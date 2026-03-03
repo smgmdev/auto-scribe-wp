@@ -14,7 +14,7 @@ import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 
 const TELEGRAM_API = "https://api.telegram.org";
 
-// Per-user conversation state (in-memory, ephemeral)
+// Per-user conversation state
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -35,60 +35,64 @@ interface UserSession {
   lastActivity: number;
   chatHistory?: ChatMessage[];
 }
-const userSessions = new Map<number, UserSession>();
 
-function generateVerifyCode(): string {
-  const arr = new Uint32Array(1);
-  crypto.getRandomValues(arr);
-  return String(arr[0] % 1000000).padStart(6, '0');
+// In-memory cache (warm instance optimization)
+const sessionCache = new Map<number, UserSession>();
+
+// Load session from DB (with in-memory cache)
+async function loadSession(supabase: any, chatId: number): Promise<UserSession | null> {
+  // Check cache first
+  const cached = sessionCache.get(chatId);
+  if (cached && Date.now() - cached.lastActivity < 30 * 60 * 1000) {
+    return cached;
+  }
+
+  // Load from DB
+  const { data } = await supabase
+    .from('telegram_bot_sessions')
+    .select('session_data')
+    .eq('chat_id', String(chatId))
+    .maybeSingle();
+
+  if (data?.session_data) {
+    const session = data.session_data as UserSession;
+    session.lastActivity = Date.now();
+    sessionCache.set(chatId, session);
+    return session;
+  }
+  return null;
 }
 
-async function sendVerificationEmail(email: string, code: string): Promise<boolean> {
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  if (!RESEND_API_KEY) {
-    console.error("[mace-telegram-bot] Missing RESEND_API_KEY");
-    return false;
-  }
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: "Arcana Mace <noreply@arcanamace.com>",
-        to: [email],
-        subject: "Your Telegram Verification Code",
-        html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px">` +
-          `<h2 style="color:#000">Telegram Verification</h2>` +
-          `<p>Use this code to link your Telegram account to Arcana Mace:</p>` +
-          `<div style="background:#f4f4f4;padding:16px 24px;border-radius:8px;text-align:center;margin:20px 0">` +
-          `<span style="font-size:32px;letter-spacing:8px;font-weight:bold;color:#000">${code}</span>` +
-          `</div>` +
-          `<p style="color:#666;font-size:14px">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>` +
-          `</div>`,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("[mace-telegram-bot] Resend error:", err);
-      return false;
-    }
-    await res.text();
-    return true;
-  } catch (err) {
-    console.error("[mace-telegram-bot] Email send failed:", err);
-    return false;
-  }
+// Save session to DB and cache
+async function saveSession(supabase: any, chatId: number, session: UserSession): Promise<void> {
+  session.lastActivity = Date.now();
+  sessionCache.set(chatId, session);
+
+  await supabase
+    .from('telegram_bot_sessions')
+    .upsert({
+      chat_id: String(chatId),
+      session_data: session,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'chat_id' });
 }
 
-// Cleanup old sessions every request
-function cleanupSessions() {
-  const THIRTY_MIN = 30 * 60 * 1000;
-  const now = Date.now();
-  for (const [chatId, session] of userSessions) {
-    if (now - session.lastActivity > THIRTY_MIN) {
-      userSessions.delete(chatId);
-    }
-  }
+// Delete session from DB and cache
+async function deleteSession(supabase: any, chatId: number): Promise<void> {
+  sessionCache.delete(chatId);
+  await supabase
+    .from('telegram_bot_sessions')
+    .delete()
+    .eq('chat_id', String(chatId));
+}
+
+// Cleanup old sessions from DB (older than 2 hours)
+async function cleanupOldSessions(supabase: any): Promise<void> {
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  await supabase
+    .from('telegram_bot_sessions')
+    .delete()
+    .lt('updated_at', twoHoursAgo);
 }
 
 // Build a numbered site list for Telegram display
@@ -320,6 +324,7 @@ async function handleContentReview(
       `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
       `Or reply <b>Skip</b> to publish without an image.`
     );
+    await saveSession(supabase, chatId, session);
   } else {
     const issuesList = review.issues.length > 0
       ? `\n\n<b>Issues found:</b>\n${review.issues.map((i: string) => `• ${i}`).join('\n')}`
@@ -335,6 +340,7 @@ async function handleContentReview(
       `Reply <b>Yes</b> to see the edited version\n` +
       `Reply <b>No</b> to publish your original as-is`
     );
+    await saveSession(supabase, chatId, session);
   }
 }
 
@@ -368,11 +374,11 @@ Deno.serve(async (req) => {
     const chatId = message.chat.id;
     const text = message.text?.trim() || message.caption?.trim() || '';
 
-    cleanupSessions();
+    cleanupOldSessions(supabase).catch(() => {});
     console.log(`[mace-telegram-bot] Message from chat ${chatId}:`, text?.substring(0, 100));
 
     // ── Identify user by telegram_chat_id in profiles ──
-    let session = userSessions.get(chatId);
+    let session = await loadSession(supabase, chatId);
     let supabaseUserId: string | null = session?.userId || null;
 
     if (!supabaseUserId) {
@@ -459,7 +465,7 @@ Deno.serve(async (req) => {
               `🔗 Send a Google Docs link to publish its content\n\n` +
               `Just send me something and I'll ask which site you want to publish on!`
             );
-            userSessions.set(chatId, { step: 'idle', userId: supabaseUserId, lastActivity: Date.now() });
+            await saveSession(supabase, chatId, { step: 'idle', userId: supabaseUserId, lastActivity: Date.now() });
             return new Response('OK', { status: 200 });
           }
         }
@@ -526,7 +532,7 @@ Deno.serve(async (req) => {
         `🔗 Send a Google Docs link → I'll read and publish it\n\n` +
         `Just send me something and I'll handle the rest!`
       );
-      userSessions.set(chatId, { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() });
+      await saveSession(supabase, chatId, { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() });
       return new Response('OK', { status: 200 });
     }
 
@@ -552,7 +558,7 @@ Deno.serve(async (req) => {
         .from('profiles')
         .update({ telegram_chat_id: null })
         .eq('id', supabaseUserId!);
-      userSessions.delete(chatId);
+      await deleteSession(supabase, chatId);
       await sendTelegramMessage(botToken, chatId,
         `🔓 Account unlinked. Send /start to link a different account.`
       );
@@ -562,7 +568,7 @@ Deno.serve(async (req) => {
     // Initialize session if needed
     if (!session) {
       session = { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() };
-      userSessions.set(chatId, session);
+      await saveSession(supabase, chatId, session);
     }
     session.userId = supabaseUserId!;
     session.lastActivity = Date.now();
@@ -583,6 +589,7 @@ Deno.serve(async (req) => {
           `Reply <b>Original</b> to publish your original instead\n` +
           `Reply <b>Cancel</b> to discard`
         );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -599,6 +606,7 @@ Deno.serve(async (req) => {
           `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
           `Or reply <b>Skip</b> to publish without an image.`
         );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -623,6 +631,7 @@ Deno.serve(async (req) => {
           `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
           `Or reply <b>Skip</b> to publish without an image.`
         );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -639,6 +648,7 @@ Deno.serve(async (req) => {
           `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
           `Or reply <b>Skip</b> to publish without an image.`
         );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -648,6 +658,7 @@ Deno.serve(async (req) => {
         session.originalContent = undefined;
         session.reviewedContent = undefined;
         await sendTelegramMessage(botToken, chatId, `❌ Cancelled. Send me new content whenever you're ready.`);
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -671,6 +682,7 @@ Deno.serve(async (req) => {
         await sendTelegramMessage(botToken, chatId,
           `👍 No image — got it.\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
         );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -690,6 +702,7 @@ Deno.serve(async (req) => {
         await sendTelegramMessage(botToken, chatId,
           `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
         );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -727,7 +740,8 @@ Deno.serve(async (req) => {
         `📸 Please send me a <b>featured image</b> (JPG or PNG only, horizontal format recommended).\n\n` +
         `Or reply <b>Skip</b> to publish without an image.`
       );
-      return new Response('OK', { status: 200 });
+        await saveSession(supabase, chatId, session);
+        return new Response('OK', { status: 200 });
     }
 
     // ── User is choosing a site ──
@@ -796,6 +810,7 @@ Deno.serve(async (req) => {
               `💳 Please top up your account on Arcana Mace and try again.`
             );
             session.step = 'idle';
+            await saveSession(supabase, chatId, session);
             return new Response('OK', { status: 200 });
           }
         }
@@ -1088,6 +1103,7 @@ Deno.serve(async (req) => {
       session.photoFileId = undefined;
       session.photoCaption = undefined;
       session.topic = undefined;
+      await saveSession(supabase, chatId, session);
       return new Response('OK', { status: 200 });
     }
 
@@ -1179,6 +1195,7 @@ Deno.serve(async (req) => {
             `🎙️ You said: "<i>${transcribedText}</i>"\n\n${cleanReply}`
           );
         }
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       } catch (err) {
         console.error('[mace-telegram-bot] Voice processing error:', err);
@@ -1313,9 +1330,12 @@ Deno.serve(async (req) => {
 
         await sendTelegramMessage(botToken, chatId, cleanReply);
       }
+      await saveSession(supabase, chatId, session);
       return new Response('OK', { status: 200 });
     }
 
+    // Auto-save session state before returning
+    if (session) await saveSession(supabase, chatId, session);
     return new Response('OK', { status: 200 });
 
   } catch (error) {
