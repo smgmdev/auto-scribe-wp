@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Siren, Shield, Radiation, CornerDownLeft } from 'lucide-react';
+import { Rocket, Crosshair, Atom, Bomb, Radiation, CornerDownLeft } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
@@ -117,10 +117,10 @@ function getAlertColors(type: AlertType) {
 }
 
 function getAlertIcon(type: AlertType, className: string) {
-  if (type === 'hbomb') return <Radiation className={className} />;
-  if (type === 'nuke') return <Radiation className={className} />;
-  if (type === 'missile') return <Siren className={className} />;
-  return <Shield className={className} />;
+  if (type === 'hbomb') return <Bomb className={className} />;
+  if (type === 'nuke') return <Atom className={className} />;
+  if (type === 'missile') return <Rocket className={className} />;
+  return <Crosshair className={className} />;
 }
 
 function getAlertLabel(type: AlertType) {
@@ -199,9 +199,9 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           onClick={onDismiss}
           className={`w-full rounded-none ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow} flex items-center justify-center gap-2`}
         >
-          <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ESC</kbd>
+          <kbd className="inline-flex items-center justify-center min-w-[42px] px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ESC</kbd>
           <span className="text-[10px] opacity-40">/</span>
-          <kbd className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ENTER <CornerDownLeft size={10} /></kbd>
+          <kbd className="inline-flex items-center justify-center gap-1 min-w-[42px] px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ENTER <CornerDownLeft size={10} /></kbd>
         </Button>
       </div>
 
