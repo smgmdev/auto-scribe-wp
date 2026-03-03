@@ -6,6 +6,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Simple in-memory rate limiter (per cold-start instance)
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT_MAX = 3;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function isRateLimited(identifier: string): boolean {
+  const now = Date.now();
+  const attempts = rateLimitMap.get(identifier) || [];
+  const recentAttempts = attempts.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  rateLimitMap.set(identifier, recentAttempts);
+  if (recentAttempts.length >= RATE_LIMIT_MAX) return true;
+  recentAttempts.push(now);
+  rateLimitMap.set(identifier, recentAttempts);
+  return false;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -22,6 +38,14 @@ Deno.serve(async (req) => {
     if (!full_name || !email || !mobile_number || !organization_type) {
       return new Response(JSON.stringify({ error: "All fields are required" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate limit by email to prevent spam
+    if (isRateLimited(email.toLowerCase().trim())) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
