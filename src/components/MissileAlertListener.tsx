@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Rocket, Crosshair, Atom, Bomb, Radiation, CornerDownLeft } from 'lucide-react';
+import { Rocket, PlaneTakeoff, Radiation, Bomb, CornerDownLeft } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
@@ -118,9 +118,9 @@ function getAlertColors(type: AlertType) {
 
 function getAlertIcon(type: AlertType, className: string) {
   if (type === 'hbomb') return <Bomb className={className} />;
-  if (type === 'nuke') return <Atom className={className} />;
+  if (type === 'nuke') return <Radiation className={className} />;
   if (type === 'missile') return <Rocket className={className} />;
-  return <Crosshair className={className} />;
+  return <PlaneTakeoff className={className} />;
 }
 
 function getAlertLabel(type: AlertType) {
@@ -181,16 +181,11 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           {alert.description && (
             <p className={`text-[11px] ${colors.textSecondary} mt-0.5`}>{alert.description}</p>
           )}
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className={`text-[10px] ${colors.textTertiary}`}>
-              {alert.country_name}{alert.source ? ` — ${alert.source}` : ''}
+          {alert.origin_country_name && alert.destination_country_name && (
+            <p className={`text-[10px] ${colors.textTertiary} mt-0.5 font-mono`}>
+              {alert.origin_country_name} → {alert.destination_country_name}
             </p>
-            {alert.origin_country_name && alert.destination_country_name && (
-              <span className="text-[10px] text-blue-400 font-mono">
-                {alert.origin_country_name} → {alert.destination_country_name}
-              </span>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
