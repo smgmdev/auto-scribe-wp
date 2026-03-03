@@ -324,7 +324,7 @@ export default function MaceAI() {
               <button 
                 onClick={() => {
                   if (user) {
-                    navigate('/account', { state: { targetView: 'settings' } });
+                    navigate('/account', { state: { targetView: 'account' } });
                   } else {
                     navigate('/auth?redirect=account');
                   }
