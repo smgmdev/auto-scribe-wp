@@ -112,6 +112,78 @@ function isPublishIntent(text: string): boolean {
   return publishKeywords.some(re => re.test(text.trim()));
 }
 
+// Detect if text contains a news article URL (not Google Docs)
+function extractNewsUrl(text: string): string | null {
+  const urlMatch = text.match(/https?:\/\/[^\s<>"]+/i);
+  if (!urlMatch) return null;
+  const url = urlMatch[0];
+  // Skip Google Docs links (handled separately)
+  if (/docs\.google\.com\/document/i.test(url)) return null;
+  // Skip non-article URLs (images, videos, social media posts without articles)
+  if (/\.(jpg|jpeg|png|gif|mp4|webm|svg)(\?|$)/i.test(url)) return null;
+  return url;
+}
+
+// Fetch article content from a news URL and extract text via AI
+async function fetchAndExtractArticle(url: string, apiKey: string): Promise<{ title: string; content: string; source: string } | null> {
+  try {
+    console.log('[mace-telegram-bot] Fetching article from URL:', url);
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; MaceBot/1.0)',
+        'Accept': 'text/html,application/xhtml+xml',
+      },
+      redirect: 'follow',
+    });
+    if (!res.ok) {
+      console.error('[mace-telegram-bot] URL fetch failed:', res.status);
+      return null;
+    }
+    const html = await res.text();
+    if (!html || html.length < 200) return null;
+
+    // Extract hostname as source name
+    let source = 'Unknown';
+    try { source = new URL(url).hostname.replace('www.', ''); } catch {}
+
+    // Use AI to extract article title and body from raw HTML
+    const extractRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash-lite',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an article extractor. Given raw HTML of a news article page, extract ONLY the article title and the main article body text. Ignore navigation, ads, sidebars, footers, related articles, and comments. Return JSON: {"title": "...", "content": "..."} where content is the plain text article body with paragraph breaks preserved. If no article is found, return {"title": "", "content": ""}.`
+          },
+          { role: 'user', content: html.substring(0, 30000) }
+        ],
+        temperature: 0.1,
+        max_tokens: 4000,
+      }),
+    });
+
+    if (!extractRes.ok) {
+      console.error('[mace-telegram-bot] AI extraction error:', extractRes.status);
+      return null;
+    }
+
+    const extractData = await extractRes.json();
+    const rawResp = extractData.choices?.[0]?.message?.content || '';
+    const jsonMatch = rawResp.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (!parsed.content || parsed.content.length < 50) return null;
+
+    return { title: parsed.title || 'Untitled', content: parsed.content, source };
+  } catch (err) {
+    console.error('[mace-telegram-bot] Article extraction error:', err);
+    return null;
+  }
+}
+
 // Chat with Perplexity AI for normal conversation
 async function chatWithPerplexity(
   userMessage: string,
@@ -543,7 +615,8 @@ Deno.serve(async (req) => {
         `📝 Send text → I'll publish it as an article\n` +
         `📸 Send a photo → I'll write an article about it\n` +
         `📄 Send a PDF/Word doc → I'll publish its content\n` +
-        `🔗 Send a Google Docs link → I'll read and publish it\n\n` +
+        `🔗 Send a Google Docs link → I'll read and publish it\n` +
+        `🌐 Share a news link → I'll offer to rewrite it as original content\n\n` +
         `Just send me something and I'll handle the rest!`
       );
       await saveSession(supabase, chatId, { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() });
@@ -861,6 +934,95 @@ Deno.serve(async (req) => {
       }
 
       await sendTelegramMessage(botToken, chatId, `Please reply <b>Yes</b> to see the edited version or <b>No</b> to submit another version.`);
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── User deciding on news article rewrite ──
+    if (session.step === 'awaiting_rewrite_decision') {
+      const answer = text?.toLowerCase().trim();
+      const extractedArticle = (session as any).extractedArticle;
+
+      if (!extractedArticle) {
+        session.step = 'idle';
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `Something went wrong. Please share the link again.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'rewrite' || answer === 'r') {
+        await sendTelegramMessage(botToken, chatId, `✍️ Rewriting the article with AI...`);
+
+        // Use AI to rewrite the article as original content
+        const rewriteRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              {
+                role: 'system',
+                content: `You are a professional journalist. Rewrite the following news article into a completely unique, original article that:
+- Has a NEW compelling headline (12-18 words, no colons, preserve key names of people/companies/countries)
+- NEVER starts with possessive forms like "Company's" or "Person's"
+- Is approximately 700 words
+- Has 5-7 well-structured paragraphs with clear transitions
+- Starts with a narrative hook or specific fact (NEVER generic AI openings like "In today's world...")
+- Preserves all key facts, names, and data from the original
+- Has a professional journalistic tone
+- NO bullet points or numbered lists
+- Maximum 1-2 subheadings (only if truly necessary)
+- Is 100% in English
+
+Return ONLY the article text: headline on line 1, then a blank line, then the body paragraphs.`
+              },
+              { role: 'user', content: `Source: ${extractedArticle.source}\nOriginal Title: ${extractedArticle.title}\n\nArticle:\n${extractedArticle.content.substring(0, 15000)}` }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000,
+          }),
+        });
+
+        if (!rewriteRes.ok) {
+          await sendTelegramMessage(botToken, chatId, `❌ Rewrite failed. Please try again.`);
+          session.step = 'idle';
+          (session as any).extractedArticle = undefined;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        const rewriteData = await rewriteRes.json();
+        const rewrittenText = rewriteData.choices?.[0]?.message?.content || '';
+
+        if (!rewrittenText || rewrittenText.length < 100) {
+          await sendTelegramMessage(botToken, chatId, `❌ Rewrite produced insufficient content. Please try again.`);
+          session.step = 'idle';
+          (session as any).extractedArticle = undefined;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        // Run through content review
+        (session as any).extractedArticle = undefined;
+        await handleContentReview(botToken, chatId, session, rewrittenText, LOVABLE_API_KEY, supabase);
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'use as is' || answer === 'use' || answer === 'asis' || answer === 'as is' || answer === 'original') {
+        const fullContent = `${extractedArticle.title}\n\n${extractedArticle.content}`;
+        (session as any).extractedArticle = undefined;
+        await handleContentReview(botToken, chatId, session, fullContent, LOVABLE_API_KEY, supabase);
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
+        session.step = 'idle';
+        (session as any).extractedArticle = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Discarded. Send me something else to publish!`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Rewrite</b>, <b>Use as is</b>, or <b>Cancel</b>.`);
       return new Response('OK', { status: 200 });
     }
 
@@ -1497,6 +1659,46 @@ Deno.serve(async (req) => {
       }
 
       await handleContentReview(botToken, chatId, session, extractedText, LOVABLE_API_KEY, supabase);
+      return new Response('OK', { status: 200 });
+    }
+
+    // News article URL — detect and offer to rewrite
+    const newsUrl = text ? extractNewsUrl(text) : null;
+    if (newsUrl && !text?.match(/docs\.google\.com\/document/)) {
+      await sendTelegramMessage(botToken, chatId, `🔗 Detected a news link! Fetching the article...`);
+
+      const extracted = await fetchAndExtractArticle(newsUrl, LOVABLE_API_KEY);
+      if (!extracted || extracted.content.length < 50) {
+        await sendTelegramMessage(botToken, chatId,
+          `❌ Couldn't extract article content from that link. The site may be blocking access.\n\n` +
+          `Try copying the article text and pasting it here directly instead.`
+        );
+        await saveSession(supabase, chatId, session);
+        return new Response('OK', { status: 200 });
+      }
+
+      // Store extracted content and show preview
+      (session as any).extractedArticle = {
+        title: extracted.title,
+        content: extracted.content,
+        source: extracted.source,
+        url: newsUrl,
+      };
+      session.step = 'awaiting_rewrite_decision';
+
+      const preview = extracted.content.substring(0, 500);
+      const truncated = extracted.content.length > 500 ? '...' : '';
+
+      await sendTelegramMessage(botToken, chatId,
+        `📰 <b>Found article from ${extracted.source}:</b>\n\n` +
+        `<b>${extracted.title}</b>\n\n` +
+        `${preview}${truncated}\n\n` +
+        `What would you like to do?\n\n` +
+        `✍️ Reply <b>Rewrite</b> — AI will rewrite this as a unique article\n` +
+        `📋 Reply <b>Use as is</b> — publish the original text (with quality review)\n` +
+        `❌ Reply <b>Cancel</b> — discard`
+      );
+      await saveSession(supabase, chatId, session);
       return new Response('OK', { status: 200 });
     }
 
