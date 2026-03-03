@@ -683,7 +683,14 @@ Deno.serve(async (req) => {
       // Photo received
       if (message.photo && message.photo.length > 0) {
         const largestPhoto = message.photo[message.photo.length - 1];
-        // Telegram compresses photos to JPEG, so photo messages are always valid
+        const fileSize = largestPhoto.file_size || 0;
+        if (fileSize > 2 * 1024 * 1024) {
+          await sendTelegramMessage(botToken, chatId,
+            `⚠️ Your image is over <b>2MB</b>. The image limit is 2MB.\n\n` +
+            `Please provide a smaller image or reply <b>Skip</b> to publish without an image.`
+          );
+          return new Response('OK', { status: 200 });
+        }
         session.photoFileId = largestPhoto.file_id;
         session.step = 'awaiting_site';
 
@@ -712,6 +719,15 @@ Deno.serve(async (req) => {
             `⚠️ Only <b>JPG</b> and <b>PNG</b> images are accepted.\n\n` +
             `💡 Please send a horizontal/landscape image (e.g. 1200×630) for best results.\n\n` +
             `Or reply <b>Skip</b> to publish without an image.`
+          );
+          return new Response('OK', { status: 200 });
+        }
+
+        const docFileSize = message.document.file_size || 0;
+        if (docFileSize > 2 * 1024 * 1024) {
+          await sendTelegramMessage(botToken, chatId,
+            `⚠️ Your image is over <b>2MB</b>. The image limit is 2MB.\n\n` +
+            `Please provide a smaller image or reply <b>Skip</b> to publish without an image.`
           );
           return new Response('OK', { status: 200 });
         }
