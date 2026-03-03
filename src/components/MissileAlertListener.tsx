@@ -332,6 +332,9 @@ export function MissileAlertListener() {
   }, [stopSound]);
 
   useEffect(() => {
+    // Non-admin users should never fetch alerts or play sounds
+    if (!isAdmin) return;
+
     const fetchActive = async () => {
       // Load dismissed alerts from DB for authenticated users
       if (!dismissedLoadedRef.current) {
@@ -374,7 +377,7 @@ export function MissileAlertListener() {
       if (alertIntervalRef.current) clearInterval(alertIntervalRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAdmin]);
 
   if (!isAdmin || alerts.length === 0) return null;
 
