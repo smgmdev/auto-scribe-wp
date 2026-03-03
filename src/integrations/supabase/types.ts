@@ -1521,6 +1521,7 @@ export type Database = {
           pin_salt: string | null
           session_started_at: string | null
           suspended: boolean
+          telegram_chat_id: string | null
           updated_at: string
           username: string | null
           verification_token: string | null
@@ -1539,6 +1540,7 @@ export type Database = {
           pin_salt?: string | null
           session_started_at?: string | null
           suspended?: boolean
+          telegram_chat_id?: string | null
           updated_at?: string
           username?: string | null
           verification_token?: string | null
@@ -1557,6 +1559,7 @@ export type Database = {
           pin_salt?: string | null
           session_started_at?: string | null
           suspended?: boolean
+          telegram_chat_id?: string | null
           updated_at?: string
           username?: string | null
           verification_token?: string | null
