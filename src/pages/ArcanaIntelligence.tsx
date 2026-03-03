@@ -566,9 +566,9 @@ export default function ArcanaIntelligence() {
         </div>
 
         {/* Disclaimer */}
-        <section className="bg-black">
+        <section className="bg-[#1d1d1f]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-8">
-            <div className="text-[11px] text-[#86868b] leading-relaxed">
+            <div className="text-[11px] text-white/40 leading-relaxed">
               <p>
                 Arcana Precision is a global media and communications collective-data, advanced AI-powered security intelligence tool that supports governmental entities and enterprises with advanced threat visualization mapping worldwide.
               </p>
