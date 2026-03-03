@@ -208,6 +208,7 @@ export function MissileAlertListener() {
   const { isAdmin } = useAuth();
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
   const dismissedRef = useRef<Set<string>>(new Set());
+  const dismissedTitlesRef = useRef<Set<string>>(new Set());
   const dismissedLoadedRef = useRef(false);
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -312,7 +313,10 @@ export function MissileAlertListener() {
   }, []);
 
   const dismissAlert = useCallback(async (id: string) => {
+    // Track both the ID and the title for content-based deduplication
+    const alertTitle = alerts.find(a => a.id === id)?.title;
     dismissedRef.current.add(id);
+    if (alertTitle) dismissedTitlesRef.current.add(alertTitle.toLowerCase().trim());
     // Persist to DB (fire-and-forget)
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user) {
@@ -329,24 +333,28 @@ export function MissileAlertListener() {
       }
       return remaining;
     });
-  }, [stopSound]);
+  }, [stopSound, alerts]);
 
   useEffect(() => {
     // Non-admin users should never fetch alerts or play sounds
     if (!isAdmin) return;
 
     const fetchActive = async () => {
-      // Load dismissed alerts from DB for authenticated users
+      // Load dismissed alerts from DB + their titles for content dedup
       if (!dismissedLoadedRef.current) {
         dismissedLoadedRef.current = true;
         const { data: userData } = await supabase.auth.getUser();
         if (userData?.user) {
           const { data: dismissed } = await supabase
             .from('dismissed_missile_alerts')
-            .select('alert_id')
+            .select('alert_id, missile_alerts!inner(title)')
             .eq('user_id', userData.user.id);
           if (dismissed) {
-            dismissed.forEach(d => dismissedRef.current.add(d.alert_id));
+            dismissed.forEach((d: any) => {
+              dismissedRef.current.add(d.alert_id);
+              const title = d.missile_alerts?.title;
+              if (title) dismissedTitlesRef.current.add(title.toLowerCase().trim());
+            });
           }
         }
       }
@@ -361,7 +369,10 @@ export function MissileAlertListener() {
         .not('destination_country_code', 'is', null)
         .order('created_at', { ascending: false });
       if (data && data.length > 0) {
-        const filtered = (data as MissileAlert[]).filter(a => !dismissedRef.current.has(a.id));
+        const filtered = (data as MissileAlert[]).filter(a => 
+          !dismissedRef.current.has(a.id) && 
+          !dismissedTitlesRef.current.has(a.title.toLowerCase().trim())
+        );
         if (filtered.length > 0) {
           setAlerts(filtered);
           const hasHbomb = filtered.some(a => a.severity === 'hbomb');
