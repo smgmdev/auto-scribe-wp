@@ -119,8 +119,26 @@ async function chatWithPerplexity(
     return "I'm having trouble connecting right now. Please try again later.";
   }
 
-  // Keep last 10 messages for context
-  const recentHistory = chatHistory.slice(-10);
+  // Keep last 20 messages for context, ensure proper alternation for Perplexity API
+  const recentHistory = chatHistory.slice(-20);
+  
+  // Perplexity requires strict user/assistant alternation after system message
+  // Deduplicate consecutive same-role messages by merging them
+  const alternatingHistory: Array<{ role: string; content: string }> = [];
+  for (const msg of recentHistory) {
+    const last = alternatingHistory[alternatingHistory.length - 1];
+    if (last && last.role === msg.role) {
+      // Merge consecutive same-role messages
+      last.content += '\n' + msg.content;
+    } else {
+      alternatingHistory.push({ role: msg.role, content: msg.content });
+    }
+  }
+  
+  // Ensure history doesn't end with a user message (we'll add our own)
+  if (alternatingHistory.length > 0 && alternatingHistory[alternatingHistory.length - 1].role === 'user') {
+    alternatingHistory.pop();
+  }
 
   try {
     const res = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -136,7 +154,7 @@ async function chatWithPerplexity(
             role: 'system',
             content: `You are Mace, an AI assistant for Arcana Mace — a media publishing platform. You're chatting with a user on Telegram. Be helpful, friendly, and conversational. Keep responses concise and Telegram-friendly. Use emojis sparingly but naturally. Don't use markdown formatting. If the user wants to publish an article, remind them they can send text, a photo, a PDF, or a Google Docs link.`
           },
-          ...recentHistory.map(m => ({ role: m.role, content: m.content })),
+          ...alternatingHistory,
           { role: 'user', content: userMessage },
         ],
       }),
