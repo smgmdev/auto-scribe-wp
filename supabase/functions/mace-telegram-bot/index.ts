@@ -1007,13 +1007,6 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         return new Response('OK', { status: 200 });
       }
 
-      if (answer === 'use as is' || answer === 'use' || answer === 'asis' || answer === 'as is' || answer === 'original') {
-        const fullContent = `${extractedArticle.title}\n\n${extractedArticle.content}`;
-        (session as any).extractedArticle = undefined;
-        await handleContentReview(botToken, chatId, session, fullContent, LOVABLE_API_KEY, supabase);
-        return new Response('OK', { status: 200 });
-      }
-
       if (answer === 'cancel' || answer === 'no' || answer === 'n') {
         session.step = 'idle';
         (session as any).extractedArticle = undefined;
@@ -1022,7 +1015,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         return new Response('OK', { status: 200 });
       }
 
-      await sendTelegramMessage(botToken, chatId, `Please reply <b>Rewrite</b>, <b>Use as is</b>, or <b>Cancel</b>.`);
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Rewrite</b> or <b>Cancel</b>.`);
       return new Response('OK', { status: 200 });
     }
 
@@ -1695,7 +1688,6 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         `${preview}${truncated}\n\n` +
         `What would you like to do?\n\n` +
         `✍️ Reply <b>Rewrite</b> — AI will rewrite this as a unique article\n` +
-        `📋 Reply <b>Use as is</b> — publish the original text (with quality review)\n` +
         `❌ Reply <b>Cancel</b> — discard`
       );
       await saveSession(supabase, chatId, session);
