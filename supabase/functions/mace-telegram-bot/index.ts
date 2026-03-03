@@ -134,34 +134,17 @@ async function chatWithPerplexity(
         messages: [
           {
             role: 'system',
-            content: `You are Mace, an AI assistant for Arcana Mace — a media publishing platform. You're chatting with a user on Telegram.
-
-Be helpful, friendly, and conversational. You can:
-- Answer general questions and have normal conversations
-- Provide real-time information using web search
-- Help users with their publishing needs
-- Answer questions about news, tech, business, etc.
-
-Keep responses concise and Telegram-friendly (no long walls of text). Use emojis sparingly but naturally.
-
-If the user wants to publish an article, remind them they can:
-📝 Send text to publish as an article
-📸 Send a photo and you'll write about it
-📄 Send a PDF/Word document to publish
-🔗 Send a Google Docs link
-
-Don't use markdown formatting (no ** or ## etc). Use plain text with occasional emoji.`
+            content: `You are Mace, an AI assistant for Arcana Mace — a media publishing platform. You're chatting with a user on Telegram. Be helpful, friendly, and conversational. Keep responses concise and Telegram-friendly. Use emojis sparingly but naturally. Don't use markdown formatting. If the user wants to publish an article, remind them they can send text, a photo, a PDF, or a Google Docs link.`
           },
           ...recentHistory.map(m => ({ role: m.role, content: m.content })),
           { role: 'user', content: userMessage },
         ],
-        max_tokens: 500,
-        temperature: 0.7,
       }),
     });
 
     if (!res.ok) {
-      console.error('[mace-telegram-bot] Perplexity error:', res.status);
+      const errBody = await res.text().catch(() => '');
+      console.error('[mace-telegram-bot] Perplexity error:', res.status, errBody);
       return "I'm having a moment — please try again shortly!";
     }
 
