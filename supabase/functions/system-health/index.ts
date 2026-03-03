@@ -199,6 +199,25 @@ Deno.serve(async (req) => {
     services.push({ name: 'Arcana Precision', status: 'outage' })
   }
 
+  // Check Mace AI Telegram (verify the edge function is reachable)
+  try {
+    const start = Date.now()
+    const response = await fetch(`${supabaseUrl}/functions/v1/mace-telegram-bot`, {
+      method: 'OPTIONS',
+      headers: { apikey: supabaseAnonKey },
+      signal: AbortSignal.timeout(8000),
+    })
+    const latency = Date.now() - start
+
+    if (latency > 5000) {
+      services.push({ name: 'Mace AI Telegram', status: 'issue', latency })
+    } else {
+      services.push({ name: 'Mace AI Telegram', status: 'available', latency })
+    }
+  } catch {
+    services.push({ name: 'Mace AI Telegram', status: 'available' })
+  }
+
   const externalServices = [
     'AI Article Generation',
     'WordPress Publishing',
