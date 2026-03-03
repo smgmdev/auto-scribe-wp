@@ -256,7 +256,8 @@ Deno.serve(async (req) => {
               `Now you can:\n` +
               `📝 Send me text and I'll publish it as an article\n` +
               `📸 Send me a photo and I'll write an article about it\n` +
-              `📄 Send me a PDF or Word document to publish\n\n` +
+              `📄 Send me a PDF or Word document to publish\n` +
+              `🔗 Send a Google Docs link to publish its content\n\n` +
               `Just send me something and I'll ask which site you want to publish on!`
             );
             userSessions.set(chatId, { step: 'idle', userId: supabaseUserId, lastActivity: Date.now() });
@@ -322,7 +323,8 @@ Deno.serve(async (req) => {
         `👋 Hey! I'm <b>Mace</b>, your AI publishing assistant.\n\n` +
         `📝 Send text → I'll publish it as an article\n` +
         `📸 Send a photo → I'll write an article about it\n` +
-        `📄 Send a PDF/Word doc → I'll publish its content\n\n` +
+        `📄 Send a PDF/Word doc → I'll publish its content\n` +
+        `🔗 Send a Google Docs link → I'll read and publish it\n\n` +
         `Just send me something and I'll handle the rest!`
       );
       userSessions.set(chatId, { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() });
@@ -773,6 +775,49 @@ Deno.serve(async (req) => {
       await sendTelegramMessage(botToken, chatId,
         `📄 Got it! Which site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
       );
+      return new Response('OK', { status: 200 });
+    }
+
+    // Google Docs shared link
+    const googleDocsMatch = text?.match(/docs\.google\.com\/document\/d\/([a-zA-Z0-9_-]+)/);
+    if (googleDocsMatch) {
+      const docId = googleDocsMatch[1];
+      await sendTelegramMessage(botToken, chatId, `📄 Fetching Google Doc...`);
+
+      try {
+        const exportUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
+        const docRes = await fetch(exportUrl, { redirect: 'follow' });
+
+        if (!docRes.ok) {
+          await sendTelegramMessage(botToken, chatId,
+            `❌ Couldn't fetch the Google Doc. Make sure the sharing is set to <b>"Anyone with the link"</b>.`
+          );
+          return new Response('OK', { status: 200 });
+        }
+
+        const docText = await docRes.text();
+        if (!docText || docText.trim().length < 10) {
+          await sendTelegramMessage(botToken, chatId, `❌ The document appears to be empty.`);
+          return new Response('OK', { status: 200 });
+        }
+
+        session.content = docText.substring(0, 20000);
+        session.photoFileId = undefined;
+        session.step = 'awaiting_site';
+
+        const { data: wpSites } = await supabase
+          .from('wordpress_sites')
+          .select('name')
+          .eq('connected', true);
+        const siteNames = (wpSites || []).map((s: any) => s.name);
+
+        await sendTelegramMessage(botToken, chatId,
+          `📄 Got the Google Doc content (${docText.trim().length.toLocaleString()} chars).\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        );
+      } catch (err) {
+        console.error('[mace-telegram-bot] Google Docs fetch error:', err);
+        await sendTelegramMessage(botToken, chatId, `❌ Failed to read the Google Doc. Please check the sharing settings and try again.`);
+      }
       return new Response('OK', { status: 200 });
     }
 
