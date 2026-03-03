@@ -18,6 +18,8 @@ const TELEGRAM_API = "https://api.telegram.org";
 interface UserSession {
   step: string;
   content?: string;
+  originalContent?: string;
+  reviewedContent?: string;
   photoFileId?: string;
   photoCaption?: string;
   topic?: string;
@@ -137,6 +139,116 @@ async function extractTextFromDocument(buffer: Uint8Array, mimeType: string): Pr
     return `[Document content (${mimeType}) - base64 encoded for AI processing: ${base64.substring(0, 50000)}]`;
   }
   return null;
+}
+
+// AI content review: checks article quality and returns verdict + rewritten version if needed
+async function reviewArticleContent(apiKey: string, content: string): Promise<{ acceptable: boolean; issues: string[]; rewrittenContent?: string }> {
+  const reviewRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        {
+          role: 'system',
+          content: `You are a senior editorial quality reviewer. Analyze the submitted article and determine if it meets professional publication standards.
+
+CHECK FOR THESE ISSUES:
+1. Non-English text (especially French lines/phrases mixed in) — articles must be 100% English
+2. Poor structure — missing clear paragraphs, no logical flow, walls of text
+3. AI-generic writing — overly formulaic openings like "In today's world...", "In an era of...", "It is worth noting...", robotic tone
+4. Grammar/spelling errors
+5. Unprofessional tone or casual language inappropriate for publication
+6. Repetitive content or filler text
+
+RESPOND WITH EXACTLY THIS JSON FORMAT:
+{
+  "acceptable": true/false,
+  "issues": ["issue 1", "issue 2"],
+  "rewritten": "FULL rewritten article text if not acceptable, or empty string if acceptable"
+}
+
+If the article IS acceptable (well-structured, professional, 100% English, original-sounding), set acceptable=true and issues=[] and rewritten="".
+
+If the article needs work, set acceptable=false, list the specific issues found, and provide a COMPLETE rewritten version that:
+- Is 100% in English (translate any non-English parts)
+- Flows naturally like human writing
+- Maintains professional journalistic tone
+- Preserves the original meaning and key facts
+- Has solid paragraph structure with clear transitions
+- Has a compelling, non-generic opening (avoid cliche AI openers)
+- Starts with the headline on line 1 (no prefix)`
+        },
+        { role: 'user', content: content.substring(0, 15000) }
+      ],
+      temperature: 0.4,
+      max_tokens: 4000,
+    }),
+  });
+
+  if (!reviewRes.ok) {
+    console.error('[mace-telegram-bot] Review API error:', reviewRes.status);
+    return { acceptable: true, issues: [] };
+  }
+
+  const reviewData = await reviewRes.json();
+  const rawResponse = reviewData.choices?.[0]?.message?.content || '';
+
+  try {
+    const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return { acceptable: true, issues: [] };
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    return {
+      acceptable: !!parsed.acceptable,
+      issues: Array.isArray(parsed.issues) ? parsed.issues : [],
+      rewrittenContent: parsed.rewritten || undefined,
+    };
+  } catch {
+    console.error('[mace-telegram-bot] Failed to parse review response');
+    return { acceptable: true, issues: [] };
+  }
+}
+
+// Helper: run review on content and handle session transition
+async function handleContentReview(
+  botToken: string, chatId: number, session: UserSession,
+  content: string, apiKey: string, supabase: any
+): Promise<void> {
+  await sendTelegramMessage(botToken, chatId, `🔍 Reviewing your article for quality...`);
+
+  const review = await reviewArticleContent(apiKey, content);
+
+  if (review.acceptable) {
+    session.content = content;
+    session.photoFileId = undefined;
+    session.step = 'awaiting_site';
+
+    const { data: wpSites } = await supabase
+      .from('wordpress_sites')
+      .select('name')
+      .eq('connected', true);
+    const siteNames = (wpSites || []).map((s: any) => s.name);
+
+    await sendTelegramMessage(botToken, chatId,
+      `✅ Your article looks great! Ready to publish.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+    );
+  } else {
+    const issuesList = review.issues.length > 0
+      ? `\n\n<b>Issues found:</b>\n${review.issues.map((i: string) => `• ${i}`).join('\n')}`
+      : '';
+
+    session.originalContent = content;
+    session.reviewedContent = review.rewrittenContent || content;
+    session.step = 'awaiting_review_approval';
+
+    await sendTelegramMessage(botToken, chatId,
+      `📝 Your article needs some formatting and improvements.${issuesList}\n\n` +
+      `I've prepared an edited version for you. Would you like to see it?\n\n` +
+      `Reply <b>Yes</b> to see the edited version\n` +
+      `Reply <b>No</b> to publish your original as-is`
+    );
+  }
 }
 
 Deno.serve(async (req) => {
@@ -367,6 +479,104 @@ Deno.serve(async (req) => {
     }
     session.userId = supabaseUserId!;
     session.lastActivity = Date.now();
+
+    // ── User reviewing AI-edited article ──
+    if (session.step === 'awaiting_review_approval') {
+      const answer = text?.toLowerCase().trim();
+
+      if (answer === 'yes' || answer === 'y') {
+        // Show the rewritten content preview (truncated for Telegram)
+        const preview = (session.reviewedContent || '').substring(0, 3500);
+        const truncated = (session.reviewedContent || '').length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+
+        session.step = 'awaiting_final_approval';
+        await sendTelegramMessage(botToken, chatId,
+          `📄 <b>Edited version:</b>\n\n${preview}${truncated}\n\n` +
+          `Reply <b>Approve</b> to publish this version\n` +
+          `Reply <b>Original</b> to publish your original instead\n` +
+          `Reply <b>Cancel</b> to discard`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'no' || answer === 'n') {
+        // Use original content as-is
+        session.content = session.originalContent;
+        session.originalContent = undefined;
+        session.reviewedContent = undefined;
+        session.photoFileId = undefined;
+        session.step = 'awaiting_site';
+
+        const { data: wpSites } = await supabase
+          .from('wordpress_sites')
+          .select('name')
+          .eq('connected', true);
+        const siteNames = (wpSites || []).map((s: any) => s.name);
+
+        await sendTelegramMessage(botToken, chatId,
+          `👍 Using your original article.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Yes</b> to see the edited version or <b>No</b> to keep your original.`);
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── User approving/rejecting the rewritten version ──
+    if (session.step === 'awaiting_final_approval') {
+      const answer = text?.toLowerCase().trim();
+
+      if (answer === 'approve' || answer === 'approved' || answer === 'yes') {
+        session.content = session.reviewedContent;
+        session.originalContent = undefined;
+        session.reviewedContent = undefined;
+        session.photoFileId = undefined;
+        session.step = 'awaiting_site';
+
+        const { data: wpSites } = await supabase
+          .from('wordpress_sites')
+          .select('name')
+          .eq('connected', true);
+        const siteNames = (wpSites || []).map((s: any) => s.name);
+
+        await sendTelegramMessage(botToken, chatId,
+          `✅ Great! Using the edited version.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'original') {
+        session.content = session.originalContent;
+        session.originalContent = undefined;
+        session.reviewedContent = undefined;
+        session.photoFileId = undefined;
+        session.step = 'awaiting_site';
+
+        const { data: wpSites } = await supabase
+          .from('wordpress_sites')
+          .select('name')
+          .eq('connected', true);
+        const siteNames = (wpSites || []).map((s: any) => s.name);
+
+        await sendTelegramMessage(botToken, chatId,
+          `👍 Using your original article.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'cancel') {
+        session.step = 'idle';
+        session.content = undefined;
+        session.originalContent = undefined;
+        session.reviewedContent = undefined;
+        await sendTelegramMessage(botToken, chatId, `❌ Cancelled. Send me new content whenever you're ready.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b>, <b>Original</b>, or <b>Cancel</b>.`);
+      return new Response('OK', { status: 200 });
+    }
 
     // ── User is choosing a site ──
     if (session.step === 'awaiting_site') {
@@ -706,6 +916,8 @@ Deno.serve(async (req) => {
 
       session.step = 'idle';
       session.content = undefined;
+      session.originalContent = undefined;
+      session.reviewedContent = undefined;
       session.photoFileId = undefined;
       session.photoCaption = undefined;
       session.topic = undefined;
@@ -762,19 +974,7 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
-      session.content = extractedText;
-      session.photoFileId = undefined;
-      session.step = 'awaiting_site';
-
-      const { data: wpSites } = await supabase
-        .from('wordpress_sites')
-        .select('name')
-        .eq('connected', true);
-      const siteNames = (wpSites || []).map((s: any) => s.name);
-
-      await sendTelegramMessage(botToken, chatId,
-        `📄 Got it! Which site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
-      );
+      await handleContentReview(botToken, chatId, session, extractedText, LOVABLE_API_KEY, supabase);
       return new Response('OK', { status: 200 });
     }
 
@@ -801,7 +1001,19 @@ Deno.serve(async (req) => {
           return new Response('OK', { status: 200 });
         }
 
-        session.content = docText.substring(0, 20000);
+        await handleContentReview(botToken, chatId, session, docText.substring(0, 20000), LOVABLE_API_KEY, supabase);
+      } catch (err) {
+        console.error('[mace-telegram-bot] Google Docs fetch error:', err);
+        await sendTelegramMessage(botToken, chatId, `❌ Failed to read the Google Doc. Please check the sharing settings and try again.`);
+      }
+      return new Response('OK', { status: 200 });
+    }
+
+    // Plain text
+    if (text && text.length > 0 && !text.startsWith('/')) {
+      // Short text = topic prompt (AI generates from scratch), skip review
+      if (text.length <= 100) {
+        session.content = text;
         session.photoFileId = undefined;
         session.step = 'awaiting_site';
 
@@ -812,35 +1024,12 @@ Deno.serve(async (req) => {
         const siteNames = (wpSites || []).map((s: any) => s.name);
 
         await sendTelegramMessage(botToken, chatId,
-          `📄 Got the Google Doc content (${docText.trim().length.toLocaleString()} chars).\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `📝 Got it — I'll write an article about "${text.substring(0, 60)}${text.length > 60 ? '...' : ''}".\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
         );
-      } catch (err) {
-        console.error('[mace-telegram-bot] Google Docs fetch error:', err);
-        await sendTelegramMessage(botToken, chatId, `❌ Failed to read the Google Doc. Please check the sharing settings and try again.`);
+      } else {
+        // Long text = actual article content, run review
+        await handleContentReview(botToken, chatId, session, text, LOVABLE_API_KEY, supabase);
       }
-      return new Response('OK', { status: 200 });
-    }
-
-    // Plain text
-    if (text && text.length > 0 && !text.startsWith('/')) {
-      session.content = text;
-      session.photoFileId = undefined;
-      session.step = 'awaiting_site';
-
-      const { data: wpSites } = await supabase
-        .from('wordpress_sites')
-        .select('name')
-        .eq('connected', true);
-      const siteNames = (wpSites || []).map((s: any) => s.name);
-
-      const isLong = text.length > 100;
-      const promptText = isLong
-        ? `📝 Got your content! I'll format and publish it.`
-        : `📝 Got it — I'll write an article about "${text.substring(0, 60)}${text.length > 60 ? '...' : ''}".`;
-
-      await sendTelegramMessage(botToken, chatId,
-        `${promptText}\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
-      );
       return new Response('OK', { status: 200 });
     }
 
