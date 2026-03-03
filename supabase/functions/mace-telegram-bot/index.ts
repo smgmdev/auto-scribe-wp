@@ -1092,6 +1092,100 @@ Deno.serve(async (req) => {
 
     // ── Handle incoming content (idle state) ──
 
+    // Voice message — transcribe with ElevenLabs then treat as text
+    if (message.voice) {
+      const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+      if (!ELEVENLABS_API_KEY) {
+        await sendTelegramMessage(botToken, chatId, `❌ Voice processing is not configured.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `🎙️ Listening...`);
+
+      const voiceFile = await downloadTelegramFile(botToken, message.voice.file_id);
+      if (!voiceFile) {
+        await sendTelegramMessage(botToken, chatId, `❌ Couldn't download the voice message. Please try again.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      try {
+        const formData = new FormData();
+        const blob = new Blob([voiceFile.buffer], { type: voiceFile.mimeType || 'audio/ogg' });
+        formData.append('file', blob, voiceFile.fileName || 'voice.ogg');
+        formData.append('model_id', 'scribe_v2');
+        formData.append('tag_audio_events', 'false');
+        formData.append('diarize', 'false');
+
+        const sttRes = await fetch('https://api.elevenlabs.io/v1/speech-to-text', {
+          method: 'POST',
+          headers: { 'xi-api-key': ELEVENLABS_API_KEY },
+          body: formData,
+        });
+
+        if (!sttRes.ok) {
+          console.error('[mace-telegram-bot] ElevenLabs STT error:', sttRes.status);
+          await sendTelegramMessage(botToken, chatId, `❌ Couldn't transcribe your voice message. Please try sending text instead.`);
+          return new Response('OK', { status: 200 });
+        }
+
+        const sttData = await sttRes.json();
+        const transcribedText = sttData.text?.trim();
+
+        if (!transcribedText) {
+          await sendTelegramMessage(botToken, chatId, `🤔 I couldn't make out what you said. Please try again or send text.`);
+          return new Response('OK', { status: 200 });
+        }
+
+        console.log(`[mace-telegram-bot] Voice transcribed: "${transcribedText.substring(0, 100)}"`);
+
+        // Route transcribed text the same way as typed text
+        if (transcribedText.length > 100) {
+          // Long voice = article content
+          await handleContentReview(botToken, chatId, session, transcribedText, LOVABLE_API_KEY, supabase);
+          return new Response('OK', { status: 200 });
+        }
+
+        if (isPublishIntent(transcribedText)) {
+          const topicMatch = transcribedText.match(/(?:about|on|titled?)\s+["']?(.+?)["']?\s*$/i);
+          const topic = topicMatch ? topicMatch[1] : transcribedText.replace(/^(publish|write|article|post|create|draft|compose|blog)\s*/i, '').trim();
+          
+          session.content = topic || transcribedText;
+          session.photoFileId = undefined;
+          session.step = 'awaiting_photo';
+
+          await sendTelegramMessage(botToken, chatId,
+            `🎙️ You said: "<i>${transcribedText}</i>"\n\n` +
+            `📝 Got it — I'll write an article about "${(topic || transcribedText).substring(0, 60)}".\n\n` +
+            `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
+            `💡 <b>Tip:</b> Horizontal/landscape format works best.\n\n` +
+            `Or reply <b>Skip</b> to publish without an image.`
+          );
+        } else {
+          // Conversational — use Perplexity
+          if (!session.chatHistory) session.chatHistory = [];
+          session.chatHistory.push({ role: 'user', content: transcribedText });
+
+          const reply = await chatWithPerplexity(transcribedText, session.chatHistory);
+          const cleanReply = reply
+            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+            .replace(/\*(.*?)\*/g, '<i>$1</i>')
+            .replace(/#{1,6}\s/g, '')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+          session.chatHistory.push({ role: 'assistant', content: reply });
+
+          await sendTelegramMessage(botToken, chatId,
+            `🎙️ You said: "<i>${transcribedText}</i>"\n\n${cleanReply}`
+          );
+        }
+        return new Response('OK', { status: 200 });
+      } catch (err) {
+        console.error('[mace-telegram-bot] Voice processing error:', err);
+        await sendTelegramMessage(botToken, chatId, `❌ Failed to process voice message. Please try again.`);
+        return new Response('OK', { status: 200 });
+      }
+    }
+
     // Photo
     if (message.photo && message.photo.length > 0) {
       const largestPhoto = message.photo[message.photo.length - 1];
@@ -1215,10 +1309,6 @@ Deno.serve(async (req) => {
           .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 
         session.chatHistory.push({ role: 'assistant', content: reply });
-        // Keep history manageable
-        if (session.chatHistory.length > 20) {
-          session.chatHistory = session.chatHistory.slice(-20);
-        }
 
         await sendTelegramMessage(botToken, chatId, cleanReply);
       }
