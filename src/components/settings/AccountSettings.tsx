@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, Loader2, Phone } from 'lucide-react';
+import { Mail, Lock, Loader2, Phone, MessageCircle, ExternalLink, CheckCircle2, Unlink } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ export function AccountSettings() {
   const [originalWhatsapp, setOriginalWhatsapp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [telegramLinked, setTelegramLinked] = useState(false);
+  const [unlinkingTelegram, setUnlinkingTelegram] = useState(false);
   
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
@@ -28,6 +30,7 @@ export function AccountSettings() {
     if (user) {
       setEmail(user.email || '');
       fetchWhatsapp();
+      fetchTelegramStatus();
     }
   }, [user]);
 
@@ -43,6 +46,32 @@ export function AccountSettings() {
       setWhatsapp(data.whatsapp_phone);
       setOriginalWhatsapp(data.whatsapp_phone);
     }
+  };
+
+  const fetchTelegramStatus = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('telegram_chat_id')
+      .eq('id', user.id)
+      .single();
+    setTelegramLinked(!!data?.telegram_chat_id);
+  };
+
+  const handleUnlinkTelegram = async () => {
+    if (!user) return;
+    setUnlinkingTelegram(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ telegram_chat_id: null } as any)
+      .eq('id', user.id);
+    setUnlinkingTelegram(false);
+    if (error) {
+      toast.error('Failed to unlink Telegram');
+      return;
+    }
+    setTelegramLinked(false);
+    toast.success('Telegram unlinked');
   };
 
   const handleUpdateEmail = async () => {
@@ -182,6 +211,45 @@ export function AccountSettings() {
           </div>
           <p className="text-xs text-muted-foreground">
             Optional but recommended. Arcana Mace Staff may contact you if your media order is in dispute or if there are any issues with your account.
+          </p>
+        </div>
+
+        {/* Telegram */}
+        <div className="space-y-3">
+          <Label className="flex items-center gap-2">
+            <MessageCircle className="h-4 w-4" />
+            Telegram Notifications
+          </Label>
+          {telegramLinked ? (
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                Telegram linked
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUnlinkTelegram}
+                disabled={unlinkingTelegram}
+                className="hover:bg-transparent hover:text-destructive hover:border-destructive"
+              >
+                {unlinkingTelegram ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Unlink className="mr-2 h-4 w-4" />Unlink</>}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row gap-3">
+              <Button
+                variant="outline"
+                className="w-full md:w-auto hover:bg-transparent hover:text-accent hover:border-accent"
+                onClick={() => window.open('https://t.me/am_dev_alerts_bot', '_blank')}
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Connect Telegram
+              </Button>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Link your Telegram to receive real-time notifications about your orders, deliveries, and account activity.
           </p>
         </div>
 
