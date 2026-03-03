@@ -130,8 +130,9 @@ async function fetchAndExtractArticle(url: string, apiKey: string): Promise<{ ti
     console.log('[mace-telegram-bot] Fetching article from URL:', url);
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; MaceBot/1.0)',
-        'Accept': 'text/html,application/xhtml+xml',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
       },
       redirect: 'follow',
     });
@@ -139,25 +140,44 @@ async function fetchAndExtractArticle(url: string, apiKey: string): Promise<{ ti
       console.error('[mace-telegram-bot] URL fetch failed:', res.status);
       return null;
     }
-    const html = await res.text();
+    let html = await res.text();
     if (!html || html.length < 200) return null;
 
     // Extract hostname as source name
     let source = 'Unknown';
     try { source = new URL(url).hostname.replace('www.', ''); } catch {}
 
-    // Use AI to extract article title and body from raw HTML
+    // Pre-clean HTML: strip scripts, styles, nav, footer, aside, ads to reduce noise
+    html = html
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[\s\S]*?<\/style>/gi, '')
+      .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+      .replace(/<aside[\s\S]*?<\/aside>/gi, '')
+      .replace(/<header[\s\S]*?<\/header>/gi, '')
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+      .replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
+
+    // Use AI to extract article title and body from cleaned HTML
     const extractRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-lite',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
-            content: `You are an article extractor. Given raw HTML of a news article page, extract ONLY the article title and the main article body text. Ignore navigation, ads, sidebars, footers, related articles, and comments. Return JSON: {"title": "...", "content": "..."} where content is the plain text article body with paragraph breaks preserved. If no article is found, return {"title": "", "content": ""}.`
+            content: `You are an article extractor. Given cleaned HTML of a news page, extract the PRIMARY article that the URL points to. The URL is: ${url}
+
+CRITICAL RULES:
+- Extract ONLY the MAIN article, NOT related articles, sidebar content, or recommended reading
+- The title should match what appears in the page's <h1> or og:title meta tag for the main story
+- Ignore all other articles mentioned on the page
+- Return JSON: {"title": "...", "content": "..."} where content is the plain text article body with paragraph breaks preserved
+- If no clear main article is found, return {"title": "", "content": ""}`
           },
-          { role: 'user', content: html.substring(0, 30000) }
+          { role: 'user', content: html.substring(0, 40000) }
         ],
         temperature: 0.1,
         max_tokens: 4000,
