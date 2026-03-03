@@ -76,12 +76,14 @@ export function useArticles() {
         .from('articles')
         .select('id', { count: 'exact', head: true })
         .match({ ...baseQuery, status: 'published' })
-        .not('source_headline', 'cs', '{"source":"mace"}'),
+        .not('source_headline', 'cs', '{"source":"mace"}')
+        .not('source_headline', 'cs', '{"source":"mace-telegram"}'),
       supabase
         .from('articles')
         .select('id', { count: 'exact', head: true })
         .match({ ...baseQuery, status: 'draft' })
-        .not('source_headline', 'cs', '{"source":"mace"}'),
+        .not('source_headline', 'cs', '{"source":"mace"}')
+        .not('source_headline', 'cs', '{"source":"mace-telegram"}'),
     ]);
 
     setPublishedCount(publishedResult.count || 0);
@@ -108,6 +110,7 @@ export function useArticles() {
         .select('*')
         .match({ ...baseFilter, status: 'published' })
         .not('source_headline', 'cs', '{"source":"mace"}')
+        .not('source_headline', 'cs', '{"source":"mace-telegram"}')
         .order('created_at', { ascending: false })
         .range(0, ARTICLES_PER_PAGE - 1),
       supabase
@@ -115,6 +118,7 @@ export function useArticles() {
         .select('*')
         .match({ ...baseFilter, status: 'draft' })
         .not('source_headline', 'cs', '{"source":"mace"}')
+        .not('source_headline', 'cs', '{"source":"mace-telegram"}')
         .order('created_at', { ascending: false })
         .range(0, ARTICLES_PER_PAGE - 1),
     ]);
@@ -343,6 +347,7 @@ export function useArticles() {
       .select('*')
       .match({ ...baseFilter, status })
       .not('source_headline', 'cs', '{"source":"mace"}')
+      .not('source_headline', 'cs', '{"source":"mace-telegram"}')
       .order('created_at', { ascending: false })
       .range(offset, offset + ARTICLES_PER_PAGE - 1);
 
@@ -376,6 +381,7 @@ export function useArticles() {
       .ilike('title', `%${query}%`)
       .eq('status', status)
       .not('source_headline', 'cs', '{"source":"mace"}')
+      .not('source_headline', 'cs', '{"source":"mace-telegram"}')
       .order('created_at', { ascending: false })
       .limit(50);
 
