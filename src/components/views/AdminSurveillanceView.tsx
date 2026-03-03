@@ -312,7 +312,12 @@ export function AdminSurveillanceView() {
     fetchHbombs();
   }, [fetchMissiles, fetchDrones, fetchNukes, fetchHbombs, trajectoryRefresh]);
 
-  // Filter events and countries by global time filter
+  // Feed always shows all events from latest scan (24h window) — no time filter
+  const feedEvents = useMemo(() => {
+    return scanData?.latest_events || [];
+  }, [scanData?.latest_events]);
+
+  // Filter events by global time filter (used for globe/countries only)
   const filteredEvents = useMemo(() => {
     if (!scanData?.latest_events) return [];
     const hours = parseFloat(globalTimeFilter);
@@ -682,14 +687,14 @@ export function AdminSurveillanceView() {
                 <ShieldAlert className="w-3.5 h-3.5 text-amber-400/80" />
                 <span className="text-xs text-gray-300 uppercase tracking-wider font-medium">Feed</span>
                 <span className="text-[10px] text-gray-600 tabular-nums">
-                  ({filteredEvents.length})
+                  ({feedEvents.length})
                 </span>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/[0.08] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/[0.14]">
               <div className="p-2.5 space-y-1.5">
-                {filteredEvents.map((event, i) => (
+                {feedEvents.map((event, i) => (
                   <div
                     key={i}
                     className="group p-3 rounded bg-white/[0.03] border-l-2 border-l-white/[0.06] border-y-0 border-r-0 hover:bg-white/[0.06] hover:border-l-amber-400/40 transition-all duration-200 cursor-pointer"
