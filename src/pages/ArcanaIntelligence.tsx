@@ -489,7 +489,7 @@ export default function ArcanaIntelligence() {
                     <p className="text-white font-semibold text-lg mb-0">{f.title}</p>
                     <div className="h-[2px] w-full mt-1 bg-white/15" />
                   </div>
-                  <p className="text-white/60 text-base leading-relaxed mt-2">{f.desc}</p>
+                  <p className="text-white/60 text-base leading-snug mt-1">{f.desc}</p>
                 </div>
               ))}
             </div>
