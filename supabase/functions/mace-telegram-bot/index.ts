@@ -6,26 +6,71 @@ import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
  * Users send text, photos, or documents (PDF/DOCX/TXT) and Mace publishes them.
  * 
  * Flow:
- * 1. User sends a message → bot asks which site
- * 2. User replies with site name → bot generates/publishes article
- * 3. Bot replies with the live link
- * 
- * User identification: matched by Telegram chat_id stored in profiles.telegram_chat_id
- * or by whatsapp_phone matching (fallback).
+ * 1. User sends email → bot sends 6-digit code to email → user verifies
+ * 2. User sends content → bot asks which site
+ * 3. User replies with site name → bot generates/publishes article
+ * 4. Bot replies with the live link
  */
 
 const TELEGRAM_API = "https://api.telegram.org";
 
 // Per-user conversation state (in-memory, ephemeral)
-const userSessions = new Map<number, {
-  step: 'idle' | 'awaiting_site' | 'publishing';
-  content?: string;       // extracted text content
-  photoFileId?: string;   // Telegram file_id for photo
+interface UserSession {
+  step: string;
+  content?: string;
+  photoFileId?: string;
   photoCaption?: string;
   topic?: string;
-  userId?: string;        // Supabase user ID
+  userId?: string;
+  pendingEmail?: string;
+  verifyCode?: string;
+  codeExpiresAt?: number;
   lastActivity: number;
-}>();
+}
+const userSessions = new Map<number, UserSession>();
+
+function generateVerifyCode(): string {
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return String(arr[0] % 1000000).padStart(6, '0');
+}
+
+async function sendVerificationEmail(email: string, code: string): Promise<boolean> {
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  if (!RESEND_API_KEY) {
+    console.error("[mace-telegram-bot] Missing RESEND_API_KEY");
+    return false;
+  }
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Arcana Mace <noreply@arcanamace.com>",
+        to: [email],
+        subject: "Your Telegram Verification Code",
+        html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:20px">` +
+          `<h2 style="color:#000">Telegram Verification</h2>` +
+          `<p>Use this code to link your Telegram account to Arcana Mace:</p>` +
+          `<div style="background:#f4f4f4;padding:16px 24px;border-radius:8px;text-align:center;margin:20px 0">` +
+          `<span style="font-size:32px;letter-spacing:8px;font-weight:bold;color:#000">${code}</span>` +
+          `</div>` +
+          `<p style="color:#666;font-size:14px">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>` +
+          `</div>`,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("[mace-telegram-bot] Resend error:", err);
+      return false;
+    }
+    await res.text();
+    return true;
+  } catch (err) {
+    console.error("[mace-telegram-bot] Email send failed:", err);
+    return false;
+  }
+}
 
 // Cleanup old sessions every request
 function cleanupSessions() {
@@ -87,19 +132,14 @@ async function extractTextFromDocument(buffer: Uint8Array, mimeType: string): Pr
   if (mimeType === 'text/plain') {
     return new TextDecoder().decode(buffer);
   }
-
-  // For PDF/DOCX, use AI to extract text from base64
-  // We'll pass it as context to the AI model
   if (mimeType === 'application/pdf' || mimeType.includes('word')) {
     const base64 = btoa(String.fromCharCode(...buffer));
     return `[Document content (${mimeType}) - base64 encoded for AI processing: ${base64.substring(0, 50000)}]`;
   }
-
   return null;
 }
 
 Deno.serve(async (req) => {
-  // This is a webhook — Telegram POSTs updates here
   if (req.method !== 'POST') {
     return new Response('OK', { status: 200 });
   }
@@ -127,11 +167,9 @@ Deno.serve(async (req) => {
     if (!message) return new Response('OK', { status: 200 });
 
     const chatId = message.chat.id;
-    const telegramUserId = message.from?.id;
     const text = message.text?.trim() || message.caption?.trim() || '';
 
     cleanupSessions();
-
     console.log(`[mace-telegram-bot] Message from chat ${chatId}:`, text?.substring(0, 100));
 
     // ── Identify user by telegram_chat_id in profiles ──
@@ -139,7 +177,6 @@ Deno.serve(async (req) => {
     let supabaseUserId: string | null = session?.userId || null;
 
     if (!supabaseUserId) {
-      // Look up user by telegram_chat_id
       const { data: profile } = await supabase
         .from('profiles')
         .select('id')
@@ -149,41 +186,49 @@ Deno.serve(async (req) => {
       if (profile) {
         supabaseUserId = profile.id;
       } else {
-        // Not linked — ask them to link
-        if (text?.toLowerCase() === '/start' || !session) {
+        // Not linked — verification flow
+        if (text?.toLowerCase() === '/start' || (!session && !text?.includes('@'))) {
           await sendTelegramMessage(botToken, chatId, 
             `👋 Hey! I'm <b>Mace</b>, your AI publishing assistant.\n\n` +
-            `To get started, I need to link your Telegram to your Arcana Mace account.\n\n` +
-            `Please send me your Arcana Mace account email address so I can verify you.`
+            `To get started, I need to verify your Arcana Mace account.\n\n` +
+            `Please send me your Arcana Mace account email address. I'll send you a 6-digit code to verify it's really you.`
           );
-          userSessions.set(chatId, { step: 'idle', lastActivity: Date.now() });
+          userSessions.set(chatId, { step: 'awaiting_email', lastActivity: Date.now() });
           return new Response('OK', { status: 200 });
         }
 
-        // Check if they're sending an email to link
-        if (text && text.includes('@') && text.includes('.')) {
-          const email = text.toLowerCase().trim();
+        // Handle awaiting_code step for unlinked users
+        if (session?.step === 'awaiting_code' && session.verifyCode && session.pendingEmail) {
+          const inputCode = (text || '').replace(/\s/g, '');
+          if (!inputCode || inputCode.length !== 6) {
+            await sendTelegramMessage(botToken, chatId, `Please enter the 6-digit code I sent to your email.`);
+            return new Response('OK', { status: 200 });
+          }
+          if (Date.now() > (session.codeExpiresAt || 0)) {
+            await sendTelegramMessage(botToken, chatId, `⏳ That code has expired. Please send your email again to get a new one.`);
+            session.step = 'awaiting_email';
+            session.verifyCode = undefined;
+            session.pendingEmail = undefined;
+            return new Response('OK', { status: 200 });
+          }
+          if (inputCode !== session.verifyCode) {
+            await sendTelegramMessage(botToken, chatId, `❌ Wrong code. Please try again or send your email to request a new one.`);
+            return new Response('OK', { status: 200 });
+          }
+
+          // Code matches — link account
           const { data: profileByEmail } = await supabase
             .from('profiles')
-            .select('id, email_verified')
-            .eq('email', email)
+            .select('id')
+            .eq('email', session.pendingEmail)
             .maybeSingle();
 
           if (!profileByEmail) {
-            await sendTelegramMessage(botToken, chatId,
-              `❌ I couldn't find an Arcana Mace account with that email. Please make sure you're using the same email you registered with.`
-            );
+            await sendTelegramMessage(botToken, chatId, `❌ Account not found. Please try again.`);
+            session.step = 'awaiting_email';
             return new Response('OK', { status: 200 });
           }
 
-          if (!profileByEmail.email_verified) {
-            await sendTelegramMessage(botToken, chatId,
-              `⚠️ Your Arcana Mace account email isn't verified yet. Please verify it first, then try again.`
-            );
-            return new Response('OK', { status: 200 });
-          }
-
-          // Link telegram_chat_id to profile
           await supabase
             .from('profiles')
             .update({ telegram_chat_id: String(chatId) })
@@ -191,7 +236,7 @@ Deno.serve(async (req) => {
 
           supabaseUserId = profileByEmail.id;
           await sendTelegramMessage(botToken, chatId,
-            `✅ Account linked! You're all set.\n\n` +
+            `✅ Account verified and linked!\n\n` +
             `Now you can:\n` +
             `📝 Send me text and I'll publish it as an article\n` +
             `📸 Send me a photo and I'll write an article about it\n` +
@@ -202,8 +247,54 @@ Deno.serve(async (req) => {
           return new Response('OK', { status: 200 });
         }
 
+        // User is sending their email
+        if (text && text.includes('@') && text.includes('.')) {
+          const email = text.toLowerCase().trim();
+          const { data: profileByEmail } = await supabase
+            .from('profiles')
+            .select('id, email_verified')
+            .eq('email', email)
+            .maybeSingle();
+
+          if (!profileByEmail) {
+            await sendTelegramMessage(botToken, chatId,
+              `❌ I couldn't find an Arcana Mace account with that email.`
+            );
+            return new Response('OK', { status: 200 });
+          }
+
+          if (!profileByEmail.email_verified) {
+            await sendTelegramMessage(botToken, chatId,
+              `⚠️ Your Arcana Mace email isn't verified yet. Please verify it on the platform first.`
+            );
+            return new Response('OK', { status: 200 });
+          }
+
+          // Generate code and send email
+          const code = generateVerifyCode();
+          const sent = await sendVerificationEmail(email, code);
+          if (!sent) {
+            await sendTelegramMessage(botToken, chatId, `❌ Failed to send verification email. Please try again later.`);
+            return new Response('OK', { status: 200 });
+          }
+
+          if (!session) {
+            userSessions.set(chatId, { step: 'awaiting_code', pendingEmail: email, verifyCode: code, codeExpiresAt: Date.now() + 10 * 60 * 1000, lastActivity: Date.now() });
+          } else {
+            session.step = 'awaiting_code';
+            session.pendingEmail = email;
+            session.verifyCode = code;
+            session.codeExpiresAt = Date.now() + 10 * 60 * 1000;
+          }
+
+          await sendTelegramMessage(botToken, chatId,
+            `📧 I've sent a 6-digit verification code to <b>${email}</b>.\n\nPlease check your inbox and send me the code here.`
+          );
+          return new Response('OK', { status: 200 });
+        }
+
         await sendTelegramMessage(botToken, chatId,
-          `Please send me your Arcana Mace account email to link your account first.`
+          `Please send me your Arcana Mace account email to get started.`
         );
         return new Response('OK', { status: 200 });
       }
@@ -238,6 +329,19 @@ Deno.serve(async (req) => {
       return new Response('OK', { status: 200 });
     }
 
+    // ── /unlink command ──
+    if (text?.toLowerCase() === '/unlink') {
+      await supabase
+        .from('profiles')
+        .update({ telegram_chat_id: null })
+        .eq('id', supabaseUserId!);
+      userSessions.delete(chatId);
+      await sendTelegramMessage(botToken, chatId,
+        `🔓 Account unlinked. Send /start to link a different account.`
+      );
+      return new Response('OK', { status: 200 });
+    }
+
     // Initialize session if needed
     if (!session) {
       session = { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() };
@@ -254,7 +358,6 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
-      // Find matching site
       const { data: wpSites } = await supabase
         .from('wordpress_sites')
         .select('id, name, url, username, app_password, seo_plugin, user_id, agency, favicon')
@@ -281,9 +384,7 @@ Deno.serve(async (req) => {
       let htmlContent = '';
 
       if (session.photoFileId) {
-        // Photo: download and use AI vision to describe + write article
         await sendTelegramMessage(botToken, chatId, `🔍 Analyzing your photo...`);
-
         const file = await downloadTelegramFile(botToken, session.photoFileId);
         if (!file) {
           await sendTelegramMessage(botToken, chatId, `❌ Couldn't download the photo. Please try again.`);
@@ -291,30 +392,21 @@ Deno.serve(async (req) => {
           return new Response('OK', { status: 200 });
         }
 
-        // Convert to base64 data URL for vision
         const base64 = btoa(String.fromCharCode(...file.buffer));
         const imageDataUrl = `data:${file.mimeType};base64,${base64}`;
-
         const photoTopic = session.photoCaption || session.topic || 'the image';
 
-        // Use AI vision to write article about the photo
         const articleRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'google/gemini-2.5-flash',
             messages: [
-              {
-                role: 'system',
-                content: `You are a journalist writing for ${matchedSite.name}. Write a complete, publication-ready article based on the image provided. The article should be ~700 words, in flowing paragraphs (no bullet points or numbered lists). Start with a compelling headline on the first line (no prefix, no colon). ${session.photoCaption ? `The user's caption/context: "${session.photoCaption}"` : ''}`
-              },
-              {
-                role: 'user',
-                content: [
-                  { type: 'text', text: `Write a full article about this image. Topic context: ${photoTopic}` },
-                  { type: 'image_url', image_url: { url: imageDataUrl } },
-                ],
-              },
+              { role: 'system', content: `You are a journalist writing for ${matchedSite.name}. Write a complete, publication-ready article based on the image provided. The article should be ~700 words, in flowing paragraphs (no bullet points or numbered lists). Start with a compelling headline on the first line (no prefix, no colon). ${session.photoCaption ? `The user's caption/context: "${session.photoCaption}"` : ''}` },
+              { role: 'user', content: [
+                { type: 'text', text: `Write a full article about this image. Topic context: ${photoTopic}` },
+                { type: 'image_url', image_url: { url: imageDataUrl } },
+              ] },
             ],
             temperature: 0.7,
             max_tokens: 1500,
@@ -338,13 +430,10 @@ Deno.serve(async (req) => {
         htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
 
       } else if (session.content) {
-        // Document or long text content — use directly or generate from it
         const contentText = session.content;
 
-        // If content is very short (< 100 chars), treat as topic
         if (contentText.length < 100) {
           await sendTelegramMessage(botToken, chatId, `✍️ Writing article about "${contentText}"...`);
-          
           const articleRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
@@ -375,9 +464,7 @@ Deno.serve(async (req) => {
           const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
           htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
         } else {
-          // Longer content — use AI to create a headline and format
           await sendTelegramMessage(botToken, chatId, `✍️ Formatting your content for publication...`);
-          
           const formatRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
@@ -474,7 +561,6 @@ Deno.serve(async (req) => {
       const wpAuthHeader = `Basic ${credentials}`;
       const baseUrl = matchedSite.url.replace(/\/+$/, '');
 
-      // Get categories from mace settings
       let resolvedCategories: number[] = [];
       try {
         const { data: catRows } = await supabase
@@ -487,7 +573,7 @@ Deno.serve(async (req) => {
         }
       } catch (_) {}
 
-      const postBody = {
+      const postBody: Record<string, unknown> = {
         title: articleTitle,
         content: htmlContent,
         status: 'publish',
@@ -504,13 +590,11 @@ Deno.serve(async (req) => {
             const formData = new FormData();
             const blob = new Blob([photoFile.buffer], { type: photoFile.mimeType });
             formData.append('file', blob, photoFile.fileName || 'image.jpg');
-
             const mediaRes = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
               method: 'POST',
               headers: { 'Authorization': wpAuthHeader },
               body: formData,
             });
-
             if (mediaRes.ok) {
               const mediaData = await mediaRes.json();
               featuredMediaId = mediaData.id;
@@ -526,10 +610,7 @@ Deno.serve(async (req) => {
 
       const wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
         method: 'POST',
-        headers: {
-          'Authorization': wpAuthHeader,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
         body: JSON.stringify(postBody),
       });
 
@@ -538,7 +619,7 @@ Deno.serve(async (req) => {
         console.error('[mace-telegram-bot] WP publish error:', wpResponse.status, wpError);
         if (lockId) await supabase.from('credit_transactions').delete().eq('id', lockId);
         await sendTelegramMessage(botToken, chatId,
-          `❌ WordPress publish failed: ${wpError.message || 'Unknown error'}. Please try again.`
+          `❌ WordPress publish failed: ${(wpError as any).message || 'Unknown error'}. Please try again.`
         );
         session.step = 'idle';
         return new Response('OK', { status: 200 });
@@ -566,7 +647,6 @@ Deno.serve(async (req) => {
           ...(Object.keys(metadataObj).length > 0 ? { metadata: metadataObj } : {}),
         }).eq('id', lockId);
 
-        // Pay site owner
         if (matchedSite.user_id && matchedSite.user_id !== userId) {
           const commission = commissionPercentage ?? 10;
           const platformFee = Math.round(creditsRequired * (commission / 100));
@@ -596,11 +676,9 @@ Deno.serve(async (req) => {
         source_headline: { source: 'mace-telegram' },
       });
 
-      // Telegram alert for admin
       sendTelegramAlert(TelegramAlerts.maceAIPublished(matchedSite.name, articleTitle, wpLink || '')).catch(() => {});
 
       const creditsMsg = creditsRequired > 0 ? `\n💰 ${creditsRequired} credits used` : '';
-
       await sendTelegramMessage(botToken, chatId,
         `✅ <b>Published!</b>\n\n` +
         `📄 ${articleTitle}\n` +
@@ -620,7 +698,6 @@ Deno.serve(async (req) => {
 
     // Photo
     if (message.photo && message.photo.length > 0) {
-      // Get largest photo
       const largestPhoto = message.photo[message.photo.length - 1];
       session.photoFileId = largestPhoto.file_id;
       session.photoCaption = message.caption || '';
