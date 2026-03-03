@@ -8,7 +8,7 @@ export default function Missile3D() {
   return (
     <div className="relative w-full aspect-square flex items-center justify-center">
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute top-4 left-4">
           <Loader2 className="h-8 w-8 animate-spin text-[#0071e3]" />
         </div>
       )}
