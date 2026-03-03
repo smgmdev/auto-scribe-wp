@@ -146,9 +146,6 @@ const sections: HelpSection[] = [
           The publishing cost depends on the media site you choose. You can view the credit
           cost for each site in the Local Media Library before giving a voice command.
         </p>
-        <p>
-          Mace AI is available on Telegram.
-        </p>
       </div>
     ),
   },
