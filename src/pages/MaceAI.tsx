@@ -633,7 +633,7 @@ export default function MaceAI() {
 
 
 
-              <AccordionItem value="q5" className="border-t border-white/20 border-b border-b-white/20">
+              <AccordionItem value="q5" className="border-t border-white/20">
                 <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
                   <span className="flex items-center justify-between w-full gap-3 text-left">
                     <span className="text-left">Does Mace AI cost extra?</span>
@@ -642,6 +642,18 @@ export default function MaceAI() {
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
                   Mace AI features are included with your Arcana Mace account. Article generation and publishing by voice with Mace AI are available to all users. Users must have enough credits to publish on their selected Local Media Library channels.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="q6" className="border-t border-white/20 border-b border-b-white/20">
+                <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-6 group [&>svg]:hidden text-left w-full hover:text-[#2997ff] data-[state=open]:text-[#2997ff] transition-colors">
+                  <span className="flex items-center justify-between w-full gap-3 text-left">
+                    <span className="text-left">Can I use Mace AI on Telegram?</span>
+                    <Plus className="h-5 w-5 flex-shrink-0 text-white/50 transition-all duration-300 group-hover:text-[#2997ff] group-data-[state=open]:rotate-45 group-data-[state=open]:text-[#2997ff]" />
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
+                  Yes. Mace AI is available on Telegram through the official Arcana Mace Telegram bot. You can publish articles directly from a Telegram chat by sending a topic and selecting a media site — Mace AI handles the research, writing, and publishing just like it does on the web platform. Simply start a conversation with the bot, link your Arcana Mace account, and you're ready to publish on the go.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -663,6 +675,9 @@ export default function MaceAI() {
             </p>
             <p>
               Mace AI is currently offered as a free service; however, pricing is subject to change in the future.
+            </p>
+            <p>
+              Mace AI is available on Telegram.
             </p>
           </div>
         </div>
