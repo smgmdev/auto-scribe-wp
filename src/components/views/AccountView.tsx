@@ -22,7 +22,7 @@ export function AccountView() {
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Account Settings
@@ -36,7 +36,7 @@ export function AccountView() {
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
+          className="w-full md:w-auto bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
