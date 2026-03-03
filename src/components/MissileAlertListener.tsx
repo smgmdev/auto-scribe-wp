@@ -168,7 +168,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
         </div>
 
         {alert.origin_country_code && alert.destination_country_code && (
-          <Suspense fallback={<div className="w-full h-36 bg-black/40 animate-pulse" />}>
+          <Suspense fallback={<div className="w-full h-36 bg-black/40 flex items-center justify-center"><div className="w-6 h-6 border-2 border-neutral-600 border-t-neutral-400 rounded-full animate-spin" /></div>}>
             <MissileTrajectoryGlobe
               originCode={alert.origin_country_code}
               destinationCode={alert.destination_country_code}
@@ -199,9 +199,9 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           onClick={onDismiss}
           className={`w-full rounded-none ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow} flex items-center justify-center gap-2`}
         >
-          <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] shadow-[0_1px_0_1px_rgba(0,0,0,0.3)] leading-none">ESC</kbd>
+          <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ESC</kbd>
           <span className="text-[10px] opacity-40">/</span>
-          <kbd className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] shadow-[0_1px_0_1px_rgba(0,0,0,0.3)] leading-none">ENTER <CornerDownLeft size={10} /></kbd>
+          <kbd className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ENTER <CornerDownLeft size={10} /></kbd>
         </Button>
       </div>
 
