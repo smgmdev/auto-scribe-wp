@@ -338,7 +338,7 @@ async function handleContentReview(
       `📝 Your article needs some formatting and improvements.${issuesList}\n\n` +
       `I've prepared an edited version for you. Would you like to see it?\n\n` +
       `Reply <b>Yes</b> to see the edited version\n` +
-      `Reply <b>No</b> to publish your original as-is`
+      `Reply <b>No</b> to submit another version`
     );
     await saveSession(supabase, chatId, session);
   }
@@ -586,31 +586,27 @@ Deno.serve(async (req) => {
         await sendTelegramMessage(botToken, chatId,
           `📄 <b>Edited version:</b>\n\n${preview}${truncated}\n\n` +
           `Reply <b>Approve</b> to publish this version\n` +
-          `Reply <b>Original</b> to publish your original instead\n` +
-          `Reply <b>Cancel</b> to discard`
+          `Reply <b>Cancel</b> to discard and submit a new version`
         );
         await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
       if (answer === 'no' || answer === 'n') {
-        session.content = session.originalContent;
+        session.step = 'idle';
+        session.content = undefined;
         session.originalContent = undefined;
         session.reviewedContent = undefined;
         session.photoFileId = undefined;
-        session.step = 'awaiting_photo';
 
         await sendTelegramMessage(botToken, chatId,
-          `👍 Using your original article.\n\n` +
-          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
-          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
-          `Or reply <b>Skip</b> to publish without an image.`
+          `📝 No problem! Please submit a revised version of your article whenever you're ready.`
         );
         await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
-      await sendTelegramMessage(botToken, chatId, `Please reply <b>Yes</b> to see the edited version or <b>No</b> to keep your original.`);
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Yes</b> to see the edited version or <b>No</b> to submit another version.`);
       return new Response('OK', { status: 200 });
     }
 
@@ -635,34 +631,17 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
-      if (answer === 'original') {
-        session.content = session.originalContent;
-        session.originalContent = undefined;
-        session.reviewedContent = undefined;
-        session.photoFileId = undefined;
-        session.step = 'awaiting_photo';
-
-        await sendTelegramMessage(botToken, chatId,
-          `👍 Using your original article.\n\n` +
-          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
-          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
-          `Or reply <b>Skip</b> to publish without an image.`
-        );
-        await saveSession(supabase, chatId, session);
-        return new Response('OK', { status: 200 });
-      }
-
-      if (answer === 'cancel') {
+      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
         session.step = 'idle';
         session.content = undefined;
         session.originalContent = undefined;
         session.reviewedContent = undefined;
-        await sendTelegramMessage(botToken, chatId, `❌ Cancelled. Send me new content whenever you're ready.`);
+        await sendTelegramMessage(botToken, chatId, `❌ Cancelled. Please submit a revised version whenever you're ready.`);
         await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
-      await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b>, <b>Original</b>, or <b>Cancel</b>.`);
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b> or <b>Cancel</b>.`);
       return new Response('OK', { status: 200 });
     }
 
