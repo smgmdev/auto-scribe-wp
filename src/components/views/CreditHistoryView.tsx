@@ -2065,7 +2065,7 @@ export function CreditHistoryView() {
                 const matchedLocked = isUnlocked ? unlockToLockedMap.get(transaction.id) : null;
                 const orderInfo = orderDetails[transaction.id];
                 const isInstantPublishingPayout = transaction.type === 'order_payout' && !transaction.order_id;
-                const isMacePublish = transaction.type === 'publish' && !!transaction.description?.includes('via Mace AI');
+                const isMacePublish = transaction.type === 'publish' && !!(transaction.description?.includes('via Mace AI') || transaction.description?.includes('via Mace Telegram'));
                 
                 const displayDescription = (() => {
                   // Format locked/unlocked credit transactions with better labels
@@ -2101,8 +2101,9 @@ export function CreditHistoryView() {
                         : 'Withdrawal Pending';
                   }
                   if (isMacePublish) {
-                    const siteMatch = transaction.description?.match(/Published via Mace AI to (.+)/);
-                    return siteMatch ? `Published via Mace AI to ${siteMatch[1]}` : 'Published via Mace AI';
+                    const siteMatch = transaction.description?.match(/Published via Mace (?:AI|Telegram) to (.+)/);
+                    const maceType = transaction.description?.includes('Telegram') ? 'Mace Telegram' : 'Mace AI';
+                    return siteMatch ? `Published via ${maceType} to ${siteMatch[1]}` : `Published via ${maceType}`;
                   }
                   return transaction.description?.replace(/by admin/gi, 'by Arcana Mace Staff') || `${transaction.type} transaction`;
                 })();
@@ -2143,8 +2144,8 @@ export function CreditHistoryView() {
                     
                     // Fetch article details for publish transactions
                     if (transaction.type === 'publish' && !publishDetails[transaction.id]) {
-                      // Extract site name from description like "Published article to X" or "Published via Mace AI to X"
-                      const siteNameMatch = transaction.description?.match(/Published (?:article|via Mace AI) to (.+)/);
+                      // Extract site name from description like "Published article to X" or "Published via Mace AI to X" or "Published via Mace Telegram to X"
+                      const siteNameMatch = transaction.description?.match(/Published (?:article|via Mace (?:AI|Telegram)) to (.+)/);
                       const siteName = siteNameMatch ? siteNameMatch[1].trim() : null;
                       
                       // Check if transaction has metadata with persisted links
@@ -2272,7 +2273,7 @@ export function CreditHistoryView() {
                             {isInstantPublishingPayout 
                               ? <Badge className="bg-green-100 text-green-700">Instant Publishing</Badge>
                               : isMacePublish
-                                ? <Badge className="bg-purple-100 text-purple-700">Mace AI</Badge>
+                                ? <Badge className="bg-purple-100 text-purple-700">{transaction.description?.includes('Telegram') ? 'Mace Telegram' : 'Mace AI'}</Badge>
                                 : getTransactionBadge(transaction.type)}
                           </div>
                           
@@ -2474,7 +2475,7 @@ export function CreditHistoryView() {
                                      <p className="font-medium flex items-center gap-2">
                                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                                        {(() => {
-                                         const siteMatch = transaction.description?.match(/Published (?:article|via Mace AI) to (.+)/);
+                                         const siteMatch = transaction.description?.match(/Published (?:article|via Mace (?:AI|Telegram)) to (.+)/);
                                          return siteMatch ? siteMatch[1] : 'Unknown';
                                        })()}
                                      </p>
