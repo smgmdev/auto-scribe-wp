@@ -22,6 +22,7 @@ interface MissileAlert {
   severity: string;
   active: boolean;
   created_at: string;
+  published_at: string | null;
 }
 
 type AlertType = 'missile' | 'drone' | 'nuke' | 'hbomb';
@@ -188,7 +189,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
               </p>
             )}
             <p className={`text-[10px] ${colors.textTertiary} font-mono ml-auto`}>
-              {new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {new Date(alert.published_at || alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
         </div>
@@ -424,7 +425,7 @@ export function MissileAlertListener() {
           ))}
         </div>
         {queuedCount > 0 && (
-          <div className="w-full max-w-sm max-sm:max-w-full bg-black text-red-500 text-xs font-mono text-center py-2 px-4 tracking-wider">
+          <div className="w-full max-w-sm max-sm:max-w-full max-sm:mt-auto bg-black text-red-500 text-xs font-mono text-center py-2 px-4 tracking-wider">
             +{queuedCount} more alert{queuedCount > 1 ? 's' : ''} queued
           </div>
         )}
