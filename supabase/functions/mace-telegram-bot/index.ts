@@ -85,6 +85,11 @@ function cleanupSessions() {
   }
 }
 
+// Build a numbered site list for Telegram display
+function formatSiteList(siteNames: string[]): string {
+  return siteNames.map((n, i) => `<b>${i + 1}.</b> ${n}`).join('\n');
+}
+
 async function sendTelegramMessage(botToken: string, chatId: number, text: string) {
   await fetch(`${TELEGRAM_API}/bot${botToken}/sendMessage`, {
     method: "POST",
@@ -448,10 +453,10 @@ Deno.serve(async (req) => {
         .eq('connected', true);
       const siteNames = (wpSites || []).map((s: any) => s.name);
       const siteListText = siteNames.length > 0
-        ? siteNames.map((n: string) => `• ${n}`).join('\n')
+        ? formatSiteList(siteNames)
         : 'No sites available';
       await sendTelegramMessage(botToken, chatId,
-        `📰 <b>Available Sites:</b>\n\n${siteListText}`
+        `📰 <b>Available Sites:</b>\n\n${siteListText}\n\n💡 Reply with a number or site name to publish.`
       );
       return new Response('OK', { status: 200 });
     }
@@ -579,7 +584,7 @@ Deno.serve(async (req) => {
         const siteNames = (wpSites || []).map((s: any) => s.name);
 
         await sendTelegramMessage(botToken, chatId,
-          `👍 No image — got it.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `👍 No image — got it.\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
         );
         return new Response('OK', { status: 200 });
       }
@@ -598,7 +603,7 @@ Deno.serve(async (req) => {
         const siteNames = (wpSites || []).map((s: any) => s.name);
 
         await sendTelegramMessage(botToken, chatId,
-          `📸 Got your image!\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
         );
         return new Response('OK', { status: 200 });
       }
@@ -628,7 +633,7 @@ Deno.serve(async (req) => {
         const siteNames = (wpSites || []).map((s: any) => s.name);
 
         await sendTelegramMessage(botToken, chatId,
-          `📸 Got your image!\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
         );
         return new Response('OK', { status: 200 });
       }
@@ -651,23 +656,68 @@ Deno.serve(async (req) => {
       const { data: wpSites } = await supabase
         .from('wordpress_sites')
         .select('id, name, url, username, app_password, seo_plugin, user_id, agency, favicon')
-        .eq('connected', true);
+        .eq('connected', true)
+        .order('created_at', { ascending: true });
 
-      const matchedSite = (wpSites || []).find((s: any) => 
-        s.name.toLowerCase() === siteChoice.toLowerCase() ||
-        s.name.toLowerCase().includes(siteChoice.toLowerCase())
-      );
+      const allSites = wpSites || [];
+
+      // Match by number (e.g. "1", "2") or by name
+      let matchedSite: any = null;
+      const numChoice = parseInt(siteChoice, 10);
+      if (!isNaN(numChoice) && numChoice >= 1 && numChoice <= allSites.length) {
+        matchedSite = allSites[numChoice - 1];
+      } else {
+        matchedSite = allSites.find((s: any) => 
+          s.name.toLowerCase() === siteChoice.toLowerCase() ||
+          s.name.toLowerCase().includes(siteChoice.toLowerCase())
+        );
+      }
 
       if (!matchedSite) {
-        const siteNames = (wpSites || []).map((s: any) => s.name);
+        const siteNames = allSites.map((s: any) => s.name);
         await sendTelegramMessage(botToken, chatId,
-          `❌ I couldn't find "${siteChoice}". Available sites:\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}\n\nPlease send the exact site name.`
+          `❌ I couldn't find "${siteChoice}". Available sites:\n\n${formatSiteList(siteNames)}\n\nPlease reply with a <b>number</b> or site name.`
         );
         return new Response('OK', { status: 200 });
       }
 
+      // ── Credit check BEFORE publishing ──
+      const userId = supabaseUserId!;
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      const isAdmin = !!roleData;
+      const isOwner = matchedSite.user_id === userId;
+
+      let creditsRequired = 0;
+      if (!isAdmin && !isOwner) {
+        const { data: siteCreditData } = await supabase
+          .from('site_credits')
+          .select('credits_required')
+          .eq('site_id', matchedSite.id)
+          .maybeSingle();
+        creditsRequired = siteCreditData?.credits_required ?? 0;
+
+        if (creditsRequired > 0) {
+          const userCredits = await supabase.rpc('get_user_credits', { _user_id: userId });
+          const availableCredits = userCredits.data ?? 0;
+          if (availableCredits < creditsRequired) {
+            await sendTelegramMessage(botToken, chatId,
+              `❌ <b>Not enough credits.</b>\n\n` +
+              `Publishing to <b>${matchedSite.name}</b> requires <b>${creditsRequired} credits</b> but you only have <b>${availableCredits}</b>.\n\n` +
+              `💳 Please top up your account on Arcana Mace and try again.`
+            );
+            session.step = 'idle';
+            return new Response('OK', { status: 200 });
+          }
+        }
+      }
+
       session.step = 'publishing';
-      await sendTelegramMessage(botToken, chatId, `⏳ Publishing to <b>${matchedSite.name}</b>...`);
+      await sendTelegramMessage(botToken, chatId, `⏳ Publishing to <b>${matchedSite.name}</b>${creditsRequired > 0 ? ` (${creditsRequired} credits)` : ''}...`);
 
       // ── Determine content to publish ──
       let articleTitle = '';
@@ -797,39 +847,7 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
-      // ── Check credits ──
-      const userId = supabaseUserId!;
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
-      const isAdmin = !!roleData;
-      const isOwner = matchedSite.user_id === userId;
-
-      let creditsRequired = 0;
-      if (!isAdmin && !isOwner) {
-        const { data: siteCreditData } = await supabase
-          .from('site_credits')
-          .select('credits_required')
-          .eq('site_id', matchedSite.id)
-          .maybeSingle();
-        creditsRequired = siteCreditData?.credits_required ?? 0;
-
-        if (creditsRequired > 0) {
-          const userCredits = await supabase.rpc('get_user_credits', { _user_id: userId });
-          const availableCredits = userCredits.data ?? 0;
-          if (availableCredits < creditsRequired) {
-            await sendTelegramMessage(botToken, chatId,
-              `❌ Not enough credits. You need ${creditsRequired} but have ${availableCredits}. Please top up on Arcana Mace.`
-            );
-            session.step = 'idle';
-            return new Response('OK', { status: 200 });
-          }
-        }
-      }
-
+      // Credits already checked upfront during site selection
       // ── Lock credits ──
       let lockId: string | null = null;
       if (!isAdmin && creditsRequired > 0) {
@@ -1001,12 +1019,13 @@ Deno.serve(async (req) => {
       const { data: wpSites } = await supabase
         .from('wordpress_sites')
         .select('name')
-        .eq('connected', true);
+        .eq('connected', true)
+        .order('created_at', { ascending: true });
       const siteNames = (wpSites || []).map((s: any) => s.name);
 
       await sendTelegramMessage(botToken, chatId,
         `📸 Got your photo! I'll write an article about it and publish.\n\n` +
-        `Which site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        `Which site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
       );
       return new Response('OK', { status: 200 });
     }
