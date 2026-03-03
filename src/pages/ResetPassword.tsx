@@ -51,7 +51,7 @@ export default function ResetPassword() {
     //    This handles the case where the client parsed the hash BEFORE this component mounted.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session && mounted) {
-        console.log('[ResetPassword] Session already available from getSession');
+        if (import.meta.env.DEV) console.log('[ResetPassword] Session already available from getSession');
         setIsReady(true);
       }
     });
@@ -59,7 +59,7 @@ export default function ResetPassword() {
     // 2. Listen for future auth events (PASSWORD_RECOVERY or SIGNED_IN)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
-      console.log('[ResetPassword] Auth event:', event, !!session);
+      if (import.meta.env.DEV) console.log('[ResetPassword] Auth event:', event, !!session);
       if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
         setIsReady(true);
       }
@@ -71,7 +71,7 @@ export default function ResetPassword() {
     if (hash && hash.includes('access_token')) {
       fallbackTimer = setTimeout(async () => {
         if (!mounted || isReady) return;
-        console.log('[ResetPassword] Fallback: manually parsing hash tokens');
+        if (import.meta.env.DEV) console.log('[ResetPassword] Fallback: manually parsing hash tokens');
         const params = new URLSearchParams(hash.substring(1));
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
@@ -81,11 +81,11 @@ export default function ResetPassword() {
             refresh_token: refreshToken,
           });
           if (data?.session && !error && mounted) {
-            console.log('[ResetPassword] Fallback setSession succeeded');
+            if (import.meta.env.DEV) console.log('[ResetPassword] Fallback setSession succeeded');
             setIsReady(true);
             window.history.replaceState(null, '', window.location.pathname);
           } else {
-            console.error('[ResetPassword] Fallback setSession failed:', error?.message);
+            if (import.meta.env.DEV) console.error('[ResetPassword] Fallback setSession failed:', error?.message);
           }
         }
       }, 3000);
