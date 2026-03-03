@@ -249,7 +249,7 @@ export function AccountSettings() {
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Link your Telegram to receive real-time notifications about your orders, deliveries, and account activity.
+            Link your Telegram to connect to Mace AI.
           </p>
         </div>
 
