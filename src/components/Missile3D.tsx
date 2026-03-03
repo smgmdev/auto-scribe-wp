@@ -89,7 +89,7 @@ function SceneContent({ onLoaded }: { onLoaded: () => void }) {
       <group ref={groupRef} position={[0, 0, 0]} rotation={[0.2, 0, 0.05]}>
         <primitive object={scene} scale={2} />
       </group>
-      <TargetOverlay />
+      
     </>
   );
 }
