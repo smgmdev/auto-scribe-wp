@@ -222,16 +222,13 @@ async function handleContentReview(
   if (review.acceptable) {
     session.content = content;
     session.photoFileId = undefined;
-    session.step = 'awaiting_site';
-
-    const { data: wpSites } = await supabase
-      .from('wordpress_sites')
-      .select('name')
-      .eq('connected', true);
-    const siteNames = (wpSites || []).map((s: any) => s.name);
+    session.step = 'awaiting_photo';
 
     await sendTelegramMessage(botToken, chatId,
-      `✅ Your article looks great! Ready to publish.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+      `✅ Your article looks great!\n\n` +
+      `📸 Now send me a <b>featured image</b> for the article (JPG or PNG only).\n\n` +
+      `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+      `Or reply <b>Skip</b> to publish without an image.`
     );
   } else {
     const issuesList = review.issues.length > 0
@@ -500,21 +497,17 @@ Deno.serve(async (req) => {
       }
 
       if (answer === 'no' || answer === 'n') {
-        // Use original content as-is
         session.content = session.originalContent;
         session.originalContent = undefined;
         session.reviewedContent = undefined;
         session.photoFileId = undefined;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true);
-        const siteNames = (wpSites || []).map((s: any) => s.name);
+        session.step = 'awaiting_photo';
 
         await sendTelegramMessage(botToken, chatId,
-          `👍 Using your original article.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `👍 Using your original article.\n\n` +
+          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
+          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+          `Or reply <b>Skip</b> to publish without an image.`
         );
         return new Response('OK', { status: 200 });
       }
@@ -532,16 +525,13 @@ Deno.serve(async (req) => {
         session.originalContent = undefined;
         session.reviewedContent = undefined;
         session.photoFileId = undefined;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true);
-        const siteNames = (wpSites || []).map((s: any) => s.name);
+        session.step = 'awaiting_photo';
 
         await sendTelegramMessage(botToken, chatId,
-          `✅ Great! Using the edited version.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `✅ Great! Using the edited version.\n\n` +
+          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
+          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+          `Or reply <b>Skip</b> to publish without an image.`
         );
         return new Response('OK', { status: 200 });
       }
@@ -551,16 +541,13 @@ Deno.serve(async (req) => {
         session.originalContent = undefined;
         session.reviewedContent = undefined;
         session.photoFileId = undefined;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true);
-        const siteNames = (wpSites || []).map((s: any) => s.name);
+        session.step = 'awaiting_photo';
 
         await sendTelegramMessage(botToken, chatId,
-          `👍 Using your original article.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `👍 Using your original article.\n\n` +
+          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
+          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+          `Or reply <b>Skip</b> to publish without an image.`
         );
         return new Response('OK', { status: 200 });
       }
@@ -575,6 +562,81 @@ Deno.serve(async (req) => {
       }
 
       await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b>, <b>Original</b>, or <b>Cancel</b>.`);
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── User sending featured image ──
+    if (session.step === 'awaiting_photo') {
+      // Skip option
+      if (text?.toLowerCase().trim() === 'skip') {
+        session.photoFileId = undefined;
+        session.step = 'awaiting_site';
+
+        const { data: wpSites } = await supabase
+          .from('wordpress_sites')
+          .select('name')
+          .eq('connected', true);
+        const siteNames = (wpSites || []).map((s: any) => s.name);
+
+        await sendTelegramMessage(botToken, chatId,
+          `👍 No image — got it.\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      // Photo received
+      if (message.photo && message.photo.length > 0) {
+        const largestPhoto = message.photo[message.photo.length - 1];
+        // Telegram compresses photos to JPEG, so photo messages are always valid
+        session.photoFileId = largestPhoto.file_id;
+        session.step = 'awaiting_site';
+
+        const { data: wpSites } = await supabase
+          .from('wordpress_sites')
+          .select('name')
+          .eq('connected', true);
+        const siteNames = (wpSites || []).map((s: any) => s.name);
+
+        await sendTelegramMessage(botToken, chatId,
+          `📸 Got your image!\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      // Document (file) sent as image — validate format
+      if (message.document) {
+        const fileName = (message.document.file_name || '').toLowerCase();
+        const validExts = ['jpg', 'jpeg', 'png'];
+        const ext = fileName.split('.').pop() || '';
+
+        if (!validExts.includes(ext)) {
+          await sendTelegramMessage(botToken, chatId,
+            `⚠️ Only <b>JPG</b> and <b>PNG</b> images are accepted.\n\n` +
+            `💡 Please send a horizontal/landscape image (e.g. 1200×630) for best results.\n\n` +
+            `Or reply <b>Skip</b> to publish without an image.`
+          );
+          return new Response('OK', { status: 200 });
+        }
+
+        session.photoFileId = message.document.file_id;
+        session.step = 'awaiting_site';
+
+        const { data: wpSites } = await supabase
+          .from('wordpress_sites')
+          .select('name')
+          .eq('connected', true);
+        const siteNames = (wpSites || []).map((s: any) => s.name);
+
+        await sendTelegramMessage(botToken, chatId,
+          `📸 Got your image!\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId,
+        `📸 Please send me a <b>featured image</b> (JPG or PNG only, horizontal format recommended).\n\n` +
+        `Or reply <b>Skip</b> to publish without an image.`
+      );
       return new Response('OK', { status: 200 });
     }
 
@@ -1015,16 +1077,13 @@ Deno.serve(async (req) => {
       if (text.length <= 100) {
         session.content = text;
         session.photoFileId = undefined;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true);
-        const siteNames = (wpSites || []).map((s: any) => s.name);
+        session.step = 'awaiting_photo';
 
         await sendTelegramMessage(botToken, chatId,
-          `📝 Got it — I'll write an article about "${text.substring(0, 60)}${text.length > 60 ? '...' : ''}".\n\nWhich site should I publish to?\n\n${siteNames.map((n: string) => `• ${n}`).join('\n')}`
+          `📝 Got it — I'll write an article about "${text.substring(0, 60)}${text.length > 60 ? '...' : ''}".\n\n` +
+          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
+          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+          `Or reply <b>Skip</b> to publish without an image.`
         );
       } else {
         // Long text = actual article content, run review
