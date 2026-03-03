@@ -1864,6 +1864,33 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_verification_sessions: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          telegram_chat_id: string
+          verify_code: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          telegram_chat_id: string
+          verify_code: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          telegram_chat_id?: string
+          verify_code?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           created_at: string
