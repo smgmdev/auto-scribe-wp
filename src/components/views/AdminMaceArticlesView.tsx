@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink, Calendar, Globe, Mic, RefreshCw, Loader2, Trash2, Search } from 'lucide-react';
+import { ExternalLink, Calendar, Globe, Mic, RefreshCw, Loader2, Trash2, Search, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ interface MaceArticle {
   wp_featured_media_id: number | null;
   focus_keyword: string | null;
   created_at: string;
+  source_headline: any;
 }
 
 const AdminMaceArticlesView = () => {
@@ -29,6 +30,7 @@ const AdminMaceArticlesView = () => {
   const [siteFilter, setSiteFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [articleToDelete, setArticleToDelete] = useState<MaceArticle | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'voice' | 'telegram'>('all');
 
   useEffect(() => {
     fetchMaceArticles();
@@ -45,7 +47,7 @@ const AdminMaceArticlesView = () => {
             if (
               newArticle.status === 'published' &&
               newArticle.published_to &&
-              newArticle.source_headline?.source === 'mace'
+              (newArticle.source_headline?.source === 'mace' || newArticle.source_headline?.source === 'mace-telegram')
             ) {
               setArticles(prev => [newArticle, ...prev]);
             }
@@ -56,7 +58,7 @@ const AdminMaceArticlesView = () => {
             if (
               updated.status === 'published' &&
               updated.published_to &&
-              updated.source_headline?.source === 'mace'
+              (updated.source_headline?.source === 'mace' || updated.source_headline?.source === 'mace-telegram')
             ) {
               setArticles(prev => {
                 const exists = prev.some(a => a.id === updated.id);
@@ -92,7 +94,7 @@ const AdminMaceArticlesView = () => {
 
       const maceArticles = (articlesData || []).filter((a: any) => {
         const sh = a.source_headline;
-        return sh && typeof sh === 'object' && (sh as any).source === 'mace';
+        return sh && typeof sh === 'object' && ((sh as any).source === 'mace' || (sh as any).source === 'mace-telegram');
       });
 
       setArticles(maceArticles);
@@ -143,9 +145,21 @@ const AdminMaceArticlesView = () => {
     return Array.from(sites.values());
   }, [articles]);
 
+  // Tab counts
+  const tabCounts = useMemo(() => {
+    const voice = articles.filter(a => a.source_headline?.source === 'mace').length;
+    const telegram = articles.filter(a => a.source_headline?.source === 'mace-telegram').length;
+    return { all: articles.length, voice, telegram };
+  }, [articles]);
+
   // Filtered articles
   const filtered = useMemo(() => {
     let result = articles;
+    if (activeTab === 'voice') {
+      result = result.filter(a => a.source_headline?.source === 'mace');
+    } else if (activeTab === 'telegram') {
+      result = result.filter(a => a.source_headline?.source === 'mace-telegram');
+    }
     if (siteFilter !== 'all') {
       result = result.filter(a => a.published_to_name === siteFilter);
     }
@@ -154,7 +168,13 @@ const AdminMaceArticlesView = () => {
       result = result.filter(a => a.title.toLowerCase().includes(q));
     }
     return result;
-  }, [articles, siteFilter, searchQuery]);
+  }, [articles, activeTab, siteFilter, searchQuery]);
+
+  const tabs = [
+    { key: 'all' as const, label: 'All', count: tabCounts.all },
+    { key: 'voice' as const, label: 'Mace AI Voice', count: tabCounts.voice, icon: <Mic className="w-3.5 h-3.5" /> },
+    { key: 'telegram' as const, label: 'Mace AI Telegram', count: tabCounts.telegram, icon: <MessageCircle className="w-3.5 h-3.5" /> },
+  ];
 
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
@@ -174,6 +194,31 @@ const AdminMaceArticlesView = () => {
           Refresh
         </Button>
       </div>
+
+      {/* Tabs */}
+      {!loading && articles.length > 0 && (
+        <div className="flex gap-1 mb-3 border-b border-border">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.key
+                  ? 'border-foreground text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                activeTab === tab.key ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Filter & Search */}
       {!loading && articles.length > 0 && (
