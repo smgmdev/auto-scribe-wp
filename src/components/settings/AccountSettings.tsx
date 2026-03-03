@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Mail, Lock, Loader2, Phone, MessageCircle, ExternalLink, CheckCircle2, Unlink, RefreshCw } from 'lucide-react';
+import { Mail, Lock, Loader2, Phone, MessageCircle, ExternalLink, CheckCircle2, Unlink } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,6 @@ export function AccountSettings() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [telegramLinked, setTelegramLinked] = useState(false);
   const [unlinkingTelegram, setUnlinkingTelegram] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
@@ -81,12 +80,6 @@ export function AccountSettings() {
     };
   }, [user]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchProfileData();
-    setRefreshing(false);
-    toast.success('Account refreshed');
-  };
 
   const handleUnlinkTelegram = async () => {
     if (!user) return;
@@ -175,19 +168,6 @@ export function AccountSettings() {
   return (
     <Card>
       <CardContent className="space-y-6 pt-6">
-        {/* Refresh */}
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        </div>
 
         {/* Email */}
         <div className="space-y-3">
