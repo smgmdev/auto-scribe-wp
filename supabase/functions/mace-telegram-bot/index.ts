@@ -245,7 +245,7 @@ async function reviewArticleContent(apiKey: string, content: string): Promise<{ 
       messages: [
         {
           role: 'system',
-          content: `You are a senior editorial quality reviewer. Analyze the submitted article and determine if it meets professional publication standards.
+          content: `You are a senior editorial quality reviewer AND rewriter. Analyze the submitted article and determine if it meets professional publication standards.
 
 CHECK FOR THESE ISSUES:
 1. Non-English text (especially French lines/phrases mixed in) — articles must be 100% English
@@ -254,6 +254,7 @@ CHECK FOR THESE ISSUES:
 4. Grammar/spelling errors
 5. Unprofessional tone or casual language inappropriate for publication
 6. Repetitive content or filler text
+7. Weak, generic, or poorly written title/headline
 
 RESPOND WITH EXACTLY THIS JSON FORMAT:
 {
@@ -262,16 +263,29 @@ RESPOND WITH EXACTLY THIS JSON FORMAT:
   "rewritten": "FULL rewritten article text if not acceptable, or empty string if acceptable"
 }
 
-If the article IS acceptable (well-structured, professional, 100% English, original-sounding), set acceptable=true and issues=[] and rewritten="".
+If the article IS acceptable (well-structured, professional, 100% English, original-sounding, strong title), set acceptable=true and issues=[] and rewritten="".
 
 If the article needs work, set acceptable=false, list the specific issues found, and provide a COMPLETE rewritten version that:
+- Starts with a NEW compelling, professional headline on line 1 (no prefix, just the headline text)
+- TITLE RULES:
+  * CRITICAL: If the original headline contains NAMES (people, countries, companies, organizations), you MUST preserve those names in your new title
+  * Names are essential identifiers — readers need to know WHO or WHAT the story is about
+  * NEVER use colons (:) in the title — write flowing, natural headlines instead
+  * NEVER start titles with possessive forms like "Company's", "Person's" — these are overused and robotic
+  * Use dynamic sentence structures: questions, action verbs, or intriguing statements
+  * Aim for 12-18 words for maximum engagement
+  * Make it intriguing — readers should NEED to click
+  * Examples of GOOD titles: "Why Everyone Is Watching Elon Musk's Latest Move and What It Means for the Future", "Inside the Secret Deal That Could Transform How Apple Approaches the AI Market"
+  * Examples of BAD titles: "Tesla's New Era Begins", "Company's Bold Move", "Tech Giant Makes Move"
 - Is 100% in English (translate any non-English parts)
-- Flows naturally like human writing
+- NEVER use numbered lists or bullet points in the article body
+- NEVER use more than 1-2 subheadings (and only if truly necessary)
+- Flows naturally like human writing with varied sentence lengths
 - Maintains professional journalistic tone
-- Preserves the original meaning and key facts
-- Has solid paragraph structure with clear transitions
-- Has a compelling, non-generic opening (avoid cliche AI openers)
-- Starts with the headline on line 1 (no prefix)`
+- Preserves the original meaning, key facts, and all specific names of people/companies/organizations
+- Has solid paragraph structure (5-7 paragraphs) with clear transitions
+- Has a compelling, non-generic opening — start with a specific fact, striking observation, or narrative hook (NEVER "In a world where...", "In today's...", "In a groundbreaking...")
+- Approximately 700 words`
         },
         { role: 'user', content: content.substring(0, 15000) }
       ],
