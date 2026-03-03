@@ -316,6 +316,26 @@ export default function MaceAI() {
           </div>
         </div>
 
+        {/* Promo Banner - Apple style */}
+        <div className="bg-[#1d1d1f] py-3">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
+            <span className="text-sm text-white/90">
+              Link your Arcana Mace account to Mace AI Telegram bot for a new experience.{' '}
+              <button 
+                onClick={() => {
+                  if (user) {
+                    navigate('/account', { state: { targetView: 'settings' } });
+                  } else {
+                    navigate('/auth?redirect=account');
+                  }
+                }}
+                className="text-[#2997ff] hover:underline"
+              >
+                Go to Account Settings ›
+              </button>
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Hero Section */}
