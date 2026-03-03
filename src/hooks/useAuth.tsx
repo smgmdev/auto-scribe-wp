@@ -663,7 +663,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const accessToken = params.get('access_token');
           const refreshToken = params.get('refresh_token');
           if (accessToken && refreshToken) {
-            console.log('[Auth] Shadow mode: setting session from URL tokens');
+            if (import.meta.env.DEV) console.log('[Auth] Shadow mode: setting session from URL tokens');
             // Stop auto-refresh BEFORE setting session to prevent the shadow
             // iframe from making token refresh HTTP requests that could
             // interfere with the parent window's admin session
