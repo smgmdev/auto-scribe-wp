@@ -579,6 +579,61 @@ Deno.serve(async (req) => {
       return new Response('OK', { status: 200 });
     }
 
+    // ── /myarticles command ──
+    if (text?.toLowerCase() === '/myarticles') {
+      const { data: maceArticles } = await supabase
+        .from('articles')
+        .select('id, title, wp_link, published_to_name, created_at, wp_post_id, wp_featured_media_id, published_to')
+        .eq('user_id', supabaseUserId!)
+        .eq('status', 'published')
+        .not('source_headline', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      // Filter to only mace-sourced articles
+      const maceOnly = (maceArticles || []).filter((a: any) => {
+        try {
+          const sh = typeof a.source_headline === 'string' ? JSON.parse(a.source_headline) : a.source_headline;
+          return sh?.source === 'mace';
+        } catch { return false; }
+      });
+
+      if (maceOnly.length === 0) {
+        await sendTelegramMessage(botToken, chatId,
+          `📭 You haven't published any articles via Mace yet.\n\nSend me some content and let's publish your first one!`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      const listText = maceOnly.map((a: any, i: number) => {
+        const date = new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const site = a.published_to_name || 'Unknown site';
+        return `<b>${i + 1}.</b> ${a.title}\n    📍 ${site} · ${date}`;
+      }).join('\n\n');
+
+      // Store the article list in session for deletion
+      const articleListForSession = maceOnly.map((a: any) => ({
+        id: a.id,
+        title: a.title,
+        wp_post_id: a.wp_post_id,
+        wp_featured_media_id: a.wp_featured_media_id,
+        published_to: a.published_to,
+        wp_link: a.wp_link,
+      }));
+
+      session = session || { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() };
+      session.step = 'myarticles_list';
+      (session as any).articleList = articleListForSession;
+      await saveSession(supabase, chatId, session);
+
+      await sendTelegramMessage(botToken, chatId,
+        `📰 <b>Your Mace Articles (${maceOnly.length}):</b>\n\n${listText}\n\n` +
+        `To <b>delete</b> an article, reply with its number.\n` +
+        `Reply <b>Cancel</b> to go back.`
+      );
+      return new Response('OK', { status: 200 });
+    }
+
     // Initialize session if needed
     if (!session) {
       session = { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() };
@@ -586,6 +641,116 @@ Deno.serve(async (req) => {
     }
     session.userId = supabaseUserId!;
     session.lastActivity = Date.now();
+
+    // ── /myarticles: user selected an article number ──
+    if (session.step === 'myarticles_list') {
+      const answer = text?.toLowerCase().trim();
+      if (answer === 'cancel' || answer === 'back') {
+        session.step = 'idle';
+        (session as any).articleList = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Back to main. Send me content to publish!`);
+        return new Response('OK', { status: 200 });
+      }
+
+      const num = parseInt(text || '', 10);
+      const articleList = (session as any).articleList || [];
+      if (isNaN(num) || num < 1 || num > articleList.length) {
+        await sendTelegramMessage(botToken, chatId, `Please reply with a number (1-${articleList.length}) or <b>Cancel</b>.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      const selected = articleList[num - 1];
+      session.step = 'myarticles_confirm_delete';
+      (session as any).deleteArticle = selected;
+      await saveSession(supabase, chatId, session);
+
+      await sendTelegramMessage(botToken, chatId,
+        `🗑 Are you sure you want to delete this article?\n\n` +
+        `<b>${selected.title}</b>\n\n` +
+        `⚠️ This will remove it from WordPress permanently.\n\n` +
+        `Reply <b>Yes</b> to delete or <b>No</b> to cancel.`
+      );
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── /myarticles: confirm deletion ──
+    if (session.step === 'myarticles_confirm_delete') {
+      const answer = text?.toLowerCase().trim();
+      const article = (session as any).deleteArticle;
+
+      if (answer === 'no' || answer === 'n' || answer === 'cancel') {
+        session.step = 'idle';
+        (session as any).deleteArticle = undefined;
+        (session as any).articleList = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Deletion cancelled.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'yes' || answer === 'y') {
+        await sendTelegramMessage(botToken, chatId, `🔄 Deleting article...`);
+
+        try {
+          // Delete from WordPress directly using site credentials
+          if (article.wp_post_id && article.published_to) {
+            const { data: site } = await supabase
+              .from('wordpress_sites')
+              .select('url, username, app_password')
+              .eq('id', article.published_to)
+              .single();
+
+            if (site) {
+              const wpBase = site.url.replace(/\/+$/, '');
+              const wpAuth = 'Basic ' + btoa(`${site.username}:${site.app_password}`);
+
+              // Delete featured media first
+              if (article.wp_featured_media_id) {
+                await fetch(`${wpBase}/wp-json/wp/v2/media/${article.wp_featured_media_id}?force=true`, {
+                  method: 'DELETE',
+                  headers: { 'Authorization': wpAuth, 'Content-Type': 'application/json' },
+                }).catch(() => {});
+              }
+
+              // Delete the post
+              const delRes = await fetch(`${wpBase}/wp-json/wp/v2/posts/${article.wp_post_id}?force=true`, {
+                method: 'DELETE',
+                headers: { 'Authorization': wpAuth, 'Content-Type': 'application/json' },
+              });
+              if (!delRes.ok && delRes.status !== 404) {
+                console.error('[mace-telegram-bot] WP delete failed:', delRes.status);
+              }
+            }
+          }
+
+          // Delete from database
+          await supabase
+            .from('articles')
+            .delete()
+            .eq('id', article.id)
+            .eq('user_id', supabaseUserId!);
+
+          session.step = 'idle';
+          (session as any).deleteArticle = undefined;
+          (session as any).articleList = undefined;
+          await saveSession(supabase, chatId, session);
+
+          await sendTelegramMessage(botToken, chatId,
+            `✅ Article "<b>${article.title}</b>" has been deleted successfully.`
+          );
+        } catch (err) {
+          console.error('[mace-telegram-bot] Delete error:', err);
+          session.step = 'idle';
+          (session as any).deleteArticle = undefined;
+          await saveSession(supabase, chatId, session);
+          await sendTelegramMessage(botToken, chatId, `❌ Failed to delete article. Please try again later.`);
+        }
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Yes</b> to delete or <b>No</b> to cancel.`);
+      return new Response('OK', { status: 200 });
+    }
 
     // ── User reviewing AI-edited article ──
     if (session.step === 'awaiting_review_approval') {
