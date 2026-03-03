@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Siren, Shield, Radiation } from 'lucide-react';
+import { Siren, Shield, Radiation, CornerDownLeft } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
@@ -197,9 +197,11 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
       <div className="shrink-0 px-4 max-sm:px-3 pb-4 max-sm:pb-3">
         <Button
           onClick={onDismiss}
-          className={`w-full rounded-none ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow}`}
+          className={`w-full rounded-none ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow} flex items-center justify-center gap-2`}
         >
-          ESC / ENTER
+          <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] shadow-[0_1px_0_1px_rgba(0,0,0,0.3)] leading-none">ESC</kbd>
+          <span className="text-[10px] opacity-40">/</span>
+          <kbd className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] shadow-[0_1px_0_1px_rgba(0,0,0,0.3)] leading-none">ENTER <CornerDownLeft size={10} /></kbd>
         </Button>
       </div>
 
