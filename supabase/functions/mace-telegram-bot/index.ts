@@ -594,7 +594,7 @@ Deno.serve(async (req) => {
       const maceOnly = (maceArticles || []).filter((a: any) => {
         try {
           const sh = typeof a.source_headline === 'string' ? JSON.parse(a.source_headline) : a.source_headline;
-          return sh?.source === 'mace';
+          return sh?.source === 'mace' || sh?.source === 'mace-telegram';
         } catch { return false; }
       });
 
