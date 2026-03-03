@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Siren, Shield, Radiation } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/hooks/useAuth';
 
 const MissileTrajectoryGlobe = lazy(() => import('@/components/MissileTrajectoryGlobe').then(m => ({ default: m.MissileTrajectoryGlobe })));
 
@@ -204,6 +205,7 @@ function getAlertType(severity: string): AlertType {
 }
 
 export function MissileAlertListener() {
+  const { isAdmin } = useAuth();
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
   const dismissedRef = useRef<Set<string>>(new Set());
   const dismissedLoadedRef = useRef(false);
@@ -374,7 +376,7 @@ export function MissileAlertListener() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (alerts.length === 0) return null;
+  if (!isAdmin || alerts.length === 0) return null;
 
   // Show max 2 on desktop, 1 on mobile — remaining are queued behind
   const maxVisible = isMobile ? 1 : 2;
