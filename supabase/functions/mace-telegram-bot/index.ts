@@ -925,34 +925,15 @@ Deno.serve(async (req) => {
           const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
           htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
         } else {
+          // Content is already reviewed/approved — use it directly without another AI rewrite
           await sendTelegramMessage(botToken, chatId, `✍️ Formatting your content for publication...`);
-          const formatRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'google/gemini-2.5-flash-lite',
-              messages: [
-                { role: 'system', content: `You are an editor at ${matchedSite.name}. The user has provided article content. Your job: 1) Create a compelling headline (first line, no prefix). 2) Clean up and format the content for publication, keeping the original meaning and substance. Output the headline on line 1 followed by the article content in paragraphs.` },
-                { role: 'user', content: contentText.substring(0, 15000) },
-              ],
-              temperature: 0.5,
-              max_tokens: 2000,
-            }),
-          });
-
-          if (!formatRes.ok) {
-            await sendTelegramMessage(botToken, chatId, `❌ Failed to format content. Please try again.`);
-            session.step = 'idle';
-            return new Response('OK', { status: 200 });
-          }
-
-          const formatData = await formatRes.json();
-          const rawContent = formatData.choices?.[0]?.message?.content || '';
-          const lines = rawContent.trim().split('\n');
-          articleTitle = lines[0].replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
+          
+          // Extract title from first line, rest is body
+          const contentLines = contentText.trim().split('\n');
+          articleTitle = contentLines[0].replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
           let startIdx = 1;
-          while (startIdx < lines.length && lines[startIdx].trim() === '') startIdx++;
-          const body = lines.slice(startIdx).join('\n').trim();
+          while (startIdx < contentLines.length && contentLines[startIdx].trim() === '') startIdx++;
+          const body = contentLines.slice(startIdx).join('\n').trim();
           const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
           htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
         }
