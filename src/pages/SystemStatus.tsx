@@ -132,6 +132,7 @@ export default function SystemStatus() {
     'Headlines Scanner': { internalLink: '/account?view=headlines' },
     'Payment Gateway (Stripe)': { internalLink: '/account?view=credit-history' },
     'Mace AI': { internalLink: '/mace-ai' },
+    'Mace AI Telegram': { internalLink: '/mace-ai' },
     'Arcana Precision': { internalLink: '/arcana-precision' },
   };
 
@@ -179,6 +180,7 @@ export default function SystemStatus() {
         { name: 'File Storage', status: 'issue' },
         { name: 'AI Article Generation', status: 'issue' },
         { name: 'Mace AI', status: 'issue', internalLink: '/mace-ai' },
+        { name: 'Mace AI Telegram', status: 'issue', internalLink: '/mace-ai' },
         { name: 'WordPress Publishing', status: 'issue', internalLink: '/account?view=compose' },
         { name: 'Credit Processing', status: 'issue', internalLink: '/account?view=credit-history' },
         { name: 'Payment Gateway (Stripe)', status: 'issue', internalLink: '/account?view=credit-history' },
@@ -224,7 +226,7 @@ export default function SystemStatus() {
     },
     {
       title: 'AI Publishing',
-      names: ['AI Article Generation', 'Mace AI'],
+      names: ['AI Article Generation', 'Mace AI', 'Mace AI Telegram'],
     },
     {
       title: 'Defense',
