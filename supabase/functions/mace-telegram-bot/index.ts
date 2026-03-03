@@ -851,13 +851,15 @@ Deno.serve(async (req) => {
       const wpAuthHeader = `Basic ${credentials}`;
       const baseUrl = matchedSite.url.replace(/\/+$/, '');
 
+      // Determine category based on Mace settings: image → has_image=true category, no image → has_image=false category
+      const hasImage = !!session.photoFileId;
       let resolvedCategories: number[] = [];
       try {
         const { data: catRows } = await supabase
           .from('mace_site_categories')
           .select('category_id')
           .eq('site_id', matchedSite.id)
-          .eq('has_image', false);
+          .eq('has_image', hasImage);
         if (catRows && catRows.length > 0) {
           resolvedCategories = catRows.map((r: any) => r.category_id);
         }
