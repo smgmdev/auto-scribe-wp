@@ -697,7 +697,7 @@ export default function MaceAI() {
               Mace AI is currently offered as a free service; however, pricing is subject to change in the future.
             </p>
             <p>
-              <a href="/help/mace-ai#telegram-bot" className="text-[#515154] underline hover:text-[#1d1d1f]">Learn more</a> about using Mace AI on Telegram.
+              <a href="/help/mace-ai#telegram-bot" className="text-[#2997ff] no-underline hover:text-[#2997ff]/80">Learn more</a> about using Mace AI on Telegram.
             </p>
           </div>
         </div>
