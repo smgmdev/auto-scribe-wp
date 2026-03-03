@@ -653,7 +653,7 @@ export default function MaceAI() {
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 leading-relaxed pb-6 text-base md:text-lg">
-                  Yes. Mace AI is available on Telegram through the official Arcana Mace Telegram bot. You can publish articles directly from a Telegram chat by sending a topic and selecting a media site — Mace AI handles the research, writing, and publishing just like it does on the web platform. Simply start a conversation with the bot, link your Arcana Mace account, and you're ready to publish on the go.
+                  Yes. Mace AI is available on Telegram through the official Arcana Mace Telegram bot. You can publish articles directly from a Telegram chat by sending a topic and selecting a media site — Mace AI handles the research, writing, and publishing just like it does on the web platform. Simply start a conversation with the bot, link your Arcana Mace account via Account Settings, and you're ready to publish on the go.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
