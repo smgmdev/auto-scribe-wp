@@ -382,7 +382,7 @@ export function AdminSurveillanceView() {
         {/* Top bar */}
         <div className="flex flex-col border-b border-white/5 bg-[#1d1d1f]">
           {/* Row 1: LIVE + controls */}
-          <div className="flex items-stretch px-0 lg:min-h-[32px]">
+          <div className="flex items-stretch px-0 lg:min-h-[26px]">
             <div className="flex items-center gap-2 pl-3 pr-3 py-1">
               <div className={cn(
                 "w-2 h-2 rounded-full animate-pulse",
