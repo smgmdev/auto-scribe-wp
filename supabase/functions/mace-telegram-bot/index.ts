@@ -15,6 +15,11 @@ import { sendTelegramAlert, TelegramAlerts } from "../_shared/telegram.ts";
 const TELEGRAM_API = "https://api.telegram.org";
 
 // Per-user conversation state (in-memory, ephemeral)
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface UserSession {
   step: string;
   content?: string;
@@ -28,6 +33,7 @@ interface UserSession {
   verifyCode?: string;
   codeExpiresAt?: number;
   lastActivity: number;
+  chatHistory?: ChatMessage[];
 }
 const userSessions = new Map<number, UserSession>();
 
@@ -88,6 +94,84 @@ function cleanupSessions() {
 // Build a numbered site list for Telegram display
 function formatSiteList(siteNames: string[]): string {
   return siteNames.map((n, i) => `<b>${i + 1}.</b> ${n}`).join('\n');
+}
+
+// Detect if user wants to publish vs just chatting
+function isPublishIntent(text: string): boolean {
+  const publishKeywords = [
+    /^(publish|write|article|post|create|draft|compose|blog)/i,
+    /write\s+(an?\s+)?article/i,
+    /publish\s+(to|on|this|it|an?\s+article)/i,
+    /create\s+(an?\s+)?(article|post|blog)/i,
+    /\b(publish|post)\s+about\b/i,
+  ];
+  return publishKeywords.some(re => re.test(text.trim()));
+}
+
+// Chat with Perplexity AI for normal conversation
+async function chatWithPerplexity(
+  userMessage: string,
+  chatHistory: ChatMessage[]
+): Promise<string> {
+  const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
+  if (!PERPLEXITY_API_KEY) {
+    console.error("[mace-telegram-bot] Missing PERPLEXITY_API_KEY");
+    return "I'm having trouble connecting right now. Please try again later.";
+  }
+
+  // Keep last 10 messages for context
+  const recentHistory = chatHistory.slice(-10);
+
+  try {
+    const res = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [
+          {
+            role: 'system',
+            content: `You are Mace, an AI assistant for Arcana Mace — a media publishing platform. You're chatting with a user on Telegram.
+
+Be helpful, friendly, and conversational. You can:
+- Answer general questions and have normal conversations
+- Provide real-time information using web search
+- Help users with their publishing needs
+- Answer questions about news, tech, business, etc.
+
+Keep responses concise and Telegram-friendly (no long walls of text). Use emojis sparingly but naturally.
+
+If the user wants to publish an article, remind them they can:
+📝 Send text to publish as an article
+📸 Send a photo and you'll write about it
+📄 Send a PDF/Word document to publish
+🔗 Send a Google Docs link
+
+Don't use markdown formatting (no ** or ## etc). Use plain text with occasional emoji.`
+          },
+          ...recentHistory.map(m => ({ role: m.role, content: m.content })),
+          { role: 'user', content: userMessage },
+        ],
+        max_tokens: 500,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!res.ok) {
+      console.error('[mace-telegram-bot] Perplexity error:', res.status);
+      return "I'm having a moment — please try again shortly!";
+    }
+
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || "I couldn't process that. Try again?";
+    return reply;
+  } catch (err) {
+    console.error('[mace-telegram-bot] Perplexity chat error:', err);
+    return "Something went wrong on my end. Please try again!";
+  }
 }
 
 async function sendTelegramMessage(botToken: string, chatId: number, text: string) {
@@ -1094,21 +1178,49 @@ Deno.serve(async (req) => {
 
     // Plain text
     if (text && text.length > 0 && !text.startsWith('/')) {
-      // Short text = topic prompt (AI generates from scratch), skip review
-      if (text.length <= 100) {
-        session.content = text;
+      // Long text (>100 chars) = actual article content, run review
+      if (text.length > 100) {
+        await handleContentReview(botToken, chatId, session, text, LOVABLE_API_KEY, supabase);
+        return new Response('OK', { status: 200 });
+      }
+
+      // Short text: check if it's a publish intent or casual conversation
+      if (isPublishIntent(text)) {
+        // Extract topic from publish intent
+        const topicMatch = text.match(/(?:about|on|titled?)\s+["']?(.+?)["']?\s*$/i);
+        const topic = topicMatch ? topicMatch[1] : text.replace(/^(publish|write|article|post|create|draft|compose|blog)\s*/i, '').trim();
+        
+        session.content = topic || text;
         session.photoFileId = undefined;
         session.step = 'awaiting_photo';
 
         await sendTelegramMessage(botToken, chatId,
-          `📝 Got it — I'll write an article about "${text.substring(0, 60)}${text.length > 60 ? '...' : ''}".\n\n` +
+          `📝 Got it — I'll write an article about "${(topic || text).substring(0, 60)}${(topic || text).length > 60 ? '...' : ''}".\n\n` +
           `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
           `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
           `Or reply <b>Skip</b> to publish without an image.`
         );
       } else {
-        // Long text = actual article content, run review
-        await handleContentReview(botToken, chatId, session, text, LOVABLE_API_KEY, supabase);
+        // Normal conversation — use Perplexity AI
+        if (!session.chatHistory) session.chatHistory = [];
+        session.chatHistory.push({ role: 'user', content: text });
+
+        const reply = await chatWithPerplexity(text, session.chatHistory);
+        
+        // Strip markdown for Telegram HTML
+        const cleanReply = reply
+          .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+          .replace(/\*(.*?)\*/g, '<i>$1</i>')
+          .replace(/#{1,6}\s/g, '')
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+        session.chatHistory.push({ role: 'assistant', content: reply });
+        // Keep history manageable
+        if (session.chatHistory.length > 20) {
+          session.chatHistory = session.chatHistory.slice(-20);
+        }
+
+        await sendTelegramMessage(botToken, chatId, cleanReply);
       }
       return new Response('OK', { status: 200 });
     }
