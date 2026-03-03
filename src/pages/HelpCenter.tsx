@@ -146,6 +146,7 @@ const helpCategories = [
       { label: 'Benefits of Mace AI', anchor: 'benefits' },
       { label: 'What Happens During Publishing', anchor: 'publishing-process' },
       { label: 'Tips for Best Results', anchor: 'tips' },
+      { label: 'Mace AI Telegram Bot', anchor: 'telegram-bot' },
       { label: 'Associated Costs', anchor: 'associated-costs' },
       { label: 'Data Privacy', anchor: 'data-privacy' },
     ],
