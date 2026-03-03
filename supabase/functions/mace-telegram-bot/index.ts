@@ -669,7 +669,8 @@ Deno.serve(async (req) => {
         const { data: wpSites } = await supabase
           .from('wordpress_sites')
           .select('name')
-          .eq('connected', true);
+          .eq('connected', true)
+          .order('created_at', { ascending: true });
         const siteNames = (wpSites || []).map((s: any) => s.name);
 
         await sendTelegramMessage(botToken, chatId,
@@ -689,7 +690,8 @@ Deno.serve(async (req) => {
         const { data: wpSites } = await supabase
           .from('wordpress_sites')
           .select('name')
-          .eq('connected', true);
+          .eq('connected', true)
+          .order('created_at', { ascending: true });
         const siteNames = (wpSites || []).map((s: any) => s.name);
 
         await sendTelegramMessage(botToken, chatId,
@@ -720,12 +722,14 @@ Deno.serve(async (req) => {
         const { data: wpSites } = await supabase
           .from('wordpress_sites')
           .select('name')
-          .eq('connected', true);
+          .eq('connected', true)
+          .order('created_at', { ascending: true });
         const siteNames = (wpSites || []).map((s: any) => s.name);
 
         await sendTelegramMessage(botToken, chatId,
           `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
         );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
@@ -825,7 +829,15 @@ Deno.serve(async (req) => {
           return new Response('OK', { status: 200 });
         }
 
-        const base64 = btoa(String.fromCharCode(...file.buffer));
+        // Convert to base64 safely (spread operator crashes on large arrays)
+        let binary = '';
+        const bytes = file.buffer;
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, i + chunkSize);
+          binary += String.fromCharCode(...chunk);
+        }
+        const base64 = btoa(binary);
         const imageDataUrl = `data:${file.mimeType};base64,${base64}`;
         const photoTopic = session.photoCaption || session.topic || 'the image';
 
