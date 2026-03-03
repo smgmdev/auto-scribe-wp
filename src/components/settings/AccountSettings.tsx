@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Mail, Lock, Loader2, Phone, MessageCircle, ExternalLink, CheckCircle2, Unlink } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Mail, Lock, Loader2, Phone, MessageCircle, ExternalLink, CheckCircle2, Unlink, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,42 +20,72 @@ export function AccountSettings() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [telegramLinked, setTelegramLinked] = useState(false);
   const [unlinkingTelegram, setUnlinkingTelegram] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [showPasswordFields, setShowPasswordFields] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      setEmail(user.email || '');
-      fetchWhatsapp();
-      fetchTelegramStatus();
-    }
-  }, [user]);
-
-  const fetchWhatsapp = async () => {
+  const fetchProfileData = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
-      .select('whatsapp_phone')
+      .select('whatsapp_phone, telegram_chat_id')
       .eq('id', user.id)
       .single();
     
-    if (data?.whatsapp_phone) {
-      setWhatsapp(data.whatsapp_phone);
-      setOriginalWhatsapp(data.whatsapp_phone);
+    if (data) {
+      if (data.whatsapp_phone) {
+        setWhatsapp(data.whatsapp_phone);
+        setOriginalWhatsapp(data.whatsapp_phone);
+      }
+      setTelegramLinked(!!data.telegram_chat_id);
     }
-  };
+  }, [user]);
 
-  const fetchTelegramStatus = async () => {
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email || '');
+      fetchProfileData();
+    }
+  }, [user, fetchProfileData]);
+
+  // Real-time subscription for profile changes (telegram_chat_id)
+  useEffect(() => {
     if (!user) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('telegram_chat_id')
-      .eq('id', user.id)
-      .single();
-    setTelegramLinked(!!data?.telegram_chat_id);
+
+    const channel = supabase
+      .channel(`account-settings-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newRecord = payload.new as any;
+          setTelegramLinked(!!newRecord.telegram_chat_id);
+          if (newRecord.whatsapp_phone !== undefined) {
+            setWhatsapp(newRecord.whatsapp_phone || '');
+            setOriginalWhatsapp(newRecord.whatsapp_phone || '');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchProfileData();
+    setRefreshing(false);
+    toast.success('Account refreshed');
   };
 
   const handleUnlinkTelegram = async () => {
@@ -145,6 +175,20 @@ export function AccountSettings() {
   return (
     <Card>
       <CardContent className="space-y-6 pt-6">
+        {/* Refresh */}
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+
         {/* Email */}
         <div className="space-y-3">
           <Label htmlFor="email" className="flex items-center gap-2">
