@@ -197,7 +197,7 @@ const AdminMaceArticlesView = () => {
 
       {/* Tabs */}
       {!loading && articles.length > 0 && (
-        <div className="flex gap-1 mb-3 border-b border-border">
+        <div className="flex gap-1 border-b border-border">
           {tabs.map(tab => (
             <button
               key={tab.key}
