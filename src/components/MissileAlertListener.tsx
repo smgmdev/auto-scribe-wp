@@ -181,11 +181,16 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           {alert.description && (
             <p className={`text-[11px] ${colors.textSecondary} mt-0.5`}>{alert.description}</p>
           )}
-          {alert.origin_country_name && alert.destination_country_name && (
-            <p className={`text-[10px] ${colors.textTertiary} mt-0.5 font-mono`}>
-              {alert.origin_country_name} → {alert.destination_country_name}
+          <div className="flex items-center justify-between mt-1">
+            {alert.origin_country_name && alert.destination_country_name && (
+              <p className={`text-[10px] ${colors.textTertiary} font-mono`}>
+                <span className="font-bold">{alert.origin_country_name}</span> → <span className="font-bold">{alert.destination_country_name}</span>
+              </p>
+            )}
+            <p className={`text-[10px] ${colors.textTertiary} font-mono ml-auto`}>
+              {new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
-          )}
+          </div>
         </div>
       </div>
 
