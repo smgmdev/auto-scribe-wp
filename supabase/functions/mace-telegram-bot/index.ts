@@ -581,17 +581,27 @@ Deno.serve(async (req) => {
 
     // ── /myarticles command ──
     if (text?.toLowerCase() === '/myarticles') {
-      const { data: maceArticles } = await supabase
-        .from('articles')
-        .select('id, title, wp_link, published_to_name, created_at, wp_post_id, wp_featured_media_id, published_to')
-        .eq('user_id', supabaseUserId!)
-        .eq('status', 'published')
-        .not('source_headline', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(20);
+      // Fetch ALL published mace articles (paginate past 1000 row limit)
+      let allArticles: any[] = [];
+      let offset = 0;
+      const pageSize = 500;
+      while (true) {
+        const { data: batch } = await supabase
+          .from('articles')
+          .select('id, title, wp_link, published_to_name, created_at, wp_post_id, wp_featured_media_id, published_to, source_headline')
+          .eq('user_id', supabaseUserId!)
+          .eq('status', 'published')
+          .not('source_headline', 'is', null)
+          .order('created_at', { ascending: false })
+          .range(offset, offset + pageSize - 1);
+        if (!batch || batch.length === 0) break;
+        allArticles = allArticles.concat(batch);
+        if (batch.length < pageSize) break;
+        offset += pageSize;
+      }
 
       // Filter to only mace-sourced articles
-      const maceOnly = (maceArticles || []).filter((a: any) => {
+      const maceOnly = allArticles.filter((a: any) => {
         try {
           const sh = typeof a.source_headline === 'string' ? JSON.parse(a.source_headline) : a.source_headline;
           return sh?.source === 'mace' || sh?.source === 'mace-telegram';
@@ -606,19 +616,21 @@ Deno.serve(async (req) => {
       }
 
       const listText = maceOnly.map((a: any, i: number) => {
-        const date = new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const date = new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const site = a.published_to_name || 'Unknown site';
         return `<b>${i + 1}.</b> ${a.title}\n    📍 ${site} · ${date}`;
       }).join('\n\n');
 
-      // Store the article list in session for deletion
+      // Store the article list in session
       const articleListForSession = maceOnly.map((a: any) => ({
         id: a.id,
         title: a.title,
         wp_post_id: a.wp_post_id,
         wp_featured_media_id: a.wp_featured_media_id,
         published_to: a.published_to,
+        published_to_name: a.published_to_name,
         wp_link: a.wp_link,
+        created_at: a.created_at,
       }));
 
       session = session || { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() };
@@ -626,11 +638,21 @@ Deno.serve(async (req) => {
       (session as any).articleList = articleListForSession;
       await saveSession(supabase, chatId, session);
 
-      await sendTelegramMessage(botToken, chatId,
-        `📰 <b>Your Mace Articles (${maceOnly.length}):</b>\n\n${listText}\n\n` +
-        `To <b>delete</b> an article, reply with its number.\n` +
-        `Reply <b>Cancel</b> to go back.`
-      );
+      // Telegram has a 4096 char limit — split if needed
+      const header = `📰 <b>Your Mace Articles (${maceOnly.length}):</b>\n\n`;
+      const footer = `\n\nReply with a <b>number</b> to view article options.\nReply <b>Cancel</b> to go back.`;
+      const fullText = header + listText + footer;
+
+      if (fullText.length <= 4000) {
+        await sendTelegramMessage(botToken, chatId, fullText);
+      } else {
+        // Send in chunks
+        await sendTelegramMessage(botToken, chatId, header + listText.substring(0, 3500) + `\n\n<i>... and more</i>`);
+        if (listText.length > 3500) {
+          await sendTelegramMessage(botToken, chatId, listText.substring(3500, 7000));
+        }
+        await sendTelegramMessage(botToken, chatId, `Reply with a <b>number</b> to view article options.\nReply <b>Cancel</b> to go back.`);
+      }
       return new Response('OK', { status: 200 });
     }
 
@@ -661,16 +683,72 @@ Deno.serve(async (req) => {
       }
 
       const selected = articleList[num - 1];
-      session.step = 'myarticles_confirm_delete';
+      session.step = 'myarticles_selected';
       (session as any).deleteArticle = selected;
       await saveSession(supabase, chatId, session);
 
+      const date = new Date(selected.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const linkLine = selected.wp_link ? `\n🔗 ${selected.wp_link}` : '';
+
       await sendTelegramMessage(botToken, chatId,
-        `🗑 Are you sure you want to delete this article?\n\n` +
-        `<b>${selected.title}</b>\n\n` +
-        `⚠️ This will remove it from WordPress permanently.\n\n` +
-        `Reply <b>Yes</b> to delete or <b>No</b> to cancel.`
+        `📄 <b>${selected.title}</b>\n` +
+        `📍 ${selected.published_to_name || 'Unknown site'} · ${date}${linkLine}\n\n` +
+        `What would you like to do?\n\n` +
+        `🗑 Reply <b>Delete</b> to remove this article\n` +
+        `⬅️ Reply <b>Back</b> to return to the list`
       );
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── /myarticles: user chose action on selected article ──
+    if (session.step === 'myarticles_selected') {
+      const answer = text?.toLowerCase().trim();
+
+      if (answer === 'back') {
+        session.step = 'myarticles_list';
+        (session as any).deleteArticle = undefined;
+        await saveSession(supabase, chatId, session);
+
+        // Re-show the list
+        const articleList = (session as any).articleList || [];
+        const listText = articleList.map((a: any, i: number) => {
+          const date = new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const site = a.published_to_name || 'Unknown site';
+          return `<b>${i + 1}.</b> ${a.title}\n    📍 ${site} · ${date}`;
+        }).join('\n\n');
+
+        await sendTelegramMessage(botToken, chatId,
+          `📰 <b>Your Mace Articles (${articleList.length}):</b>\n\n${listText}\n\nReply with a <b>number</b> to view article options.\nReply <b>Cancel</b> to go back.`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'delete') {
+        const selected = (session as any).deleteArticle;
+        session.step = 'myarticles_confirm_delete';
+        await saveSession(supabase, chatId, session);
+
+        await sendTelegramMessage(botToken, chatId,
+          `⚠️ <b>Are you sure?</b>\n\n` +
+          `This will permanently delete:\n` +
+          `"<b>${selected.title}</b>"\n\n` +
+          `This action cannot be undone. The article will be removed from WordPress.\n\n` +
+          `Reply <b>Yes</b> to confirm deletion\n` +
+          `Reply <b>No</b> to cancel`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'cancel') {
+        session.step = 'idle';
+        (session as any).deleteArticle = undefined;
+        (session as any).articleList = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Back to main.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Reply <b>Delete</b>, <b>Back</b>, or <b>Cancel</b>.`);
       return new Response('OK', { status: 200 });
     }
 
@@ -704,7 +782,6 @@ Deno.serve(async (req) => {
               const wpBase = site.url.replace(/\/+$/, '');
               const wpAuth = 'Basic ' + btoa(`${site.username}:${site.app_password}`);
 
-              // Delete featured media first
               if (article.wp_featured_media_id) {
                 await fetch(`${wpBase}/wp-json/wp/v2/media/${article.wp_featured_media_id}?force=true`, {
                   method: 'DELETE',
@@ -712,7 +789,6 @@ Deno.serve(async (req) => {
                 }).catch(() => {});
               }
 
-              // Delete the post
               const delRes = await fetch(`${wpBase}/wp-json/wp/v2/posts/${article.wp_post_id}?force=true`, {
                 method: 'DELETE',
                 headers: { 'Authorization': wpAuth, 'Content-Type': 'application/json' },
@@ -723,7 +799,6 @@ Deno.serve(async (req) => {
             }
           }
 
-          // Delete from database
           await supabase
             .from('articles')
             .delete()
