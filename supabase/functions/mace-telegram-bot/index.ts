@@ -1076,7 +1076,56 @@ Deno.serve(async (req) => {
       let articleTitle = '';
       let htmlContent = '';
 
-      if (session.photoFileId) {
+      if (session.content) {
+        // We have approved content — use it directly (photo will be uploaded as featured image separately)
+        const contentText = session.content;
+
+        if (contentText.length < 100) {
+          await sendTelegramMessage(botToken, chatId, `✍️ Writing article about "${contentText}"...`);
+          const articleRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'google/gemini-2.5-flash-lite',
+              messages: [
+                { role: 'system', content: `You are a journalist writing for ${matchedSite.name}. Write a ~700 word article. Start with a headline on line 1 (no prefix). Write in flowing paragraphs, no bullet points.` },
+                { role: 'user', content: `Write an article about: ${contentText}` },
+              ],
+              temperature: 0.7,
+              max_tokens: 1500,
+            }),
+          });
+
+          if (!articleRes.ok) {
+            await sendTelegramMessage(botToken, chatId, `❌ Failed to generate article. Please try again.`);
+            session.step = 'idle';
+            return new Response('OK', { status: 200 });
+          }
+
+          const articleData = await articleRes.json();
+          const rawContent = articleData.choices?.[0]?.message?.content || '';
+          const lines = rawContent.trim().split('\n');
+          articleTitle = lines[0].replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
+          let startIdx = 1;
+          while (startIdx < lines.length && lines[startIdx].trim() === '') startIdx++;
+          const body = lines.slice(startIdx).join('\n').trim();
+          const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
+          htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
+        } else {
+          // Content is already reviewed/approved — use it directly without another AI rewrite
+          await sendTelegramMessage(botToken, chatId, `✍️ Formatting your content for publication...`);
+          
+          // Extract title from first line, rest is body
+          const contentLines = contentText.trim().split('\n');
+          articleTitle = contentLines[0].replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
+          let startIdx = 1;
+          while (startIdx < contentLines.length && contentLines[startIdx].trim() === '') startIdx++;
+          const body = contentLines.slice(startIdx).join('\n').trim();
+          const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
+          htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
+        }
+      } else if (session.photoFileId) {
+        // Photo-only flow: generate article FROM the photo (no pre-approved content)
         await sendTelegramMessage(botToken, chatId, `🔍 Analyzing your photo...`);
         const file = await downloadTelegramFile(botToken, session.photoFileId);
         if (!file) {
@@ -1129,54 +1178,6 @@ Deno.serve(async (req) => {
         const body = lines.slice(startIdx).join('\n').trim();
         const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
         htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
-
-      } else if (session.content) {
-        const contentText = session.content;
-
-        if (contentText.length < 100) {
-          await sendTelegramMessage(botToken, chatId, `✍️ Writing article about "${contentText}"...`);
-          const articleRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'google/gemini-2.5-flash-lite',
-              messages: [
-                { role: 'system', content: `You are a journalist writing for ${matchedSite.name}. Write a ~700 word article. Start with a headline on line 1 (no prefix). Write in flowing paragraphs, no bullet points.` },
-                { role: 'user', content: `Write an article about: ${contentText}` },
-              ],
-              temperature: 0.7,
-              max_tokens: 1500,
-            }),
-          });
-
-          if (!articleRes.ok) {
-            await sendTelegramMessage(botToken, chatId, `❌ Failed to generate article. Please try again.`);
-            session.step = 'idle';
-            return new Response('OK', { status: 200 });
-          }
-
-          const articleData = await articleRes.json();
-          const rawContent = articleData.choices?.[0]?.message?.content || '';
-          const lines = rawContent.trim().split('\n');
-          articleTitle = lines[0].replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
-          let startIdx = 1;
-          while (startIdx < lines.length && lines[startIdx].trim() === '') startIdx++;
-          const body = lines.slice(startIdx).join('\n').trim();
-          const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
-          htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
-        } else {
-          // Content is already reviewed/approved — use it directly without another AI rewrite
-          await sendTelegramMessage(botToken, chatId, `✍️ Formatting your content for publication...`);
-          
-          // Extract title from first line, rest is body
-          const contentLines = contentText.trim().split('\n');
-          articleTitle = contentLines[0].replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
-          let startIdx = 1;
-          while (startIdx < contentLines.length && contentLines[startIdx].trim() === '') startIdx++;
-          const body = contentLines.slice(startIdx).join('\n').trim();
-          const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
-          htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
-        }
       } else {
         await sendTelegramMessage(botToken, chatId, `❌ No content to publish. Please send text, a photo, or a document first.`);
         session.step = 'idle';
