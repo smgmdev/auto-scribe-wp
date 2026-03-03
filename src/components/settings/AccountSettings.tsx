@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Mail, Lock, Loader2, Phone, MessageCircle, ExternalLink, CheckCircle2, Unlink } from 'lucide-react';
+import { Mail, Lock, Loader2, Phone, Bot, ExternalLink, CheckCircle2, Unlink } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -240,9 +240,9 @@ export function AccountSettings() {
 
         {/* Telegram */}
         <div className="space-y-3">
-          <Label className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4" />
-            Telegram Notifications
+           <Label className="flex items-center gap-2">
+            <Bot className="h-4 w-4" />
+            Link with Mace AI
           </Label>
           {telegramLinked ? (
             <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
