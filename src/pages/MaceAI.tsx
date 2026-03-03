@@ -333,6 +333,10 @@ export default function MaceAI() {
               >
                 Go to Account Settings ›
               </button>
+              {' · '}
+              <a href="/help/mace-ai#telegram-bot" className="text-[#2997ff] hover:underline">
+                Learn more ›
+              </a>
             </span>
           </div>
         </div>
