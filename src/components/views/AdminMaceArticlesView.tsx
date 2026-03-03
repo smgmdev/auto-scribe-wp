@@ -179,7 +179,7 @@ const AdminMaceArticlesView = () => {
   return (
     <div className="animate-fade-in bg-white min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-4 lg:p-8">
       <div className="max-w-[980px] mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-0">
         <h1 className="text-4xl font-bold text-foreground">Mace Articles</h1>
         <Button
           onClick={() => fetchMaceArticles(true)}
