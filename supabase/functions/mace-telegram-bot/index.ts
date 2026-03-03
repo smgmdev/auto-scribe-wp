@@ -126,13 +126,28 @@ function extractNewsUrl(text: string): string | null {
 
 // Fetch article content from a news URL and extract text via AI
 async function fetchAndExtractArticle(url: string, apiKey: string): Promise<{ title: string; content: string; source: string } | null> {
+  let source = 'Unknown';
+  try { source = new URL(url).hostname.replace('www.', ''); } catch {}
+
+  // Strategy 1: Try direct fetch first
+  const directResult = await fetchArticleDirect(url, apiKey, source);
+  if (directResult) return directResult;
+
+  // Strategy 2: Fallback to Perplexity AI web search to read the article
+  console.log('[mace-telegram-bot] Direct fetch failed, trying Perplexity fallback for:', url);
+  return await fetchArticleViaPerplexity(url, source);
+}
+
+// Direct fetch + AI extraction
+async function fetchArticleDirect(url: string, apiKey: string, source: string): Promise<{ title: string; content: string; source: string } | null> {
   try {
-    console.log('[mace-telegram-bot] Fetching article from URL:', url);
+    console.log('[mace-telegram-bot] Fetching article directly from URL:', url);
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache',
       },
       redirect: 'follow',
     });
@@ -143,11 +158,17 @@ async function fetchAndExtractArticle(url: string, apiKey: string): Promise<{ ti
     let html = await res.text();
     if (!html || html.length < 200) return null;
 
-    // Extract hostname as source name
-    let source = 'Unknown';
-    try { source = new URL(url).hostname.replace('www.', ''); } catch {}
+    // Check if we got a paywall/cookie wall/blocked page
+    const lowerHtml = html.toLowerCase();
+    if (lowerHtml.includes('subscribe to continue') || 
+        lowerHtml.includes('create a free account') ||
+        lowerHtml.includes('sign in to continue') ||
+        (lowerHtml.includes('paywall') && html.length < 5000)) {
+      console.log('[mace-telegram-bot] Detected paywall/block page');
+      return null;
+    }
 
-    // Pre-clean HTML: strip scripts, styles, nav, footer, aside, ads to reduce noise
+    // Pre-clean HTML
     html = html
       .replace(/<script[\s\S]*?<\/script>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -159,7 +180,7 @@ async function fetchAndExtractArticle(url: string, apiKey: string): Promise<{ ti
       .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
       .replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
 
-    // Use AI to extract article title and body from cleaned HTML
+    // Use AI to extract article
     const extractRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -199,7 +220,65 @@ CRITICAL RULES:
 
     return { title: parsed.title || 'Untitled', content: parsed.content, source };
   } catch (err) {
-    console.error('[mace-telegram-bot] Article extraction error:', err);
+    console.error('[mace-telegram-bot] Direct article extraction error:', err);
+    return null;
+  }
+}
+
+// Perplexity fallback: use web search to read and extract article content
+async function fetchArticleViaPerplexity(url: string, source: string): Promise<{ title: string; content: string; source: string } | null> {
+  const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
+  if (!PERPLEXITY_API_KEY) {
+    console.error('[mace-telegram-bot] No PERPLEXITY_API_KEY for fallback');
+    return null;
+  }
+
+  try {
+    const res = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an article extractor. The user will give you a URL. Search the web for this exact article and extract its full content. Return ONLY valid JSON with this format: {"title": "the article headline", "content": "the full article text with paragraph breaks preserved"}. Do NOT summarize — extract the COMPLETE article text as published. If you cannot find the article, return {"title": "", "content": ""}.`
+          },
+          { role: 'user', content: `Extract the full article from this URL: ${url}` }
+        ],
+        search_domain_filter: [new URL(url).hostname],
+      }),
+    });
+
+    if (!res.ok) {
+      console.error('[mace-telegram-bot] Perplexity fallback error:', res.status);
+      return null;
+    }
+
+    const data = await res.json();
+    const rawResp = data.choices?.[0]?.message?.content || '';
+    const jsonMatch = rawResp.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      // Perplexity might return plain text instead of JSON — treat entire response as content
+      if (rawResp.length > 100) {
+        // Try to extract a title from the first line
+        const lines = rawResp.split('\n').filter((l: string) => l.trim());
+        const title = lines[0]?.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim() || 'Untitled';
+        return { title, content: rawResp, source };
+      }
+      return null;
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (!parsed.content || parsed.content.length < 50) return null;
+
+    console.log('[mace-telegram-bot] Perplexity fallback succeeded for:', url);
+    return { title: parsed.title || 'Untitled', content: parsed.content, source };
+  } catch (err) {
+    console.error('[mace-telegram-bot] Perplexity fallback error:', err);
     return null;
   }
 }
