@@ -133,8 +133,19 @@ function getAlertLabel(type: AlertType) {
 function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: AlertType; onDismiss: () => void }) {
   const colors = getAlertColors(type);
 
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Enter') {
+        e.preventDefault();
+        onDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onDismiss]);
+
   return (
-    <div className={`relative w-full max-w-sm max-sm:max-w-full mx-2 max-sm:mx-0 rounded-xl max-sm:rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden flex flex-col max-sm:h-full`}>
+    <div className={`relative w-full max-w-sm max-sm:max-w-full mx-2 max-sm:mx-0 rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden flex flex-col max-sm:h-full`}>
       <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse shrink-0`} />
       
       <div className="p-4 max-sm:p-3 text-center space-y-3 max-sm:space-y-2 flex-1 overflow-auto">
@@ -157,7 +168,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
         </div>
 
         {alert.origin_country_code && alert.destination_country_code && (
-          <Suspense fallback={<div className="w-full h-36 bg-black/40 rounded-lg animate-pulse" />}>
+          <Suspense fallback={<div className="w-full h-36 bg-black/40 animate-pulse" />}>
             <MissileTrajectoryGlobe
               originCode={alert.origin_country_code}
               destinationCode={alert.destination_country_code}
@@ -165,7 +176,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           </Suspense>
         )}
 
-        <div className={`p-2.5 rounded-lg ${colors.cardBg} border ${colors.cardBorder} text-left`}>
+        <div className={`p-2.5 rounded-none ${colors.cardBg} border ${colors.cardBorder} text-left`}>
           <p className={`text-xs font-medium ${colors.textPrimary}`}>{alert.title}</p>
           {alert.description && (
             <p className={`text-[11px] ${colors.textSecondary} mt-0.5`}>{alert.description}</p>
@@ -186,9 +197,9 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
       <div className="shrink-0 px-4 max-sm:px-3 pb-4 max-sm:pb-3">
         <Button
           onClick={onDismiss}
-          className={`w-full ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow}`}
+          className={`w-full rounded-none ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow}`}
         >
-          OK
+          OK <span className="text-[10px] font-normal opacity-60 ml-1.5">ESC / ENTER</span>
         </Button>
       </div>
 
