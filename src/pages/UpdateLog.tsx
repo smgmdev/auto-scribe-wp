@@ -18,6 +18,21 @@ import amblack from '@/assets/amblack.png';
 const updates = [
   {
     date: 'March 3, 2026',
+    title: 'Mace AI Telegram Bot — Voice, Chat & Publishing',
+    changes: [
+      'Mace AI is now available on Telegram — link your account from Account Settings under "Link with Mace AI" to access the full voice and text assistant directly in Telegram',
+      'Real-time account linking with instant UI status update — once verification is complete, the "Telegram linked" badge appears automatically without refreshing',
+      'Conversational chat mode powered by Perplexity Sonar with infinite session history — ask Mace anything and get web-grounded, contextual answers',
+      'Voice message support via ElevenLabs Scribe transcription — speak your prompts naturally and Mace processes them for both casual chat and article generation',
+      'Full article publishing workflow from Telegram — provide a topic, select a target site, and Mace researches, writes, and publishes a complete article',
+      'AI-powered content review analyzes structure, tone, and quality before publishing — if issues are detected, Mace provides a mandatory edited version with a professional title and human-like narrative hook',
+      'Featured image upload support for published articles — send a JPG or PNG image (horizontal recommended) to accompany your article',
+      'Strict role alternation enforced in conversation history to maintain reliable multi-turn interactions with the AI backend',
+      'Users can unlink the Telegram bot directly from Account Settings, clearing the connection and terminating the bot session',
+    ],
+  },
+  {
+    date: 'March 3, 2026',
     title: 'Threat Alert Popups — Source Timestamps & UI Improvements',
     changes: [
       'Alert popups now display the original source publication time instead of the system detection time — giving a more accurate picture of when the threat event actually occurred',
