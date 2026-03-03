@@ -17,6 +17,17 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'March 3, 2026',
+    title: 'Threat Alert Popups — Source Timestamps & UI Improvements',
+    changes: [
+      'Alert popups now display the original source publication time instead of the system detection time — giving a more accurate picture of when the threat event actually occurred',
+      'Falls back to the detection timestamp if the original source time is unavailable',
+      'Origin and destination country names are now bolded in alert popups for quicker readability',
+      'Repositioned the "+N more alerts queued" badge to the very bottom of the screen on mobile devices so it no longer overlaps with alert content',
+      'Improved alert popup container layout on mobile with proper flex column spacing and bottom-anchored queue indicator',
+    ],
+  },
+  {
     date: 'March 2, 2026',
     title: 'Arcana Precision — Intelligence Platform',
     changes: [
