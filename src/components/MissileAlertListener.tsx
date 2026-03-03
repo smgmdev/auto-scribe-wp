@@ -199,7 +199,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           onClick={onDismiss}
           className={`w-full rounded-none ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow}`}
         >
-          OK <span className="text-[10px] font-normal opacity-60 ml-1.5">ESC / ENTER</span>
+          ESC / ENTER
         </Button>
       </div>
 
