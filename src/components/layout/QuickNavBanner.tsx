@@ -119,11 +119,9 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                     </p>
                   </div>
                   <div className="bg-[#1a1a1a] p-6 mb-6">
-                    <h4 className="text-white font-semibold text-sm mb-3">For Clients</h4>
+                    <h4 className="text-white font-semibold text-sm mb-3">Account</h4>
                     <ul className="space-y-2 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleNav('/how-it-works')} label="How It Works" /></li>
-                      <li><NavLink onClick={() => handleNav('/self-publishing')} label="Self Publishing" /></li>
-                      <li><NavLink onClick={() => handleAccountNav('account')} label="Manage Account" /></li>
+                      <li><NavLink onClick={() => handleAccountNav('account')} label="Manage Your Account" /></li>
                     </ul>
                   </div>
                   <div className="bg-[#1a1a1a] p-6">
@@ -131,16 +129,64 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                     <ul className="space-y-2 text-sm text-white/50">
                       <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
                       <li><NavLink onClick={() => handleNav('/report-bug')} label="Report a Bug" /></li>
+                      <li><NavLink onClick={() => handleNav('/sitemap')} label="Site Map" /></li>
                     </ul>
                   </div>
                 </div>
 
                 {/* Right columns */}
-                <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
-                  {/* Column 1: Company */}
+                <div className="flex-1 grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10">
+                  {/* Column 1: Media Buying Categories */}
                   <div>
                     <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
-                      Company
+                      Media Buying
+                    </h4>
+                    <ul className="space-y-3 text-sm text-white/50">
+                      {['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'].map((sub) => (
+                        <li key={sub}>
+                          <NavLink onClick={() => {
+                            if (user) {
+                              handleNav('/account', { targetView: 'sites', targetTab: 'global', targetSubcategory: sub });
+                            } else {
+                              handleNav('/auth', { redirectTo: '/account', targetView: 'sites', targetTab: 'global', targetSubcategory: sub });
+                            }
+                          }} label={sub} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Column 2: For Clients */}
+                  <div>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
+                      For Clients
+                    </h4>
+                    <ul className="space-y-3 text-sm text-white/50">
+                      <li><NavLink onClick={() => handleNav('/how-it-works')} label="How It Works" /></li>
+                      <li><NavLink onClick={() => handleNav('/self-publishing')} label="Self Publishing" /></li>
+                      <li><NavLink onClick={() => handleNav('/media-buying')} label="Media Buying" /></li>
+                      <li><NavLink onClick={() => handleNav('/ai-article-generation')} label="AI Article Generation" /></li>
+                      <li><NavLink onClick={() => handleNav('/mace-ai')} label="Mace AI" /></li>
+                    </ul>
+                  </div>
+
+                  {/* Column 3: For Business */}
+                  <div>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
+                      For Business
+                    </h4>
+                    <ul className="space-y-3 text-sm text-white/50">
+                      <li><NavLink onClick={() => handleAccountNav('agency-application')} label="Agency Account" /></li>
+                      <li><NavLink onClick={() => handleNav('/industries')} label="Industries" /></li>
+                      <li><NavLink onClick={() => handleNav('/arcana-precision')} label="Arcana Precision" /></li>
+                      <li><NavLink onClick={() => handleNav('/arcana-intelligence')} label="Arcana Intelligence" /></li>
+                    </ul>
+                  </div>
+
+                  {/* Column 4: Arcana Mace */}
+                  <div>
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
+                      Arcana Mace
                     </h4>
                     <ul className="space-y-3 text-sm text-white/50">
                       <li><NavLink onClick={() => handleNav('/about')} label="About" /></li>
@@ -151,29 +197,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                     </ul>
                   </div>
 
-                  {/* Column 2: Products */}
-                  <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
-                      Products
-                    </h4>
-                    <ul className="space-y-3 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleNav('/media-buying')} label="Media Buying" /></li>
-                      <li><NavLink onClick={() => handleNav('/ai-article-generation')} label="AI Article Generation" /></li>
-                      <li><NavLink onClick={() => handleNav('/mace-ai')} label="Mace AI" /></li>
-                      <li><NavLink onClick={() => handleNav('/arcana-precision')} label="Arcana Precision" /></li>
-                      <li><NavLink onClick={() => handleNav('/arcana-intelligence')} label="Arcana Intelligence" /></li>
-                    </ul>
-
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mt-8 mb-5 pb-2 border-b border-white/20">
-                      For Business
-                    </h4>
-                    <ul className="space-y-3 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleNav('/industries')} label="Industries" /></li>
-                      <li><NavLink onClick={() => handleAccountNav('agency-application')} label="Agency Account" /></li>
-                    </ul>
-                  </div>
-
-                  {/* Column 3: Legal */}
+                  {/* Column 5: Legal */}
                   <div>
                     <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
                       Legal
