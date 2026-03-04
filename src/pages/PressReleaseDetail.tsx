@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Search, User, Loader2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -116,7 +117,7 @@ export default function PressReleaseDetail() {
             onClick={() => navigate('/')}
             className="flex items-center gap-3"
           >
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <HeaderLogo src={amblack} />
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
           

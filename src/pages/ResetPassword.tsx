@@ -8,6 +8,7 @@ import { Loader2, Search } from 'lucide-react';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -130,7 +131,7 @@ export default function ResetPassword() {
       <header className={`fixed top-0 left-0 right-0 z-40 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center">
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <HeaderLogo src={amblack} />
           </button>
           <button
             className="p-2 rounded-full hover:bg-black/5 transition-colors"
