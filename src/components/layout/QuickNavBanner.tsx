@@ -114,10 +114,10 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                   {/* Column 1: Media Buying Categories */}
                   <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 pb-2 border-b border-white/20">
                       Media Buying
                     </h4>
-                    <ul className="space-y-3 text-sm text-white/50">
+                    <ul className="space-y-1.5 text-sm text-white/50">
                       {['Business and Finance', 'Crypto', 'Tech', 'Campaign', 'Politics and Economy', 'MENA', 'China'].map((sub) => (
                         <li key={sub}>
                           <NavLink onClick={() => {
@@ -134,10 +134,10 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
 
                   {/* Column 2: For Clients */}
                   <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 pb-2 border-b border-white/20">
                       For Clients
                     </h4>
-                    <ul className="space-y-3 text-sm text-white/50">
+                    <ul className="space-y-1.5 text-sm text-white/50">
                       <li><NavLink onClick={() => handleNav('/how-it-works')} label="How Arcana Mace Works" /></li>
                       <li><NavLink onClick={() => handleNav('/self-publishing')} label="Self Publishing" /></li>
                       <li><NavLink onClick={() => handleNav('/media-buying')} label="Media Buying" /></li>
@@ -148,10 +148,10 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
 
                   {/* Column 3: For Business */}
                   <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 pb-2 border-b border-white/20">
                       For Business
                     </h4>
-                    <ul className="space-y-3 text-sm text-white/50">
+                    <ul className="space-y-1.5 text-sm text-white/50">
                       <li><NavLink onClick={() => handleAccountNav('agency-application')} label="Agency Account" /></li>
                       <li><NavLink onClick={() => handleNav('/industries')} label="Industries" /></li>
                       <li><NavLink onClick={() => handleNav('/arcana-precision')} label="Arcana Precision" /></li>
@@ -161,10 +161,10 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
 
                   {/* Column 4: Arcana Mace */}
                   <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
+                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 pb-2 border-b border-white/20">
                       Arcana Mace
                     </h4>
-                    <ul className="space-y-3 text-sm text-white/50">
+                    <ul className="space-y-1.5 text-sm text-white/50">
                       <li><NavLink onClick={() => handleNav('/about')} label="About" /></li>
                       <li><NavLink onClick={() => handleNav('/press')} label="Newsroom" /></li>
                       <li><NavLink onClick={() => handleNav('/system-status')} label="System Status" /></li>
