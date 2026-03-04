@@ -111,7 +111,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
 
               <div className="space-y-10">
                 {/* Link columns */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10">
                   {/* Column 1: Media Buying Categories */}
                   <div>
                     <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-3 pb-2 border-b border-white/20">
