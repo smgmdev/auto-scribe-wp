@@ -595,7 +595,7 @@ const Landing = () => {
       />
 
       {/* Main content */}
-      <main className="max-w-[980px] mx-auto px-4 md:px-6 py-8 pt-[7.5rem]">
+      <main className="max-w-[980px] mx-auto px-4 md:px-6 pb-0 pt-[7.5rem]">
         {loading ? (
           <div className="space-y-10">
             {[...Array(3)].map((_, i) => (
