@@ -1880,7 +1880,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
       return new Response('OK', { status: 200 });
     }
 
-    // News article URL — detect and offer to rewrite
+    // News article URL — detect, review quality, and offer to edit
     const newsUrl = text ? extractNewsUrl(text) : null;
     if (newsUrl && !text?.match(/docs\.google\.com\/document/)) {
       await sendTelegramMessage(botToken, chatId, `🔗 Detected a news link! Fetching the article...`);
@@ -1895,26 +1895,46 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         return new Response('OK', { status: 200 });
       }
 
-      // Store extracted content and show preview
+      // Run quality review on extracted content
+      await sendTelegramMessage(botToken, chatId, `🔍 Reviewing article quality...`);
+      const review = await reviewArticleContent(LOVABLE_API_KEY, `${extracted.title}\n\n${extracted.content}`);
+
+      // Store extracted content
       (session as any).extractedArticle = {
         title: extracted.title,
         content: extracted.content,
         source: extracted.source,
         url: newsUrl,
       };
-      session.step = 'awaiting_rewrite_decision';
 
-      const preview = extracted.content.substring(0, 500);
-      const truncated = extracted.content.length > 500 ? '...' : '';
+      const preview = extracted.content.substring(0, 400);
+      const truncated = extracted.content.length > 400 ? '...' : '';
 
-      await sendTelegramMessage(botToken, chatId,
-        `📰 <b>Found article from ${extracted.source}:</b>\n\n` +
-        `<b>${extracted.title}</b>\n\n` +
-        `${preview}${truncated}\n\n` +
-        `What would you like to do?\n\n` +
-        `✍️ Reply <b>Rewrite</b> — AI will rewrite this as a unique article\n` +
-        `❌ Reply <b>Cancel</b> — discard`
-      );
+      if (!review.acceptable && review.issues.length > 0) {
+        // Article has quality issues — explain and ask user if they want editing
+        const issuesList = review.issues.map((i: string) => `• ${i}`).join('\n');
+        session.step = 'awaiting_rewrite_decision';
+        await sendTelegramMessage(botToken, chatId,
+          `📰 <b>Found article from ${extracted.source}:</b>\n\n` +
+          `<b>${extracted.title}</b>\n\n` +
+          `${preview}${truncated}\n\n` +
+          `⚠️ <b>Quality issues detected:</b>\n${issuesList}\n\n` +
+          `This article needs editing before it can be published. I can rewrite it into a professional, well-structured article with proper formatting.\n\n` +
+          `✍️ Reply <b>Rewrite</b> — I'll edit and rewrite this article\n` +
+          `❌ Reply <b>Cancel</b> — discard`
+        );
+      } else {
+        // Article passes quality but still needs rewrite for originality (it's from a news source)
+        session.step = 'awaiting_rewrite_decision';
+        await sendTelegramMessage(botToken, chatId,
+          `📰 <b>Found article from ${extracted.source}:</b>\n\n` +
+          `<b>${extracted.title}</b>\n\n` +
+          `${preview}${truncated}\n\n` +
+          `This article needs to be rewritten as original content before publishing.\n\n` +
+          `✍️ Reply <b>Rewrite</b> — I'll rewrite this as a unique article\n` +
+          `❌ Reply <b>Cancel</b> — discard`
+        );
+      }
       await saveSession(supabase, chatId, session);
       return new Response('OK', { status: 200 });
     }
