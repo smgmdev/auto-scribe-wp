@@ -155,7 +155,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       <li><NavLink onClick={() => handleAccountNav('agency-application')} label="Agency Account" /></li>
                       <li><NavLink onClick={() => handleNav('/industries')} label="Industries" /></li>
                       <li><NavLink onClick={() => handleNav('/arcana-precision')} label="Arcana Precision" /></li>
-                      <li><NavLink onClick={() => handleNav('/arcana-intelligence')} label="Arcana Intelligence" /></li>
+                      
                     </ul>
                   </div>
 
