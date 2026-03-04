@@ -102,7 +102,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
             transition: 'height 0.3s ease-in-out, max-height 0.3s ease-in-out',
           }}
         >
-          <div ref={innerRef} className="bg-black border-t border-white/10">
+          <div ref={innerRef} className="bg-black">
             <div className={`${!inDashboard ? 'max-w-[1200px] mx-auto' : ''} px-6 md:px-10 py-10`}>
               <div className="flex justify-end mb-6">
                 <button onClick={() => setExpanded(false)} className="text-white/40 hover:text-white transition-colors">
