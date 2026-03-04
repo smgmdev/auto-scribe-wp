@@ -78,8 +78,8 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                 className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
               />
             </button>
-            <span className="hidden md:inline text-white/40">|</span>
-            <span className="hidden md:inline"><span className="font-bold">Media Products</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
+            <span className="text-white/40">|</span>
+            <span className="text-[9px] md:text-xs"><span className="font-bold">Media Products</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[9px] md:text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[9px] md:text-[10px] font-mono">⌘K</kbd></span>
             <span className="hidden md:inline"><span className="font-bold">Close</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
             <button
               onClick={toggleSound}
@@ -110,6 +110,30 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
               </div>
 
               <div className="space-y-10">
+                {/* Info panels - moved above links */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-8 border-b border-white/10">
+                  <div className="bg-[#1a1a1a] p-6">
+                    <h3 className="text-white text-lg font-bold mb-3">Arcana Mace</h3>
+                    <p className="text-white/50 text-sm leading-relaxed">
+                      Connecting brands to a global network of media agencies, Arcana Mace delivers seamless media buying and publishing services worldwide.
+                    </p>
+                  </div>
+                  <div className="bg-[#1a1a1a] p-6">
+                    <h4 className="text-white font-semibold text-sm mb-3">Account</h4>
+                    <ul className="space-y-2 text-sm text-white/50">
+                      <li><NavLink onClick={() => handleAccountNav('account')} label="Manage Your Account" /></li>
+                    </ul>
+                  </div>
+                  <div className="bg-[#1a1a1a] p-6">
+                    <h4 className="text-white font-semibold text-sm mb-3">Support</h4>
+                    <ul className="space-y-2 text-sm text-white/50">
+                      <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
+                      <li><NavLink onClick={() => handleNav('/report-bug')} label="Report a Bug" /></li>
+                      <li><NavLink onClick={() => handleNav('/sitemap')} label="Site Map" /></li>
+                    </ul>
+                  </div>
+                </div>
+
                 {/* Link columns */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10">
                   {/* Column 1: Media Buying Categories */}
@@ -155,7 +179,6 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       <li><NavLink onClick={() => handleAccountNav('agency-application')} label="Agency Account" /></li>
                       <li><NavLink onClick={() => handleNav('/industries')} label="Industries" /></li>
                       <li><NavLink onClick={() => handleNav('/arcana-precision')} label="Arcana Precision" /></li>
-                      
                     </ul>
                   </div>
 
@@ -170,30 +193,6 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       <li><NavLink onClick={() => handleNav('/system-status')} label="System Status" /></li>
                       <li><NavLink onClick={() => handleNav('/update-log')} label="Changelog" /></li>
                       <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Bottom info panels */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/10">
-                  <div className="bg-[#1a1a1a] p-6">
-                    <h3 className="text-white text-lg font-bold mb-3">Arcana Mace</h3>
-                    <p className="text-white/50 text-sm leading-relaxed">
-                      Connecting brands to a global network of media agencies, Arcana Mace delivers seamless media buying and publishing services worldwide.
-                    </p>
-                  </div>
-                  <div className="bg-[#1a1a1a] p-6">
-                    <h4 className="text-white font-semibold text-sm mb-3">Account</h4>
-                    <ul className="space-y-2 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleAccountNav('account')} label="Manage Your Account" /></li>
-                    </ul>
-                  </div>
-                  <div className="bg-[#1a1a1a] p-6">
-                    <h4 className="text-white font-semibold text-sm mb-3">Support</h4>
-                    <ul className="space-y-2 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
-                      <li><NavLink onClick={() => handleNav('/report-bug')} label="Report a Bug" /></li>
-                      <li><NavLink onClick={() => handleNav('/sitemap')} label="Site Map" /></li>
                     </ul>
                   </div>
                 </div>
