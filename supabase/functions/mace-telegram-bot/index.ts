@@ -95,6 +95,65 @@ async function cleanupOldSessions(supabase: any): Promise<void> {
     .lt('updated_at', twoHoursAgo);
 }
 
+// Generate a 6-digit verification code
+function generateVerifyCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Send verification email via Resend
+async function sendVerificationEmail(email: string, code: string): Promise<boolean> {
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  if (!RESEND_API_KEY) {
+    console.error("[mace-telegram-bot] Missing RESEND_API_KEY");
+    return false;
+  }
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Mace AI <noreply@arcanamace.com>",
+        to: [email],
+        subject: "Your Mace AI Verification Code",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px; background: #ffffff;">
+            <h2 style="color: #1a1a1a; margin-bottom: 16px;">Mace AI Verification</h2>
+            <p style="color: #444; font-size: 15px; line-height: 1.5;">
+              Use the code below to verify your Telegram account with Mace AI:
+            </p>
+            <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; text-align: center; margin: 24px 0;">
+              <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #1a1a1a;">${code}</span>
+            </div>
+            <p style="color: #888; font-size: 13px;">This code expires in 10 minutes. If you didn't request this, please ignore this email.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+            <p style="color: #aaa; font-size: 12px;">Arcana Mace — Stankevicius Pacific Limited</p>
+          </div>
+        `,
+        headers: {
+          "X-Entity-Ref-ID": `mace-verify-${Date.now()}`,
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("[mace-telegram-bot] Resend email error:", res.status, errText);
+      return false;
+    }
+
+    await res.json();
+    console.log("[mace-telegram-bot] Verification email sent to:", email);
+    return true;
+  } catch (err) {
+    console.error("[mace-telegram-bot] Email send error:", err);
+    return false;
+  }
+}
+
 // Build a numbered site list for Telegram display
 function formatSiteList(siteNames: string[]): string {
   return siteNames.map((n, i) => `<b>${i + 1}.</b> ${n}`).join('\n');
