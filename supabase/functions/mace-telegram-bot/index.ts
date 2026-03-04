@@ -467,6 +467,20 @@ async function extractTextFromDocument(buffer: Uint8Array, mimeType: string): Pr
 
 // AI content review: checks article quality and returns verdict + rewritten version if needed
 async function reviewArticleContent(apiKey: string, content: string): Promise<{ acceptable: boolean; issues: string[]; rewrittenContent?: string }> {
+  // Pre-checks before AI review
+  const wordCount = content.trim().split(/\s+/).length;
+  if (wordCount < 80) {
+    return { acceptable: false, issues: ['Article is too short (minimum ~200 words for publication). Please provide more content.'] };
+  }
+
+  // Check for obvious formatting issues before AI
+  const lines = content.trim().split('\n').filter(l => l.trim());
+  const hasTitle = lines.length > 0 && lines[0].trim().length > 10 && lines[0].trim().length < 300;
+  const hasBody = lines.length > 2;
+  if (!hasTitle || !hasBody) {
+    return { acceptable: false, issues: ['Article must have a clear headline on the first line followed by body paragraphs.'] };
+  }
+
   const reviewRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -475,16 +489,23 @@ async function reviewArticleContent(apiKey: string, content: string): Promise<{ 
       messages: [
         {
           role: 'system',
-          content: `You are a senior editorial quality reviewer AND rewriter. Analyze the submitted article and determine if it meets professional publication standards.
+          content: `You are a STRICT senior editorial quality reviewer AND rewriter. You must reject articles that don't meet professional publication standards. Be CRITICAL — when in doubt, mark as NOT acceptable and provide a rewrite.
 
-CHECK FOR THESE ISSUES:
+CHECK FOR ALL OF THESE ISSUES (reject if ANY are found):
 1. Non-English text (especially French lines/phrases mixed in) — articles must be 100% English
-2. Poor structure — missing clear paragraphs, no logical flow, walls of text
+2. Poor structure — missing clear paragraphs, no logical flow, walls of text, text that reads like notes or bullet points
 3. AI-generic writing — overly formulaic openings like "In today's world...", "In an era of...", "It is worth noting...", robotic tone
-4. Grammar/spelling errors
+4. Grammar/spelling errors (more than minor typos)
 5. Unprofessional tone or casual language inappropriate for publication
 6. Repetitive content or filler text
-7. Weak, generic, or poorly written title/headline
+7. Weak, generic, or poorly written title/headline — title MUST be compelling and specific
+8. Missing paragraph breaks or poor paragraph structure (needs 4-7 distinct paragraphs minimum)
+9. Content that is just a list of facts without narrative flow
+10. Title that uses colons, is too short (<8 words), or too generic
+11. Article body shorter than ~300 words
+12. Content that looks like raw notes, press release copy-paste, or unedited draft material
+
+IMPORTANT: You must be STRICT. Most user-submitted articles will need editing. Only mark as acceptable if the article is genuinely well-written, well-structured, and publication-ready with a compelling title.
 
 RESPOND WITH EXACTLY THIS JSON FORMAT:
 {
@@ -493,9 +514,9 @@ RESPOND WITH EXACTLY THIS JSON FORMAT:
   "rewritten": "FULL rewritten article text if not acceptable, or empty string if acceptable"
 }
 
-If the article IS acceptable (well-structured, professional, 100% English, original-sounding, strong title), set acceptable=true and issues=[] and rewritten="".
+If the article IS acceptable (well-structured, professional, 100% English, original-sounding, strong title, proper paragraphs), set acceptable=true and issues=[] and rewritten="".
 
-If the article needs work, set acceptable=false, list the specific issues found, and provide a COMPLETE rewritten version that:
+If the article needs work (MOST articles will), set acceptable=false, list the specific issues found, and provide a COMPLETE rewritten version that:
 - Starts with a NEW compelling, professional headline on line 1 (no prefix, just the headline text)
 - TITLE RULES:
   * CRITICAL: If the original headline contains NAMES (people, countries, companies, organizations), you MUST preserve those names in your new title
@@ -526,7 +547,8 @@ If the article needs work, set acceptable=false, list the specific issues found,
 
   if (!reviewRes.ok) {
     console.error('[mace-telegram-bot] Review API error:', reviewRes.status);
-    return { acceptable: true, issues: [] };
+    // CRITICAL: Default to NOT acceptable when review fails — never let unchecked content through
+    return { acceptable: false, issues: ['Could not complete quality review. Please try submitting again.'] };
   }
 
   const reviewData = await reviewRes.json();
@@ -534,7 +556,10 @@ If the article needs work, set acceptable=false, list the specific issues found,
 
   try {
     const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return { acceptable: true, issues: [] };
+    if (!jsonMatch) {
+      // If AI didn't return proper JSON, reject the article
+      return { acceptable: false, issues: ['Quality review was inconclusive. Please try submitting again.'] };
+    }
 
     const parsed = JSON.parse(jsonMatch[0]);
     return {
@@ -544,7 +569,8 @@ If the article needs work, set acceptable=false, list the specific issues found,
     };
   } catch {
     console.error('[mace-telegram-bot] Failed to parse review response');
-    return { acceptable: true, issues: [] };
+    // Default to NOT acceptable on parse failure
+    return { acceptable: false, issues: ['Quality review encountered an error. Please try submitting again.'] };
   }
 }
 
