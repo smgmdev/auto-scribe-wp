@@ -11,6 +11,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const [panelHeight, setPanelHeight] = useState(0);
 
   // Close on route change
@@ -18,17 +19,18 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
     setExpanded(false);
   }, [location.pathname]);
 
-  // Measure panel height and set CSS custom property
+  // Measure inner content height once on mount and set CSS variable
   useEffect(() => {
-    if (expanded && panelRef.current) {
-      const h = panelRef.current.scrollHeight;
-      setPanelHeight(h);
-      document.documentElement.style.setProperty('--banner-offset', `${28 + h}px`);
-    } else {
-      setPanelHeight(0);
-      document.documentElement.style.setProperty('--banner-offset', '28px');
+    if (innerRef.current) {
+      setPanelHeight(innerRef.current.offsetHeight);
     }
-  }, [expanded]);
+  }, []);
+
+  // Sync CSS variable with expanded state
+  useEffect(() => {
+    const offset = expanded ? 28 + panelHeight : 28;
+    document.documentElement.style.setProperty('--banner-offset', `${offset}px`);
+  }, [expanded, panelHeight]);
 
   const hiddenPaths = ['/auth', '/reset-password'];
   const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path)) || is404Page;
@@ -82,13 +84,13 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
         {/* Expandable panel */}
         <div
           ref={panelRef}
-          className="overflow-hidden transition-all duration-300 ease-in-out"
+          className="overflow-hidden"
           style={{
-            maxHeight: expanded ? '600px' : '0px',
-            opacity: expanded ? 1 : 0,
+            height: expanded ? `${panelHeight}px` : '0px',
+            transition: 'height 0.3s ease-in-out',
           }}
         >
-          <div className="bg-[#1d1d1f] border-t border-white/10">
+          <div ref={innerRef} className="bg-black border-t border-white/10">
             <div className={`${!inDashboard ? 'max-w-[980px] mx-auto' : ''} px-4 md:px-6 py-8`}>
               <div className="flex justify-end mb-4">
                 <button onClick={() => setExpanded(false)} className="text-white/50 hover:text-white transition-colors">
