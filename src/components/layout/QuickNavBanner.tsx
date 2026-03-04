@@ -109,33 +109,9 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                 </button>
               </div>
 
-              <div className="flex gap-10 md:gap-16">
-                {/* Left info panel */}
-                <div className="hidden md:flex flex-col w-[280px] flex-shrink-0">
-                  <div className="bg-[#1a1a1a] p-6 mb-6">
-                    <h3 className="text-white text-xl font-bold mb-3">Arcana Mace</h3>
-                    <p className="text-white/50 text-sm leading-relaxed">
-                      Connecting brands to a global network of media agencies, Arcana Mace delivers seamless media buying and publishing services worldwide.
-                    </p>
-                  </div>
-                  <div className="bg-[#1a1a1a] p-6 mb-6">
-                    <h4 className="text-white font-semibold text-sm mb-3">Account</h4>
-                    <ul className="space-y-2 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleAccountNav('account')} label="Manage Your Account" /></li>
-                    </ul>
-                  </div>
-                  <div className="bg-[#1a1a1a] p-6">
-                    <h4 className="text-white font-semibold text-sm mb-3">Support</h4>
-                    <ul className="space-y-2 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
-                      <li><NavLink onClick={() => handleNav('/report-bug')} label="Report a Bug" /></li>
-                      <li><NavLink onClick={() => handleNav('/sitemap')} label="Site Map" /></li>
-                    </ul>
-                  </div>
-                </div>
-
-                {/* Right columns */}
-                <div className="flex-1 grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10">
+              <div className="space-y-10">
+                {/* Link columns */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10">
                   {/* Column 1: Media Buying Categories */}
                   <div>
                     <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
@@ -207,6 +183,30 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       <li><NavLink onClick={() => handleNav('/privacy')} label="Privacy Policy" /></li>
                       <li><NavLink onClick={() => handleNav('/guidelines')} label="User Guidelines" /></li>
                       <li><NavLink onClick={() => handleNav('/do-not-sell')} label="Do Not Sell Info" /></li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Bottom info panels */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/10">
+                  <div className="bg-[#1a1a1a] p-6">
+                    <h3 className="text-white text-lg font-bold mb-3">Arcana Mace</h3>
+                    <p className="text-white/50 text-sm leading-relaxed">
+                      Connecting brands to a global network of media agencies, Arcana Mace delivers seamless media buying and publishing services worldwide.
+                    </p>
+                  </div>
+                  <div className="bg-[#1a1a1a] p-6">
+                    <h4 className="text-white font-semibold text-sm mb-3">Account</h4>
+                    <ul className="space-y-2 text-sm text-white/50">
+                      <li><NavLink onClick={() => handleAccountNav('account')} label="Manage Your Account" /></li>
+                    </ul>
+                  </div>
+                  <div className="bg-[#1a1a1a] p-6">
+                    <h4 className="text-white font-semibold text-sm mb-3">Support</h4>
+                    <ul className="space-y-2 text-sm text-white/50">
+                      <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
+                      <li><NavLink onClick={() => handleNav('/report-bug')} label="Report a Bug" /></li>
+                      <li><NavLink onClick={() => handleNav('/sitemap')} label="Site Map" /></li>
                     </ul>
                   </div>
                 </div>
