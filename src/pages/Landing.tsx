@@ -832,7 +832,10 @@ const Landing = () => {
         isAuthenticated={!!user}
       />
 
-      <PWAInstallButtons />
+      <div className="border-t border-[#424245]" />
+      <div className="bg-black">
+        <PWAInstallButtons />
+      </div>
       <Footer narrow hideBlackSpacer />
     </div>
 
