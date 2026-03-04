@@ -33,7 +33,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
   }, [expanded, panelHeight]);
 
   const hiddenPaths = ['/auth', '/reset-password'];
-  const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path)) || is404Page;
+  const shouldHide = hiddenPaths.some(path => location.pathname.startsWith(path));
   
   if (!inDashboard && (location.pathname.startsWith('/account') || location.pathname.startsWith('/dashboard'))) return null;
   if (shouldHide) return null;
