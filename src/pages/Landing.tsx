@@ -22,6 +22,7 @@ import { Footer } from '@/components/layout/Footer';
 import { PWAInstallButtons } from '@/components/layout/PWAInstallButtons';
 
 import amblack from '@/assets/amblack.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import bugReportBg from '@/assets/bug-report-bg.mp4';
 import mediaBuyingBg from '@/assets/media-buying-bg.mp4';
 import mediaBuyingPoster from '@/assets/media-buying-poster.png';
@@ -84,7 +85,7 @@ const Landing = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [bugReportVideoLoaded, setBugReportVideoLoaded] = useState(false);
   const [mediaBuyingVideoLoaded, setMediaBuyingVideoLoaded] = useState(false);
-  const [logoLoaded, setLogoLoaded] = useState(false);
+  
   
   // Media site dialog state (unified with brief submission)
   const [selectedMediaSite, setSelectedMediaSite] = useState<MediaSite | null>(null);
@@ -539,19 +540,7 @@ const Landing = () => {
       <header className="fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm">
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
-            <div className="relative h-10 w-10">
-              {!logoLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                </div>
-              )}
-              <img 
-                src={amblack} 
-                alt="Arcana Mace" 
-                className={`h-10 w-10 transition-opacity duration-300 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
-                onLoad={() => setLogoLoaded(true)}
-              />
-            </div>
+            <HeaderLogo src={amblack} />
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </div>
           

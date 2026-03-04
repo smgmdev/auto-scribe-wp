@@ -8,6 +8,7 @@ import { QuickNavBanner } from './QuickNavBanner';
 import { Button } from '@/components/ui/button';
 import { SearchModal } from '@/components/search/SearchModal';
 import amlogo from '@/assets/amlogo.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { useAppStore } from '@/stores/appStore';
 
 interface MainLayoutProps {
@@ -97,7 +98,7 @@ export function MainLayout({
             onClick={() => navigate('/')} 
             className="flex items-center"
           >
-            <img src={amlogo} alt="Logo" className="h-7 w-7 object-contain" />
+            <HeaderLogo src={amlogo} size="h-7 w-7" />
             <span className="ml-2 text-lg font-semibold text-white">Arcana Mace</span>
           </button>
           <Button variant="ghost" size="icon" onClick={() => setShowSearchModal(true)} className="absolute right-4 text-white hover:text-white hover:bg-[#999]/30 rounded-full">

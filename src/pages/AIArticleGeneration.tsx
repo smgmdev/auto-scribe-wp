@@ -28,6 +28,7 @@ function SliderImage({ src, alt }: { src: string; alt: string }) {
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import amlogo from '@/assets/amlogo.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import bgaiVideo from '@/assets/bgai.mp4';
 import amblack from '@/assets/amblack.png';
 
@@ -261,7 +262,7 @@ export default function AIArticleGeneration() {
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3 flex-shrink-0">
-            <img src={amlogo} alt="Arcana Mace" className="h-10 w-10" />
+            <HeaderLogo src={amlogo} />
             <span className="text-lg font-semibold text-white">Arcana Mace</span>
           </button>
           

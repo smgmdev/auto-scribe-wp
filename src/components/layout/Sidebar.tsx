@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Globe, Newspaper, Plus, FileText, Settings, LogOut, Users, CreditCard, UserCircle, X, Package, MessageSquare, ChevronDown, Zap, ShoppingBag, Building2, Loader2, Briefcase, ClipboardList, Wallet, Library, History, MoreHorizontal, Megaphone, FilePlus, List, Bot, Database, Cog, ScrollText, Terminal, Shield, MessageSquareText, MessageCircleQuestion, Mic, Play, Radar, Satellite } from 'lucide-react';
 import amlogo from '@/assets/amlogo.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -1882,7 +1883,7 @@ export function Sidebar({
               onClick={() => navigate('/')} 
               className="flex items-center gap-3"
             >
-              <img src={amlogo} alt="Logo" className="h-9 w-9 object-contain" />
+              <HeaderLogo src={amlogo} size="h-9 w-9" />
               <div>
                 <h1 className="text-lg font-semibold text-white">
                   Arcana Mace 

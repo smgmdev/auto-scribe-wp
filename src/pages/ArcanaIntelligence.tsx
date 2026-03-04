@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import heroImg from '@/assets/arcana-intel-hero.jpg';
 import heroVideo from '@/assets/arcana-intel-hero.mp4';
 import heroBgVideo from '@/assets/arcana-intel-hero-bg.mp4';
@@ -300,7 +301,7 @@ export default function ArcanaIntelligence() {
         >
           <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <img src={amlogo} alt="Arcana Mace" className="h-10 w-10" />
+              <HeaderLogo src={amlogo} />
               <span className="text-lg font-semibold text-white">Arcana Mace</span>
             </button>
             

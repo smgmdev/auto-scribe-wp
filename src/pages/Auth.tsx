@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '@/components/layout/Footer';
 import { SearchModal } from '@/components/search/SearchModal';
 import amblack from '@/assets/amblack.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { createPortal } from 'react-dom';
 import {
   AlertDialog,
@@ -382,7 +383,7 @@ export default function Auth() {
             onClick={() => navigate('/')}
             className="flex items-center"
           >
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <HeaderLogo src={amblack} />
           </button>
           <button 
             className="p-2 rounded-full hover:bg-black/5 transition-colors"

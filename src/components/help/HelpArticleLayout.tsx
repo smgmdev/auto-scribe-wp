@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import amblack from '@/assets/amblack.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 
 export interface HelpSection {
   id: string;
@@ -99,7 +100,7 @@ export function HelpArticleLayout({ title, category, categorySlug, intro, sectio
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <HeaderLogo src={amblack} />
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
           

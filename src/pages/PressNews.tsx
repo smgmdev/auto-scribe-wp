@@ -25,6 +25,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import amlogo from '@/assets/amlogo.png';
 import amblack from '@/assets/amblack.png';
+import { HeaderLogo } from '@/components/ui/HeaderLogo';
 
 interface PressRelease {
   id: string;
@@ -161,7 +162,7 @@ export default function PressNews() {
             onClick={() => navigate('/')}
             className="flex items-center gap-3"
           >
-            <img src={amblack} alt="Arcana Mace" className="h-10 w-10" />
+            <HeaderLogo src={amblack} />
             <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
           </button>
           
