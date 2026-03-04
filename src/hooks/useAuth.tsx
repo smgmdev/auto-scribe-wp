@@ -304,6 +304,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Skip session guard on reset-password page — the recovery session is
+    // temporary and was intentionally not registered as an active session.
+    // Running the guard here would kick the user out before they can update
+    // their password (causing "Auth session missing" errors).
+    if (window.location.pathname === '/reset-password') {
+      return;
+    }
+
     let consecutiveFailures = 0;
     
     const checkSessionValidity = async () => {
