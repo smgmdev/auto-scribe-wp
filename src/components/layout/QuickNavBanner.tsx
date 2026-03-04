@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Volume2, VolumeOff, ChevronDown, X } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
@@ -18,12 +18,15 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
     setExpanded(false);
   }, [location.pathname]);
 
-  // Measure panel height for the spacer
+  // Measure panel height and set CSS custom property
   useEffect(() => {
     if (expanded && panelRef.current) {
-      setPanelHeight(panelRef.current.scrollHeight);
+      const h = panelRef.current.scrollHeight;
+      setPanelHeight(h);
+      document.documentElement.style.setProperty('--banner-offset', `${28 + h}px`);
     } else {
       setPanelHeight(0);
+      document.documentElement.style.setProperty('--banner-offset', '28px');
     }
   }, [expanded]);
 
@@ -154,14 +157,6 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
           </div>
         </div>
       </div>
-
-      {/* Spacer — sits in document flow and pushes content (including header) down */}
-      {!inDashboard && (
-        <div
-          className="transition-all duration-300 ease-in-out"
-          style={{ height: `${28 + panelHeight}px` }}
-        />
-      )}
     </>
   );
 }
