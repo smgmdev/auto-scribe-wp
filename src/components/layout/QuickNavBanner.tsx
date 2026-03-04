@@ -20,6 +20,16 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
     setExpanded(false);
   }, [location.pathname]);
 
+  // Close on ESC key
+  useEffect(() => {
+    if (!expanded) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpanded(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [expanded]);
+
   // Measure inner content height once on mount and set CSS variable
   useEffect(() => {
     if (innerRef.current) {
