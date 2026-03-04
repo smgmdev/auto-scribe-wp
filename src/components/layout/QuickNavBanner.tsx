@@ -111,7 +111,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
 
               <div className="space-y-10">
                 {/* Link columns */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-10">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
                   {/* Column 1: Media Buying Categories */}
                   <div>
                     <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
@@ -170,19 +170,6 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       <li><NavLink onClick={() => handleNav('/system-status')} label="System Status" /></li>
                       <li><NavLink onClick={() => handleNav('/update-log')} label="Changelog" /></li>
                       <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
-                    </ul>
-                  </div>
-
-                  {/* Column 5: Legal */}
-                  <div>
-                    <h4 className="text-white font-bold text-xs uppercase tracking-wider mb-5 pb-2 border-b border-white/20">
-                      Legal
-                    </h4>
-                    <ul className="space-y-3 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleNav('/terms')} label="Terms of Service" /></li>
-                      <li><NavLink onClick={() => handleNav('/privacy')} label="Privacy Policy" /></li>
-                      <li><NavLink onClick={() => handleNav('/guidelines')} label="User Guidelines" /></li>
-                      <li><NavLink onClick={() => handleNav('/do-not-sell')} label="Do Not Sell Info" /></li>
                     </ul>
                   </div>
                 </div>
