@@ -1271,10 +1271,22 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
       const answer = text?.toLowerCase().trim();
 
       if (answer === 'approve' || answer === 'approved' || answer === 'yes' || answer === 'y') {
-        // User approved the rewrite — proceed to content review then photo
-        const rewrittenText = session.reviewedContent || '';
+        // User approved the rewrite — skip redundant quality review (the AI rewrite already follows quality guidelines)
+        // Go directly to photo step to avoid chained AI calls that cause timeouts
+        session.content = session.reviewedContent || '';
         session.reviewedContent = undefined;
-        await handleContentReview(botToken, chatId, session, rewrittenText, LOVABLE_API_KEY, supabase);
+        session.originalContent = undefined;
+        (session as any).extractedArticle = undefined;
+        session.photoFileId = undefined;
+        session.step = 'awaiting_photo';
+
+        await sendTelegramMessage(botToken, chatId,
+          `✅ Article approved!\n\n` +
+          `📸 Now send me a <b>featured image</b> for the article (JPG or PNG only).\n\n` +
+          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+          `Or reply <b>Skip</b> to publish without an image.`
+        );
+        await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
