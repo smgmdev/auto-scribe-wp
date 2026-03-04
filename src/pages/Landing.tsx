@@ -671,39 +671,40 @@ const Landing = () => {
           </>
         )}
 
-        {/* Bug Report CTA Section */}
-        <section className="relative overflow-hidden">
-          {!bugReportVideoLoaded && (
-            <div className="absolute bottom-4 right-4 z-20">
-              <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
-            </div>
-          )}
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="none"
-            className="absolute inset-0 w-full h-full object-cover"
-            onCanPlayThrough={() => setBugReportVideoLoaded(true)}
-          >
-            <source src={bugReportBg} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-black/60" />
-          <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 min-h-[320px]">
-            <h2 className="text-xl md:text-4xl font-semibold text-white mb-6">
-              Found a bug? Report it and get free credits.
-            </h2>
-            <Button
-              onClick={() => navigate('/report-bug')}
-              className="group bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all"
-            >
-              Report a Bug
-              <ArrowRight className="h-4 w-4 max-w-0 opacity-0 group-hover:max-w-[16px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 overflow-hidden" />
-            </Button>
-          </div>
-        </section>
       </main>
+
+      {/* Bug Report CTA Section - full width */}
+      <section className="relative overflow-hidden">
+        {!bugReportVideoLoaded && (
+          <div className="absolute bottom-4 right-4 z-20">
+            <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
+          </div>
+        )}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="none"
+          className="absolute inset-0 w-full h-full object-cover"
+          onCanPlayThrough={() => setBugReportVideoLoaded(true)}
+        >
+          <source src={bugReportBg} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 min-h-[320px]">
+          <h2 className="text-xl md:text-4xl font-semibold text-white mb-6">
+            Found a bug? Report it and get free credits.
+          </h2>
+          <Button
+            onClick={() => navigate('/report-bug')}
+            className="group bg-accent hover:bg-white hover:text-accent border border-accent text-white px-8 py-3 text-base transition-all"
+          >
+            Report a Bug
+            <ArrowRight className="h-4 w-4 max-w-0 opacity-0 group-hover:max-w-[16px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 overflow-hidden" />
+          </Button>
+        </div>
+      </section>
 
 
       {/* WP Site Detail - Draggable Popup */}
