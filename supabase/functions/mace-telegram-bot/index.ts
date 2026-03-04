@@ -538,15 +538,12 @@ Be STRICT. Only mark acceptable if genuinely publication-ready.`
 
 // AI rewrite: transforms content into a professional essay-style article (same rules as generate-article)
 async function rewriteArticleContent(apiKey: string, content: string): Promise<string | null> {
-  const rewriteRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'google/gemini-2.5-flash',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content.
+  // Extract title from first line of source content
+  const contentLines = content.trim().split('\n').filter(l => l.trim());
+  const sourceTitle = contentLines[0]?.replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim() || 'Untitled';
+  const sourceBody = contentLines.slice(1).join('\n').trim();
+
+  const systemPrompt = `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content.
 
 WRITING STYLE RULES (CRITICAL):
 - NEVER use numbered lists or bullet points
@@ -554,45 +551,83 @@ WRITING STYLE RULES (CRITICAL):
 - NEVER start with cliché AI openings like "In a world where...", "In today's fast-paced...", "In a groundbreaking...", "In a move that...", "In an era of..."
 - NEVER use phrases like "It's worth noting", "Interestingly enough", "Needless to say", "At the end of the day"
 - Write in flowing paragraphs with natural transitions
-- Vary sentence length — mix short punchy sentences with longer complex ones
-- Start paragraphs differently — avoid repetitive structures
-- Use specific details, names, numbers, and concrete examples
+- Vary sentence length - mix short punchy sentences with longer complex ones
+- Start paragraphs differently - avoid repetitive structures
+- Use specific details, names, and concrete examples
 
 OPENING PARAGRAPH:
 - Start with a specific fact, striking observation, or narrative hook
-- Jump straight into the story — no throat-clearing or context-setting
+- Jump straight into the story - no throat-clearing or context-setting
 - Make it feel like you're continuing an ongoing conversation with the reader
 - Examples of good openings: "The numbers are staggering.", "Three days ago, everything changed.", "Nobody expected this."
+
+TONE: JOURNALIST
+Write like a veteran news reporter. Lead with the most newsworthy angle. Use punchy sentences, active voice, and quote-worthy phrasing. Channel the style of Reuters or AP News.
 
 TARGET LENGTH: Approximately 700 words
 STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings
 
-Rewrite the user's article into a polished, publication-ready essay.
+SOURCE ARTICLE REFERENCE (extract facts only - DO NOT rewrite or paraphrase):
+---
+${sourceBody.substring(0, 12000)}
+---
+
+CRITICAL ORIGINALITY RULES:
+- Your article must be LESS THAN 50% similar to the source
+- DO NOT paraphrase or reword the source sentence by sentence
+- DO NOT follow the same structure or paragraph order as the source
+- Extract ONLY the key facts, data points, quotes, and figures
+- Write a COMPLETELY ORIGINAL article using those facts as raw material
+- Use a different angle, different narrative structure, different opening
+- Add your own analysis, context, and perspective
+- The source is REFERENCE MATERIAL, not a template to rewrite
+- Think of the source as interview notes - you have the facts, now write YOUR story`;
+
+  const userPrompt = `Write an article based on this headline: "${sourceTitle}"
 
 TITLE REQUIREMENTS:
-- CRITICAL: If the original article contains NAMES (people, countries, companies, organizations) or important NUMBERS/FIGURES, you MUST preserve those in your new title
-- Names and numbers are essential identifiers — readers need to know WHO, WHAT, and HOW MUCH
-- NEVER use colons (:) in the title — write flowing, natural headlines instead
-- NEVER start titles with possessive forms like "Company's", "Person's" — these are overused and robotic
+- Create a NEW compelling headline that sparks curiosity
+- CRITICAL: If the original headline contains NAMES (people, countries, companies, organizations), you MUST preserve those names in your new title
+- CRITICAL: If the article contains important NUMBERS or FIGURES ($amounts, percentages, dates, quantities), include the most important ones in the title
+- Names and numbers are essential identifiers - readers need to know WHO, WHAT, and HOW MUCH
+- Weave the names naturally into an engaging headline structure
+- NEVER use colons (:) in the title - write flowing, natural headlines instead
+- NEVER start titles with possessive forms like "Company's", "Person's", "Country's" - these are overused and robotic
+- AVOID title structures like "Topic: Explanation" or "Subject: Details"
 - Use dynamic sentence structures: questions, action verbs, or intriguing statements
-- Aim for 12-18 words for maximum engagement
+- Aim for 12-18 words for maximum engagement and impact (slightly longer titles perform better)
 - Write like a seasoned newspaper editor crafting a front-page headline
 
-Examples of GOOD titles: "Why Everyone Is Watching Elon Musk's Latest Move and What It Means for the Future", "Inside the Secret Deal That Could Transform How Apple Approaches the AI Market", "What Warren Buffett's Surprising Decision Reveals About the State of Global Investing"
-Examples of BAD titles: "Tesla's New Era Begins", "Company's Bold Move", "Tech Giant Makes Move"
+Examples of GOOD titles (note how names are preserved and titles are longer): 
+- "Why Everyone Is Watching Elon Musk's Latest Move and What It Means for the Future"
+- "Inside the Secret Deal That Could Transform How Apple Approaches the AI Market"
+- "What Warren Buffett's Surprising Decision Reveals About the State of Global Investing"
+- "How Germany's Bold Climate Policy Is Forcing Europe to Rethink Everything"
 
-BODY RULES:
-- Is 100% in English (translate any non-English parts)
-- Flows naturally like human writing with varied sentence lengths
-- Maintains professional journalistic tone
-- Preserves the original meaning, key facts, all specific names, and all numbers/figures
-- Has solid paragraph structure (5-7 paragraphs) with clear transitions
-- Approximately 700 words
-- Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling.
+Examples of BAD titles (never do this): "Tesla's New Era Begins", "Apple's Big Announcement: What It Means", "Warren Buffett: The Oracle Speaks", "Company's Bold Move", "Tech Giant Makes Move"
 
-Return ONLY the article text: headline on line 1, then a blank line, then the body paragraphs.`
-        },
-        { role: 'user', content: content.substring(0, 15000) }
+ORIGINALITY REQUIREMENT:
+- Use facts and data from the source but write a COMPLETELY ORIGINAL article
+- Your article must be LESS THAN 50% textually similar to the source
+- Take a fresh angle - maybe focus on implications, or a specific detail, or the bigger picture
+- The structure and narrative flow must be entirely your own creation
+- Think like a journalist who just finished an interview - you have the facts, now tell YOUR story
+
+FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
+[Your new headline here - no prefix, just the headline - must include any names from the original]
+
+[Article content starts here - approximately 700 words, flowing paragraphs, human writing style]
+
+Remember: Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling. PRESERVE ALL NAMES from the original headline.`;
+
+  const rewriteRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
       ],
       temperature: 0.7,
       max_tokens: 4000,
