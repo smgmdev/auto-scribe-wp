@@ -17,6 +17,21 @@ import amblack from '@/assets/amblack.png';
 
 const updates = [
   {
+    date: 'March 5, 2026',
+    title: 'Quick Nav Mega Menu Redesign',
+    changes: [
+      'Redesigned the Quick Nav expanded area into a Bloomberg-style mega menu with a multi-column link grid covering Media Buying, For Clients, For Business, and Arcana Mace sections',
+      'Added three horizontal info cards below the link grid — Arcana Mace overview with logo, Account management, and Support quick links',
+      'Navigation links now feature a blue hover state with a sliding arrow icon for improved interactivity',
+      'Media Products keyboard shortcut hint (Ctrl+K / ⌘K) is now visible on mobile devices',
+      'Quick Nav dropdown is now accessible on 404 pages, helping users navigate back to valid routes',
+      'Expanded area is now scrollable when content exceeds the viewport height, constrained to max-height: calc(100vh - 28px)',
+      'Mobile responsive layout updated — link columns display in a single column on small screens, info cards stack vertically above the links',
+      'Reduced link spacing for a more compact, scannable layout across all columns',
+      '"How It Works" renamed to "How Arcana Mace Works" for brand clarity',
+    ],
+  },
+  {
     date: 'March 3, 2026',
     title: 'Mace AI Telegram Bot — Voice, Chat & Publishing',
     changes: [
