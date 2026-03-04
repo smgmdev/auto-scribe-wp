@@ -62,7 +62,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
               onClick={() => setExpanded(!expanded)}
               className="font-bold text-[#f2a547] mr-1 flex items-center gap-1 hover:text-[#f5b96b] transition-colors"
             >
-              Arcana Mace & Products
+              QUICK NAV
               <ChevronDown
                 size={12}
                 className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
