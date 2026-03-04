@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Volume2, VolumeOff, ChevronDown, X, ArrowRight } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
+import amlogo from '@/assets/amlogo.png';
 
 export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean }) {
   const location = useLocation();
@@ -113,7 +114,10 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                 {/* Info panels - moved above links */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-8 border-b border-white/10">
                   <div className="bg-[#1a1a1a] p-6">
-                    <h3 className="text-white text-lg font-bold mb-3">Arcana Mace</h3>
+                    <h3 className="text-white text-lg font-bold mb-3 flex items-center gap-2">
+                      <img src={amlogo} alt="Arcana Mace" className="h-6 w-6" />
+                      Arcana Mace
+                    </h3>
                     <p className="text-white/50 text-sm leading-relaxed">
                       Connecting brands to a global network of media agencies, Arcana Mace delivers seamless media buying and publishing services worldwide.
                     </p>
