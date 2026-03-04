@@ -138,7 +138,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       For Clients
                     </h4>
                     <ul className="space-y-3 text-sm text-white/50">
-                      <li><NavLink onClick={() => handleNav('/how-it-works')} label="How It Works" /></li>
+                      <li><NavLink onClick={() => handleNav('/how-it-works')} label="How Arcana Mace Works" /></li>
                       <li><NavLink onClick={() => handleNav('/self-publishing')} label="Self Publishing" /></li>
                       <li><NavLink onClick={() => handleNav('/media-buying')} label="Media Buying" /></li>
                       <li><NavLink onClick={() => handleNav('/ai-article-generation')} label="AI Article Generation" /></li>
