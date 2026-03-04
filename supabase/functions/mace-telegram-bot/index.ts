@@ -465,15 +465,13 @@ async function extractTextFromDocument(buffer: Uint8Array, mimeType: string): Pr
   return null;
 }
 
-// AI content review: checks article quality and returns verdict + rewritten version if needed
-async function reviewArticleContent(apiKey: string, content: string): Promise<{ acceptable: boolean; issues: string[]; rewrittenContent?: string }> {
-  // Pre-checks before AI review
+// AI content review: checks article quality and returns issues list
+async function reviewArticleContent(apiKey: string, content: string): Promise<{ acceptable: boolean; issues: string[] }> {
   const wordCount = content.trim().split(/\s+/).length;
   if (wordCount < 80) {
     return { acceptable: false, issues: ['Article is too short (minimum ~200 words for publication). Please provide more content.'] };
   }
 
-  // Check for obvious formatting issues before AI
   const lines = content.trim().split('\n').filter(l => l.trim());
   const hasTitle = lines.length > 0 && lines[0].trim().length > 10 && lines[0].trim().length < 300;
   const hasBody = lines.length > 2;
@@ -489,37 +487,69 @@ async function reviewArticleContent(apiKey: string, content: string): Promise<{ 
       messages: [
         {
           role: 'system',
-          content: `You are a STRICT senior editorial quality reviewer AND experienced human journalist. You must reject articles that don't meet professional publication standards. Be CRITICAL — when in doubt, mark as NOT acceptable and provide a rewrite.
+          content: `You are a STRICT senior editorial quality reviewer. Check the article against these criteria and respond with JSON only.
 
-CHECK FOR ALL OF THESE ISSUES (reject if ANY are found):
-1. Non-English text (especially French lines/phrases mixed in) — articles must be 100% English
-2. Poor structure — missing clear paragraphs, no logical flow, walls of text, text that reads like notes or bullet points
-3. AI-generic writing — overly formulaic openings like "In today's world...", "In an era of...", "It is worth noting...", "Needless to say", "At the end of the day", "Interestingly enough", "In a move that...", "In a groundbreaking...", robotic tone
-4. Grammar/spelling errors (more than minor typos)
-5. Unprofessional tone or casual language inappropriate for publication
-6. Repetitive content or filler text
-7. Weak, generic, or poorly written title/headline — title MUST be compelling, specific, and include key names/numbers from the article
-8. Missing paragraph breaks or poor paragraph structure (needs 4-7 distinct paragraphs minimum)
-9. Content that is just a list of facts without narrative flow
-10. Title that uses colons, is too short (<8 words), or too generic
-11. Article body shorter than ~300 words
-12. Content that looks like raw notes, press release copy-paste, or unedited draft material
+CHECK FOR (reject if ANY found):
+1. Non-English text (especially French lines mixed in) — must be 100% English
+2. Poor structure — missing paragraphs, walls of text, reads like notes or bullet points
+3. AI-generic writing — formulaic openings ("In today's world...", "In a move that..."), robotic tone
+4. Grammar/spelling errors beyond minor typos
+5. Weak/generic title — must include key names/numbers, no colons, 12-18 words
+6. Missing paragraph structure (needs 5-7 distinct paragraphs minimum)
+7. Lists of facts without narrative flow
+8. Article body shorter than ~300 words
+9. Raw notes, press release copy-paste, or unedited draft material
 
-IMPORTANT: You must be STRICT. Most user-submitted articles will need editing. Only mark as acceptable if the article is genuinely well-written, well-structured, and publication-ready with a compelling title.
+RESPOND WITH EXACTLY:
+{"acceptable": true/false, "issues": ["issue 1", "issue 2"]}
 
-RESPOND WITH EXACTLY THIS JSON FORMAT:
-{
-  "acceptable": true/false,
-  "issues": ["issue 1", "issue 2"],
-  "rewritten": "FULL rewritten article text if not acceptable, or empty string if acceptable"
+Be STRICT. Only mark acceptable if genuinely publication-ready.`
+        },
+        { role: 'user', content: content.substring(0, 15000) }
+      ],
+      temperature: 0.2,
+      max_tokens: 500,
+    }),
+  });
+
+  if (!reviewRes.ok) {
+    console.error('[mace-telegram-bot] Review API error:', reviewRes.status);
+    return { acceptable: false, issues: ['Could not complete quality review. Please try submitting again.'] };
+  }
+
+  const reviewData = await reviewRes.json();
+  const rawResponse = reviewData.choices?.[0]?.message?.content || '';
+
+  try {
+    const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return { acceptable: false, issues: ['Quality review was inconclusive. Please try submitting again.'] };
+    }
+    const parsed = JSON.parse(jsonMatch[0]);
+    return {
+      acceptable: !!parsed.acceptable,
+      issues: Array.isArray(parsed.issues) ? parsed.issues : [],
+    };
+  } catch {
+    console.error('[mace-telegram-bot] Failed to parse review response');
+    return { acceptable: false, issues: ['Quality review encountered an error. Please try submitting again.'] };
+  }
 }
 
-If the article IS acceptable (well-structured, professional, 100% English, original-sounding, strong title, proper paragraphs), set acceptable=true and issues=[] and rewritten="".
+// AI rewrite: transforms content into a professional essay-style article (same rules as generate-article)
+async function rewriteArticleContent(apiKey: string, content: string): Promise<string | null> {
+  const rewriteRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        {
+          role: 'system',
+          content: `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content.
 
-If the article needs work (MOST articles will), set acceptable=false, list the specific issues found, and provide a COMPLETE rewritten version following these WRITING STYLE RULES:
-
-WRITING STYLE (CRITICAL — your rewrite must be indistinguishable from human writing):
-- NEVER use numbered lists or bullet points in the article body
+WRITING STYLE RULES (CRITICAL):
+- NEVER use numbered lists or bullet points
 - NEVER use more than 1-2 subheadings in the entire article (and only if truly necessary)
 - NEVER start with cliché AI openings like "In a world where...", "In today's fast-paced...", "In a groundbreaking...", "In a move that...", "In an era of..."
 - NEVER use phrases like "It's worth noting", "Interestingly enough", "Needless to say", "At the end of the day"
@@ -534,18 +564,22 @@ OPENING PARAGRAPH:
 - Make it feel like you're continuing an ongoing conversation with the reader
 - Examples of good openings: "The numbers are staggering.", "Three days ago, everything changed.", "Nobody expected this."
 
-TITLE RULES:
+TARGET LENGTH: Approximately 700 words
+STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings
+
+Rewrite the user's article into a polished, publication-ready essay.
+
+TITLE REQUIREMENTS:
 - CRITICAL: If the original article contains NAMES (people, countries, companies, organizations) or important NUMBERS/FIGURES, you MUST preserve those in your new title
-- Names and numbers are essential identifiers — readers need to know WHO, WHAT, and HOW MUCH the story is about
+- Names and numbers are essential identifiers — readers need to know WHO, WHAT, and HOW MUCH
 - NEVER use colons (:) in the title — write flowing, natural headlines instead
 - NEVER start titles with possessive forms like "Company's", "Person's" — these are overused and robotic
-- AVOID title structures like "Topic: Explanation" or "Subject: Details"
 - Use dynamic sentence structures: questions, action verbs, or intriguing statements
 - Aim for 12-18 words for maximum engagement
-- Make it intriguing — readers should NEED to click
 - Write like a seasoned newspaper editor crafting a front-page headline
-- Examples of GOOD titles: "Why Everyone Is Watching Elon Musk's Latest Move and What It Means for the Future", "Inside the Secret Deal That Could Transform How Apple Approaches the AI Market", "What Warren Buffett's Surprising Decision Reveals About the State of Global Investing"
-- Examples of BAD titles: "Tesla's New Era Begins", "Company's Bold Move", "Tech Giant Makes Move"
+
+Examples of GOOD titles: "Why Everyone Is Watching Elon Musk's Latest Move and What It Means for the Future", "Inside the Secret Deal That Could Transform How Apple Approaches the AI Market", "What Warren Buffett's Surprising Decision Reveals About the State of Global Investing"
+Examples of BAD titles: "Tesla's New Era Begins", "Company's Bold Move", "Tech Giant Makes Move"
 
 BODY RULES:
 - Is 100% in English (translate any non-English parts)
@@ -554,7 +588,9 @@ BODY RULES:
 - Preserves the original meaning, key facts, all specific names, and all numbers/figures
 - Has solid paragraph structure (5-7 paragraphs) with clear transitions
 - Approximately 700 words
-- Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling.`
+- Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling.
+
+Return ONLY the article text: headline on line 1, then a blank line, then the body paragraphs.`
         },
         { role: 'user', content: content.substring(0, 15000) }
       ],
@@ -563,33 +599,14 @@ BODY RULES:
     }),
   });
 
-  if (!reviewRes.ok) {
-    console.error('[mace-telegram-bot] Review API error:', reviewRes.status);
-    // CRITICAL: Default to NOT acceptable when review fails — never let unchecked content through
-    return { acceptable: false, issues: ['Could not complete quality review. Please try submitting again.'] };
+  if (!rewriteRes.ok) {
+    console.error('[mace-telegram-bot] Rewrite API error:', rewriteRes.status);
+    return null;
   }
 
-  const reviewData = await reviewRes.json();
-  const rawResponse = reviewData.choices?.[0]?.message?.content || '';
-
-  try {
-    const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      // If AI didn't return proper JSON, reject the article
-      return { acceptable: false, issues: ['Quality review was inconclusive. Please try submitting again.'] };
-    }
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    return {
-      acceptable: !!parsed.acceptable,
-      issues: Array.isArray(parsed.issues) ? parsed.issues : [],
-      rewrittenContent: parsed.rewritten || undefined,
-    };
-  } catch {
-    console.error('[mace-telegram-bot] Failed to parse review response');
-    // Default to NOT acceptable on parse failure
-    return { acceptable: false, issues: ['Quality review encountered an error. Please try submitting again.'] };
-  }
+  const data = await rewriteRes.json();
+  const result = data.choices?.[0]?.message?.content || '';
+  return result.length > 100 ? result : null;
 }
 
 // Helper: run review on content and handle session transition
@@ -618,16 +635,15 @@ async function handleContentReview(
       ? `\n\n<b>Issues found:</b>\n${review.issues.map((i: string) => `• ${i}`).join('\n')}`
       : '';
 
-    session.originalContent = content;
-    session.reviewedContent = review.rewrittenContent || content;
-    session.step = 'awaiting_review_approval';
-
+    // Now do the rewrite as a separate, dedicated call
     await sendTelegramMessage(botToken, chatId,
-      `📝 Your article needs some formatting and improvements.${issuesList}\n\n` +
-      `I've prepared an edited version for you. Would you like to see it?\n\n` +
-      `Reply <b>Yes</b> to see the edited version\n` +
-      `Reply <b>No</b> to submit another version`
+      `📝 Your article needs editing to meet publication standards.${issuesList}\n\n` +
+      `✍️ Reply <b>Rewrite</b> — I'll rewrite it into a professional article\n` +
+      `❌ Reply <b>Cancel</b> — discard and submit a new version`
     );
+
+    session.originalContent = content;
+    session.step = 'awaiting_edit_rewrite_decision';
     await saveSession(supabase, chatId, session);
   }
 }
@@ -1102,40 +1118,122 @@ Deno.serve(async (req) => {
       return new Response('OK', { status: 200 });
     }
 
-    // ── User reviewing AI-edited article ──
-    if (session.step === 'awaiting_review_approval') {
+    // ── User deciding on edit rewrite (after quality review found issues) ──
+    if (session.step === 'awaiting_edit_rewrite_decision') {
       const answer = text?.toLowerCase().trim();
 
-      if (answer === 'yes' || answer === 'y') {
-        // Show the rewritten content preview (truncated for Telegram)
-        const preview = (session.reviewedContent || '').substring(0, 3500);
-        const truncated = (session.reviewedContent || '').length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+      if (answer === 'rewrite' || answer === 'r' || answer === 'yes' || answer === 'y') {
+        await sendTelegramMessage(botToken, chatId, `✍️ Rewriting your article into a professional publication...`);
 
-        session.step = 'awaiting_final_approval';
-        await sendTelegramMessage(botToken, chatId,
-          `📄 <b>Edited version:</b>\n\n${preview}${truncated}\n\n` +
-          `Reply <b>Approve</b> to publish this version\n` +
-          `Reply <b>Cancel</b> to discard and submit a new version`
-        );
+        const rewritten = await rewriteArticleContent(LOVABLE_API_KEY, session.originalContent || '');
+
+        if (!rewritten) {
+          await sendTelegramMessage(botToken, chatId, `❌ Rewrite failed. Please try submitting again.`);
+          session.step = 'idle';
+          session.originalContent = undefined;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        const rewrittenLines = rewritten.split('\n');
+        const rewrittenTitle = rewrittenLines[0].replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim();
+        const rewrittenBody = rewrittenLines.slice(1).join('\n').trim();
+
+        session.reviewedContent = rewritten;
+        session.step = 'awaiting_edit_preview_approval';
         await saveSession(supabase, chatId, session);
+
+        const previewHeader = `✍️ <b>Here's the rewritten article:</b>\n\n<b>${rewrittenTitle}</b>\n\n`;
+        const previewBody = rewrittenBody.substring(0, 3500);
+        const bodyTruncated = rewrittenBody.length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+
+        await sendTelegramMessage(botToken, chatId, previewHeader + previewBody + bodyTruncated);
+        await sendTelegramMessage(botToken, chatId,
+          `👆 Review the article above.\n\n` +
+          `✅ Reply <b>Approve</b> — accept and continue to publishing\n` +
+          `🔄 Reply <b>Rewrite</b> — generate a new version\n` +
+          `❌ Reply <b>Cancel</b> — discard`
+        );
         return new Response('OK', { status: 200 });
       }
 
-      if (answer === 'no' || answer === 'n') {
+      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
         session.step = 'idle';
-        session.content = undefined;
         session.originalContent = undefined;
         session.reviewedContent = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `📝 No problem! Submit a revised version whenever you're ready.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Rewrite</b> or <b>Cancel</b>.`);
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── User approving/rejecting edit preview (from content review rewrite) ──
+    if (session.step === 'awaiting_edit_preview_approval') {
+      const answer = text?.toLowerCase().trim();
+
+      if (answer === 'approve' || answer === 'approved' || answer === 'yes' || answer === 'y') {
+        session.content = session.reviewedContent || '';
+        session.reviewedContent = undefined;
+        session.originalContent = undefined;
         session.photoFileId = undefined;
+        session.step = 'awaiting_photo';
 
         await sendTelegramMessage(botToken, chatId,
-          `📝 No problem! Please submit a revised version of your article whenever you're ready.`
+          `✅ Article approved!\n\n` +
+          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
+          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+          `Or reply <b>Skip</b> to publish without an image.`
         );
         await saveSession(supabase, chatId, session);
         return new Response('OK', { status: 200 });
       }
 
-      await sendTelegramMessage(botToken, chatId, `Please reply <b>Yes</b> to see the edited version or <b>No</b> to submit another version.`);
+      if (answer === 'rewrite' || answer === 'r') {
+        await sendTelegramMessage(botToken, chatId, `🔄 Generating a new version...`);
+
+        const rewritten = await rewriteArticleContent(LOVABLE_API_KEY, session.originalContent || '');
+
+        if (!rewritten) {
+          await sendTelegramMessage(botToken, chatId, `❌ Rewrite failed. Please try again.`);
+          session.step = 'idle';
+          session.reviewedContent = undefined;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        const newLines = rewritten.split('\n');
+        const newTitle = newLines[0].replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim();
+        const newBody = newLines.slice(1).join('\n').trim();
+
+        session.reviewedContent = rewritten;
+        await saveSession(supabase, chatId, session);
+
+        const previewHeader = `✍️ <b>Here's the new version:</b>\n\n<b>${newTitle}</b>\n\n`;
+        const previewBody = newBody.substring(0, 3500);
+        const bodyTruncated = newBody.length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+        await sendTelegramMessage(botToken, chatId, previewHeader + previewBody + bodyTruncated);
+        await sendTelegramMessage(botToken, chatId,
+          `👆 Review the article above.\n\n` +
+          `✅ Reply <b>Approve</b> — accept and continue to publishing\n` +
+          `🔄 Reply <b>Rewrite</b> — generate another version\n` +
+          `❌ Reply <b>Cancel</b> — discard`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
+        session.step = 'idle';
+        session.reviewedContent = undefined;
+        session.originalContent = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Discarded. Send me something else to publish!`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b>, <b>Rewrite</b>, or <b>Cancel</b>.`);
       return new Response('OK', { status: 200 });
     }
 
@@ -1409,39 +1507,6 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
     }
 
 
-    if (session.step === 'awaiting_final_approval') {
-      const answer = text?.toLowerCase().trim();
-
-      if (answer === 'approve' || answer === 'approved' || answer === 'yes') {
-        session.content = session.reviewedContent;
-        session.originalContent = undefined;
-        session.reviewedContent = undefined;
-        session.photoFileId = undefined;
-        session.step = 'awaiting_photo';
-
-        await sendTelegramMessage(botToken, chatId,
-          `✅ Great! Using the edited version.\n\n` +
-          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
-          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
-          `Or reply <b>Skip</b> to publish without an image.`
-        );
-        await saveSession(supabase, chatId, session);
-        return new Response('OK', { status: 200 });
-      }
-
-      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
-        session.step = 'idle';
-        session.content = undefined;
-        session.originalContent = undefined;
-        session.reviewedContent = undefined;
-        await sendTelegramMessage(botToken, chatId, `❌ Cancelled. Please submit a revised version whenever you're ready.`);
-        await saveSession(supabase, chatId, session);
-        return new Response('OK', { status: 200 });
-      }
-
-      await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b> or <b>Cancel</b>.`);
-      return new Response('OK', { status: 200 });
-    }
 
     // ── User sending featured image ──
     if (session.step === 'awaiting_photo') {
