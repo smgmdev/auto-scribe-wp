@@ -536,6 +536,114 @@ Be STRICT. Only mark acceptable if genuinely publication-ready.`
   }
 }
 
+// Tone-specific writing guidance (same as generate-article edge function)
+const toneGuidanceMap: Record<string, string> = {
+  neutral: 'Write in a balanced, objective tone. Present facts without emotional bias. Use clear, straightforward language that informs without persuading.',
+  professional: 'Write in a polished corporate tone. Use sophisticated vocabulary and authoritative language. Sound like a seasoned industry analyst or business correspondent.',
+  journalist: 'Write like a veteran news reporter. Lead with the most newsworthy angle. Use punchy sentences, active voice, and quote-worthy phrasing. Channel the style of Reuters or AP News.',
+  inspiring: 'Write with warmth and optimism. Highlight positive implications and human achievement. Use vivid language that motivates and uplifts while remaining credible.',
+  aggressive: 'Write with urgency and conviction. Use bold statements and direct language. Challenge assumptions and provoke thought. Sound like an op-ed columnist with strong opinions.',
+  powerful: 'Write with commanding authority. Use strong, decisive language. Every sentence should carry weight and impact. Sound like a thought leader making a definitive statement.',
+  important: 'Write with gravitas and significance. Emphasize the stakes and implications. Make readers understand why this matters now. Sound like breaking news from a major publication.',
+};
+
+// AI generate article from topic/headline (same logic as generate-article edge function)
+async function generateArticleFromTopic(apiKey: string, headline: string, tone: string): Promise<string | null> {
+  const selectedTone = tone || 'neutral';
+  const toneInstruction = toneGuidanceMap[selectedTone] || toneGuidanceMap.neutral;
+
+  const systemPrompt = `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content.
+
+WRITING STYLE RULES (CRITICAL):
+- NEVER use numbered lists or bullet points
+- NEVER use more than 1-2 subheadings in the entire article (and only if truly necessary)
+- NEVER start with cliché AI openings like "In a world where...", "In today's fast-paced...", "In a groundbreaking...", "In a move that...", "In an era of..."
+- NEVER use phrases like "It's worth noting", "Interestingly enough", "Needless to say", "At the end of the day"
+- Write in flowing paragraphs with natural transitions
+- Vary sentence length - mix short punchy sentences with longer complex ones
+- Start paragraphs differently - avoid repetitive structures
+- Use specific details, names, and concrete examples
+
+OPENING PARAGRAPH:
+- Start with a specific fact, striking observation, or narrative hook
+- Jump straight into the story - no throat-clearing or context-setting
+- Make it feel like you're continuing an ongoing conversation with the reader
+- Examples of good openings: "The numbers are staggering.", "Three days ago, everything changed.", "Nobody expected this."
+
+TONE: ${selectedTone.toUpperCase()}
+${toneInstruction}
+
+TARGET LENGTH: Approximately 700 words
+STRUCTURE: 5-7 paragraphs with natural flow, minimal or no subheadings`;
+
+  const userPrompt = `Write an article based on this headline: "${headline}"
+
+TITLE REQUIREMENTS:
+- Create a NEW compelling headline that sparks curiosity and matches the ${selectedTone.toUpperCase()} tone
+- CRITICAL: If the original headline contains NAMES (people, countries, companies, organizations), you MUST preserve those names in your new title
+- Names are essential identifiers - readers need to know WHO or WHAT the story is about
+- Weave the names naturally into an engaging headline structure
+- NEVER use colons (:) in the title - write flowing, natural headlines instead
+- NEVER start titles with possessive forms like "Company's", "Person's", "Country's" - these are overused and robotic
+- AVOID title structures like "Topic: Explanation" or "Subject: Details"
+- Use dynamic sentence structures: questions, action verbs, or intriguing statements
+- Make it intriguing and engaging - readers should NEED to click
+- Aim for 12-18 words for maximum engagement and impact (slightly longer titles perform better)
+- Write like a seasoned newspaper editor crafting a front-page headline
+
+Examples of GOOD titles (note how names are preserved and titles are longer): 
+- "Why Everyone Is Watching Elon Musk's Latest Move and What It Means for the Future"
+- "Inside the Secret Deal That Could Transform How Apple Approaches the AI Market"
+- "What Warren Buffett's Surprising Decision Reveals About the State of Global Investing"
+- "How Germany's Bold Climate Policy Is Forcing Europe to Rethink Everything"
+
+Examples of BAD titles (never do this): "Tesla's New Era Begins", "Apple's Big Announcement: What It Means", "Warren Buffett: The Oracle Speaks", "Company's Bold Move", "Tech Giant Makes Move"
+
+FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
+[Your new headline here - no prefix, just the headline - must include any names from the original]
+
+[Article content starts here - approximately 700 words, flowing paragraphs, human writing style]
+
+Remember: Write like a seasoned journalist, not an AI. No lists. No excessive formatting. Just compelling, human storytelling. PRESERVE ALL NAMES from the original headline.`;
+
+  const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    }),
+  });
+
+  if (!res.ok) {
+    console.error('[mace-telegram-bot] Generate article API error:', res.status);
+    return null;
+  }
+
+  const data = await res.json();
+  const result = data.choices?.[0]?.message?.content || '';
+  return result.length > 100 ? result : null;
+}
+
+// Fetch user's preferred tone from user_settings table
+async function getUserTone(supabase: any, userId: string): Promise<string> {
+  try {
+    const { data } = await supabase
+      .from('user_settings')
+      .select('default_tone')
+      .eq('user_id', userId)
+      .maybeSingle();
+    return data?.default_tone || 'neutral';
+  } catch {
+    return 'neutral';
+  }
+}
+
 // AI rewrite: transforms content into a professional essay-style article (same rules as generate-article)
 async function rewriteArticleContent(apiKey: string, content: string): Promise<string | null> {
   // Extract title from first line of source content
@@ -1265,6 +1373,77 @@ Deno.serve(async (req) => {
         session.originalContent = undefined;
         await saveSession(supabase, chatId, session);
         await sendTelegramMessage(botToken, chatId, `👍 Discarded. Send me something else to publish!`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b>, <b>Rewrite</b>, or <b>Cancel</b>.`);
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── User approving/rejecting AI-generated article from topic ──
+    if (session.step === 'awaiting_generate_preview_approval') {
+      const answer = text?.toLowerCase().trim();
+
+      if (answer === 'approve' || answer === 'approved' || answer === 'yes' || answer === 'y') {
+        session.content = session.reviewedContent || '';
+        session.reviewedContent = undefined;
+        session.originalContent = undefined;
+        (session as any).generateTone = undefined;
+        session.photoFileId = undefined;
+        session.step = 'awaiting_photo';
+
+        await sendTelegramMessage(botToken, chatId,
+          `✅ Article approved!\n\n` +
+          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
+          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
+          `Or reply <b>Skip</b> to publish without an image.`
+        );
+        await saveSession(supabase, chatId, session);
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'rewrite' || answer === 'r') {
+        await sendTelegramMessage(botToken, chatId, `🔄 Generating a new version...`);
+
+        const tone = (session as any).generateTone || 'neutral';
+        const topic = session.originalContent || '';
+        const generated = await generateArticleFromTopic(LOVABLE_API_KEY, topic, tone);
+
+        if (!generated) {
+          await sendTelegramMessage(botToken, chatId, `❌ Generation failed. Please try again.`);
+          session.step = 'idle';
+          session.reviewedContent = undefined;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        const newLines = generated.split('\n');
+        const newTitle = newLines[0].replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim();
+        const newBody = newLines.slice(1).join('\n').trim();
+
+        session.reviewedContent = generated;
+        await saveSession(supabase, chatId, session);
+
+        const previewHeader = `✍️ <b>Here's the new version:</b>\n\n<b>${newTitle}</b>\n\n`;
+        const previewBody = newBody.substring(0, 3500);
+        const bodyTruncated = newBody.length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+        await sendTelegramMessage(botToken, chatId, previewHeader + previewBody + bodyTruncated);
+        await sendTelegramMessage(botToken, chatId,
+          `👆 Review the article above.\n\n` +
+          `✅ Reply <b>Approve</b> — accept and continue to publishing\n` +
+          `🔄 Reply <b>Rewrite</b> — generate another version\n` +
+          `❌ Reply <b>Cancel</b> — discard`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
+        session.step = 'idle';
+        session.reviewedContent = undefined;
+        session.originalContent = undefined;
+        (session as any).generateTone = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Discarded. Send me something else!`);
         return new Response('OK', { status: 200 });
       }
 
@@ -2052,17 +2231,41 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         if (isPublishIntent(transcribedText)) {
           const topicMatch = transcribedText.match(/(?:about|on|titled?)\s+["']?(.+?)["']?\s*$/i);
           const topic = topicMatch ? topicMatch[1] : transcribedText.replace(/^(publish|write|article|post|create|draft|compose|blog)\s*/i, '').trim();
-          
-          session.content = topic || transcribedText;
-          session.photoFileId = undefined;
-          session.step = 'awaiting_photo';
+          const articleTopic = topic || transcribedText;
 
           await sendTelegramMessage(botToken, chatId,
             `🎙️ You said: "<i>${transcribedText}</i>"\n\n` +
-            `📝 Got it — I'll write an article about "${(topic || transcribedText).substring(0, 60)}".\n\n` +
-            `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
-            `💡 <b>Tip:</b> Horizontal/landscape format works best.\n\n` +
-            `Or reply <b>Skip</b> to publish without an image.`
+            `✍️ Generating an AI article about "${articleTopic.substring(0, 60)}"...`
+          );
+
+          const userTone = await getUserTone(supabase, supabaseUserId!);
+          const generated = await generateArticleFromTopic(LOVABLE_API_KEY, articleTopic, userTone);
+
+          if (!generated) {
+            await sendTelegramMessage(botToken, chatId, `❌ Failed to generate article. Please try again.`);
+            await saveSession(supabase, chatId, session);
+            return new Response('OK', { status: 200 });
+          }
+
+          const genLines = generated.split('\n');
+          const genTitle = genLines[0].replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim();
+          const genBody = genLines.slice(1).join('\n').trim();
+
+          session.reviewedContent = generated;
+          session.originalContent = articleTopic;
+          (session as any).generateTone = userTone;
+          session.step = 'awaiting_generate_preview_approval';
+
+          const previewHeader = `✍️ <b>Here's your AI-generated article:</b>\n\n<b>${genTitle}</b>\n\n`;
+          const previewBody = genBody.substring(0, 3500);
+          const bodyTruncated = genBody.length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+
+          await sendTelegramMessage(botToken, chatId, previewHeader + previewBody + bodyTruncated);
+          await sendTelegramMessage(botToken, chatId,
+            `👆 Review the article above.\n\n` +
+            `✅ Reply <b>Approve</b> — accept and continue to publishing\n` +
+            `🔄 Reply <b>Rewrite</b> — generate a new version\n` +
+            `❌ Reply <b>Cancel</b> — discard`
           );
         } else {
           // Conversational — use Perplexity
@@ -2247,16 +2450,46 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         // Extract topic from publish intent
         const topicMatch = text.match(/(?:about|on|titled?)\s+["']?(.+?)["']?\s*$/i);
         const topic = topicMatch ? topicMatch[1] : text.replace(/^(publish|write|article|post|create|draft|compose|blog)\s*/i, '').trim();
-        
-        session.content = topic || text;
-        session.photoFileId = undefined;
-        session.step = 'awaiting_photo';
+        const articleTopic = topic || text;
 
         await sendTelegramMessage(botToken, chatId,
-          `📝 Got it — I'll write an article about "${(topic || text).substring(0, 60)}${(topic || text).length > 60 ? '...' : ''}".\n\n` +
-          `📸 Now send me a <b>featured image</b> (JPG or PNG only).\n\n` +
-          `💡 <b>Tip:</b> Horizontal/landscape format works best (e.g. 1200×630 or 16:9 ratio).\n\n` +
-          `Or reply <b>Skip</b> to publish without an image.`
+          `✍️ Generating an AI article about "${articleTopic.substring(0, 60)}${articleTopic.length > 60 ? '...' : ''}"...`
+        );
+
+        // Fetch user's preferred tone from settings
+        const userTone = await getUserTone(supabase, supabaseUserId!);
+
+        // Generate full article using same logic as generate-article edge function
+        const generated = await generateArticleFromTopic(LOVABLE_API_KEY, articleTopic, userTone);
+
+        if (!generated) {
+          await sendTelegramMessage(botToken, chatId, `❌ Failed to generate article. Please try again.`);
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        // Parse title and body
+        const genLines = generated.split('\n');
+        const genTitle = genLines[0].replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim();
+        const genBody = genLines.slice(1).join('\n').trim();
+
+        // Store for approval
+        session.reviewedContent = generated;
+        session.originalContent = articleTopic; // Keep topic for potential re-generation
+        (session as any).generateTone = userTone;
+        session.step = 'awaiting_generate_preview_approval';
+
+        // Show preview
+        const previewHeader = `✍️ <b>Here's your AI-generated article:</b>\n\n<b>${genTitle}</b>\n\n`;
+        const previewBody = genBody.substring(0, 3500);
+        const bodyTruncated = genBody.length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+
+        await sendTelegramMessage(botToken, chatId, previewHeader + previewBody + bodyTruncated);
+        await sendTelegramMessage(botToken, chatId,
+          `👆 Review the article above.\n\n` +
+          `✅ Reply <b>Approve</b> — accept and continue to publishing\n` +
+          `🔄 Reply <b>Rewrite</b> — generate a new version\n` +
+          `❌ Reply <b>Cancel</b> — discard`
         );
       } else {
         // Normal conversation — use Perplexity AI
