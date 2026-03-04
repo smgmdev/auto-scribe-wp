@@ -63,6 +63,7 @@ export function AdminMaceAIView() {
   const scribeCommittedTextRef = useRef('');
   const scribeSilenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scribeActiveRef = useRef(false);
+  const scribeConnectedRef = useRef(false);
   const wordRevealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prefetchedTokenRef = useRef<string | null>(null);
   const tokenFetchingRef = useRef(false);
@@ -78,9 +79,11 @@ export function AdminMaceAIView() {
     languageCode: 'en',
     onConnect: () => {
       console.log('[Scribe] Connected to ElevenLabs STT');
+      scribeConnectedRef.current = true;
     },
     onDisconnect: () => {
       console.log('[Scribe] Disconnected from ElevenLabs STT');
+      scribeConnectedRef.current = false;
     },
     onError: (error) => {
       console.error('[Scribe] Error:', error);
@@ -201,9 +204,9 @@ export function AdminMaceAIView() {
 
   useEffect(() => {
     isMountedRef.current = true;
-    // Pre-fetch token and warm up connection on mount
-    prefetchScribeToken().then(() => warmUpScribe());
-    // Also request mic permission early
+    // Pre-fetch token so first mic tap is fast
+    prefetchScribeToken();
+    // Request mic permission early
     navigator.mediaDevices.getUserMedia({ audio: true }).then(s => s.getTracks().forEach(t => t.stop())).catch(() => {});
     return () => {
       isMountedRef.current = false;
@@ -221,8 +224,13 @@ export function AdminMaceAIView() {
     const text = scribeCommittedTextRef.current.trim();
     scribeCommittedTextRef.current = '';
     
-    // Don't disconnect — keep Scribe warm for instant next tap
-    // Connection will be cleaned up on unmount via stopAll()
+    // Disconnect Scribe to ensure a fresh connection next time
+    // This prevents stale WebSocket connections where isConnected is true but no data flows
+    try { scribe.disconnect(); } catch (_) {}
+    scribeConnectedRef.current = false;
+    
+    // Pre-fetch a new token so next mic tap is fast
+    prefetchScribeToken();
     
     if (!isMountedRef.current) return;
     
@@ -232,7 +240,7 @@ export function AdminMaceAIView() {
       setStep('idle');
       setInterimTranscript('');
     }
-  }, [scribe]);
+  }, [scribe, prefetchScribeToken]);
 
   const stopAll = useCallback(() => {
     // Clean up speculative AI calls
@@ -240,6 +248,7 @@ export function AdminMaceAIView() {
     if (speculativeAbortRef.current) { speculativeAbortRef.current.abort(); speculativeAbortRef.current = null; }
     speculativeResultRef.current = null;
     scribeActiveRef.current = false;
+    scribeConnectedRef.current = false;
     if (scribeSilenceTimerRef.current) { clearTimeout(scribeSilenceTimerRef.current); scribeSilenceTimerRef.current = null; }
     if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
     try { scribe.disconnect(); } catch (_) {}
@@ -419,24 +428,30 @@ export function AdminMaceAIView() {
     setStep('listening');
 
     try {
-      // If already connected (warm connection), just start listening immediately
-      if (!scribe.isConnected) {
-        let token = prefetchedTokenRef.current;
-        prefetchedTokenRef.current = null;
-
-        if (!token) {
-          const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
-          if (error || !data?.token) throw new Error('Failed to get speech recognition token');
-          token = data.token;
-        }
-
-        if (!scribeActiveRef.current || !isMountedRef.current) return;
-
-        await scribe.connect({
-          token,
-          microphone: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        });
+      // Always disconnect first to ensure fresh connection
+      // Stale WebSocket connections report isConnected=true but don't deliver transcripts
+      if (scribe.isConnected || scribeConnectedRef.current) {
+        try { scribe.disconnect(); } catch (_) {}
+        scribeConnectedRef.current = false;
+        // Small delay to allow clean disconnect before reconnecting
+        await new Promise(r => setTimeout(r, 100));
       }
+
+      let token = prefetchedTokenRef.current;
+      prefetchedTokenRef.current = null;
+
+      if (!token) {
+        const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
+        if (error || !data?.token) throw new Error('Failed to get speech recognition token');
+        token = data.token;
+      }
+
+      if (!scribeActiveRef.current || !isMountedRef.current) return;
+
+      await scribe.connect({
+        token,
+        microphone: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
 
       // Initial silence timer — if no speech at all after 10s, stop
       scribeSilenceTimerRef.current = setTimeout(() => {
