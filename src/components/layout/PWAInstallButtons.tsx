@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { supabase } from '@/integrations/supabase/client';
 
-export function PWAInstallButtons() {
+export function PWAInstallButtons({ fullWidth = false }: { fullWidth?: boolean }) {
   const { canInstall, isInstalled, isIOS, promptInstall } = usePWAInstall();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ export function PWAInstallButtons() {
 
   return (
     <div className="w-full">
-      <div className="max-w-[980px] mx-auto px-0 lg:px-6 pt-0">
+      <div className={`${fullWidth ? '' : 'max-w-[980px]'} mx-auto px-0 lg:px-6 pt-0`}>
         <div className="flex flex-col lg:flex-row gap-0">
             {/* Android / Chrome install */}
             <button
