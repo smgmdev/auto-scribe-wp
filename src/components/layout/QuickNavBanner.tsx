@@ -119,7 +119,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       Arcana Mace
                     </h3>
                     <p className="text-white/50 text-sm leading-relaxed">
-                      Connecting brands to a global network of media agencies, Arcana Mace delivers seamless media buying and publishing services worldwide.
+                      Global media infrastructure platform enabling seamless media transactions, publishing solutions, and API-driven business communications.
                     </p>
                   </div>
                   <div className="bg-[#1a1a1a] p-6">
