@@ -65,7 +65,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
   return (
     <>
       {/* Fixed banner + expandable panel */}
-      <div className={`${inDashboard ? 'hidden lg:block' : 'fixed top-0 left-0 right-0'} z-50 bg-black`}>
+      <div className={`${inDashboard ? 'hidden lg:block' : 'fixed top-0 left-0 right-0'} z-[60] bg-black`}>
         {/* Top bar */}
         <div className="text-white text-[10px] md:text-xs py-1.5 px-4 md:px-6 tracking-tight">
           <div className={`flex items-center gap-1.5 md:gap-2.5 whitespace-nowrap overflow-hidden ${!inDashboard ? 'max-w-[980px] mx-auto' : ''}`}>
