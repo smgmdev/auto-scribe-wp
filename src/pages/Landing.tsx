@@ -672,7 +672,7 @@ const Landing = () => {
         )}
 
         {/* Bug Report CTA Section */}
-        <section className="relative overflow-hidden mt-12">
+        <section className="relative overflow-hidden">
           {!bugReportVideoLoaded && (
             <div className="absolute bottom-4 right-4 z-20">
               <Loader2 className="h-6 w-6 animate-spin text-[#0071e3]" />
