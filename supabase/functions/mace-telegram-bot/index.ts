@@ -1226,9 +1226,31 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
           return new Response('OK', { status: 200 });
         }
 
-        // Run through content review
-        (session as any).extractedArticle = undefined;
-        await handleContentReview(botToken, chatId, session, rewrittenText, LOVABLE_API_KEY, supabase);
+        // Show rewritten preview for user approval
+        // Keep extractedArticle in session for potential re-rewrite
+
+        // Parse title and body from rewritten text
+        const rewrittenLines = rewrittenText.split('\n');
+        const rewrittenTitle = rewrittenLines[0].replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim();
+        const rewrittenBody = rewrittenLines.slice(1).join('\n').trim();
+
+        session.reviewedContent = rewrittenText;
+        session.step = 'awaiting_rewrite_preview_approval';
+        await saveSession(supabase, chatId, session);
+
+        // Send preview in chunks if needed (Telegram 4096 char limit)
+        const previewHeader = `✍️ <b>Here's the rewritten article:</b>\n\n<b>${rewrittenTitle}</b>\n\n`;
+        const previewBody = rewrittenBody.substring(0, 3500);
+        const bodyTruncated = rewrittenBody.length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+
+        await sendTelegramMessage(botToken, chatId, previewHeader + previewBody + bodyTruncated);
+
+        await sendTelegramMessage(botToken, chatId,
+          `👆 Review the article above.\n\n` +
+          `✅ Reply <b>Approve</b> — accept and continue to publishing\n` +
+          `🔄 Reply <b>Rewrite</b> — generate a new version\n` +
+          `❌ Reply <b>Cancel</b> — discard`
+        );
         return new Response('OK', { status: 200 });
       }
 
@@ -1244,7 +1266,137 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
       return new Response('OK', { status: 200 });
     }
 
-    // ── User approving/rejecting the rewritten version ──
+    // ── User approving/rejecting rewrite preview (from news URL rewrite) ──
+    if (session.step === 'awaiting_rewrite_preview_approval') {
+      const answer = text?.toLowerCase().trim();
+
+      if (answer === 'approve' || answer === 'approved' || answer === 'yes' || answer === 'y') {
+        // User approved the rewrite — proceed to content review then photo
+        const rewrittenText = session.reviewedContent || '';
+        session.reviewedContent = undefined;
+        await handleContentReview(botToken, chatId, session, rewrittenText, LOVABLE_API_KEY, supabase);
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'rewrite' || answer === 'r') {
+        // User wants a new version — re-trigger rewrite
+        const extractedArticle = (session as any).extractedArticle;
+        if (!extractedArticle) {
+          // No stored article, go back to idle
+          session.step = 'idle';
+          session.reviewedContent = undefined;
+          await saveSession(supabase, chatId, session);
+          await sendTelegramMessage(botToken, chatId, `Original article data was lost. Please share the link again.`);
+          return new Response('OK', { status: 200 });
+        }
+        // Re-trigger the rewrite decision handler
+        session.step = 'awaiting_rewrite_decision';
+        await saveSession(supabase, chatId, session);
+        // Simulate "rewrite" answer by recursing into the handler
+        await sendTelegramMessage(botToken, chatId, `🔄 Generating a new version...`);
+        // We need to actually do the rewrite here
+        const rewriteRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              {
+                role: 'system',
+                content: `You are an experienced human journalist writing for a major publication. Your writing must be indistinguishable from human-written content. Rewrite the following news article into a completely unique, original article.
+
+WRITING STYLE RULES (CRITICAL):
+- NEVER use numbered lists or bullet points
+- NEVER use more than 1-2 subheadings in the entire article (and only if truly necessary)
+- NEVER start with cliché AI openings like "In a world where...", "In today's fast-paced...", "In a groundbreaking...", "In a move that...", "In an era of..."
+- NEVER use phrases like "It's worth noting", "Interestingly enough", "Needless to say", "At the end of the day"
+- Write in flowing paragraphs with natural transitions
+- Vary sentence length — mix short punchy sentences with longer complex ones
+- Start paragraphs differently — avoid repetitive structures
+- Use specific details, names, numbers, and concrete examples
+
+OPENING PARAGRAPH:
+- Start with a specific fact, striking observation, or narrative hook
+- Jump straight into the story — no throat-clearing or context-setting
+
+TITLE RULES:
+- CRITICAL: Preserve ALL names (people, countries, companies, organizations) AND important numbers/figures from the original in your new title
+- NEVER use colons (:) in the title
+- NEVER start titles with possessive forms like "Company's", "Person's"
+- Aim for 12-18 words for maximum engagement
+
+BODY RULES:
+- Approximately 700 words
+- 5-7 well-structured paragraphs with clear transitions
+- Preserves all key facts, names, data, and numbers from the original
+- Professional journalistic tone
+- 100% in English
+- LESS THAN 50% textually similar to the source
+- Take a COMPLETELY DIFFERENT angle and narrative flow from the previous version
+
+Return ONLY the article text: headline on line 1, then a blank line, then the body paragraphs.`
+              },
+              { role: 'user', content: `Source: ${extractedArticle.source}\nOriginal Title: ${extractedArticle.title}\n\nArticle:\n${extractedArticle.content.substring(0, 15000)}` }
+            ],
+            temperature: 0.85,
+            max_tokens: 4000,
+          }),
+        });
+
+        if (!rewriteRes.ok) {
+          await sendTelegramMessage(botToken, chatId, `❌ Rewrite failed. Please try again.`);
+          session.step = 'idle';
+          session.reviewedContent = undefined;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        const rewriteData = await rewriteRes.json();
+        const newText = rewriteData.choices?.[0]?.message?.content || '';
+
+        if (!newText || newText.length < 100) {
+          await sendTelegramMessage(botToken, chatId, `❌ Rewrite produced insufficient content. Please try again.`);
+          session.step = 'idle';
+          session.reviewedContent = undefined;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        const newLines = newText.split('\n');
+        const newTitle = newLines[0].replace(/^#+\s*/, '').replace(/^\*\*(.+)\*\*$/, '$1').trim();
+        const newBody = newLines.slice(1).join('\n').trim();
+
+        session.reviewedContent = newText;
+        session.step = 'awaiting_rewrite_preview_approval';
+        await saveSession(supabase, chatId, session);
+
+        const previewHeader = `✍️ <b>Here's the new version:</b>\n\n<b>${newTitle}</b>\n\n`;
+        const previewBody = newBody.substring(0, 3500);
+        const bodyTruncated = newBody.length > 3500 ? '\n\n<i>... (truncated for preview)</i>' : '';
+        await sendTelegramMessage(botToken, chatId, previewHeader + previewBody + bodyTruncated);
+        await sendTelegramMessage(botToken, chatId,
+          `👆 Review the article above.\n\n` +
+          `✅ Reply <b>Approve</b> — accept and continue to publishing\n` +
+          `🔄 Reply <b>Rewrite</b> — generate another version\n` +
+          `❌ Reply <b>Cancel</b> — discard`
+        );
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
+        session.step = 'idle';
+        session.reviewedContent = undefined;
+        (session as any).extractedArticle = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Discarded. Send me something else to publish!`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Please reply <b>Approve</b>, <b>Rewrite</b>, or <b>Cancel</b>.`);
+      return new Response('OK', { status: 200 });
+    }
+
+
     if (session.step === 'awaiting_final_approval') {
       const answer = text?.toLowerCase().trim();
 
