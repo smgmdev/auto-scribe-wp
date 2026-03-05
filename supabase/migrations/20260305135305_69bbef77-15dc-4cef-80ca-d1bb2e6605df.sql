@@ -1,0 +1,1 @@
+UPDATE public.missile_alerts SET severity = 'trade', origin_country_code = NULL, destination_country_code = NULL, origin_country_name = NULL, destination_country_name = NULL WHERE id = '45ed27fe-286c-4f40-bb23-2663cd9032ad';
