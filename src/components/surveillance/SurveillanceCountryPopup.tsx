@@ -33,6 +33,7 @@ interface MissileAlert {
 }
 
 export function SurveillanceCountryPopup() {
+  const [expandedAlerts, setExpandedAlerts] = useState<Set<string>>(new Set());
   const selectedCountry = useAppStore((s) => s.surveillanceCountry);
   const showPopup = useAppStore((s) => s.showSurveillancePopup);
   const closeSurveillancePopup = useAppStore((s) => s.closeSurveillancePopup);
@@ -131,21 +132,31 @@ export function SurveillanceCountryPopup() {
     return <span className="text-[9px] text-red-400 bg-red-500/10 px-1 rounded">MISSILE</span>;
   };
 
+  const toggleExpand = (id: string) => {
+    setExpandedAlerts(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const renderAlert = (m: MissileAlert, direction: 'launched' | 'targeted') => {
     const date = new Date(m.published_at || m.created_at);
     const timeStr = date.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+    const isExpanded = expandedAlerts.has(m.id);
     return (
       <li key={m.id} className={cn(
-        "text-xs flex items-start gap-1.5 p-1.5 rounded border",
+        "text-xs flex items-start gap-1.5 p-1.5 rounded border cursor-pointer transition-colors hover:bg-white/5",
         m.severity === 'trade' ? 'bg-cyan-500/5 border-cyan-500/20' :
         m.severity === 'hbomb' ? 'bg-orange-500/5 border-orange-500/20' :
         m.severity === 'nuke' ? 'bg-yellow-500/5 border-yellow-500/20' :
         direction === 'launched' ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'
-      )}>
+      )} onClick={() => toggleExpand(m.id)}>
         {getSeverityIcon(m.severity)}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="text-gray-300 truncate flex-1">{m.title}</p>
+            <p className={cn("text-gray-300 flex-1", isExpanded ? 'whitespace-normal' : 'truncate')}>{m.title}</p>
             {getSeverityLabel(m.severity)}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
