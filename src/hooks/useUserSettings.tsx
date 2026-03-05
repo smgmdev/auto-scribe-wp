@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast' | 'times-of-israel';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast' | 'times-of-israel' | 'moscow-times' | 'rt-russia' | 'tass' | 'kyiv-independent' | 'ukrainska-pravda' | 'al-jazeera' | 'gulf-news' | 'arab-news' | 'scmp' | 'channel-news-asia' | 'straits-times';
 
 export interface UserSettings {
   selectedSources: SourceType[];

@@ -24,6 +24,21 @@ const sourceColors: Record<string, string> = {
   'fortune-latest': 'bg-pink-500/10 text-pink-600 border-pink-500/30',
   'nikkei-asia': 'bg-rose-500/10 text-rose-600 border-rose-500/30',
   'cnn-middleeast': 'bg-orange-500/10 text-orange-600 border-orange-500/30',
+  // Russia
+  'moscow-times': 'bg-blue-500/10 text-blue-600 border-blue-500/30',
+  'rt-russia': 'bg-green-600/10 text-green-700 border-green-600/30',
+  'tass': 'bg-sky-500/10 text-sky-600 border-sky-500/30',
+  // Ukraine
+  'kyiv-independent': 'bg-yellow-500/10 text-yellow-700 border-yellow-500/30',
+  'ukrainska-pravda': 'bg-blue-600/10 text-blue-700 border-blue-600/30',
+  // Arabian
+  'al-jazeera': 'bg-amber-600/10 text-amber-700 border-amber-600/30',
+  'gulf-news': 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30',
+  'arab-news': 'bg-lime-500/10 text-lime-700 border-lime-500/30',
+  // Asia local
+  'scmp': 'bg-orange-600/10 text-orange-700 border-orange-600/30',
+  'channel-news-asia': 'bg-red-600/10 text-red-700 border-red-600/30',
+  'straits-times': 'bg-indigo-500/10 text-indigo-600 border-indigo-500/30',
 };
 
 const sourceLabels: Record<string, string> = {
@@ -38,21 +53,40 @@ const sourceLabels: Record<string, string> = {
   'fortune-latest': 'Fortune Latest',
   'nikkei-asia': 'NIKKEI Asia',
   'cnn-middleeast': 'CNN Middle East',
+  // Russia
+  'moscow-times': 'Moscow Times',
+  'rt-russia': 'RT',
+  'tass': 'TASS',
+  // Ukraine
+  'kyiv-independent': 'Kyiv Independent',
+  'ukrainska-pravda': 'Ukrainska Pravda',
+  // Arabian
+  'al-jazeera': 'Al Jazeera',
+  'gulf-news': 'Gulf News',
+  'arab-news': 'Arab News',
+  // Asia local
+  'scmp': 'South China Morning Post',
+  'channel-news-asia': 'Channel News Asia',
+  'straits-times': 'Straits Times',
 };
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast' | 'moscow-times' | 'rt-russia' | 'tass' | 'kyiv-independent' | 'ukrainska-pravda' | 'al-jazeera' | 'gulf-news' | 'arab-news' | 'scmp' | 'channel-news-asia' | 'straits-times';
 
 // Category to sources mapping
 const categorySourcesMap: Record<string, SourceType[]> = {
   political: ['euronews', 'euronews-economy'],
   business: ['bloomberg', 'bloomberg-latest', 'fortune'],
-  middleeast: ['bloomberg-middleeast', 'cnn-middleeast'],
-  asia: ['bloomberg-asia', 'nikkei-asia'],
+  middleeast: ['bloomberg-middleeast', 'cnn-middleeast', 'al-jazeera', 'gulf-news', 'arab-news'],
+  asia: ['bloomberg-asia', 'nikkei-asia', 'scmp', 'channel-news-asia', 'straits-times'],
+  russia: ['moscow-times', 'rt-russia', 'tass'],
+  ukraine: ['kyiv-independent', 'ukrainska-pravda'],
 };
 
 const allSources: SourceType[] = [
   'euronews', 'euronews-economy', 'bloomberg', 'bloomberg-latest', 'fortune',
-  'bloomberg-middleeast', 'cnn-middleeast', 'bloomberg-asia', 'nikkei-asia'
+  'bloomberg-middleeast', 'cnn-middleeast', 'al-jazeera', 'gulf-news', 'arab-news',
+  'bloomberg-asia', 'nikkei-asia', 'scmp', 'channel-news-asia', 'straits-times',
+  'moscow-times', 'rt-russia', 'tass', 'kyiv-independent', 'ukrainska-pravda',
 ];
 
 export function HeadlinesView() {
@@ -207,11 +241,13 @@ export function HeadlinesView() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="overflow-x-auto scrollbar-hide mb-4">
-              <TabsList className="inline-flex w-auto md:grid md:grid-cols-4 md:w-full p-0 h-auto bg-white/10">
+              <TabsList className="inline-flex w-auto md:grid md:grid-cols-6 md:w-full p-0 h-auto bg-white/10">
                 <TabsTrigger value="political" className="py-2 px-6 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Political</TabsTrigger>
                 <TabsTrigger value="business" className="py-2 px-6 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Business</TabsTrigger>
                 <TabsTrigger value="middleeast" className="py-2 px-6 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Middle East</TabsTrigger>
                 <TabsTrigger value="asia" className="py-2 px-6 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Asia</TabsTrigger>
+                <TabsTrigger value="russia" className="py-2 px-6 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Russia</TabsTrigger>
+                <TabsTrigger value="ukraine" className="py-2 px-6 data-[state=active]:bg-white data-[state=active]:text-foreground text-white/60 bg-transparent whitespace-nowrap">Ukraine</TabsTrigger>
               </TabsList>
             </div>
 
@@ -240,6 +276,20 @@ export function HeadlinesView() {
               <p className="text-xs text-white/50 mb-3">Asia Pacific</p>
               <div className="flex flex-wrap gap-6">
                 {categorySourcesMap.asia.map(renderSourceCheckbox)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="russia" className="space-y-3">
+              <p className="text-xs text-white/50 mb-3">Russia News</p>
+              <div className="flex flex-wrap gap-6">
+                {categorySourcesMap.russia.map(renderSourceCheckbox)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ukraine" className="space-y-3">
+              <p className="text-xs text-white/50 mb-3">Ukraine News</p>
+              <div className="flex flex-wrap gap-6">
+                {categorySourcesMap.ukraine.map(renderSourceCheckbox)}
               </div>
             </TabsContent>
           </Tabs>

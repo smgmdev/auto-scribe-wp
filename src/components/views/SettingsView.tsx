@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast as sonnerToast } from 'sonner';
 import type { ArticleTone } from '@/types';
 
-type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast' | 'times-of-israel';
+type SourceType = 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast' | 'times-of-israel' | 'moscow-times' | 'rt-russia' | 'tass' | 'kyiv-independent' | 'ukrainska-pravda' | 'al-jazeera' | 'gulf-news' | 'arab-news' | 'scmp' | 'channel-news-asia' | 'straits-times';
 
 const sourceLabels: Record<string, string> = {
   euronews: 'Euronews',
@@ -27,13 +27,26 @@ const sourceLabels: Record<string, string> = {
   'nikkei-asia': 'NIKKEI Asia',
   'cnn-middleeast': 'CNN Middle East',
   'times-of-israel': 'Times of Israel',
+  'moscow-times': 'Moscow Times',
+  'rt-russia': 'RT',
+  'tass': 'TASS',
+  'kyiv-independent': 'Kyiv Independent',
+  'ukrainska-pravda': 'Ukrainska Pravda',
+  'al-jazeera': 'Al Jazeera',
+  'gulf-news': 'Gulf News',
+  'arab-news': 'Arab News',
+  'scmp': 'South China Morning Post',
+  'channel-news-asia': 'Channel News Asia',
+  'straits-times': 'Straits Times',
 };
 
 const categorySourcesMap: Record<string, SourceType[]> = {
   political: ['euronews', 'euronews-economy'],
   business: ['bloomberg', 'bloomberg-latest', 'fortune'],
-  middleeast: ['bloomberg-middleeast', 'cnn-middleeast', 'times-of-israel'],
-  asia: ['bloomberg-asia', 'nikkei-asia'],
+  middleeast: ['bloomberg-middleeast', 'cnn-middleeast', 'times-of-israel', 'al-jazeera', 'gulf-news', 'arab-news'],
+  asia: ['bloomberg-asia', 'nikkei-asia', 'scmp', 'channel-news-asia', 'straits-times'],
+  russia: ['moscow-times', 'rt-russia', 'tass'],
+  ukraine: ['kyiv-independent', 'ukrainska-pravda'],
 };
 
 const tones: {
@@ -167,11 +180,13 @@ export function SettingsView() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeSourceTab} onValueChange={setActiveSourceTab}>
-              <TabsList className="flex w-full gap-1 mb-4 h-auto p-1">
+              <TabsList className="flex w-full gap-1 mb-4 h-auto p-1 flex-wrap">
                 <TabsTrigger value="political" className="flex-1 px-3 py-2 text-xs">Political</TabsTrigger>
                 <TabsTrigger value="business" className="flex-1 px-3 py-2 text-xs">Business</TabsTrigger>
                 <TabsTrigger value="middleeast" className="flex-1 px-3 py-2 text-xs">Mid East</TabsTrigger>
                 <TabsTrigger value="asia" className="flex-1 px-3 py-2 text-xs">Asia</TabsTrigger>
+                <TabsTrigger value="russia" className="flex-1 px-3 py-2 text-xs">Russia</TabsTrigger>
+                <TabsTrigger value="ukraine" className="flex-1 px-3 py-2 text-xs">Ukraine</TabsTrigger>
               </TabsList>
 
               <TabsContent value="political" className="space-y-3">
@@ -199,6 +214,20 @@ export function SettingsView() {
                 <p className="text-xs text-muted-foreground mb-3">Asia & Pacific</p>
                 <div className="flex flex-wrap gap-6">
                   {categorySourcesMap.asia.map(renderSourceCheckbox)}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="russia" className="space-y-3">
+                <p className="text-xs text-muted-foreground mb-3">Russia</p>
+                <div className="flex flex-wrap gap-6">
+                  {categorySourcesMap.russia.map(renderSourceCheckbox)}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="ukraine" className="space-y-3">
+                <p className="text-xs text-muted-foreground mb-3">Ukraine</p>
+                <div className="flex flex-wrap gap-6">
+                  {categorySourcesMap.ukraine.map(renderSourceCheckbox)}
                 </div>
               </TabsContent>
             </Tabs>
