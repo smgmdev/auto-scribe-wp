@@ -27,6 +27,8 @@ interface MissileAlert {
   created_at: string;
   origin_country_name: string | null;
   destination_country_name: string | null;
+  origin_country_code: string | null;
+  destination_country_code: string | null;
   severity: string;
 }
 
@@ -81,9 +83,10 @@ export function SurveillanceCountryPopup() {
       const earliestCutoff = activeFilters.reduce((min, f) => f.cutoff < min ? f.cutoff : min, activeFilters[0].cutoff);
       const activeSeverities = activeFilters.map(f => f.severity);
       
+      // Query by country CODE (not name) for both origin and destination
       const { data } = await supabase
         .from('missile_alerts')
-        .select('id, title, published_at, created_at, origin_country_name, destination_country_name, severity')
+        .select('id, title, published_at, created_at, origin_country_name, destination_country_name, severity, origin_country_code, destination_country_code')
         .eq('active', true)
         .in('severity', activeSeverities)
         .or(`origin_country_code.eq.${code},destination_country_code.eq.${code}`)
@@ -154,8 +157,8 @@ export function SurveillanceCountryPopup() {
     );
   };
 
-  const launched = countryMissiles.filter(m => m.origin_country_name?.toLowerCase() === selectedCountry.name.toLowerCase());
-  const targeted = countryMissiles.filter(m => m.destination_country_name?.toLowerCase() === selectedCountry.name.toLowerCase() && m.origin_country_name?.toLowerCase() !== selectedCountry.name.toLowerCase());
+  const launched = countryMissiles.filter(m => m.origin_country_code === selectedCountry.code);
+  const targeted = countryMissiles.filter(m => m.destination_country_code === selectedCountry.code && m.origin_country_code !== selectedCountry.code);
 
   return (
     <DraggablePopup

@@ -366,7 +366,7 @@ export function AdminSurveillanceView() {
     if (showMissiles) missileTrajectories.forEach(t => { addScore(t.origin_country_code, 40); addScore(t.destination_country_code, 60); });
     if (showDrones) droneTrajectories.forEach(t => { addScore(t.origin_country_code, 25); addScore(t.destination_country_code, 40); });
 
-    return scanData.countries.map(c => {
+    const processed = scanData.countries.map(c => {
       const hasEvents = activeCountryCodes.has(c.code);
       const hasTrajectory = trajectoryCountryCodes.has(c.code);
       const attackBoost = countryAttackScore.get(c.code) || 0;
@@ -381,6 +381,25 @@ export function AdminSurveillanceView() {
       // Only zero out countries that Perplexity also scored as safe AND have no active events
       return { ...c, score: 0, threat_level: 'safe' as const, events: [] };
     });
+    
+    // Add countries from trajectories that weren't in Perplexity's country list
+    const existingCodes = new Set(processed.map(c => c.code));
+    for (const code of trajectoryCountryCodes) {
+      if (!existingCodes.has(code)) {
+        const boost = countryAttackScore.get(code) || 40;
+        const score = Math.min(100, boost);
+        processed.push({
+          code,
+          name: code, // Will be resolved by globe coordinate lookup
+          threat_level: score >= 60 ? 'danger' as const : score >= 30 ? 'caution' as const : 'safe' as const,
+          score,
+          summary: 'Country involved in active attack trajectories.',
+          events: [],
+        });
+      }
+    }
+    
+    return processed;
   }, [scanData?.countries, filteredEvents, missileTrajectories, droneTrajectories, nukeTrajectories, hbombTrajectories, showMissiles, showDrones, showNukes, showHbombs]);
 
   const dangerCount = filteredCountries.filter(c => c.score >= 60).length || 0;

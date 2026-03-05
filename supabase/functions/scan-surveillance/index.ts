@@ -205,6 +205,36 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   'mozambique': 'MZ', 'south africa': 'ZA',
 };
 
+// Reverse lookup: code → name (use the most natural/common name for each code)
+const CODE_TO_COUNTRY_NAME: Record<string, string> = {};
+// Build reverse map, preferring full country names over adjectives/cities
+const NAME_PRIORITY: Record<string, number> = {};
+for (const [name, code] of Object.entries(COUNTRY_NAME_TO_CODE)) {
+  const existing = NAME_PRIORITY[code] || 0;
+  // Prefer names that are NOT adjectives (don't end in 'i', 'n', 'an', 'ese') and not cities
+  const isAdjective = /i$|ian$|ish$|ese$|ch$/.test(name);
+  const isCity = ['kyiv','kiev','odessa','kharkiv','moscow','tehran','tel aviv','jerusalem','beirut','damascus','baghdad','riyadh','sanaa','aden','dubai','abu dhabi','natanz','isfahan','bushehr','fordow','parchin','haifa','gaza city','rafah','khan younis','aleppo','idlib','homs','tripoli','benghazi','misrata','khartoum','darfur','mogadishu','addis ababa','taipei','pyongyang','seoul','kabul','kandahar','kherson','zaporizhzhia','dnipro','lviv','crimea','donetsk','luhansk','mariupol','st. petersburg','belgorod','kursk','bryansk','west bank'].includes(name);
+  const isGroup = ['hezbollah','hamas','houthi','houthis','dprk','idf'].includes(name);
+  const priority = (isAdjective ? 1 : 0) + (isCity ? 2 : 0) + (isGroup ? 3 : 0);
+  // Lower priority number = better name. Keep the best (lowest priority, longest name for ties)
+  if (!CODE_TO_COUNTRY_NAME[code] || priority < existing || (priority === existing && name.length > CODE_TO_COUNTRY_NAME[code].length)) {
+    CODE_TO_COUNTRY_NAME[code] = name.charAt(0).toUpperCase() + name.slice(1);
+    NAME_PRIORITY[code] = priority;
+  }
+}
+// Manual overrides for correctness
+Object.assign(CODE_TO_COUNTRY_NAME, {
+  US: 'United States', UA: 'Ukraine', RU: 'Russia', IL: 'Israel', IR: 'Iran',
+  PS: 'Palestine', LB: 'Lebanon', SY: 'Syria', YE: 'Yemen', IQ: 'Iraq',
+  SA: 'Saudi Arabia', KP: 'North Korea', KR: 'South Korea', CN: 'China',
+  TW: 'Taiwan', IN: 'India', PK: 'Pakistan', TR: 'Turkey', EG: 'Egypt',
+  AE: 'UAE', QA: 'Qatar', KW: 'Kuwait', BH: 'Bahrain', JO: 'Jordan',
+  AF: 'Afghanistan', SD: 'Sudan', SO: 'Somalia', ET: 'Ethiopia', LY: 'Libya',
+  MM: 'Myanmar', CD: 'DRC', VE: 'Venezuela', CO: 'Colombia', MX: 'Mexico',
+  BR: 'Brazil', NG: 'Nigeria', ML: 'Mali', BF: 'Burkina Faso', NE: 'Niger',
+  TD: 'Chad', CM: 'Cameroon', MZ: 'Mozambique', ZA: 'South Africa', OM: 'Oman',
+});
+
 // Known attack route patterns: attacker → target
 const KNOWN_ATTACK_ROUTES: Array<{ keywords: string[]; origin: string; destination: string }> = [
   // Russia-Ukraine
@@ -768,6 +798,9 @@ Deno.serve(async (req) => {
             originCode = originCode || inferred.origin;
             destCode = destCode || inferred.destination;
           }
+          // Resolve names from codes if missing
+          if (originCode && !originName) originName = CODE_TO_COUNTRY_NAME[originCode] || null;
+          if (destCode && !destName) destName = CODE_TO_COUNTRY_NAME[destCode] || null;
           
           return {
             title: event.title,
