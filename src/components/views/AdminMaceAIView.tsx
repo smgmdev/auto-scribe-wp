@@ -465,14 +465,16 @@ export function AdminMaceAIView() {
     }
     isProcessingRef.current = true;
 
-    // Full cleanup
+    // Full cleanup — but don't kill audio during active publish flow
     if (recognitionRef.current) {
       try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
     }
     if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
-    window.speechSynthesis.cancel();
+    if (!publishFlowActiveRef.current) {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
+      window.speechSynthesis.cancel();
+    }
 
     if (!isMountedRef.current) { isProcessingRef.current = false; return; }
     setStep('processing');
@@ -637,8 +639,10 @@ export function AdminMaceAIView() {
       if (data?.type === 'pending_publish') {
         await speak(displayMessage, () => {
           done();
-          // Auto-start listening for the confirmation response
-          startListening();
+          // Small delay before auto-listening to avoid picking up TTS audio echo
+          setTimeout(() => {
+            if (isMountedRef.current) startListening();
+          }, 600);
         });
       } else {
         await speak(displayMessage, done);
