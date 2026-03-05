@@ -43,14 +43,19 @@ export function SurveillanceCameraPopup() {
               </span>
               <span className="text-[8px] font-medium text-gray-300 uppercase tracking-wider">{feed.label}</span>
             </div>
-            <div className="w-full" style={{ aspectRatio: '16/9' }}>
+            <div className="w-full relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
               <iframe
-                src={`https://www.youtube.com/embed/${feed.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0`}
-                className="w-full h-full border-0"
+                src={`https://www.youtube.com/embed/${feed.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1`}
+                className="absolute border-0"
+                style={{ top: '-60px', left: '-2px', right: '-2px', width: 'calc(100% + 4px)', height: 'calc(100% + 120px)' }}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title={feed.label}
               />
+              {/* Bottom overlay to hide YouTube logo */}
+              <div className="absolute bottom-0 left-0 right-0 h-[50px] bg-gradient-to-t from-[#0d1220] via-[#0d1220]/90 to-transparent pointer-events-none z-10" />
+              {/* Top overlay to hide YouTube header */}
+              <div className="absolute top-0 left-0 right-0 h-[40px] bg-gradient-to-b from-[#0d1220] via-[#0d1220]/90 to-transparent pointer-events-none z-10" />
             </div>
           </div>
         ))}
