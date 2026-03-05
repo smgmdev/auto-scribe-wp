@@ -712,53 +712,55 @@ function CameraResetter({ trigger }: { trigger: number }) {
   return null;
 }
 
-function SatelliteMarker({ satellite }: { satellite: SatelliteData }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
-  
-  // Convert lat/lng to position above globe (altitude scaled)
-  const altitudeScale = 0.003; // Scale altitude to reasonable visual height
-  const orbitRadius = GLOBE_RADIUS + 0.05 + (satellite.sataltitude * altitudeScale);
-  const position = latLngToVector3(satellite.satlatitude, satellite.satlongitude, Math.min(orbitRadius, GLOBE_RADIUS + 1.2));
-  
-  useFrame(({ clock }) => {
-    if (glowRef.current) {
-      const pulse = 0.5 + Math.sin(clock.getElapsedTime() * 3 + satellite.satid) * 0.3;
-      (glowRef.current.material as THREE.MeshBasicMaterial).opacity = pulse;
+const MAX_VISIBLE_SATELLITES = 80;
+
+function SatelliteInstances({ satellites }: { satellites: SatelliteData[] }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const tetherGeoRef = useRef<THREE.BufferGeometry | null>(null);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const altitudeScale = 0.003;
+
+  const limited = useMemo(() => satellites.slice(0, MAX_VISIBLE_SATELLITES), [satellites]);
+
+  const { positions, tetherGeometry } = useMemo(() => {
+    const pos: THREE.Vector3[] = [];
+    const tetherPoints: number[] = [];
+    for (const sat of limited) {
+      const orbitR = Math.min(GLOBE_RADIUS + 0.05 + sat.sataltitude * altitudeScale, GLOBE_RADIUS + 1.2);
+      const p = latLngToVector3(sat.satlatitude, sat.satlongitude, orbitR);
+      pos.push(new THREE.Vector3(...p));
+      // tether line from surface to satellite
+      const sp = latLngToVector3(sat.satlatitude, sat.satlongitude, GLOBE_RADIUS + 0.01);
+      tetherPoints.push(sp[0], sp[1], sp[2], p[0], p[1], p[2]);
     }
-  });
+    const tGeo = new THREE.BufferGeometry();
+    tGeo.setAttribute('position', new THREE.Float32BufferAttribute(tetherPoints, 3));
+    return { positions: pos, tetherGeometry: tGeo };
+  }, [limited]);
+
+  useEffect(() => {
+    if (!meshRef.current) return;
+    for (let i = 0; i < positions.length; i++) {
+      dummy.position.copy(positions[i]);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [positions, dummy]);
+
+  if (limited.length === 0) return null;
 
   return (
-    <group position={position}>
-      {/* Satellite dot */}
-      <mesh ref={meshRef}>
-        <sphereGeometry args={[0.015, 8, 8]} />
+    <group>
+      <instancedMesh ref={meshRef} args={[undefined, undefined, limited.length]}>
+        <sphereGeometry args={[0.015, 6, 6]} />
         <meshBasicMaterial color="#00e5ff" />
-      </mesh>
-      {/* Glow */}
-      <mesh ref={glowRef}>
-        <sphereGeometry args={[0.025, 8, 8]} />
-        <meshBasicMaterial color="#00e5ff" transparent opacity={0.4} />
-      </mesh>
-      {/* Connection line to surface */}
-      <SatelliteTether lat={satellite.satlatitude} lng={satellite.satlongitude} altitude={Math.min(orbitRadius, GLOBE_RADIUS + 1.2)} />
-      <pointLight color="#00e5ff" intensity={0.15} distance={0.3} />
+      </instancedMesh>
+      <lineSegments geometry={tetherGeometry}>
+        <lineBasicMaterial color="#00e5ff" transparent opacity={0.1} />
+      </lineSegments>
     </group>
-  );
-}
-
-function SatelliteTether({ lat, lng, altitude }: { lat: number; lng: number; altitude: number }) {
-  const geometry = useMemo(() => {
-    const surfacePos = new THREE.Vector3(...latLngToVector3(lat, lng, GLOBE_RADIUS + 0.01));
-    const satPos = new THREE.Vector3(...latLngToVector3(lat, lng, altitude));
-    const points = [surfacePos, satPos];
-    return new THREE.BufferGeometry().setFromPoints(points);
-  }, [lat, lng, altitude]);
-
-  return (
-    <lineSegments geometry={geometry}>
-      <lineBasicMaterial color="#00e5ff" transparent opacity={0.12} />
-    </lineSegments>
   );
 }
 
@@ -922,9 +924,7 @@ function RotatingGlobe({
           ) : null
         )}
 
-        {satellites.map((sat) => (
-          <SatelliteMarker key={sat.satid} satellite={sat} />
-        ))}
+        <SatelliteInstances satellites={satellites} />
       </group>
 
       <OrbitControls
