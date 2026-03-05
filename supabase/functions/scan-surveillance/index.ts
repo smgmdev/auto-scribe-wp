@@ -386,21 +386,33 @@ function isPersonalOrLifestyleTitle(text: string): boolean {
     'techie', 'employee', 'traveler', 'traveller', 'tourist', 'passenger',
     'stranded', 'evacuated safely', 'personal account', 'eyewitness account',
     'via muscat', 'via dubai', 'via doha', 'via istanbul',
-    'bengaluru', 'bangalore', 'hyderabad', 'pune', 'chennai', 'kolkata',  // Indian tech city mentions in travel context
+    'bengaluru', 'bangalore', 'hyderabad', 'pune', 'chennai', 'kolkata',
     'delhi news', 'times of india', 'hindustan times lifestyle',
-    // Non-military "struck" context (e.g. "missile struck 4.5km away" in a personal story)
+    // Non-military "struck" context
     'km away', 'miles away', 'close call', 'narrow escape', 'scary moment',
     'felt the blast', 'heard the explosion', 'saw the smoke',
-    // Human interest / lifestyle
+    // Human interest / lifestyle / celebrity
     'viral video', 'goes viral', 'trending', 'social media reacts',
     'interview with', 'speaks out', 'tells story', 'recounts',
+    'real housewives', 'celebrity', 'celebrities', 'star ', 'stars ',
+    'separated from', 'reunited with', 'family members', 'loved ones',
+    'evacuates family', 'evacuating family', 'fled with',
+    'reality tv', 'reality show', 'tv star', 'tv personality',
+    'influencer', 'influencers', 'instagram', 'tiktok',
+    'heartbreaking', 'emotional reunion', 'emotional moment',
+    'fans react', 'fans worry', 'fans concerned',
   ];
   if (personalPhrases.some(p => lower.includes(p))) return true;
   
-  // Pattern: title contains both a weapon word AND personal/travel context
+  // Pattern: title contains both a weapon word AND personal/human-interest context
   const hasWeapon = ['missile', 'rocket', 'bomb', 'drone', 'strike'].some(w => lower.includes(w));
   const hasTravelContext = ['returns to', 'travels to', 'flight to', 'landed in', 'arriving in', 'departing from', 'via '].some(p => lower.includes(p));
   if (hasWeapon && hasTravelContext) return true;
+  
+  // Pattern: title mentions a person's name "amid" or "during" military events — personal story, not attack
+  const hasAmidPattern = ['amid ', 'during ', 'as ', 'while '].some(p => lower.includes(p));
+  const hasPersonalSubject = ['separated', 'stranded', 'trapped', 'fleeing', 'escaped', 'sheltering', 'hiding', 'waiting', 'praying'].some(p => lower.includes(p));
+  if (hasWeapon && hasAmidPattern && hasPersonalSubject) return true;
   
   return false;
 }

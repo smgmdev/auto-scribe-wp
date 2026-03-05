@@ -1,0 +1,1 @@
+DELETE FROM public.missile_alerts WHERE title ILIKE '%Real Housewives%';
