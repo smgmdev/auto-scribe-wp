@@ -510,6 +510,146 @@ function inferTradeTrajectory(title: string, description: string): { origin: str
   return { origin: uniqueCodes[0], destination: uniqueCodes[1] };
 }
 
+// ── Story-level deduplication: cluster articles about the same event ──
+// Extracts a normalized "story fingerprint" so that multiple articles about
+// e.g. "Iran attacks US consulate in Dubai" are treated as ONE news idea.
+
+// Common filler words to strip when computing keyword overlap
+const STOP_WORDS = new Set([
+  'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'and', 'or', 'is', 'are',
+  'was', 'were', 'has', 'have', 'had', 'been', 'be', 'with', 'by', 'from', 'as',
+  'its', 'it', 'that', 'this', 'than', 'but', 'not', 'no', 'says', 'said', 'report',
+  'reports', 'new', 'news', 'after', 'over', 'amid', 'during', 'into', 'about',
+  'more', 'will', 'could', 'may', 'would', 'up', 'out', 'also', 'just',
+]);
+
+/**
+ * Extract significant keywords from a title (lowercased, de-stopped, sorted).
+ */
+function extractSignificantWords(title: string): string[] {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+}
+
+/**
+ * Build a "story fingerprint" — a canonical key representing the core news idea.
+ * Format: sorted country codes + action category + top entity keywords.
+ * E.g. "AE+IR+US|attack|consulate,dubai" for "Iran attacks US consulate in Dubai"
+ */
+function buildStoryFingerprint(title: string, description: string): {
+  countryCodes: string[];
+  actionCategory: string;
+  entityKeywords: string[];
+} {
+  const text = `${title} ${description}`;
+  const mentions = findCountryMentions(text);
+  const countryCodes = [...new Set(mentions.map(m => m.code))].sort();
+
+  // Determine action category
+  const lower = text.toLowerCase();
+  let actionCategory = 'event';
+  const attackIndicators = ['attack', 'strike', 'bomb', 'shell', 'missile', 'drone', 'shoot', 'kill', 'destroy', 'blast', 'raid', 'assault', 'hit', 'fire'];
+  const tradeIndicators = ['supply', 'supplies', 'deliver', 'send', 'sell', 'export', 'transfer', 'aid', 'deal', 'arms', 'package'];
+  const protestIndicators = ['protest', 'rally', 'demonstration', 'uprising', 'riot', 'unrest'];
+  
+  if (attackIndicators.some(w => lower.includes(w))) actionCategory = 'attack';
+  if (tradeIndicators.some(w => lower.includes(w))) actionCategory = 'trade';
+  if (protestIndicators.some(w => lower.includes(w))) actionCategory = 'protest';
+
+  // Extract entity keywords (non-country significant words that define the specific event)
+  const allWords = extractSignificantWords(title);
+  // Remove country names/adjectives from keywords since they're already in countryCodes
+  const countryTerms = new Set(mentions.map(m => m.term.toLowerCase()));
+  const entityKeywords = allWords
+    .filter(w => !countryTerms.has(w) && !STOP_WORDS.has(w))
+    .slice(0, 8); // Keep top 8 keywords
+
+  return { countryCodes, actionCategory, entityKeywords };
+}
+
+/**
+ * Calculate Jaccard similarity between two word sets.
+ */
+function jaccardSimilarity(a: string[], b: string[]): number {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  let intersection = 0;
+  for (const w of setA) { if (setB.has(w)) intersection++; }
+  const union = setA.size + setB.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
+/**
+ * Check if two events are about the same "news idea" / story.
+ * Returns true if they should be clustered together.
+ */
+function isSameStory(
+  fpA: { countryCodes: string[]; actionCategory: string; entityKeywords: string[] },
+  fpB: { countryCodes: string[]; actionCategory: string; entityKeywords: string[] }
+): boolean {
+  // Must share the same action category
+  if (fpA.actionCategory !== fpB.actionCategory) return false;
+
+  // Must share at least one country
+  const sharedCountries = fpA.countryCodes.filter(c => fpB.countryCodes.includes(c));
+  if (sharedCountries.length === 0) return false;
+
+  // Check keyword overlap — if ≥40% Jaccard similarity, they're about the same story
+  const kwSimilarity = jaccardSimilarity(fpA.entityKeywords, fpB.entityKeywords);
+  if (kwSimilarity >= 0.35) return true;
+
+  // Also cluster if country sets are identical and ≥25% keyword overlap
+  const sameCountries = fpA.countryCodes.length === fpB.countryCodes.length &&
+    fpA.countryCodes.every(c => fpB.countryCodes.includes(c));
+  if (sameCountries && kwSimilarity >= 0.25) return true;
+
+  return false;
+}
+
+/**
+ * Cluster threat events by story, returning one representative event per story.
+ * Picks the event with the longest title (most descriptive) as representative.
+ */
+function clusterEventsByStory(events: any[]): any[] {
+  const clusters: Array<{ fingerprint: ReturnType<typeof buildStoryFingerprint>; events: any[] }> = [];
+
+  for (const event of events) {
+    const fp = buildStoryFingerprint(event.title || '', event.description || '');
+    let merged = false;
+
+    for (const cluster of clusters) {
+      if (isSameStory(fp, cluster.fingerprint)) {
+        cluster.events.push(event);
+        merged = true;
+        break;
+      }
+    }
+
+    if (!merged) {
+      clusters.push({ fingerprint: fp, events: [event] });
+    }
+  }
+
+  // Pick the best representative from each cluster
+  return clusters.map(cluster => {
+    // Prefer Perplexity/named sources over GDELT, then longest title
+    const sorted = cluster.events.sort((a: any, b: any) => {
+      const aIsGdelt = (a.origin === 'gdelt' || a.source === 'GDELT') ? 1 : 0;
+      const bIsGdelt = (b.origin === 'gdelt' || b.source === 'GDELT') ? 1 : 0;
+      if (aIsGdelt !== bIsGdelt) return aIsGdelt - bIsGdelt;
+      return (b.title?.length || 0) - (a.title?.length || 0);
+    });
+    const representative = sorted[0];
+    // Add source count to indicate how many articles covered this story
+    representative._cluster_size = cluster.events.length;
+    representative._cluster_sources = [...new Set(cluster.events.map((e: any) => e.source).filter(Boolean))];
+    return representative;
+  });
+}
+
 
 async function fetchPerplexityScan(apiKey: string, region: string = 'global'): Promise<{ scanResult: any; citations: string[] }> {
   const config = REGION_CONFIGS[region] || REGION_CONFIGS.global;
@@ -975,30 +1115,44 @@ Deno.serve(async (req) => {
     });
 
     if (threatEvents.length > 0) {
-      console.log(`Detected ${threatEvents.length} threat events, creating alerts...`);
+      console.log(`Detected ${threatEvents.length} threat events, clustering by story...`);
+
+      // ── Step 1: Cluster incoming events by "news idea" ──
+      // Multiple articles about the same event → one representative alert
+      const clusteredEvents = clusterEventsByStory(threatEvents);
+      console.log(`Clustered ${threatEvents.length} events into ${clusteredEvents.length} unique stories`);
       
-      // Batch dedup check: fetch all recent alert titles (3h window to prevent re-creating)
-      const recentCutoff = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
+      // ── Step 2: Fetch recent alerts for story-level dedup against DB ──
+      const recentCutoff = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
       const { data: recentAlerts } = await supabase
         .from('missile_alerts')
-        .select('title')
+        .select('title, description')
         .gte('created_at', recentCutoff);
-      const existingTitles = new Set((recentAlerts || []).map((a: any) => a.title));
+      
+      // Build fingerprints for existing alerts
+      const existingFingerprints = (recentAlerts || []).map((a: any) => 
+        buildStoryFingerprint(a.title || '', a.description || '')
+      );
 
-      // Build batch of new alerts
-      const newAlerts = threatEvents
-        .filter((event: any) => !existingTitles.has(event.title))
+      // ── Step 3: Filter out stories that already have an alert in DB ──
+      const newAlerts = clusteredEvents
+        .filter((event: any) => {
+          const fp = buildStoryFingerprint(event.title || '', event.description || '');
+          // Check if any existing alert covers this same story
+          const alreadyExists = existingFingerprints.some(existingFp => isSameStory(fp, existingFp));
+          if (alreadyExists) {
+            console.log(`Skipping duplicate story: "${event.title}" (${event._cluster_size || 1} articles)`);
+          }
+          return !alreadyExists;
+        })
         .map((event: any) => {
           const threatType = classifyThreatType(event.title || '', event.description || '');
-          // For TRADE events, always re-infer trajectory using trade-specific logic (supplier→receiver)
-          // This prevents misclassifications like "Iran supplies drones to Russia for Ukraine" → Russia→Ukraine
           let originCode = event.origin_country_code || null;
           let destCode = event.destination_country_code || null;
           let originName = event.origin_country_name || null;
           let destName = event.destination_country_name || null;
           
           if (threatType === 'trade') {
-            // Always re-infer for trade — even if Perplexity provided trajectory (it may use attack logic)
             const tradeInferred = inferTradeTrajectory(event.title || '', event.description || '');
             if (tradeInferred.origin && tradeInferred.destination) {
               originCode = tradeInferred.origin;
@@ -1011,13 +1165,20 @@ Deno.serve(async (req) => {
             originCode = originCode || inferred.origin;
             destCode = destCode || inferred.destination;
           }
-          // Resolve names from codes if missing
           if (originCode && !originName) originName = CODE_TO_COUNTRY_NAME[originCode] || null;
           if (destCode && !destName) destName = CODE_TO_COUNTRY_NAME[destCode] || null;
           
+          // Build description that notes how many sources covered this story
+          const clusterSize = event._cluster_size || 1;
+          const clusterSources = event._cluster_sources || [];
+          let desc = event.description || '';
+          if (clusterSize > 1) {
+            desc = `${desc} [Reported by ${clusterSize} sources: ${clusterSources.slice(0, 5).join(', ')}]`.trim();
+          }
+
           return {
             title: event.title,
-            description: event.description,
+            description: desc,
             country_code: event.country_code,
             country_name: event.country_name,
             source: event.source || event.origin || 'unknown',
@@ -1033,7 +1194,9 @@ Deno.serve(async (req) => {
 
       if (newAlerts.length > 0) {
         await supabase.from('missile_alerts').insert(newAlerts);
-        console.log(`Inserted ${newAlerts.length} new threat alerts in batch`);
+        console.log(`Inserted ${newAlerts.length} new unique story alerts (from ${threatEvents.length} total articles)`);
+      } else {
+        console.log(`All ${clusteredEvents.length} stories already had existing alerts — no new inserts`);
       }
     }
 
