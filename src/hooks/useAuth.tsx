@@ -25,6 +25,7 @@ interface AuthContextType {
   verifyPin: (pin: string) => Promise<boolean>;
   setPinVerified: (verified: boolean) => void;
   extendSession: () => Promise<boolean>;
+  setSessionGrace: (durationMs: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -1050,7 +1051,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshCredits,
         verifyPin,
         setPinVerified,
-        extendSession
+        extendSession,
+        setSessionGrace: (durationMs: number) => {
+          const target = Date.now() + durationMs;
+          if (target > sessionGraceUntilRef.current) {
+            sessionGraceUntilRef.current = target;
+          }
+        },
       }}
     >
       {children}
@@ -1077,6 +1084,7 @@ const defaultAuthContext: AuthContextType = {
   verifyPin: async () => false,
   setPinVerified: () => {},
   extendSession: async () => false,
+  setSessionGrace: () => {},
 };
 
 export function useAuth() {
