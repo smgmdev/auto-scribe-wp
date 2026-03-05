@@ -435,7 +435,8 @@ export function MissileAlertListener() {
         .gte('created_at', threeHoursAgo)
         .not('origin_country_code', 'is', null)
         .not('destination_country_code', 'is', null)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(10); // Cap initial fetch to prevent flood on first login
       if (data && data.length > 0) {
         const filtered = (data as MissileAlert[]).filter(a => {
           if (dismissedRef.current.has(a.id)) return false;
@@ -448,10 +449,28 @@ export function MissileAlertListener() {
           }
           return true;
         });
-        if (filtered.length > 0) {
-          setAlerts(filtered);
-          const hasHbomb = filtered.some(a => a.severity === 'hbomb');
-          const hasNuke = filtered.some(a => a.severity === 'nuke');
+        // On initial load, show max 3 alerts to avoid overwhelming users
+        const capped = filtered.slice(0, 3);
+        // Auto-dismiss the rest so they don't reappear
+        const autoDismissed = filtered.slice(3);
+        if (autoDismissed.length > 0) {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData?.user) {
+            for (const a of autoDismissed) {
+              dismissedRef.current.add(a.id);
+              dismissedTitlesRef.current.add(a.title.toLowerCase().trim());
+              supabase.from('dismissed_missile_alerts').upsert({
+                user_id: userData.user.id,
+                alert_id: a.id,
+                dismissed_title: a.title,
+              }, { onConflict: 'user_id,alert_id' }).then(() => {});
+            }
+          }
+        }
+        if (capped.length > 0) {
+          setAlerts(capped);
+          const hasHbomb = capped.some(a => a.severity === 'hbomb');
+          const hasNuke = capped.some(a => a.severity === 'nuke');
           const soundFn = (hasHbomb || hasNuke) ? playNukeAlarm : playAlertSound;
           soundFn();
           alertIntervalRef.current = setInterval(soundFn, (hasHbomb || hasNuke) ? 3000 : 2500);
