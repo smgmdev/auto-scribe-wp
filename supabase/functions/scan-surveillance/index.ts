@@ -437,7 +437,80 @@ function inferTrajectory(title: string, description: string, countryCode: string
   return { origin: null, destination: null };
 }
 
-// ── Perplexity scan (primary) ─────────────────────────────────────────
+// ── Trade-specific trajectory: supplier → receiver ──
+// For trade events like "Iran supplies drones to Russia", origin=Iran, destination=Russia
+const TRADE_SUPPLY_VERBS = [
+  'supplies', 'supplying', 'supplied', 'supply',
+  'sends', 'sending', 'sent',
+  'delivers', 'delivering', 'delivered', 'delivery',
+  'donates', 'donating', 'donated',
+  'sells', 'selling', 'sold',
+  'ships', 'shipping', 'shipped',
+  'transfers', 'transferring', 'transferred',
+  'provides', 'providing', 'provided',
+  'exports', 'exporting', 'exported',
+  'gives', 'giving', 'gave',
+];
+const TRADE_RECEIVE_PATTERNS = ['to ', 'for ', 'destined for ', 'bound for '];
+
+function inferTradeTrajectory(title: string, description: string): { origin: string | null; destination: string | null } {
+  const text = `${title} ${description}`.toLowerCase();
+  const mentions = findCountryMentions(text);
+  const uniqueCodes = [...new Set(mentions.map(m => m.code))];
+  if (uniqueCodes.length < 2) return { origin: null, destination: null };
+
+  // Strategy 1: "[Country A] supplies/sends/delivers ... to [Country B]"
+  // The supplier verb appears AFTER country A and BEFORE "to Country B"
+  for (let i = 0; i < mentions.length - 1; i++) {
+    const supplier = mentions[i];
+    for (let j = i + 1; j < mentions.length; j++) {
+      const receiver = mentions[j];
+      if (supplier.code === receiver.code) continue;
+      const between = text.substring(supplier.position + supplier.term.length, receiver.position).trim();
+      const hasSupplyVerb = TRADE_SUPPLY_VERBS.some(v => {
+        const regex = new RegExp(`\\b${v}\\b`, 'i');
+        return regex.test(between);
+      });
+      const hasReceivePattern = TRADE_RECEIVE_PATTERNS.some(p => between.endsWith(p.trim()) || between.includes(p));
+      if (hasSupplyVerb || hasReceivePattern) {
+        return { origin: supplier.code, destination: receiver.code };
+      }
+    }
+  }
+
+  // Strategy 2: First country mentioned is usually the supplier in trade headlines
+  // "Iran supplies thousands of Shahed drones to Russia for Ukraine" → Iran=supplier
+  // But "for Ukraine" here means the drones are for use against Ukraine, NOT delivered to Ukraine
+  // So find the first "to [Country]" pattern after a supply verb
+  for (const verb of TRADE_SUPPLY_VERBS) {
+    const verbIdx = text.indexOf(verb);
+    if (verbIdx < 0) continue;
+    // Find supplier: first country mentioned before the verb
+    const supplierMention = mentions.find(m => m.position < verbIdx);
+    if (!supplierMention) continue;
+    // Find receiver: look for "to [Country]" after verb
+    const afterVerb = text.substring(verbIdx);
+    for (const m of mentions) {
+      if (m.code === supplierMention.code) continue;
+      if (m.position <= verbIdx) continue;
+      // Check if preceded by "to " or "for "
+      const prefix = text.substring(Math.max(0, m.position - 4), m.position).toLowerCase();
+      if (prefix.includes('to ')) {
+        return { origin: supplierMention.code, destination: m.code };
+      }
+    }
+    // Fallback: second unique country after verb
+    const receiverMention = mentions.find(m => m.code !== supplierMention.code && m.position > verbIdx);
+    if (receiverMention) {
+      return { origin: supplierMention.code, destination: receiverMention.code };
+    }
+  }
+
+  // Fallback: first two unique countries
+  return { origin: uniqueCodes[0], destination: uniqueCodes[1] };
+}
+
+
 async function fetchPerplexityScan(apiKey: string, region: string = 'global'): Promise<{ scanResult: any; citations: string[] }> {
   const config = REGION_CONFIGS[region] || REGION_CONFIGS.global;
 
@@ -917,13 +990,23 @@ Deno.serve(async (req) => {
         .filter((event: any) => !existingTitles.has(event.title))
         .map((event: any) => {
           const threatType = classifyThreatType(event.title || '', event.description || '');
-          // Use inferred trajectory if Perplexity didn't provide one
+          // For TRADE events, always re-infer trajectory using trade-specific logic (supplier→receiver)
+          // This prevents misclassifications like "Iran supplies drones to Russia for Ukraine" → Russia→Ukraine
           let originCode = event.origin_country_code || null;
           let destCode = event.destination_country_code || null;
           let originName = event.origin_country_name || null;
           let destName = event.destination_country_name || null;
           
-          if (!originCode || !destCode) {
+          if (threatType === 'trade') {
+            // Always re-infer for trade — even if Perplexity provided trajectory (it may use attack logic)
+            const tradeInferred = inferTradeTrajectory(event.title || '', event.description || '');
+            if (tradeInferred.origin && tradeInferred.destination) {
+              originCode = tradeInferred.origin;
+              destCode = tradeInferred.destination;
+              originName = null;
+              destName = null;
+            }
+          } else if (!originCode || !destCode) {
             const inferred = inferTrajectory(event.title || '', event.description || '', event.country_code || null);
             originCode = originCode || inferred.origin;
             destCode = destCode || inferred.destination;
