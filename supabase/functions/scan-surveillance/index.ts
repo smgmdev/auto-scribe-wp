@@ -183,53 +183,149 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   'kyiv': 'UA', 'kiev': 'UA', 'odessa': 'UA', 'kharkiv': 'UA', 'moscow': 'RU',
   'tehran': 'IR', 'tel aviv': 'IL', 'jerusalem': 'IL', 'beirut': 'LB', 'damascus': 'SY',
   'baghdad': 'IQ', 'riyadh': 'SA', 'sanaa': 'YE', 'aden': 'YE',
+  // Additional mappings for better coverage
+  'kuwait': 'KW', 'kuwaiti': 'KW', 'bahrain': 'BH', 'bahraini': 'BH',
+  'oman': 'OM', 'omani': 'OM', 'jordan': 'JO', 'jordanian': 'JO',
+  'dubai': 'AE', 'abu dhabi': 'AE',
+  'natanz': 'IR', 'isfahan': 'IR', 'bushehr': 'IR', 'fordow': 'IR', 'parchin': 'IR',
+  'haifa': 'IL', 'gaza city': 'PS', 'rafah': 'PS', 'khan younis': 'PS', 'west bank': 'PS',
+  'aleppo': 'SY', 'idlib': 'SY', 'homs': 'SY',
+  'tripoli': 'LY', 'benghazi': 'LY', 'misrata': 'LY',
+  'khartoum': 'SD', 'darfur': 'SD',
+  'mogadishu': 'SO', 'addis ababa': 'ET',
+  'taipei': 'TW', 'pyongyang': 'KP', 'seoul': 'KR',
+  'kabul': 'AF', 'kandahar': 'AF',
+  'kherson': 'UA', 'zaporizhzhia': 'UA', 'dnipro': 'UA', 'lviv': 'UA', 'crimea': 'UA',
+  'donetsk': 'UA', 'luhansk': 'UA', 'mariupol': 'UA',
+  'st. petersburg': 'RU', 'belgorod': 'RU', 'kursk': 'RU', 'bryansk': 'RU',
+  'venezuela': 'VE', 'venezuelan': 'VE', 'colombia': 'CO', 'colombian': 'CO',
+  'mexico': 'MX', 'mexican': 'MX', 'brazil': 'BR', 'brazilian': 'BR',
+  'nigeria': 'NG', 'nigerian': 'NG', 'mali': 'ML', 'malian': 'ML',
+  'burkina faso': 'BF', 'niger': 'NE', 'chad': 'TD', 'cameroon': 'CM',
+  'mozambique': 'MZ', 'south africa': 'ZA',
 };
 
 // Known attack route patterns: attacker → target
 const KNOWN_ATTACK_ROUTES: Array<{ keywords: string[]; origin: string; destination: string }> = [
-  { keywords: ['russia', 'russian', 'shahed', 'kalibr', 'iskander', 'kh-101', 'kh-555'], origin: 'RU', destination: 'UA' },
-  { keywords: ['ukraine', 'ukrainian'], origin: 'UA', destination: 'RU' }, // Ukrainian attacks on Russia
-  { keywords: ['houthi', 'yemen'], origin: 'YE', destination: 'IL' },
+  // Russia-Ukraine
+  { keywords: ['russia', 'russian', 'shahed', 'kalibr', 'iskander', 'kh-101', 'kh-555', 'kh-22', 'geran'], origin: 'RU', destination: 'UA' },
+  { keywords: ['ukraine', 'ukrainian'], origin: 'UA', destination: 'RU' },
+  // Middle East - Iran axis
+  { keywords: ['houthi', 'yemen', 'ansar allah'], origin: 'YE', destination: 'IL' },
   { keywords: ['hezbollah', 'lebanon'], origin: 'LB', destination: 'IL' },
-  { keywords: ['hamas', 'gaza'], origin: 'PS', destination: 'IL' },
+  { keywords: ['hamas', 'gaza', 'palestinian islamic jihad', 'pij'], origin: 'PS', destination: 'IL' },
   { keywords: ['israel', 'israeli', 'idf'], origin: 'IL', destination: 'PS' },
-  { keywords: ['iran', 'iranian'], origin: 'IR', destination: 'IL' },
-  { keywords: ['north korea', 'dprk', 'pyongyang'], origin: 'KP', destination: 'KR' },
+  { keywords: ['iran', 'iranian', 'irgc', 'quds force'], origin: 'IR', destination: 'IL' },
+  // North Korea
+  { keywords: ['north korea', 'dprk', 'pyongyang', 'kim jong'], origin: 'KP', destination: 'KR' },
+  // Iran attacks on Gulf states
+  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'SA' },
+  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'AE' },
+  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'KW' },
+  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'BH' },
+  // Israel/US strikes on Iran
+  { keywords: ['israel', 'israeli', 'idf', 'us ', 'american'], origin: 'IL', destination: 'IR' },
+  // Turkey/PKK
+  { keywords: ['turkey', 'turkish'], origin: 'TR', destination: 'SY' },
+  { keywords: ['pkk', 'kurdistan workers'], origin: 'TR', destination: 'IQ' },
+  // India-Pakistan
+  { keywords: ['india', 'indian'], origin: 'IN', destination: 'PK' },
+  { keywords: ['pakistan', 'pakistani'], origin: 'PK', destination: 'IN' },
+  // China-Taiwan
+  { keywords: ['china', 'chinese', 'pla'], origin: 'CN', destination: 'TW' },
 ];
 
 function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
   const text = `${title} ${description}`.toLowerCase();
+  const attackWords = ['strike', 'attack', 'launch', 'fire', 'hit', 'target', 'bomb', 'shell', 'intercept', 'shoot', 'barrage', 'salvo', 'raid', 'blast', 'destroy', 'damage', 'injure', 'kill', 'assault', 'offensive', 'bombard', 'pummel', 'hits', 'struck', 'fired', 'shelled', 'causing'];
+  const isAttack = attackWords.some(w => text.includes(w));
+  if (!isAttack) return { origin: null, destination: null };
 
-  // Check known attack routes
+  // ── Smart pattern matching: "X strikes/attacks Y" ──
+  // Try to detect "ATTACKER verb TARGET" patterns
+  
+  // Special cases first (most common conflicts)
+  // Russia → Ukraine
+  if ((text.includes('russia') || text.includes('russian') || text.includes('shahed') || text.includes('kalibr') || text.includes('iskander')) && 
+      (text.includes('ukraine') || text.includes('ukrainian') || text.includes('kyiv') || text.includes('kharkiv') || text.includes('odessa') || text.includes('dnipro') || text.includes('lviv') || text.includes('kherson') || text.includes('zaporizhzhia'))) {
+    return { origin: 'RU', destination: 'UA' };
+  }
+  // Ukraine → Russia
+  if ((text.includes('ukraine') || text.includes('ukrainian')) && 
+      (text.includes('russia') || text.includes('russian') || text.includes('moscow') || text.includes('belgorod') || text.includes('kursk') || text.includes('bryansk')) &&
+      (text.includes('ukrainian drone') || text.includes('ukraine strike') || text.includes('ukraine attack') || text.includes('attacks russia') || text.includes('strikes russia') || text.includes('hit russia'))) {
+    return { origin: 'UA', destination: 'RU' };
+  }
+  // Israel → Gaza/Lebanon/Syria/Iran
+  if ((text.includes('israel') || text.includes('israeli') || text.includes('idf')) && 
+      (text.includes('gaza') || text.includes('palestinian') || text.includes('lebanon') || text.includes('beirut') || text.includes('hezbollah') || text.includes('syria') || text.includes('damascus'))) {
+    if (text.includes('gaza') || text.includes('palestinian') || text.includes('rafah') || text.includes('khan younis')) return { origin: 'IL', destination: 'PS' };
+    if (text.includes('syria') || text.includes('damascus') || text.includes('aleppo')) return { origin: 'IL', destination: 'SY' };
+    if (text.includes('iran') || text.includes('tehran') || text.includes('natanz') || text.includes('isfahan') || text.includes('nuclear facilit')) return { origin: 'IL', destination: 'IR' };
+    return { origin: 'IL', destination: 'LB' };
+  }
+  // Iran → Israel/Gulf/UAE/SA/KW
+  if ((text.includes('iran') || text.includes('iranian') || text.includes('irgc'))) {
+    if (text.includes('israel') || text.includes('tel aviv') || text.includes('haifa') || text.includes('jerusalem')) return { origin: 'IR', destination: 'IL' };
+    if (text.includes('saudi') || text.includes('riyadh') || text.includes('jeddah')) return { origin: 'IR', destination: 'SA' };
+    if (text.includes('dubai') || text.includes('abu dhabi') || text.includes('uae') || text.includes('emirates')) return { origin: 'IR', destination: 'AE' };
+    if (text.includes('kuwait')) return { origin: 'IR', destination: 'KW' };
+    if (text.includes('bahrain')) return { origin: 'IR', destination: 'BH' };
+    if (text.includes('iraq') || text.includes('baghdad')) return { origin: 'IR', destination: 'IQ' };
+  }
+  // US/Israel → Iran
+  if ((text.includes('us ') || text.includes('u.s.') || text.includes('american') || text.includes('pentagon')) && 
+      (text.includes('iran') || text.includes('iranian') || text.includes('tehran') || text.includes('natanz') || text.includes('nuclear facilit'))) {
+    return { origin: 'US', destination: 'IR' };
+  }
+  // Houthi attacks
+  if (text.includes('houthi') || (text.includes('yemen') && isAttack)) {
+    if (text.includes('israel') || text.includes('tel aviv')) return { origin: 'YE', destination: 'IL' };
+    if (text.includes('saudi') || text.includes('riyadh')) return { origin: 'YE', destination: 'SA' };
+    if (text.includes('red sea') || text.includes('shipping') || text.includes('vessel')) return { origin: 'YE', destination: 'SA' };
+    return { origin: 'YE', destination: 'IL' }; // default Houthi target
+  }
+  // Hamas/Gaza → Israel
+  if ((text.includes('hamas') || text.includes('gaza')) && (text.includes('israel') || text.includes('rocket'))) {
+    return { origin: 'PS', destination: 'IL' };
+  }
+  // Hezbollah → Israel
+  if (text.includes('hezbollah') && (text.includes('israel') || text.includes('attack') || text.includes('rocket') || text.includes('missile'))) {
+    return { origin: 'LB', destination: 'IL' };
+  }
+  // North Korea
+  if (text.includes('north korea') || text.includes('dprk') || text.includes('pyongyang')) {
+    if (text.includes('south korea') || text.includes('seoul')) return { origin: 'KP', destination: 'KR' };
+    if (text.includes('japan') || text.includes('tokyo')) return { origin: 'KP', destination: 'JP' };
+    return { origin: 'KP', destination: 'KR' };
+  }
+
+  // ── Generic inference: find all country mentions and determine attacker/target ──
+  const foundCountries: Array<{ code: string; position: number }> = [];
+  for (const [name, code] of Object.entries(COUNTRY_NAME_TO_CODE)) {
+    const idx = text.indexOf(name);
+    if (idx >= 0) {
+      // Avoid duplicate codes at different positions
+      if (!foundCountries.some(c => c.code === code)) {
+        foundCountries.push({ code, position: idx });
+      }
+    }
+  }
+  
+  if (foundCountries.length >= 2) {
+    // Sort by position in text - typically "ATTACKER strikes TARGET"
+    foundCountries.sort((a, b) => a.position - b.position);
+    const first = foundCountries[0];
+    const second = foundCountries[1];
+    if (first.code !== second.code) {
+      return { origin: first.code, destination: second.code };
+    }
+  }
+
+  // ── Fallback: known routes ──
   for (const route of KNOWN_ATTACK_ROUTES) {
     if (route.keywords.some(kw => text.includes(kw))) {
-      // Determine if this is an attack event (not just news)
-      const attackWords = ['strike', 'attack', 'launch', 'fire', 'hit', 'target', 'bomb', 'shell', 'intercept', 'shoot', 'barrage', 'salvo', 'raid'];
-      if (attackWords.some(w => text.includes(w))) {
-        // Special handling: if text mentions Ukraine being attacked by Russia
-        if (text.includes('russia') && text.includes('ukraine') && (text.includes('strike') || text.includes('attack') || text.includes('drone') || text.includes('missile') || text.includes('shahed'))) {
-          return { origin: 'RU', destination: 'UA' };
-        }
-        // Special: Ukraine attacking Russia
-        if (text.includes('ukraine') && text.includes('russia') && (text.includes('ukrainian drone') || text.includes('ukraine strike') || text.includes('ukraine attack'))) {
-          return { origin: 'UA', destination: 'RU' };
-        }
-        // Special: Israel attacking Gaza/Lebanon/Iran
-        if ((text.includes('israel') || text.includes('idf')) && (text.includes('gaza') || text.includes('lebanon') || text.includes('beirut'))) {
-          const dest = text.includes('gaza') ? 'PS' : text.includes('iran') ? 'IR' : 'LB';
-          return { origin: 'IL', destination: dest };
-        }
-        // Special: Iran attacking Israel
-        if (text.includes('iran') && text.includes('israel') && (text.includes('strike') || text.includes('missile') || text.includes('attack'))) {
-          return { origin: 'IR', destination: 'IL' };
-        }
-        // Special: Houthi attacks
-        if (text.includes('houthi') && (text.includes('israel') || text.includes('red sea') || text.includes('shipping'))) {
-          const dest = text.includes('israel') ? 'IL' : 'SA';
-          return { origin: 'YE', destination: dest };
-        }
-        return { origin: route.origin, destination: route.destination };
-      }
+      return { origin: route.origin, destination: route.destination };
     }
   }
 
@@ -621,14 +717,14 @@ Deno.serve(async (req) => {
     }
 
     // Detect threat events (missiles, drones, nukes) and create alerts
-    const DRONE_KEYWORDS = ['drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition', 'uav attack', 'unmanned aerial attack'];
+    const DRONE_KEYWORDS = ['drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition', 'uav attack', 'unmanned aerial attack', 'drone hits', 'drone strikes', 'geran-2', 'suicide drone', 'fpv drone'];
     // Nuke: ONLY confirmed launches/detonations — exclude diplomatic/political mentions
     const NUKE_LAUNCH_PHRASES = ['nuclear weapon launched', 'nuclear strike confirmed', 'nuclear warhead detonated', 'nuclear bomb dropped', 'nuclear detonation', 'thermonuclear strike', 'nuclear attack confirmed', 'nuclear missile launched'];
     // Hydrogen bomb: ONLY confirmed launches/detonations
     const HBOMB_LAUNCH_PHRASES = ['hydrogen bomb launched', 'hydrogen bomb detonated', 'hydrogen bomb dropped', 'thermonuclear bomb launched', 'thermonuclear bomb detonated', 'h-bomb launched', 'h-bomb detonated', 'h-bomb dropped', 'hydrogen bomb strike', 'thermonuclear bomb strike', 'fusion bomb launched', 'fusion bomb detonated', 'hydrogen bomb attack confirmed', 'thermonuclear device detonated'];
     // Exclude false positives: these phrases contain "nuclear" but are NOT actual launches
     const NUKE_FALSE_POSITIVES = ['nuclear deal', 'nuclear talks', 'nuclear program', 'nuclear threat', 'nuclear deterrent', 'nuclear capable', 'nuclear arsenal', 'nuclear policy', 'nuclear energy', 'nuclear power', 'nuclear facility', 'nuclear plant', 'nuclear reactor', 'nuclear proliferation', 'nuclear sanctions', 'nuclear agreement', 'nuclear diplomacy', 'nuclear posture', 'nuclear doctrine', 'nuclear option', 'nuclear warning', 'nuclear rhetoric', 'nuclear fears', 'nuclear risk', 'nuclear standoff'];
-    const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile', 'rocket fire', 'rocket barrage'];
+    const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile', 'rocket fire', 'rocket barrage', 'cluster munition', 'munitions strike', 'air strike', 'airstrike', 'airstrikes', 'bombardment', 'shelling'];
 
     const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | 'hbomb' | null => {
       const text = `${title} ${description}`.toLowerCase();

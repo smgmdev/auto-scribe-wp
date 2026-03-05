@@ -47,7 +47,11 @@ export function SurveillanceCountryPopup() {
   // Build list of active severity types and their cutoff times
   const activeFilters = useMemo(() => {
     const filters: { severity: string; cutoff: string }[] = [];
-    if (showMissiles) filters.push({ severity: 'missile', cutoff: new Date(Date.now() - parseFloat(missileTimeFilter) * 3600000).toISOString() });
+    if (showMissiles) {
+      const cutoff = new Date(Date.now() - parseFloat(missileTimeFilter) * 3600000).toISOString();
+      filters.push({ severity: 'missile', cutoff });
+      filters.push({ severity: 'critical', cutoff }); // legacy alerts
+    }
     if (showDrones) filters.push({ severity: 'drone', cutoff: new Date(Date.now() - parseFloat(droneTimeFilter) * 3600000).toISOString() });
     if (showNukes) filters.push({ severity: 'nuke', cutoff: new Date(Date.now() - parseFloat(nukeTimeFilter) * 3600000).toISOString() });
     if (showHbombs) filters.push({ severity: 'hbomb', cutoff: new Date(Date.now() - parseFloat(hbombTimeFilter) * 3600000).toISOString() });
