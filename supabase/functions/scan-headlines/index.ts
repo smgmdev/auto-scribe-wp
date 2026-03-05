@@ -22,7 +22,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: 
 interface Headline {
   id: string;
   title: string;
-  source: 'euronews' | 'bloomberg' | 'fortune' | 'bloomberg-middleeast' | 'bloomberg-asia' | 'bloomberg-latest' | 'fortune-latest' | 'euronews-latest' | 'euronews-economy' | 'nikkei-asia' | 'cnn-middleeast';
+  source: string;
   url: string;
   publishedAt: string;
   summary?: string;
@@ -737,6 +737,109 @@ async function scrapeNikkeiAsia(): Promise<Headline[]> {
   }
   return headlines;
 }
+// Generic Google News RSS scraper - reliable for any site
+async function scrapeGoogleNewsRSS(siteDomain: string, sourceKey: string, maxItems = 30): Promise<Headline[]> {
+  const headlines: Headline[] = [];
+  const seen = new Set<string>();
+  
+  try {
+    console.log(`Fetching Google News RSS for ${siteDomain}...`);
+    const rssUrl = `https://news.google.com/rss/search?q=site:${siteDomain}&hl=en&gl=US&ceid=US:en`;
+    
+    const response = await fetch(rssUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml',
+      }
+    });
+    const xml = await response.text();
+    console.log(`Google News RSS for ${siteDomain} length: ${xml.length}`);
+    
+    const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
+    
+    for (const match of itemMatches) {
+      if (headlines.length >= maxItems) break;
+      const itemXml = match[1];
+      
+      const titleMatch = itemXml.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/);
+      const title = titleMatch ? titleMatch[1].trim().replace(/\s+/g, ' ').replace(/ - .*$/, '') : '';
+      
+      const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/link>/);
+      const url = linkMatch ? linkMatch[1].trim() : '';
+      
+      const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/);
+      const pubDateStr = dateMatch ? dateMatch[1] : '';
+      
+      if (!title || title.length < 20 || title.length > 300) continue;
+      if (seen.has(title.toLowerCase())) continue;
+      if (!url) continue;
+      
+      let articleDate: Date | null = null;
+      if (pubDateStr) {
+        articleDate = new Date(pubDateStr);
+      }
+      
+      if (articleDate && isTodayOrYesterday(articleDate)) {
+        seen.add(title.toLowerCase());
+        headlines.push({
+          id: `${sourceKey}-${Date.now()}-${headlines.length}`,
+          title,
+          source: sourceKey,
+          url,
+          publishedAt: articleDate.toISOString(),
+        });
+      }
+    }
+    
+    console.log(`Found ${headlines.length} ${sourceKey} headlines`);
+  } catch (error) {
+    console.error(`Error scraping ${sourceKey}:`, error);
+  }
+  return headlines;
+}
+
+// --- Regional scrapers using Google News RSS ---
+
+// Russia
+async function scrapeMoscowTimes(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('themoscowtimes.com', 'moscow-times');
+}
+async function scrapeRT(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('rt.com', 'rt-russia');
+}
+async function scrapeTASS(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('tass.com', 'tass');
+}
+
+// Ukraine
+async function scrapeKyivIndependent(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('kyivindependent.com', 'kyiv-independent');
+}
+async function scrapeUkrainskaEnglish(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('pravda.com.ua/eng', 'ukrainska-pravda');
+}
+
+// Arabian / Middle East
+async function scrapeAlJazeera(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('aljazeera.com', 'al-jazeera');
+}
+async function scrapeGulfNews(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('gulfnews.com', 'gulf-news');
+}
+async function scrapeArabNews(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('arabnews.com', 'arab-news');
+}
+
+// Asia (additional local)
+async function scrapeSCMP(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('scmp.com', 'scmp');
+}
+async function scrapeChannelNewsAsia(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('channelnewsasia.com', 'channel-news-asia');
+}
+async function scrapeStraitsTimesAsia(): Promise<Headline[]> {
+  return scrapeGoogleNewsRSS('straitstimes.com', 'straits-times');
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -801,6 +904,43 @@ Deno.serve(async (req) => {
     }
     if (sources.includes('nikkei-asia')) {
       scraperEntries.push({ name: 'nikkei-asia', promise: withTimeout(scrapeNikkeiAsia(), SCRAPER_TIMEOUT, []) });
+    }
+    // Russia
+    if (sources.includes('moscow-times')) {
+      scraperEntries.push({ name: 'moscow-times', promise: withTimeout(scrapeMoscowTimes(), SCRAPER_TIMEOUT, []) });
+    }
+    if (sources.includes('rt-russia')) {
+      scraperEntries.push({ name: 'rt-russia', promise: withTimeout(scrapeRT(), SCRAPER_TIMEOUT, []) });
+    }
+    if (sources.includes('tass')) {
+      scraperEntries.push({ name: 'tass', promise: withTimeout(scrapeTASS(), SCRAPER_TIMEOUT, []) });
+    }
+    // Ukraine
+    if (sources.includes('kyiv-independent')) {
+      scraperEntries.push({ name: 'kyiv-independent', promise: withTimeout(scrapeKyivIndependent(), SCRAPER_TIMEOUT, []) });
+    }
+    if (sources.includes('ukrainska-pravda')) {
+      scraperEntries.push({ name: 'ukrainska-pravda', promise: withTimeout(scrapeUkrainskaEnglish(), SCRAPER_TIMEOUT, []) });
+    }
+    // Arabian
+    if (sources.includes('al-jazeera')) {
+      scraperEntries.push({ name: 'al-jazeera', promise: withTimeout(scrapeAlJazeera(), SCRAPER_TIMEOUT, []) });
+    }
+    if (sources.includes('gulf-news')) {
+      scraperEntries.push({ name: 'gulf-news', promise: withTimeout(scrapeGulfNews(), SCRAPER_TIMEOUT, []) });
+    }
+    if (sources.includes('arab-news')) {
+      scraperEntries.push({ name: 'arab-news', promise: withTimeout(scrapeArabNews(), SCRAPER_TIMEOUT, []) });
+    }
+    // Asia local
+    if (sources.includes('scmp')) {
+      scraperEntries.push({ name: 'scmp', promise: withTimeout(scrapeSCMP(), SCRAPER_TIMEOUT, []) });
+    }
+    if (sources.includes('channel-news-asia')) {
+      scraperEntries.push({ name: 'channel-news-asia', promise: withTimeout(scrapeChannelNewsAsia(), SCRAPER_TIMEOUT, []) });
+    }
+    if (sources.includes('straits-times')) {
+      scraperEntries.push({ name: 'straits-times', promise: withTimeout(scrapeStraitsTimesAsia(), SCRAPER_TIMEOUT, []) });
     }
     
     const results = await Promise.all(scraperEntries.map(e => e.promise));
