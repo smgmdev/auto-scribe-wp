@@ -630,7 +630,17 @@ export function AdminMaceAIView() {
         toast.success(`Published to ${data.site}!`);
       }
 
-      await speak(displayMessage, done);
+      // For pending_publish (confirmation question), auto-start listening after speaking
+      // so user can say "yes" without tapping mic (which would cut the voice off)
+      if (data?.type === 'pending_publish') {
+        await speak(displayMessage, () => {
+          done();
+          // Auto-start listening for the confirmation response
+          startListening();
+        });
+      } else {
+        await speak(displayMessage, done);
+      }
 
     } catch (err: any) {
       // Silently ignore aborts from speculative/superseded requests
