@@ -175,8 +175,12 @@ export function SurveillanceCountryPopup() {
     );
   };
 
-  const launched = countryMissiles.filter(m => m.origin_country_code === selectedCountry.code);
-  const targeted = countryMissiles.filter(m => m.destination_country_code === selectedCountry.code && m.origin_country_code !== selectedCountry.code);
+  const attackAlerts = countryMissiles.filter(m => m.severity !== 'trade');
+  const tradeAlerts = countryMissiles.filter(m => m.severity === 'trade');
+  const launched = attackAlerts.filter(m => m.origin_country_code === selectedCountry.code);
+  const targeted = attackAlerts.filter(m => m.destination_country_code === selectedCountry.code && m.origin_country_code !== selectedCountry.code);
+  const tradeLaunched = tradeAlerts.filter(m => m.origin_country_code === selectedCountry.code);
+  const tradeTargeted = tradeAlerts.filter(m => m.destination_country_code === selectedCountry.code && m.origin_country_code !== selectedCountry.code);
 
   return (
     <DraggablePopup
@@ -236,6 +240,7 @@ export function SurveillanceCountryPopup() {
 
         {/* Attacks panel */}
         <div className="md:w-1/2 p-4 space-y-3 border-t border-white/5 md:border-t-0">
+          {/* Attacks section */}
           <div className="flex items-center gap-2 mb-2">
             <Rocket className="w-4 h-4 text-red-400" />
             <span className="text-sm font-bold text-red-400">Attacks</span>
@@ -243,8 +248,8 @@ export function SurveillanceCountryPopup() {
               last {displayTimeLabel}
             </span>
           </div>
-          {countryMissiles.length === 0 ? (
-            <div className="text-center py-6">
+          {attackAlerts.length === 0 ? (
+            <div className="text-center py-4">
               <ShieldAlert className="w-5 h-5 text-green-500/50 mx-auto mb-2" />
               <p className="text-xs text-gray-500">No attacks in this time window</p>
             </div>
@@ -269,6 +274,49 @@ export function SurveillanceCountryPopup() {
                     {targeted.map(m => renderAlert(m, 'targeted'))}
                   </ul>
                 </div>
+              )}
+            </>
+          )}
+
+          {/* Trade section */}
+          {showTrades && (
+            <>
+              <div className="border-t border-white/5 pt-3 mt-3" />
+              <div className="flex items-center gap-2 mb-2">
+                <Package className="w-4 h-4 text-cyan-400" />
+                <span className="text-sm font-bold text-cyan-400">Trade</span>
+                <span className="text-[10px] text-gray-600 ml-auto">
+                  last {displayTimeLabel}
+                </span>
+              </div>
+              {tradeAlerts.length === 0 ? (
+                <div className="text-center py-4">
+                  <Package className="w-5 h-5 text-cyan-500/30 mx-auto mb-2" />
+                  <p className="text-xs text-gray-500">No trade activity in this time window</p>
+                </div>
+              ) : (
+                <>
+                  {tradeLaunched.length > 0 && (
+                    <div>
+                      <span className="text-xs text-cyan-400/80 block mb-1 flex items-center gap-1">
+                        <Package className="w-3 h-3" /> Supplying ({tradeLaunched.length})
+                      </span>
+                      <ul className="space-y-1.5">
+                        {tradeLaunched.map(m => renderAlert(m, 'launched'))}
+                      </ul>
+                    </div>
+                  )}
+                  {tradeTargeted.length > 0 && (
+                    <div>
+                      <span className="text-xs text-cyan-400/80 block mb-1 flex items-center gap-1">
+                        <Package className="w-3 h-3" /> Receiving ({tradeTargeted.length})
+                      </span>
+                      <ul className="space-y-1.5">
+                        {tradeTargeted.map(m => renderAlert(m, 'targeted'))}
+                      </ul>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
