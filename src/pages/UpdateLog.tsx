@@ -19,6 +19,20 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 const updates = [
   {
     date: 'March 5, 2026',
+    title: 'Quick Nav, Alert Sound Fix & Header Loading',
+    changes: [
+      'Quick Nav expanded panel now opens on mobile dashboard — tapping the QUICK NAV toggle with the dropdown arrow reveals the full mega menu on responsive screens',
+      'Added ChevronDown dropdown arrow to the mobile dashboard QUICK NAV bar for visual toggle indication',
+      'Fixed header/sub-header desync when opening Quick Nav — all elements now animate in perfect sync at 300ms using unified CSS transition overrides',
+      'Removed the gap between the expanded Quick Nav panel and the "Get Credits" banner on the desktop dashboard',
+      'Added a dark grey bottom border to the expanded Quick Nav area to visually separate it from page content below',
+      'Quick Nav expanded panel can now be closed by pressing the Escape key',
+      'Added loading spinner to the Arcana Mace logo across all page headers and the dashboard sidebar — a spinning indicator displays while the logo image loads, then fades in smoothly',
+      'Alert popup sounds now stop immediately on the first dismiss — previously, sounds could continue playing after rapidly closing multiple alert popups with Enter or Escape',
+    ],
+  },
+  {
+    date: 'March 5, 2026',
     title: 'Quick Nav Mega Menu Redesign',
     changes: [
       'Redesigned the Quick Nav expanded area into a Bloomberg-style mega menu with a multi-column link grid covering Media Buying, For Clients, For Business, and Arcana Mace sections',
