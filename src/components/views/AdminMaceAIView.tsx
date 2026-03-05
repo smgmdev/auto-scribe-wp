@@ -66,6 +66,7 @@ export function AdminMaceAIView() {
   const scribeActiveRef = useRef(false);
   const scribeConnectedRef = useRef(false);
   const processUserMessageRef = useRef<(text: string) => void>(() => {});
+  const startListeningRef = useRef<() => void>(() => {});
   
   const wordRevealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prefetchedTokenRef = useRef<string | null>(null);
@@ -276,7 +277,8 @@ export function AdminMaceAIView() {
     }, intervalMs);
   }, []);
 
-  const speak = useCallback(async (text: string, onDone?: () => void) => {
+  const speak = useCallback(async (text: string, onDone?: () => void, options?: { autoListen?: boolean }) => {
+    const autoListen = options?.autoListen ?? true; // Default: auto-listen after speaking
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
@@ -284,11 +286,20 @@ export function AdminMaceAIView() {
     }
     setSpeakingWords([]);
 
-    const cleanupAndFinish = () => {
+    const cleanupAndFinish = (autoListen = false) => {
       if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
       setSpeakingWords([]);
       if (isMountedRef.current) {
-        if (!publishFlowActiveRef.current) setStep('idle');
+        if (!publishFlowActiveRef.current) {
+          if (autoListen) {
+            // Auto-start listening after AI finishes speaking
+            setTimeout(() => {
+              if (isMountedRef.current && !publishFlowActiveRef.current) startListeningRef.current();
+            }, 800);
+          } else {
+            setStep('idle');
+          }
+        }
         onDone?.();
       }
     };
@@ -312,14 +323,14 @@ export function AdminMaceAIView() {
         audio.onended = () => {
           URL.revokeObjectURL(audioUrl);
           audioRef.current = null;
-          cleanupAndFinish();
+          cleanupAndFinish(autoListen);
           resolve();
         };
         audio.onerror = () => {
           console.error('[Mace] Audio playback error');
           URL.revokeObjectURL(audioUrl);
           audioRef.current = null;
-          cleanupAndFinish();
+          cleanupAndFinish(autoListen);
           resolve();
         };
 
@@ -328,7 +339,7 @@ export function AdminMaceAIView() {
           console.error('[Mace] audio.play() rejected:', err);
           URL.revokeObjectURL(audioUrl);
           audioRef.current = null;
-          cleanupAndFinish();
+          cleanupAndFinish(autoListen);
           resolve();
         });
       });
@@ -521,7 +532,6 @@ export function AdminMaceAIView() {
               
               const genData = genResult.data;
               if (genData?.type === 'conversation') {
-                // AI returned an error message instead of content
                 throw new Error(genData.message || 'Article generation failed');
               }
               if (genData?.type !== 'content_ready' || !genData?.generatedContent) {
@@ -543,7 +553,6 @@ export function AdminMaceAIView() {
 
               const data = pubResult.data;
               if (data?.type === 'conversation') {
-                // WP error returned as conversation
                 throw new Error(data.message || 'Publishing failed');
               }
 
@@ -561,21 +570,21 @@ export function AdminMaceAIView() {
 
               speak(responseMessage, () => {
                 publishFlowActiveRef.current = false;
-                setStep('idle');
+                setTimeout(() => { if (isMountedRef.current) startListening(); }, 800);
                 done();
-              });
+              }, { autoListen: false });
             } catch (err: any) {
               setPublishPhase('');
               const errorMsg = err.message || 'Publishing failed';
               setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
               speak(errorMsg, () => {
                 publishFlowActiveRef.current = false;
-                setStep('idle');
+                setTimeout(() => { if (isMountedRef.current) startListening(); }, 800);
                 done();
-              });
+              }, { autoListen: false });
               toast.error(errorMsg);
             }
-          });
+          }, { autoListen: false });
           return;
         } else if (isDenial(text)) {
           setPendingArticle(null);
@@ -624,19 +633,8 @@ export function AdminMaceAIView() {
         toast.success(`Published to ${data.site}!`);
       }
 
-      // For pending_publish (confirmation question), auto-start listening after speaking
-      // so user can say "yes" without tapping mic (which would cut the voice off)
-      if (data?.type === 'pending_publish') {
-        await speak(displayMessage, () => {
-          done();
-          // Delay before auto-listening — 1.2s avoids TTS echo through mic
-          setTimeout(() => {
-            if (isMountedRef.current) startListening();
-          }, 1200);
-        });
-      } else {
-        await speak(displayMessage, done);
-      }
+      // All responses auto-listen after speaking (continuous conversation mode)
+      await speak(displayMessage, done);
 
     } catch (err: any) {
       // Silently ignore aborts from speculative/superseded requests
@@ -665,10 +663,14 @@ export function AdminMaceAIView() {
       // Stop listening and process what we have
       finishScribeListening();
     } else if (step === 'speaking') {
-      // Stop speech and immediately start listening (interrupt)
+      // User interrupted AI — stop speech and add context so AI knows
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
       window.speechSynthesis.cancel();
+      if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+      setSpeakingWords([]);
       isProcessingRef.current = false;
+      // Add a system-level note so AI knows the user interrupted
+      setMessages(prev => [...prev, { role: 'user', content: '[User interrupted your response to say something new]' }]);
       startListening();
     } else if (step === 'idle') {
       startListening();
@@ -698,8 +700,9 @@ export function AdminMaceAIView() {
     prefetchScribeToken();
   };
 
-  // Keep ref always pointing to latest processUserMessage
+  // Keep refs always pointing to latest functions
   processUserMessageRef.current = processUserMessage;
+  startListeningRef.current = startListening;
 
 
   const isProcessing = step === 'processing';
