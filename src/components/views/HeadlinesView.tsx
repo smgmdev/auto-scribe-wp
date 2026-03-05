@@ -79,11 +79,15 @@ export function HeadlinesView() {
     setIsScanning(true);
     
     try {
+      console.log('[HeadlinesView] Invoking scan-headlines with sources:', settings.selectedSources);
       const { data, error } = await supabase.functions.invoke('scan-headlines', {
         body: { sources: settings.selectedSources }
       });
 
+      console.log('[HeadlinesView] Response:', { data, error });
+
       if (error) {
+        console.error('[HeadlinesView] Function error details:', JSON.stringify(error));
         throw error;
       }
 
