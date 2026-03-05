@@ -291,13 +291,17 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
     let refunded = 0;
     let publishSpent = 0;
     let rawTxSum = 0;
+    let rawWLocked = 0;
+    let rawWUnlocked = 0;
+    let rawWCompleted = 0;
     const withdrawalTypesSet = new Set(WITHDRAWAL_TYPES);
     const outgoingExcludedSet = new Set(['locked', 'locked_superseded', 'offer_accepted', 'offer_superseded', 'order', 'order_accepted']);
     userTxs.forEach(tx => {
-      // rawTxSum mirrors the DB trigger: incoming (excl unlocked) - outgoing (excl lock types)
-      if (withdrawalTypesSet.has(tx.type)) {
-        // skip withdrawal types entirely
-      } else if (tx.amount > 0 && tx.type !== 'unlocked') {
+      // rawTxSum mirrors the DB trigger: incoming (excl unlocked) - outgoing (excl lock types) - net withdrawals
+      if (tx.type === 'withdrawal_locked') rawWLocked += Math.abs(tx.amount);
+      else if (tx.type === 'withdrawal_unlocked') rawWUnlocked += Math.abs(tx.amount);
+      else if (tx.type === 'withdrawal_completed') rawWCompleted += Math.abs(tx.amount);
+      else if (tx.amount > 0 && tx.type !== 'unlocked') {
         rawTxSum += tx.amount;
       } else if (tx.amount < 0 && !outgoingExcludedSet.has(tx.type)) {
         rawTxSum += tx.amount;
@@ -306,6 +310,9 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
       if (tx.type === 'refund' && tx.amount > 0) refunded += tx.amount;
       if (tx.type === 'publish') publishSpent += Math.abs(tx.amount);
     });
+    // Subtract net withdrawal impact to match DB trigger
+    const netWithdrawals = Math.max(0, rawWLocked - rawWUnlocked - rawWCompleted) + rawWCompleted;
+    rawTxSum -= netWithdrawals;
 
     const b2bDeliveryOrders = userTxs.filter(t => t.type === 'order_payout' && t.description && t.description.startsWith('Earnings from completed order')).length;
     const instantPublishDeliveryOrders = userTxs.filter(t => t.type === 'order_payout' && (!t.description || !t.description.startsWith('Earnings from completed order'))).length;
@@ -384,17 +391,23 @@ export function recalculateSingleUser(
   );
 
   let rawTxSum = 0;
+  let rawWLocked = 0;
+  let rawWUnlocked = 0;
+  let rawWCompleted = 0;
   const withdrawalTypesSet = new Set(WITHDRAWAL_TYPES);
   const outgoingExcludedSet = new Set(['locked', 'locked_superseded', 'offer_accepted', 'offer_superseded', 'order', 'order_accepted']);
   userTxs.forEach(tx => {
-    if (withdrawalTypesSet.has(tx.type)) {
-      // skip
-    } else if (tx.amount > 0 && tx.type !== 'unlocked') {
+    if (tx.type === 'withdrawal_locked') rawWLocked += Math.abs(tx.amount);
+    else if (tx.type === 'withdrawal_unlocked') rawWUnlocked += Math.abs(tx.amount);
+    else if (tx.type === 'withdrawal_completed') rawWCompleted += Math.abs(tx.amount);
+    else if (tx.amount > 0 && tx.type !== 'unlocked') {
       rawTxSum += tx.amount;
     } else if (tx.amount < 0 && !outgoingExcludedSet.has(tx.type)) {
       rawTxSum += tx.amount;
     }
   });
+  const netWithdrawals = Math.max(0, rawWLocked - rawWUnlocked - rawWCompleted) + rawWCompleted;
+  rawTxSum -= netWithdrawals;
 
   const isValid = rawTxSum === dbCreditsValue;
 

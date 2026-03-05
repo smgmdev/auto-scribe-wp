@@ -335,12 +335,33 @@ export function AdminUsersView() {
 
     const WITHDRAWAL_TYPES = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
     
-    // Calculate rawTxSum excluding withdrawal types (same as Credit Management)
+    // Calculate rawTxSum matching DB trigger: incoming - outgoing - net withdrawals
     const txSumMap = new Map<string, number>();
+    const wLockedMap = new Map<string, number>();
+    const wUnlockedMap = new Map<string, number>();
+    const wCompletedMap = new Map<string, number>();
+    const OUTGOING_EXCLUDED = new Set(['locked', 'locked_superseded', 'offer_accepted', 'offer_superseded', 'order', 'order_accepted']);
     allTxs?.forEach(tx => {
-      if (!WITHDRAWAL_TYPES.includes(tx.type)) {
+      if (tx.type === 'withdrawal_locked') {
+        wLockedMap.set(tx.user_id, (wLockedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+      } else if (tx.type === 'withdrawal_unlocked') {
+        wUnlockedMap.set(tx.user_id, (wUnlockedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+      } else if (tx.type === 'withdrawal_completed') {
+        wCompletedMap.set(tx.user_id, (wCompletedMap.get(tx.user_id) || 0) + Math.abs(tx.amount));
+      } else if (tx.amount > 0 && tx.type !== 'unlocked') {
+        txSumMap.set(tx.user_id, (txSumMap.get(tx.user_id) || 0) + tx.amount);
+      } else if (tx.amount < 0 && !OUTGOING_EXCLUDED.has(tx.type)) {
         txSumMap.set(tx.user_id, (txSumMap.get(tx.user_id) || 0) + tx.amount);
       }
+    });
+    // Apply net withdrawal subtraction per user
+    const allWithdrawalUserIds = new Set([...wLockedMap.keys(), ...wUnlockedMap.keys(), ...wCompletedMap.keys()]);
+    allWithdrawalUserIds.forEach(uid => {
+      const wL = wLockedMap.get(uid) || 0;
+      const wU = wUnlockedMap.get(uid) || 0;
+      const wC = wCompletedMap.get(uid) || 0;
+      const netW = Math.max(0, wL - wU - wC) + wC;
+      txSumMap.set(uid, (txSumMap.get(uid) || 0) - netW);
     });
     
     const dbMap = new Map<string, number>();
