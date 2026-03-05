@@ -32,6 +32,18 @@ export interface SatelliteData {
   sataltitude: number;
 }
 
+export interface EarthquakeData {
+  id: string;
+  magnitude: number;
+  place: string;
+  time: number;
+  depth: number;
+  latitude: number;
+  longitude: number;
+  tsunami: boolean;
+  type: string;
+}
+
 interface SurveillanceGlobeProps {
   countries: CountryData[];
   onCountryClick: (country: CountryData) => void;
@@ -42,6 +54,7 @@ interface SurveillanceGlobeProps {
   hbombTrajectories?: MissileTrajectory[];
   tradeTrajectories?: MissileTrajectory[];
   satellites?: SatelliteData[];
+  earthquakes?: EarthquakeData[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
   resetTrigger?: number;
@@ -802,6 +815,118 @@ function SatelliteInstances({ satellites }: { satellites: SatelliteData[] }) {
   );
 }
 
+const MAX_VISIBLE_EARTHQUAKES = 100;
+
+function getEarthquakeColor(magnitude: number): string {
+  if (magnitude >= 7) return '#ff0000';
+  if (magnitude >= 5) return '#ff6600';
+  if (magnitude >= 4) return '#ffaa00';
+  return '#ffdd44';
+}
+
+function getEarthquakeSize(magnitude: number): number {
+  if (magnitude >= 7) return 0.04;
+  if (magnitude >= 5) return 0.03;
+  if (magnitude >= 4) return 0.025;
+  return 0.018;
+}
+
+function EarthquakeInstances({ earthquakes }: { earthquakes: EarthquakeData[] }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+
+  const limited = useMemo(() => earthquakes.slice(0, MAX_VISIBLE_EARTHQUAKES), [earthquakes]);
+
+  const positions = useMemo(() => {
+    return limited.map((eq) => {
+      const p = latLngToVector3(eq.latitude, eq.longitude, GLOBE_RADIUS + 0.015);
+      return new THREE.Vector3(...p);
+    });
+  }, [limited]);
+
+  // Use largest magnitude color for the instanced mesh (individual coloring not supported with single material)
+  const dominantColor = useMemo(() => {
+    if (limited.length === 0) return '#ffaa00';
+    const maxMag = Math.max(...limited.map(e => e.magnitude));
+    return getEarthquakeColor(maxMag);
+  }, [limited]);
+
+  useEffect(() => {
+    if (!meshRef.current) return;
+    for (let i = 0; i < positions.length; i++) {
+      dummy.position.copy(positions[i]);
+      const s = getEarthquakeSize(limited[i].magnitude) / 0.025; // normalize to base size
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  }, [positions, limited, dummy]);
+
+  // Pulse animation
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+    const pulse = 1 + Math.sin(clock.getElapsedTime() * 2) * 0.15;
+    for (let i = 0; i < positions.length; i++) {
+      dummy.position.copy(positions[i]);
+      const baseS = getEarthquakeSize(limited[i].magnitude) / 0.025;
+      dummy.scale.set(baseS * pulse, baseS * pulse, baseS * pulse);
+      dummy.updateMatrix();
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  const handlePointerOver = useCallback((e: ThreeEvent<PointerEvent>) => {
+    if (e.instanceId !== undefined) {
+      setSelectedIdx(e.instanceId);
+      e.stopPropagation();
+    }
+  }, []);
+
+  const handlePointerOut = useCallback(() => {
+    setSelectedIdx(null);
+  }, []);
+
+  const handleClick = useCallback((e: ThreeEvent<MouseEvent>) => {
+    if (e.instanceId !== undefined) {
+      setSelectedIdx(prev => prev === e.instanceId ? null : e.instanceId!);
+      e.stopPropagation();
+    }
+  }, []);
+
+  if (limited.length === 0) return null;
+
+  const selectedEq = selectedIdx !== null ? limited[selectedIdx] : null;
+  const selectedPos = selectedIdx !== null ? positions[selectedIdx] : null;
+
+  return (
+    <group>
+      <instancedMesh
+        ref={meshRef}
+        args={[undefined, undefined, limited.length]}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+        onClick={handleClick}
+      >
+        <sphereGeometry args={[0.025, 8, 8]} />
+        <meshBasicMaterial color={dominantColor} transparent opacity={0.85} />
+      </instancedMesh>
+      {selectedEq && selectedPos && (
+        <Html position={selectedPos} center style={{ pointerEvents: 'none' }}>
+          <div className="bg-black/90 border border-orange-500/50 rounded px-2 py-1.5 text-[10px] font-mono text-orange-300 whitespace-nowrap shadow-lg shadow-orange-500/20 -translate-y-6">
+            <div className="font-bold text-orange-100 text-[11px]">M{selectedEq.magnitude.toFixed(1)} Earthquake</div>
+            <div className="text-orange-400/80">{selectedEq.place}</div>
+            <div className="text-orange-400/80">Depth: {selectedEq.depth.toFixed(1)} km</div>
+            <div className="text-orange-400/80">{new Date(selectedEq.time).toLocaleString()}</div>
+            {selectedEq.tsunami && <div className="text-red-400 font-bold">⚠ Tsunami warning</div>}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
 
 function RotatingGlobe({
   countries,
@@ -813,6 +938,7 @@ function RotatingGlobe({
   hbombTrajectories = [],
   tradeTrajectories = [],
   satellites = [],
+  earthquakes = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -963,6 +1089,7 @@ function RotatingGlobe({
         )}
 
         <SatelliteInstances satellites={satellites} />
+        <EarthquakeInstances earthquakes={earthquakes} />
       </group>
 
       <OrbitControls
@@ -990,6 +1117,7 @@ export function SurveillanceGlobe({
   hbombTrajectories = [],
   tradeTrajectories = [],
   satellites = [],
+  earthquakes = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -1011,6 +1139,7 @@ export function SurveillanceGlobe({
           hbombTrajectories={hbombTrajectories}
           tradeTrajectories={tradeTrajectories}
           satellites={satellites}
+          earthquakes={earthquakes}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
           resetTrigger={resetTrigger}
