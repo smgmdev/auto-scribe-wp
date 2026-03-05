@@ -581,6 +581,8 @@ export function AdminMaceAIView() {
 
   const processUserMessage = async (text: string) => {
     console.log('[Mace] processUserMessage called with:', text);
+    const currentPending = pendingArticleRef.current;
+    console.log('[Mace] pendingArticle:', currentPending ? JSON.stringify(currentPending) : 'null');
     // Keep session alive during active voice conversation
     keepSessionAlive();
     // Bail out immediately if user is no longer authenticated
@@ -619,7 +621,6 @@ export function AdminMaceAIView() {
     } catch { /* use anon key as fallback */ }
 
     const currentMessages = messagesRef.current;
-    const currentPending = pendingArticleRef.current;
 
     const userMsg: Message = { role: 'user', content: text };
     const updatedMessages = [...currentMessages, userMsg];

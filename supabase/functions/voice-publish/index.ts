@@ -157,8 +157,9 @@ FEATURED IMAGES:
 
 IMPORTANT RULES:
 - For greetings like "hi", "how are you", "what's up" — just reply naturally. Do NOT call any tools.
-- NEVER claim you have published, written, or created an article unless you are CURRENTLY calling the publish_article tool in THIS response. You do NOT have memory of past sessions. If the user asks "did you publish that?" or "what was the last article?" and there is no evidence in the conversation of a successful publish, say honestly: "I don't have a record of publishing anything in this conversation. Want me to write something now?"
+- ABSOLUTELY NEVER say you published an article unless you are calling the publish_article tool RIGHT NOW in this response. If the user says "go ahead", "do it", "publish it now", "let's publish it" but you are NOT calling the tool, say: "Let me set that up for you — what topic and which site?" Publishing ONLY happens through the publish_article tool. You CANNOT publish by just saying you did.
 - NEVER fabricate or hallucinate article titles, links, or publishing results. If you didn't do it, say so.
+- If a user seems to be confirming a previous publish request but you don't have a tool call in this response, say: "I need to set that up again. What topic would you like, and which site?"
 - Users can ONLY publish to sites listed above. If they mention any site not in the list (e.g., Forbes, CNN, BBC, TechCrunch, etc.), say: "I don't have access to [site name], it's not in the Arcana Mace local library list. Want me to show you what's available?"
 - When a user wants to publish, figure out the topic. If they do NOT specify which site to publish to, ask them: "Which site would you like me to publish it on?" and list available sites naturally.
 - Keep responses SHORT — 1-2 sentences max. Sound human. No bullet points in speech.
@@ -370,8 +371,40 @@ IMPORTANT RULES:
         });
       }
 
-      // Find matching site
-      const matchedSite = (wpSites || []).find((s: any) => s.name.toLowerCase() === parsed.target_site?.toLowerCase());
+      // Fuzzy site matching — normalize and find best match
+      const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+      const targetNorm = normalize(parsed.target_site || '');
+      
+      let matchedSite = (wpSites || []).find((s: any) => normalize(s.name) === targetNorm);
+      
+      // If no exact match, try includes-based matching
+      if (!matchedSite && targetNorm.length >= 3) {
+        matchedSite = (wpSites || []).find((s: any) => {
+          const siteNorm = normalize(s.name);
+          return siteNorm.includes(targetNorm) || targetNorm.includes(siteNorm);
+        });
+      }
+      
+      // If still no match, try word overlap (>= 50% of words match)
+      if (!matchedSite && targetNorm.length >= 3) {
+        const targetWords = targetNorm.split(' ').filter(w => w.length > 2);
+        let bestScore = 0;
+        let bestSite: any = null;
+        for (const s of (wpSites || [])) {
+          const siteWords = normalize(s.name).split(' ').filter((w: string) => w.length > 2);
+          const matches = targetWords.filter(w => siteWords.some((sw: string) => sw.includes(w) || w.includes(sw)));
+          const score = matches.length / Math.max(targetWords.length, siteWords.length);
+          if (score > bestScore && score >= 0.5) {
+            bestScore = score;
+            bestSite = s;
+          }
+        }
+        if (bestSite) {
+          console.log(`[voice-publish] Fuzzy matched "${parsed.target_site}" → "${bestSite.name}" (score: ${bestScore})`);
+          matchedSite = bestSite;
+        }
+      }
+
       if (!matchedSite) {
         return new Response(JSON.stringify({ 
           type: 'conversation', 
