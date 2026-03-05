@@ -327,6 +327,8 @@ export function MissileAlertListener() {
   }, []);
 
   const dismissAlert = useCallback(async (id: string) => {
+    // Stop sound immediately on ANY dismiss — user is actively closing alerts
+    stopSound();
     // Track both the ID and the title for content-based deduplication
     const alertTitle = alerts.find(a => a.id === id)?.title;
     dismissedRef.current.add(id);
@@ -340,13 +342,7 @@ export function MissileAlertListener() {
         }).then(() => {});
       }
     });
-    setAlerts(prev => {
-      const remaining = prev.filter(a => a.id !== id);
-      if (remaining.length === 0) {
-        stopSound();
-      }
-      return remaining;
-    });
+    setAlerts(prev => prev.filter(a => a.id !== id));
   }, [stopSound, alerts]);
 
   useEffect(() => {
