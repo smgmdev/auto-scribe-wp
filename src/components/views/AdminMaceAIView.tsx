@@ -569,6 +569,7 @@ export function AdminMaceAIView() {
 
               speak(responseMessage, () => {
                 publishFlowActiveRef.current = false;
+                setStep('idle');
                 done();
               });
             } catch (err: any) {
@@ -577,6 +578,7 @@ export function AdminMaceAIView() {
               setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
               speak(errorMsg, () => {
                 publishFlowActiveRef.current = false;
+                setStep('idle');
                 done();
               });
               toast.error(errorMsg);
