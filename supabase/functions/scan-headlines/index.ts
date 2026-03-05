@@ -768,41 +768,55 @@ Deno.serve(async (req) => {
     console.log('[scan-headlines] Looking for articles from:', yesterday, 'and', today);
     
     const allHeadlines: Headline[] = [];
-    const scrapePromises: Promise<Headline[]>[] = [];
     
     // Each scraper gets 15 seconds max to prevent overall timeout
     const SCRAPER_TIMEOUT = 15000;
     
+    // Track each scraper with its name for detailed logging
+    const scraperEntries: { name: string; promise: Promise<Headline[]> }[] = [];
+    
     if (sources.includes('euronews')) {
-      scrapePromises.push(withTimeout(scrapeEuronews(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'euronews', promise: withTimeout(scrapeEuronews(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('euronews-economy')) {
-      scrapePromises.push(withTimeout(scrapeEuronewsEconomy(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'euronews-economy', promise: withTimeout(scrapeEuronewsEconomy(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('bloomberg')) {
-      scrapePromises.push(withTimeout(scrapeBloomberg(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'bloomberg', promise: withTimeout(scrapeBloomberg(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('bloomberg-middleeast')) {
-      scrapePromises.push(withTimeout(scrapeBloombergMiddleEast(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'bloomberg-middleeast', promise: withTimeout(scrapeBloombergMiddleEast(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('bloomberg-asia')) {
-      scrapePromises.push(withTimeout(scrapeBloombergAsia(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'bloomberg-asia', promise: withTimeout(scrapeBloombergAsia(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('bloomberg-latest')) {
-      scrapePromises.push(withTimeout(scrapeBloombergLatest(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'bloomberg-latest', promise: withTimeout(scrapeBloombergLatest(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('fortune')) {
-      scrapePromises.push(withTimeout(scrapeFortune(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'fortune', promise: withTimeout(scrapeFortune(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('cnn-middleeast')) {
-      scrapePromises.push(withTimeout(scrapeCNNMiddleEast(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'cnn-middleeast', promise: withTimeout(scrapeCNNMiddleEast(), SCRAPER_TIMEOUT, []) });
     }
     if (sources.includes('nikkei-asia')) {
-      scrapePromises.push(withTimeout(scrapeNikkeiAsia(), SCRAPER_TIMEOUT, []));
+      scraperEntries.push({ name: 'nikkei-asia', promise: withTimeout(scrapeNikkeiAsia(), SCRAPER_TIMEOUT, []) });
     }
     
-    const results = await Promise.all(scrapePromises);
-    results.forEach(headlines => allHeadlines.push(...headlines));
+    const results = await Promise.all(scraperEntries.map(e => e.promise));
+    
+    // Log per-scraper breakdown
+    const breakdown: Record<string, number> = {};
+    results.forEach((headlines, i) => {
+      const name = scraperEntries[i].name;
+      breakdown[name] = headlines.length;
+      allHeadlines.push(...headlines);
+      if (headlines.length === 0) {
+        console.warn(`[scan-headlines] ⚠️ ${name}: returned 0 results (timeout or broken scraper)`);
+      } else {
+        console.log(`[scan-headlines] ✅ ${name}: ${headlines.length} headlines`);
+      }
+    });
     
     // Sort by date, newest first
     allHeadlines.sort((a, b) => 
@@ -810,10 +824,12 @@ Deno.serve(async (req) => {
     );
     
     console.log(`[scan-headlines] Total headlines found: ${allHeadlines.length}`);
+    console.log(`[scan-headlines] Breakdown:`, JSON.stringify(breakdown));
     
     return new Response(JSON.stringify({ 
       success: true, 
-      headlines: allHeadlines 
+      headlines: allHeadlines,
+      _debug_breakdown: breakdown,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
