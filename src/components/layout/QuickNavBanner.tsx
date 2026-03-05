@@ -94,8 +94,9 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
             >
               QUICK NAV
               <ChevronDown
-                size={12}
-                className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+                size={14}
+                strokeWidth={3}
+                className={`transition-transform duration-200 flex-shrink-0 ${expanded ? 'rotate-180' : ''}`}
               />
             </button>
             <span className="text-white/40">|</span>
