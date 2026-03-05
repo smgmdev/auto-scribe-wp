@@ -1,20 +1,16 @@
-import { useCallback } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
 
-export function SurveillanceCameraPopup() {
-  const activeCameraRegion = useAppStore((s) => s.activeCameraRegion);
+function CameraFeedPopup({ region, index }: { region: { region: string; label: string; feeds: { label: string; embedId: string }[] }; index: number }) {
   const closeCameraFeed = useAppStore((s) => s.closeCameraFeed);
-
-  if (!activeCameraRegion) return null;
 
   return (
     <DraggablePopup
-      open={!!activeCameraRegion}
-      onOpenChange={(open) => { if (!open) closeCameraFeed(); }}
+      open
+      onOpenChange={(open) => { if (!open) closeCameraFeed(region.region); }}
       width={520}
       maxHeight="75vh"
-      zIndex={200}
+      zIndex={200 + index}
       className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
       headerClassName="!bg-[#0d1220] !border-white/5"
       bodyClassName="!p-0"
@@ -24,7 +20,7 @@ export function SurveillanceCameraPopup() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
           </span>
-          <span className="text-sm font-bold text-white">{activeCameraRegion.label}</span>
+          <span className="text-sm font-bold text-white">{region.label}</span>
           <span className="text-xs text-gray-500">Live Webcams</span>
         </div>
       }
@@ -35,7 +31,7 @@ export function SurveillanceCameraPopup() {
       }
     >
       <div className="grid grid-cols-2 gap-px bg-white/5">
-        {activeCameraRegion.feeds.map(feed => (
+        {region.feeds.map(feed => (
           <div key={feed.embedId} className="relative bg-black">
             <div className="absolute top-1 left-1.5 z-10 flex items-center gap-1 bg-black/70 px-1.5 py-0.5 rounded-sm">
               <span className="relative flex h-1 w-1">
@@ -58,5 +54,19 @@ export function SurveillanceCameraPopup() {
         ))}
       </div>
     </DraggablePopup>
+  );
+}
+
+export function SurveillanceCameraPopup() {
+  const activeCameraRegions = useAppStore((s) => s.activeCameraRegions);
+
+  if (activeCameraRegions.length === 0) return null;
+
+  return (
+    <>
+      {activeCameraRegions.map((region, index) => (
+        <CameraFeedPopup key={region.region} region={region} index={index} />
+      ))}
+    </>
   );
 }
