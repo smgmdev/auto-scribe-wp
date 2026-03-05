@@ -1,0 +1,1 @@
+DELETE FROM public.missile_alerts WHERE origin_country_code = 'GB' AND destination_country_code = 'IR' AND title ILIKE '%UK says%';

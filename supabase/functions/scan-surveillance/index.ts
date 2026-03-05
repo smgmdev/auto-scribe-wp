@@ -420,7 +420,6 @@ function isPoliticalTitle(text: string): boolean {
 // e.g. "Explosions in Doha, Qatar" — this does NOT mean Qatar attacked anyone
 function isLocationOnlyEvent(title: string): boolean {
   const lower = title.toLowerCase().trim();
-  // Patterns like "Explosions in X", "Blasts in X", "Attack on X" — event AT location, no attacker named
   const locationEventPrefixes = [
     'explosions in ', 'explosion in ', 'blasts in ', 'blast in ',
     'attack on ', 'attacks on ', 'strike on ', 'strikes on ',
@@ -429,9 +428,40 @@ function isLocationOnlyEvent(title: string): boolean {
     'drone attack on ', 'drone strike on ', 'air raid on ', 'air raids on ',
     'fire in ', 'fires in ', 'incident in ', 'clashes in ',
   ];
-  // If title starts with or contains these patterns AND only mentions ONE country/city
-  // then it's describing WHERE the event happened, not WHO launched it
   return locationEventPrefixes.some(p => lower.startsWith(p));
+}
+
+// Detect when a country is merely REPORTING/COMMENTING on an event, not attacking
+// e.g. "UK says missiles fired in direction of Cyprus" — UK is the reporter, NOT the attacker
+// e.g. "France warns of escalation in Middle East" — France is commenting, NOT attacking
+function extractReporterCountry(title: string): string | null {
+  const lower = title.toLowerCase().trim();
+  // Pattern: "[Country/Adjective] says/reports/confirms/warns/urges/calls/claims/denies/announces..."
+  const reporterVerbs = [
+    ' says ', ' said ', ' reports ', ' reported ', ' confirms ', ' confirmed ',
+    ' warns ', ' warned ', ' urges ', ' urged ', ' calls for ', ' called for ',
+    ' claims ', ' claimed ', ' denies ', ' denied ', ' announces ', ' announced ',
+    ' reveals ', ' revealed ', ' discloses ', ' disclosed ', ' condemns ', ' condemned ',
+    ' criticizes ', ' criticised ', ' slams ', ' accuses ', ' accused ',
+    ' demands ', ' demanded ', ' asks ', ' asked ', ' tells ', ' told ',
+    ' believes ', ' cautions ', ' cautioned ', ' signals ', ' signaled ',
+    ' acknowledges ', ' acknowledged ', ' admits ', ' admitted ',
+    ' intelligence says ', ' intel says ', ' officials say ', ' sources say ',
+  ];
+  
+  for (const verb of reporterVerbs) {
+    const verbIdx = lower.indexOf(verb);
+    if (verbIdx < 0) continue;
+    // The text before the verb is the potential reporter
+    const beforeVerb = lower.substring(0, verbIdx).trim();
+    // Find country mentions in the "before" portion
+    const mentions = findCountryMentions(beforeVerb);
+    if (mentions.length > 0) {
+      // The country before the reporting verb is the REPORTER, not attacker
+      return mentions[mentions.length - 1].code; // last mentioned country before verb
+    }
+  }
+  return null;
 }
 
 function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
@@ -457,12 +487,16 @@ function inferTrajectory(title: string, description: string, countryCode: string
     return { origin: null, destination: null };
   }
   
+  // CRITICAL: Detect if a country in the title is merely REPORTING on events
+  // e.g. "UK says missiles fired..." — UK is the reporter, NOT the attacker
+  const reporterCode = extractReporterCountry(title);
+  
   // Find all country/city mentions in the text
   const mentions = findCountryMentions(text);
   if (mentions.length === 0) return { origin: null, destination: null };
   
-  // Get unique country codes mentioned
-  const uniqueCodes = [...new Set(mentions.map(m => m.code))];
+  // Get unique country codes mentioned, EXCLUDING the reporter country
+  const uniqueCodes = [...new Set(mentions.map(m => m.code))].filter(c => c !== reporterCode);
   
   // CRITICAL: If the TITLE only describes an event happening at a location
   // (e.g. "Explosions in Doha, Qatar") without naming an attacker,
@@ -557,7 +591,9 @@ function inferTrajectory(title: string, description: string, countryCode: string
   const weaponWords = ['drone', 'missile', 'rocket', 'bomb', 'shell', 'munition', 'warhead', 'uav', 'cruise', 'ballistic', 'airstrike', 'air strike', 'strike', 'attack', 'barrage'];
   for (const [keyword, attackerCode] of Object.entries(attackerKeywords)) {
     if (!text.includes(keyword)) continue;
-    const targetMention = mentions.find(m => m.code !== attackerCode);
+    // Skip if this "attacker" is actually the reporter country
+    if (attackerCode === reporterCode) continue;
+    const targetMention = mentions.find(m => m.code !== attackerCode && m.code !== reporterCode);
     if (targetMention) {
       const hasWeapon = weaponWords.some(w => text.includes(w));
       const hasAttack = ATTACK_VERBS.some(v => text.includes(v));
@@ -852,7 +888,12 @@ CRITICAL — TRAJECTORY DATA: For missile, drone, rocket, and bombing events, pr
 - "Explosions in Doha, Qatar": origin_country_code=null, destination_country_code=null ❌ (NO attacker named — only describes WHERE it happened)
 - "Blasts reported in Baghdad": origin_country_code=null, destination_country_code=null ❌ (no attacker confirmed)
 - "Missile hits Qatar base": origin_country_code=null, destination_country_code=null ❌ (who fired is unknown)
-RULE: If the title does NOT explicitly name WHO attacked, set origin to null. A country where explosions/attacks happen is the TARGET, not the attacker. Never guess the attacker.
+- "UK says missiles fired in direction of Cyprus": origin_country_code=null, destination_country_code=null ❌ (UK is REPORTING, not attacking. "UK says" means UK is the source of the statement, NOT the attacker)
+- "France warns of Iranian missile threat": origin_country_code=null, destination_country_code=null ❌ (France is commenting, not involved in any attack)
+RULES:
+1. If the title does NOT explicitly name WHO attacked, set origin to null. Never guess the attacker.
+2. If a country is the SUBJECT of a reporting verb (says, reports, confirms, warns, reveals, announces, claims, denies), that country is a REPORTER/COMMENTER — do NOT treat it as the attacker or target.
+3. A country where explosions/attacks happen is the TARGET, not the attacker.
 
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
