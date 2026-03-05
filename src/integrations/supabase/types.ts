@@ -2276,6 +2276,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_precision_enabled: { Args: { _user_id: string }; Returns: boolean }
       register_active_session: {
         Args: { _session_id: string; _user_id: string }
         Returns: undefined
