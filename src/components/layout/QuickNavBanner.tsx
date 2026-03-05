@@ -105,11 +105,10 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
         {/* Expandable panel */}
         <div
           ref={panelRef}
-          className="overflow-hidden"
+          className={expanded ? "overflow-y-auto" : "overflow-hidden"}
           style={{
             height: expanded ? `${panelHeight}px` : '0px',
             maxHeight: expanded ? 'calc(100vh - 28px)' : '0px',
-            overflowY: expanded ? 'auto' : 'hidden',
             transition: 'height 0.3s ease-in-out, max-height 0.3s ease-in-out',
           }}
         >
