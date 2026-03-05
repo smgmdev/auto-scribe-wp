@@ -121,6 +121,12 @@ export function SurveillanceCountryPopup() {
           const aftermathPatterns = ['names ', 'named ', 'identifies ', 'identified ', 'believed to be', 'confirmed dead', 'confirmed killed', 'funeral', 'memorial', 'mourns', 'mourning', 'pays tribute', 'tribute to', 'investigation into', 'investigating', 'probe into', 'toll rises', 'toll climbs', 'death toll', 'casualty count', 'recovering from', 'recovery efforts', 'damage assessment', 'rebuilding', 'reconstruction', 'blamed for', 'claims responsibility'];
           const hasWeaponWord = ['missile', 'rocket', 'bomb', 'drone', 'strike', 'attack'].some(w => titleLower.includes(w));
           if (hasWeaponWord && aftermathPatterns.some(p => titleLower.includes(p))) return false;
+          // Filter out military testing/drills/exercises — not actual attacks
+          const testingPatterns = ['testing', 'test ', 'tests ', 'tested', 'drill', 'drills', 'exercise', 'exercises', 'exercising', 'simulated', 'simulation', 'war games', 'wargame', 'practice ', 'training ', 'specialists'];
+          const militaryContext = ['missile', 'rocket', 'nuclear', 'weapon', 'military', 'defense', 'defence', 'army', 'navy', 'air force', 'jet', 'fighter', 'warhead', 'ballistic', 'intercept'];
+          const hasTestingWord = testingPatterns.some(p => titleLower.includes(p));
+          const hasMilitaryContext = militaryContext.some(p => titleLower.includes(p));
+          if (hasTestingWord && hasMilitaryContext && m.severity !== 'trade') return false;
           return true;
         });
         setCountryMissiles(filtered);
