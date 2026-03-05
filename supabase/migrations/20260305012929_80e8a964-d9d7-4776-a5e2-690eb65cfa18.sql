@@ -1,0 +1,1 @@
+UPDATE missile_alerts SET severity = 'trade' WHERE id IN ('b3d486a7-774e-43ff-843f-05227ac5d6ba', '6b93c93a-0ebf-42b7-9b24-5c9d15c62b58');
