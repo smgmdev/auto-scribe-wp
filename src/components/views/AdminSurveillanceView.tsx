@@ -175,7 +175,7 @@ export function AdminSurveillanceView() {
       .select('*')
       .gte('scanned_at', cutoff)
       .order('scanned_at', { ascending: false })
-      .limit(20);
+      .limit(50);
 
     if (scans && scans.length > 0) {
       const latest = scans[0];

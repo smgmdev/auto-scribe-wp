@@ -9,8 +9,8 @@ const corsHeaders = {
 async function fetchGdeltEvents(): Promise<{ events: any[]; countries: any[] }> {
   try {
     // GDELT DOC 2.0 API – conflict & protest events from last 24h
-    const query = encodeURIComponent('(conflict OR war OR attack OR missile OR drone OR protest OR coup OR terrorism) sourcelang:eng');
-    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=ArtList&maxrecords=75&format=json&timespan=24h&sort=DateDesc`;
+    const query = encodeURIComponent('(conflict OR war OR attack OR missile OR drone OR protest OR coup OR terrorism OR strike OR bombing OR shelling) sourcelang:eng');
+    const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=ArtList&maxrecords=250&format=json&timespan=24h&sort=DateDesc`;
 
     console.log('Fetching GDELT events...');
     const controller = new AbortController();
@@ -64,7 +64,7 @@ async function fetchGdeltEvents(): Promise<{ events: any[]; countries: any[] }> 
 async function fetchReliefWebAlerts(): Promise<any[]> {
   try {
     console.log('Fetching ReliefWeb disaster/crisis alerts...');
-    const url = 'https://api.reliefweb.int/v1/disasters?appname=amdev-surveillance&limit=15&sort[]=date:desc&fields[include][]=name&fields[include][]=glide&fields[include][]=date&fields[include][]=country&fields[include][]=type&fields[include][]=status&fields[include][]=description';
+    const url = 'https://api.reliefweb.int/v1/disasters?appname=amdev-surveillance&limit=30&sort[]=date:desc&fields[include][]=name&fields[include][]=glide&fields[include][]=date&fields[include][]=country&fields[include][]=type&fields[include][]=status&fields[include][]=description';
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
     const resp = await fetch(url, { signal: controller.signal });
@@ -162,6 +162,80 @@ const REGION_CONFIGS: Record<string, { sources: string; focus: string; userPromp
   },
 };
 
+// ── Country inference from event text ─────────────────────────────────
+// Maps common country/region mentions to ISO codes for trajectory inference
+const COUNTRY_NAME_TO_CODE: Record<string, string> = {
+  'ukraine': 'UA', 'russia': 'RU', 'russian': 'RU', 'israel': 'IL', 'israeli': 'IL',
+  'iran': 'IR', 'iranian': 'IR', 'palestine': 'PS', 'palestinian': 'PS', 'gaza': 'PS',
+  'lebanon': 'LB', 'lebanese': 'LB', 'syria': 'SY', 'syrian': 'SY',
+  'yemen': 'YE', 'yemeni': 'YE', 'houthi': 'YE', 'houthis': 'YE',
+  'iraq': 'IQ', 'iraqi': 'IQ', 'saudi arabia': 'SA', 'saudi': 'SA',
+  'north korea': 'KP', 'dprk': 'KP', 'south korea': 'KR',
+  'china': 'CN', 'chinese': 'CN', 'taiwan': 'TW', 'taiwanese': 'TW',
+  'india': 'IN', 'indian': 'IN', 'pakistan': 'PK', 'pakistani': 'PK',
+  'myanmar': 'MM', 'sudan': 'SD', 'sudanese': 'SD', 'ethiopia': 'ET', 'ethiopian': 'ET',
+  'somalia': 'SO', 'somali': 'SO', 'drc': 'CD', 'congo': 'CD',
+  'united states': 'US', 'u.s.': 'US', 'american': 'US',
+  'turkey': 'TR', 'turkish': 'TR', 'egypt': 'EG', 'egyptian': 'EG',
+  'libya': 'LY', 'libyan': 'LY', 'afghanistan': 'AF', 'afghan': 'AF',
+  'uae': 'AE', 'emirates': 'AE', 'qatar': 'QA',
+  'hezbollah': 'LB', 'hamas': 'PS',
+  'kyiv': 'UA', 'kiev': 'UA', 'odessa': 'UA', 'kharkiv': 'UA', 'moscow': 'RU',
+  'tehran': 'IR', 'tel aviv': 'IL', 'jerusalem': 'IL', 'beirut': 'LB', 'damascus': 'SY',
+  'baghdad': 'IQ', 'riyadh': 'SA', 'sanaa': 'YE', 'aden': 'YE',
+};
+
+// Known attack route patterns: attacker → target
+const KNOWN_ATTACK_ROUTES: Array<{ keywords: string[]; origin: string; destination: string }> = [
+  { keywords: ['russia', 'russian', 'shahed', 'kalibr', 'iskander', 'kh-101', 'kh-555'], origin: 'RU', destination: 'UA' },
+  { keywords: ['ukraine', 'ukrainian'], origin: 'UA', destination: 'RU' }, // Ukrainian attacks on Russia
+  { keywords: ['houthi', 'yemen'], origin: 'YE', destination: 'IL' },
+  { keywords: ['hezbollah', 'lebanon'], origin: 'LB', destination: 'IL' },
+  { keywords: ['hamas', 'gaza'], origin: 'PS', destination: 'IL' },
+  { keywords: ['israel', 'israeli', 'idf'], origin: 'IL', destination: 'PS' },
+  { keywords: ['iran', 'iranian'], origin: 'IR', destination: 'IL' },
+  { keywords: ['north korea', 'dprk', 'pyongyang'], origin: 'KP', destination: 'KR' },
+];
+
+function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
+  const text = `${title} ${description}`.toLowerCase();
+
+  // Check known attack routes
+  for (const route of KNOWN_ATTACK_ROUTES) {
+    if (route.keywords.some(kw => text.includes(kw))) {
+      // Determine if this is an attack event (not just news)
+      const attackWords = ['strike', 'attack', 'launch', 'fire', 'hit', 'target', 'bomb', 'shell', 'intercept', 'shoot', 'barrage', 'salvo', 'raid'];
+      if (attackWords.some(w => text.includes(w))) {
+        // Special handling: if text mentions Ukraine being attacked by Russia
+        if (text.includes('russia') && text.includes('ukraine') && (text.includes('strike') || text.includes('attack') || text.includes('drone') || text.includes('missile') || text.includes('shahed'))) {
+          return { origin: 'RU', destination: 'UA' };
+        }
+        // Special: Ukraine attacking Russia
+        if (text.includes('ukraine') && text.includes('russia') && (text.includes('ukrainian drone') || text.includes('ukraine strike') || text.includes('ukraine attack'))) {
+          return { origin: 'UA', destination: 'RU' };
+        }
+        // Special: Israel attacking Gaza/Lebanon/Iran
+        if ((text.includes('israel') || text.includes('idf')) && (text.includes('gaza') || text.includes('lebanon') || text.includes('beirut'))) {
+          const dest = text.includes('gaza') ? 'PS' : text.includes('iran') ? 'IR' : 'LB';
+          return { origin: 'IL', destination: dest };
+        }
+        // Special: Iran attacking Israel
+        if (text.includes('iran') && text.includes('israel') && (text.includes('strike') || text.includes('missile') || text.includes('attack'))) {
+          return { origin: 'IR', destination: 'IL' };
+        }
+        // Special: Houthi attacks
+        if (text.includes('houthi') && (text.includes('israel') || text.includes('red sea') || text.includes('shipping'))) {
+          const dest = text.includes('israel') ? 'IL' : 'SA';
+          return { origin: 'YE', destination: dest };
+        }
+        return { origin: route.origin, destination: route.destination };
+      }
+    }
+  }
+
+  return { origin: null, destination: null };
+}
+
 // ── Perplexity scan (primary) ─────────────────────────────────────────
 async function fetchPerplexityScan(apiKey: string, region: string = 'global'): Promise<{ scanResult: any; citations: string[] }> {
   const config = REGION_CONFIGS[region] || REGION_CONFIGS.global;
@@ -173,7 +247,7 @@ async function fetchPerplexityScan(apiKey: string, region: string = 'global'): P
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'sonar',
+      model: 'sonar-pro',
       messages: [
         {
           role: 'system',
@@ -201,19 +275,27 @@ async function fetchPerplexityScan(apiKey: string, region: string = 'global'): P
       "source": "<source name e.g. Reuters, BBC, Al Jazeera, X/Twitter>",
       "source_url": "<direct URL to the source article or post>",
       "published_at": "<ISO 8601 datetime of when the news was originally published, e.g. 2025-03-01T14:30:00Z>",
-      "origin_country_code": "<ISO code of launch origin if missile/rocket event, or null>",
-      "origin_country_name": "<origin country name if missile/rocket event, or null>",
-      "destination_country_code": "<ISO code of target if missile/rocket event, or null>",
-      "destination_country_name": "<target country name if missile/rocket event, or null>"
+      "origin_country_code": "<ISO code of launch origin if missile/drone/rocket event, or null>",
+      "origin_country_name": "<origin country name if missile/drone/rocket event, or null>",
+      "destination_country_code": "<ISO code of target if missile/drone/rocket event, or null>",
+      "destination_country_name": "<target country name if missile/drone/rocket event, or null>"
     }
   ]
 }
 
 ${config.focus}
-Include at least 40-60 latest events from the past 48 hours. The more events you include the better — aim for maximum coverage.
+CRITICAL: Include as many events as possible — aim for 80-120+ events from the past 48 hours. The more events you include, the better. Do not limit yourself to just 20-30 events. Every military strike, attack, bombing, shelling, and drone/missile event should be included.
 Mark countries with no issues as "safe".
 
 ${config.sources}
+
+CRITICAL — TRAJECTORY DATA: For ALL missile, drone, rocket, and bombing events, you MUST provide origin_country_code and destination_country_code. Examples:
+- Russian missile strikes on Ukraine: origin_country_code="RU", destination_country_code="UA"
+- Israeli airstrikes on Gaza: origin_country_code="IL", destination_country_code="PS"
+- Houthi attacks on Israel: origin_country_code="YE", destination_country_code="IL"
+- Iran attacks on Israel: origin_country_code="IR", destination_country_code="IL"
+- Ukrainian drone strikes on Russia: origin_country_code="UA", destination_country_code="RU"
+Never leave origin/destination null for attack events. Always determine the attacker and target.
 
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
@@ -225,7 +307,7 @@ Return ONLY the JSON object, no other text.`
         },
         {
           role: 'user',
-          content: `Provide a comprehensive security threat assessment for right now. Include all active conflicts, recent attacks, military operations, and civil unrest. ${config.userPromptExtra}`
+          content: `Provide a comprehensive security threat assessment for right now. Include ALL active conflicts, recent attacks, military operations, and civil unrest. Be thorough — include every missile strike, drone attack, bombing, shelling, and military engagement from the past 48 hours. ${config.userPromptExtra}`
         }
       ],
       search_recency_filter: 'day',
@@ -258,7 +340,7 @@ Return ONLY the JSON object, no other text.`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'sonar',
+        model: 'sonar-pro',
         messages: [
           {
             role: 'system',
@@ -390,8 +472,7 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    // Fetch all sources in parallel — GDELT/ReliefWeb are best-effort (skip for regional to speed up)
-    // Always fetch GDELT and ReliefWeb to supplement Perplexity (which often returns too few events)
+    // Fetch all sources in parallel — GDELT/ReliefWeb are best-effort
     const [perplexityResult, gdeltResult, reliefWebResult] = await Promise.allSettled([
       fetchPerplexityScan(PERPLEXITY_API_KEY, region),
       fetchGdeltEvents(),
@@ -424,8 +505,6 @@ Deno.serve(async (req) => {
     const reliefData = reliefWebResult.status === 'fulfilled' ? reliefWebResult.value : [];
 
     // ── Carry-forward: preserve high-threat countries that new scan downgraded ──
-    // If a country was caution/danger in the last scan (within 6 hours) but the
-    // new scan marks it safe, keep the previous assessment to prevent flicker.
     const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
     const prevCountries: any[] = (prevScan?.country_data as any[]) || [];
     const prevScannedAt = prevScan?.scanned_at ? new Date(prevScan.scanned_at).getTime() : 0;
@@ -444,9 +523,7 @@ Deno.serve(async (req) => {
         const newThreat = newEntry?.threat_level || 'safe';
         const prevScore = prev.score || 0;
 
-        // If previous was elevated (caution/danger with score >= 40) and new scan dropped it
         if ((prevThreat === 'caution' || prevThreat === 'danger') && prevScore >= 40 && newThreat === 'safe') {
-          // Decay the score by 20% but keep it elevated
           const decayedScore = Math.max(Math.round(prevScore * 0.8), 20);
           const decayedThreat = decayedScore >= 60 ? 'danger' : 'caution';
           const carried = {
@@ -456,7 +533,6 @@ Deno.serve(async (req) => {
             summary: `${prev.summary} [Carried from previous scan — situation may still be developing]`,
           };
           if (newEntry) {
-            // Replace the safe entry with carried data
             const idx = scanResult.countries.indexOf(newEntry);
             if (idx >= 0) scanResult.countries[idx] = carried;
           } else {
@@ -476,7 +552,6 @@ Deno.serve(async (req) => {
       for (const pe of prevEvents) {
         const code = pe.country_code || pe.origin_country_code || '';
         if (carriedCodes.has(code)) {
-          // Check if this event is already in new results
           const newTitles = (scanResult.latest_events || []).map((e: any) => (e.title || '').toLowerCase());
           if (!newTitles.some((t: string) => t.includes((pe.title || '').toLowerCase().substring(0, 25)))) {
             scanResult.latest_events = scanResult.latest_events || [];
@@ -492,6 +567,19 @@ Deno.serve(async (req) => {
       gdeltData.events,
       reliefData,
     );
+
+    // ── Auto-infer trajectory data for events missing origin/destination ──
+    for (const ev of mergedEvents) {
+      if (!ev.origin_country_code || !ev.destination_country_code) {
+        const inferred = inferTrajectory(ev.title || '', ev.description || '', ev.country_code || null);
+        if (inferred.origin && inferred.destination) {
+          ev.origin_country_code = ev.origin_country_code || inferred.origin;
+          ev.origin_country_name = ev.origin_country_name || null;
+          ev.destination_country_code = ev.destination_country_code || inferred.destination;
+          ev.destination_country_name = ev.destination_country_name || null;
+        }
+      }
+    }
 
     // Build enriched source list
     const sources = ['perplexity'];
@@ -560,8 +648,8 @@ Deno.serve(async (req) => {
     if (threatEvents.length > 0) {
       console.log(`Detected ${threatEvents.length} threat events, creating alerts...`);
       
-      // Batch dedup check: fetch all recent alert titles in one query
-      const recentCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      // Batch dedup check: fetch all recent alert titles (3h window to prevent re-creating)
+      const recentCutoff = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
       const { data: recentAlerts } = await supabase
         .from('missile_alerts')
         .select('title')
@@ -573,6 +661,18 @@ Deno.serve(async (req) => {
         .filter((event: any) => !existingTitles.has(event.title))
         .map((event: any) => {
           const threatType = classifyThreatType(event.title || '', event.description || '');
+          // Use inferred trajectory if Perplexity didn't provide one
+          let originCode = event.origin_country_code || null;
+          let destCode = event.destination_country_code || null;
+          let originName = event.origin_country_name || null;
+          let destName = event.destination_country_name || null;
+          
+          if (!originCode || !destCode) {
+            const inferred = inferTrajectory(event.title || '', event.description || '', event.country_code || null);
+            originCode = originCode || inferred.origin;
+            destCode = destCode || inferred.destination;
+          }
+          
           return {
             title: event.title,
             description: event.description,
@@ -581,10 +681,10 @@ Deno.serve(async (req) => {
             source: event.source || event.origin || 'unknown',
             severity: threatType || 'missile',
             active: true,
-            origin_country_code: event.origin_country_code || null,
-            origin_country_name: event.origin_country_name || null,
-            destination_country_code: event.destination_country_code || null,
-            destination_country_name: event.destination_country_name || null,
+            origin_country_code: originCode,
+            origin_country_name: originName,
+            destination_country_code: destCode,
+            destination_country_name: destName,
             published_at: event.published_at || new Date().toISOString(),
           };
         });
