@@ -34,6 +34,7 @@ interface UserData {
   isAgency: boolean;
   emailConfirmed: boolean;
   suspended: boolean;
+  precisionEnabled: boolean;
   createdAt: string | null;
   lastSignInAt: string | null;
   lastSignInIp: string | null;
@@ -795,7 +796,7 @@ export function AdminUsersView() {
 
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, email, email_verified, suspended, created_at');
+      .select('id, email, email_verified, suspended, created_at, precision_enabled');
 
     if (profilesError) {
       toast({
@@ -943,6 +944,7 @@ export function AdminUsersView() {
         isAgency: userAgency?.onboarding_complete === true,
         emailConfirmed: profile.email_verified ?? false,
         suspended: profile.suspended ?? false,
+        precisionEnabled: profile.precision_enabled ?? false,
         createdAt: authInfo?.createdAt || profile.created_at,
         lastSignInAt: authInfo?.lastSignInAt || null,
         lastSignInIp: authInfo?.lastSignInIp || null,
@@ -957,6 +959,20 @@ export function AdminUsersView() {
     setLoading(false);
   };
 
+  const handleTogglePrecision = async (user: UserData, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newValue = !user.precisionEnabled;
+    const { error } = await supabase
+      .from('profiles')
+      .update({ precision_enabled: newValue })
+      .eq('id', user.id);
+    if (error) {
+      sonnerToast.error('Failed to update Precision access');
+      return;
+    }
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, precisionEnabled: newValue } : u));
+    sonnerToast.success(`Precision ${newValue ? 'enabled' : 'disabled'} for ${user.email}`);
+  };
   const openCreditDialog = (user: UserData, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedUser(user);
@@ -1413,6 +1429,14 @@ export function AdminUsersView() {
                             >
                               Manage Credits
                             </Button>
+                            <Button
+                              variant={user.precisionEnabled ? "default" : "outline"}
+                              size="sm"
+                              onClick={(e) => handleTogglePrecision(user, e)}
+                              className={`rounded-none ${user.precisionEnabled ? 'bg-[#3872e0] text-white hover:bg-[#2d5bb8]' : 'hover:bg-black hover:text-white'}`}
+                            >
+                              Precision {user.precisionEnabled ? 'ON' : 'OFF'}
+                            </Button>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
@@ -1467,7 +1491,15 @@ export function AdminUsersView() {
                                 onClick={(e) => openCreditDialog(user, e)}
                                 className="rounded-none hover:bg-black hover:text-white text-xs h-7"
                               >
-                                Manage Credits
+                                Credits
+                              </Button>
+                              <Button
+                                variant={user.precisionEnabled ? "default" : "outline"}
+                                size="sm"
+                                onClick={(e) => handleTogglePrecision(user, e)}
+                                className={`rounded-none text-xs h-7 ${user.precisionEnabled ? 'bg-[#3872e0] text-white hover:bg-[#2d5bb8]' : 'hover:bg-black hover:text-white'}`}
+                              >
+                                P {user.precisionEnabled ? 'ON' : 'OFF'}
                               </Button>
                               <Button
                                 variant="outline"

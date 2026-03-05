@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN precision_enabled boolean NOT NULL DEFAULT false;

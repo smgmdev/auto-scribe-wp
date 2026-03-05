@@ -248,7 +248,8 @@ export function Sidebar({
     signOut,
     isAdmin,
     user,
-    loading: authLoading
+    loading: authLoading,
+    precisionEnabled,
   } = useAuth();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [isAgencyOnboarded, setIsAgencyOnboarded] = useState(false);
@@ -2131,12 +2132,14 @@ export function Sidebar({
                   </span>
                 )}
               </div>
+              {(isAdmin || precisionEnabled) && (
+                <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-surveillance')}>
+                  <Satellite className={cn("h-5 w-5", currentView === 'admin-surveillance' && "text-[#3872e0]")} />
+                  Precision AI
+                </Button>
+              )}
               {isAdmin && (
                 <>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-surveillance' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-surveillance')}>
-                    <Satellite className={cn("h-5 w-5", currentView === 'admin-surveillance' && "text-[#3872e0]")} />
-                    Precision AI
-                  </Button>
                   <Button variant="ghost" className={cn("w-full justify-start gap-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent", currentView === 'admin-system' && "bg-sidebar-accent text-[#3872e0] font-medium")} onClick={() => handleNavClick('admin-system')}>
                     <Terminal className={cn("h-5 w-5", currentView === 'admin-system' && "text-[#3872e0]")} />
                     Terminal
