@@ -17,6 +17,7 @@ interface AuthContextType {
   emailVerified: boolean;
   pinRequired: boolean;
   pinVerified: boolean;
+  precisionEnabled: boolean;
   signUp: (email: string, password: string, options?: { honeypot?: string; redirectTo?: string }) => Promise<{ error: Error | null; data: { user: User | null } | null; welcomeEmailResult: { error?: string } | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -75,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [emailVerified, setEmailVerified] = useState(false);
   const [pinRequired, setPinRequired] = useState(false);
   const [pinVerified, setPinVerified] = useState(false);
+  const [precisionEnabled, setPrecisionEnabled] = useState(false);
   const hasShownWelcomeRef = useRef(false);
   const previousUserIdRef = useRef<string | null>(null);
   const userInitiatedSignOutRef = useRef(false);
@@ -106,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setEmailVerified(false);
     setPinRequired(false);
     setPinVerified(false);
+    setPrecisionEnabled(false);
     hasShownWelcomeRef.current = false;
     previousUserIdRef.current = null;
   };
@@ -218,9 +221,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Check profile for PIN and email verification status
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('pin_enabled, pin_hash, email_verified')
+        .select('pin_enabled, pin_hash, email_verified, precision_enabled')
         .eq('id', userId)
         .maybeSingle();
+
+      setPrecisionEnabled(profileData?.precision_enabled ?? false);
       
       // Set email verification status
       const isVerified = profileData?.email_verified ?? false;
@@ -995,6 +1000,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailVerified,
         pinRequired,
         pinVerified,
+        precisionEnabled,
         signUp,
         signIn,
         signOut,
@@ -1020,6 +1026,7 @@ const defaultAuthContext: AuthContextType = {
   emailVerified: false,
   pinRequired: false,
   pinVerified: false,
+  precisionEnabled: false,
   signUp: async () => ({ error: new Error('Auth not ready'), data: null, welcomeEmailResult: null }),
   signIn: async () => ({ error: new Error('Auth not ready') }),
   signOut: async () => {},
