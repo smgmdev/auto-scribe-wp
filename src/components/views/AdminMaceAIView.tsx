@@ -280,137 +280,102 @@ export function AdminMaceAIView() {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
+      audioRef.current = null;
     }
     setSpeakingWords([]);
 
-    // Create Audio element synchronously to preserve user-gesture context (Safari)
-    const audio = new Audio();
-    audio.preload = 'auto';
-    audioRef.current = audio;
-    // Unlock audio on Safari — fire-and-forget, don't await
-    audio.play().then(() => audio.pause()).catch(() => {});
+    const cleanupAndFinish = () => {
+      if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
+      setSpeakingWords([]);
+      if (isMountedRef.current) {
+        if (!publishFlowActiveRef.current) setStep('idle');
+        onDone?.();
+      }
+    };
 
-    try {
+    const playAudioBlob = (audioBlob: Blob): Promise<void> => {
+      return new Promise((resolve) => {
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio();
+        audioRef.current = audio;
+
+        audio.onplay = () => {
+          if (isMountedRef.current) {
+            setStep('speaking');
+            const estimatedMs = text.split(/\s+/).length * 150;
+            startWordReveal(text, audio.duration ? audio.duration * 1000 : estimatedMs);
+          }
+        };
+        audio.onloadedmetadata = () => {
+          if (audio.duration && audio.duration > 0) startWordReveal(text, audio.duration * 1000);
+        };
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+          cleanupAndFinish();
+          resolve();
+        };
+        audio.onerror = () => {
+          console.error('[Mace] Audio playback error');
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+          cleanupAndFinish();
+          resolve();
+        };
+
+        audio.src = audioUrl;
+        audio.play().catch((err) => {
+          console.error('[Mace] audio.play() rejected:', err);
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+          cleanupAndFinish();
+          resolve();
+        });
+      });
+    };
+
+    const fetchTTS = async (): Promise<Blob> => {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       const accessToken = currentSession?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ text }),
-        }
-      );
-
-      if (!response.ok) throw new Error(`TTS failed: ${response.status}`);
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      audio.src = audioUrl;
-
-      audio.onplay = () => {
-        if (isMountedRef.current) {
-          setStep('speaking');
-          // Estimate duration: ~150ms per word average for ElevenLabs
-          const estimatedMs = text.split(/\s+/).length * 150;
-          startWordReveal(text, audio.duration ? audio.duration * 1000 : estimatedMs);
-        }
-      };
-
-      // Update word reveal timing once duration is known
-      audio.onloadedmetadata = () => {
-        if (audio.duration && audio.duration > 0) {
-          // Restart with accurate duration
-          startWordReveal(text, audio.duration * 1000);
-        }
-      };
-
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords([]);
-        if (isMountedRef.current) {
-          // During publish flow, keep step as 'processing' instead of resetting to 'idle'
-          if (!publishFlowActiveRef.current) {
-            setStep('idle');
-          }
-          onDone?.();
-        }
-      };
-      audio.onerror = () => {
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords([]);
-        if (isMountedRef.current) {
-          if (!publishFlowActiveRef.current) setStep('idle');
-          onDone?.();
-        }
-      };
-
-      await audio.play();
-    } catch (err) {
-      console.error('ElevenLabs TTS error, retrying once:', err);
-      // Retry ElevenLabs once before giving up — never fall back to browser voice
+      
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      
       try {
-        await new Promise(r => setTimeout(r, 500));
-        const { data: { session: retrySession } } = await supabase.auth.getSession();
-        const retryToken = retrySession?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const retryResponse = await fetch(
+        const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-              Authorization: `Bearer ${retryToken}`,
+              Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify({ text }),
+            signal: controller.signal,
           }
         );
-        if (!retryResponse.ok) throw new Error(`TTS retry failed: ${retryResponse.status}`);
-         const retryBlob = await retryResponse.blob();
-         const retryUrl = URL.createObjectURL(retryBlob);
-         // Reuse the already-unlocked audio element if still available
-         const retryAudio = audioRef.current || new Audio();
-         audioRef.current = retryAudio;
-         retryAudio.src = retryUrl;
-        retryAudio.onplay = () => {
-          if (isMountedRef.current) {
-            setStep('speaking');
-            const estimatedMs = text.split(/\s+/).length * 150;
-            startWordReveal(text, retryAudio.duration ? retryAudio.duration * 1000 : estimatedMs);
-          }
-        };
-        retryAudio.onloadedmetadata = () => {
-          if (retryAudio.duration && retryAudio.duration > 0) startWordReveal(text, retryAudio.duration * 1000);
-        };
-        retryAudio.onended = () => {
-          URL.revokeObjectURL(retryUrl);
-          audioRef.current = null;
-          if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-          setSpeakingWords([]);
-          if (isMountedRef.current) { if (!publishFlowActiveRef.current) setStep('idle'); onDone?.(); }
-        };
-        retryAudio.onerror = () => {
-          URL.revokeObjectURL(retryUrl);
-          audioRef.current = null;
-          if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-          setSpeakingWords([]);
-          if (isMountedRef.current) { if (!publishFlowActiveRef.current) setStep('idle'); onDone?.(); }
-        };
-        await retryAudio.play();
+        if (!response.ok) throw new Error(`TTS failed: ${response.status}`);
+        return await response.blob();
+      } finally {
+        clearTimeout(timeout);
+      }
+    };
+
+    try {
+      console.log('[Mace] Fetching TTS audio...');
+      const blob = await fetchTTS();
+      console.log('[Mace] TTS audio received, playing...');
+      await playAudioBlob(blob);
+    } catch (err) {
+      console.error('[Mace] TTS error, retrying once:', err);
+      try {
+        await new Promise(r => setTimeout(r, 500));
+        const blob = await fetchTTS();
+        await playAudioBlob(blob);
       } catch (retryErr) {
-        console.error('ElevenLabs TTS retry also failed, skipping speech:', retryErr);
-        // Skip speech entirely — do NOT fall back to browser voice
-        if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
-        setSpeakingWords([]);
-        if (isMountedRef.current) { if (!publishFlowActiveRef.current) setStep('idle'); onDone?.(); }
+        console.error('[Mace] TTS retry failed, skipping speech:', retryErr);
+        cleanupAndFinish();
       }
     }
   }, [startWordReveal]);
