@@ -46,7 +46,7 @@ function isDenial(text: string): boolean {
 }
 
 export function AdminMaceAIView() {
-  const { extendSession, setSessionGrace } = useAuth();
+  const { extendSession } = useAuth();
   const [step, setStep] = useState<ConversationStep>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
@@ -502,9 +502,8 @@ export function AdminMaceAIView() {
 
   const processUserMessage = async (text: string) => {
     console.log('[Mace] processUserMessage called with:', text);
-    // Keep session alive and suspend session guard during voice processing
+    // Keep session alive during active voice conversation
     keepSessionAlive();
-    setSessionGrace(60_000); // 60s grace for normal AI interactions
     // Bail out immediately if user is no longer authenticated
     if (!isAuthenticatedRef.current) {
       console.log('[Mace] Blocked processUserMessage — user signed out');
@@ -563,10 +562,7 @@ export function AdminMaceAIView() {
         if (isConfirmation(text)) {
           // Lock the publish flow — prevent mic/interruption until done
           publishFlowActiveRef.current = true;
-          // Suspend session guard for 2 minutes — publish flow is long-running
-          // and concurrent token refreshes from the guard cause "Refresh Token Not Found"
-          setSessionGrace(120_000);
-          // Also proactively refresh the token now so it won't expire mid-publish
+          // Proactively refresh the token so it won't expire mid-publish
           extendSession().catch(() => {});
           
           // Say "Got it" first, then publish in background
