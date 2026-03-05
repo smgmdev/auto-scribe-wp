@@ -67,6 +67,7 @@ export function AdminMaceAIView() {
   const scribeSilenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scribeActiveRef = useRef(false);
   const scribeConnectedRef = useRef(false);
+  const scribePartialRef = useRef('');
   const processUserMessageRef = useRef<(text: string) => void>(() => {});
   const startListeningRef = useRef<() => void>(() => {});
   
@@ -139,6 +140,7 @@ export function AdminMaceAIView() {
       if (!isMountedRef.current || !scribeActiveRef.current) return;
       const partialText = data.text || '';
       setInterimTranscript(partialText);
+      scribePartialRef.current = partialText;
       // Only reset silence timer if there's actual speech content
       if (partialText.trim()) {
         if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
@@ -155,6 +157,7 @@ export function AdminMaceAIView() {
         scribeCommittedTextRef.current = (scribeCommittedTextRef.current + ' ' + text).trim();
         setCurrentTranscript(scribeCommittedTextRef.current);
         setInterimTranscript('');
+        scribePartialRef.current = '';
         // Only start silence timer after real speech has been committed
         if (scribeSilenceTimerRef.current) clearTimeout(scribeSilenceTimerRef.current);
         scribeSilenceTimerRef.current = setTimeout(() => {
@@ -261,8 +264,20 @@ export function AdminMaceAIView() {
     // Stop speculative timer (but keep result if ready — processUserMessage will use it)
     if (speculativeTimerRef.current) { clearTimeout(speculativeTimerRef.current); speculativeTimerRef.current = null; }
     
-    const text = scribeCommittedTextRef.current.trim();
+    // Use committed text, but fall back to partial transcript if user tapped stop
+    // before VAD committed (common on Safari where taps interrupt mid-speech)
+    let text = scribeCommittedTextRef.current.trim();
+    const partial = scribePartialRef.current.trim();
+    if (!text && partial) {
+      console.log('[Scribe] No committed text, using partial:', partial);
+      text = partial;
+    } else if (text && partial) {
+      // Append any trailing partial that wasn't committed yet
+      text = (text + ' ' + partial).trim();
+      console.log('[Scribe] Appending partial to committed:', text);
+    }
     scribeCommittedTextRef.current = '';
+    scribePartialRef.current = '';
     
     // Disconnect Scribe — WebSocket connections time out when idle anyway,
     // and prefetching a new token keeps next tap fast
@@ -291,6 +306,7 @@ export function AdminMaceAIView() {
     if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
     try { scribe.disconnect(); } catch (_) {}
     scribeCommittedTextRef.current = '';
+    scribePartialRef.current = '';
     setSpeakingWords([]);
     
     if (recognitionRef.current) {
@@ -480,6 +496,7 @@ export function AdminMaceAIView() {
     setInterimTranscript('');
     setPublishResult(null);
     scribeCommittedTextRef.current = '';
+    scribePartialRef.current = '';
     scribeActiveRef.current = true;
     
     setStep('listening');
@@ -779,6 +796,7 @@ export function AdminMaceAIView() {
     isProcessingRef.current = false;
     publishFlowActiveRef.current = false;
     scribeCommittedTextRef.current = '';
+    scribePartialRef.current = '';
     scribeActiveRef.current = false;
     speculativeResultRef.current = null;
     if (speculativeAbortRef.current) { speculativeAbortRef.current.abort(); speculativeAbortRef.current = null; }
