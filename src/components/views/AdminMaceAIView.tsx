@@ -79,6 +79,7 @@ export function AdminMaceAIView() {
   const speculativeResultRef = useRef<{ text: string; result: any } | null>(null);
   const lastSessionExtendRef = useRef<number>(Date.now());
   const audioUnlockedRef = useRef(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Unlock audio playback on Safari — must be called from a user gesture (click/tap).
   // Creates a silent AudioContext interaction so subsequent audio.play() calls work.
@@ -87,6 +88,7 @@ export function AdminMaceAIView() {
     audioUnlockedRef.current = true;
     try {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = ctx;
       const buffer = ctx.createBuffer(1, 1, 22050);
       const source = ctx.createBufferSource();
       source.buffer = buffer;
@@ -358,10 +360,11 @@ export function AdminMaceAIView() {
       }
     };
 
-    const playAudioBlob = (audioBlob: Blob): Promise<void> => {
+    const playAudioBlob = (audioBlob: Blob, preWarmedAudio?: HTMLAudioElement): Promise<void> => {
       return new Promise((resolve) => {
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio();
+        // Reuse pre-warmed Audio element (Safari gesture context) or create new
+        const audio = preWarmedAudio || new Audio();
         audioRef.current = audio;
 
         audio.onplay = () => {
@@ -429,15 +432,31 @@ export function AdminMaceAIView() {
 
     try {
       console.log('[Mace] Fetching TTS audio...');
+      // Safari: create and "warm" Audio element NOW (in user gesture context)
+      // so .play() works after the async fetch completes
+      const preWarmedAudio = new Audio();
+      preWarmedAudio.preload = 'auto';
+      // Silent play attempt unlocks the element for Safari
+      preWarmedAudio.play().catch(() => {});
+      preWarmedAudio.pause();
+      // Keep AudioContext alive for Safari
+      if (audioContextRef.current?.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => {});
+      }
+
       const blob = await fetchTTS();
       console.log('[Mace] TTS audio received, playing...');
-      await playAudioBlob(blob);
+      await playAudioBlob(blob, preWarmedAudio);
     } catch (err) {
       console.error('[Mace] TTS error, retrying once:', err);
       try {
         await new Promise(r => setTimeout(r, 500));
+        const retryAudio = new Audio();
+        retryAudio.preload = 'auto';
+        retryAudio.play().catch(() => {});
+        retryAudio.pause();
         const blob = await fetchTTS();
-        await playAudioBlob(blob);
+        await playAudioBlob(blob, retryAudio);
       } catch (retryErr) {
         console.error('[Mace] TTS retry failed, skipping speech:', retryErr);
         cleanupAndFinish();
