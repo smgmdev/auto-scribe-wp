@@ -70,6 +70,8 @@ interface EventData {
   source: string;
   source_url?: string;
   published_at?: string;
+  origin_country_code?: string;
+  destination_country_code?: string;
 }
 
 interface ScanData {
@@ -331,7 +333,14 @@ export function AdminSurveillanceView() {
   const filteredCountries = useMemo(() => {
     if (!scanData?.countries) return [];
     // Build set of country codes that have events in the time window
-    const activeCountryCodes = new Set(filteredEvents.map(ev => ev.country_code));
+    // Include country_code, origin_country_code, AND destination_country_code from events
+    const activeCountryCodes = new Set<string>();
+    for (const ev of filteredEvents) {
+      if (ev.country_code) activeCountryCodes.add(ev.country_code);
+      // Also mark origin and destination countries as active (e.g. "Iranian drone strikes Dubai" → both IR and AE)
+      if (ev.origin_country_code) activeCountryCodes.add(ev.origin_country_code);
+      if (ev.destination_country_code) activeCountryCodes.add(ev.destination_country_code);
+    }
 
     // Also include countries involved in active weapon trajectories
     const trajectoryCountryCodes = new Set<string>();
@@ -361,13 +370,15 @@ export function AdminSurveillanceView() {
       const hasEvents = activeCountryCodes.has(c.code);
       const hasTrajectory = trajectoryCountryCodes.has(c.code);
       const attackBoost = countryAttackScore.get(c.code) || 0;
+      // Preserve Perplexity's original score if the country was scored as caution/danger
+      const perplexityHadThreat = c.score >= 30;
 
-      if (hasEvents || hasTrajectory) {
+      if (hasEvents || hasTrajectory || perplexityHadThreat) {
         const newScore = Math.min(100, Math.max(c.score, attackBoost));
         const newLevel = newScore >= 60 ? 'danger' as const : newScore >= 30 ? 'caution' as const : 'safe' as const;
-        return { ...c, score: hasEvents ? Math.max(c.score, newScore) : newScore, threat_level: hasEvents ? (c.score >= newScore ? c.threat_level : newLevel) : newLevel, events: hasEvents ? c.events : [] };
+        return { ...c, score: newScore, threat_level: newLevel, events: hasEvents ? c.events : c.events };
       }
-      // Countries without active events or trajectories get score zeroed out
+      // Only zero out countries that Perplexity also scored as safe AND have no active events
       return { ...c, score: 0, threat_level: 'safe' as const, events: [] };
     });
   }, [scanData?.countries, filteredEvents, missileTrajectories, droneTrajectories, nukeTrajectories, hbombTrajectories, showMissiles, showDrones, showNukes, showHbombs]);
