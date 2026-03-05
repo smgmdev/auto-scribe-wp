@@ -282,6 +282,14 @@ export function AdminMaceAIView() {
     }
     setSpeakingWords([]);
 
+    // Create Audio element synchronously to preserve user-gesture context (Safari)
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audioRef.current = audio;
+    // Unlock audio on Safari — must happen synchronously in gesture chain
+    try { await audio.play().catch(() => {}); } catch (_) {}
+    audio.pause();
+
     try {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       const accessToken = currentSession?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -302,8 +310,7 @@ export function AdminMaceAIView() {
 
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
+      audio.src = audioUrl;
 
       audio.onplay = () => {
         if (isMountedRef.current) {
@@ -367,10 +374,12 @@ export function AdminMaceAIView() {
           }
         );
         if (!retryResponse.ok) throw new Error(`TTS retry failed: ${retryResponse.status}`);
-        const retryBlob = await retryResponse.blob();
-        const retryUrl = URL.createObjectURL(retryBlob);
-        const retryAudio = new Audio(retryUrl);
-        audioRef.current = retryAudio;
+         const retryBlob = await retryResponse.blob();
+         const retryUrl = URL.createObjectURL(retryBlob);
+         // Reuse the already-unlocked audio element if still available
+         const retryAudio = audioRef.current || new Audio();
+         audioRef.current = retryAudio;
+         retryAudio.src = retryUrl;
         retryAudio.onplay = () => {
           if (isMountedRef.current) {
             setStep('speaking');
@@ -407,8 +416,11 @@ export function AdminMaceAIView() {
   }, [startWordReveal]);
 
   const startListening = useCallback(async () => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
-    window.speechSynthesis.cancel();
+    // Only kill audio if NOT in a publish flow (prevents cutting off TTS during auto-listen)
+    if (!publishFlowActiveRef.current) {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
+      window.speechSynthesis.cancel();
+    }
     
     setCurrentTranscript('');
     setInterimTranscript('');
@@ -418,40 +430,52 @@ export function AdminMaceAIView() {
     
     setStep('listening');
 
+    const attemptConnect = async (retryCount: number): Promise<void> => {
+      try {
+        console.log(`[Scribe] Connecting fresh (attempt ${retryCount + 1})`);
+        
+        // Disconnect any existing connection
+        if (scribe.isConnected) {
+          try { scribe.disconnect(); } catch (_) {}
+          scribeConnectedRef.current = false;
+        }
+
+        // Use prefetched token on first attempt; always fetch fresh on retry
+        let token = retryCount === 0 ? prefetchedTokenRef.current : null;
+        if (retryCount === 0) prefetchedTokenRef.current = null;
+
+        if (!token) {
+          const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
+          if (error || !data?.token) throw new Error('Failed to get speech recognition token');
+          token = data.token;
+        }
+
+        if (!scribeActiveRef.current || !isMountedRef.current) return;
+
+        await scribe.connect({
+          token,
+          microphone: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        });
+
+        // Initial silence timer — if no speech at all after 10s, stop
+        scribeSilenceTimerRef.current = setTimeout(() => {
+          finishScribeListening();
+        }, 10000);
+      } catch (err) {
+        console.error(`[Scribe] Connection attempt ${retryCount + 1} failed:`, err);
+        // Retry up to 2 times with a fresh token
+        if (retryCount < 2 && scribeActiveRef.current && isMountedRef.current) {
+          await new Promise(r => setTimeout(r, 300 * (retryCount + 1)));
+          return attemptConnect(retryCount + 1);
+        }
+        throw err;
+      }
+    };
+
     try {
-      // Always connect fresh — Scribe WebSocket connections time out when idle
-      // so we can't keep them warm. With prefetched token, connect() is fast.
-      console.log('[Scribe] Connecting fresh');
-      
-      // Disconnect any existing connection
-      if (scribe.isConnected) {
-        try { scribe.disconnect(); } catch (_) {}
-        scribeConnectedRef.current = false;
-      }
-
-      // Use prefetched token (fetched on mount/after last session) for speed
-      let token = prefetchedTokenRef.current;
-      prefetchedTokenRef.current = null;
-
-      if (!token) {
-        const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
-        if (error || !data?.token) throw new Error('Failed to get speech recognition token');
-        token = data.token;
-      }
-
-      if (!scribeActiveRef.current || !isMountedRef.current) return;
-
-      await scribe.connect({
-        token,
-        microphone: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      });
-
-      // Initial silence timer — if no speech at all after 10s, stop
-      scribeSilenceTimerRef.current = setTimeout(() => {
-        finishScribeListening();
-      }, 10000);
+      await attemptConnect(0);
     } catch (err) {
-      console.error('Failed to start ElevenLabs STT:', err);
+      console.error('Failed to start ElevenLabs STT after retries:', err);
       scribeActiveRef.current = false;
       if (isMountedRef.current) setStep('idle');
       toast.error('Could not start speech recognition. Please try again.');
@@ -639,10 +663,10 @@ export function AdminMaceAIView() {
       if (data?.type === 'pending_publish') {
         await speak(displayMessage, () => {
           done();
-          // Small delay before auto-listening to avoid picking up TTS audio echo
+          // Delay before auto-listening — 1.2s avoids TTS echo through mic
           setTimeout(() => {
             if (isMountedRef.current) startListening();
-          }, 600);
+          }, 1200);
         });
       } else {
         await speak(displayMessage, done);
