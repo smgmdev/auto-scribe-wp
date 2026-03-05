@@ -332,19 +332,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // If the query fails due to RLS (session expired/invalid), the auth session is broken
         if (error || data === null) {
           consecutiveFailures++;
-          console.warn(`[Auth] Session check failed (${consecutiveFailures}/5) - profile not accessible`, error?.message);
+          console.warn(`[Auth] Session check failed (${consecutiveFailures}/10) - profile not accessible`, error?.message);
           
-          // Only attempt recovery after 5 consecutive failures (was 3, increased for resilience)
-          if (consecutiveFailures >= 5) {
-            console.warn('[Auth] 5 consecutive session check failures, attempting session refresh');
-            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-            if (refreshError || !refreshData?.session) {
-              console.error('[Auth] Session refresh failed during validity check, signing out');
+          // Only attempt recovery after 10 consecutive failures (~50 seconds)
+          // This prevents false logouts during heavy network usage (voice AI, etc.)
+          if (consecutiveFailures >= 10) {
+            console.warn('[Auth] 10 consecutive session check failures, attempting session recovery');
+            // First try getSession (lightweight, uses local storage)
+            const { data: { session: localSession } } = await supabase.auth.getSession();
+            if (localSession) {
+              // We still have a local session — try refreshing the token
+              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+              if (!refreshError && refreshData?.session) {
+                console.log('[Auth] Session refreshed successfully after failures');
+                consecutiveFailures = 0;
+                return;
+              }
+            }
+            // Both getSession and refresh failed — wait one more cycle before giving up
+            if (consecutiveFailures >= 12) {
+              console.error('[Auth] Session unrecoverable after 12 failures, signing out');
               handleSessionKicked();
               return;
             }
-            // Refresh succeeded, reset counter
-            consecutiveFailures = 0;
           }
           return;
         }

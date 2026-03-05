@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Loader2, Volume2, ExternalLink } from 'lucide-react';
 import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import amblack from '@/assets/amblack.png';
@@ -45,6 +46,7 @@ function isDenial(text: string): boolean {
 }
 
 export function AdminMaceAIView() {
+  const { extendSession } = useAuth();
   const [step, setStep] = useState<ConversationStep>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
@@ -75,6 +77,18 @@ export function AdminMaceAIView() {
   const speculativeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const speculativeAbortRef = useRef<AbortController | null>(null);
   const speculativeResultRef = useRef<{ text: string; result: any } | null>(null);
+  const lastSessionExtendRef = useRef<number>(Date.now());
+
+  // Keep session alive while voice AI is actively used (every 10 min)
+  const keepSessionAlive = useCallback(() => {
+    const now = Date.now();
+    // Only extend if 10+ minutes have passed since last extension
+    if (now - lastSessionExtendRef.current > 10 * 60 * 1000) {
+      lastSessionExtendRef.current = now;
+      console.log('[Mace] Extending session — voice AI active');
+      extendSession().catch(() => {});
+    }
+  }, [extendSession]);
 
   // ElevenLabs Scribe for speech-to-text
   const scribe = useScribe({
@@ -487,6 +501,8 @@ export function AdminMaceAIView() {
 
   const processUserMessage = async (text: string) => {
     console.log('[Mace] processUserMessage called with:', text);
+    // Keep session alive during active voice conversation
+    keepSessionAlive();
     // Bail out immediately if user is no longer authenticated
     if (!isAuthenticatedRef.current) {
       console.log('[Mace] Blocked processUserMessage — user signed out');
