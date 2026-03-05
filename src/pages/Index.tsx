@@ -105,7 +105,7 @@ const adminOnlyViews: Record<string, React.ComponentType> = {
 
 const Index = () => {
   const { currentView, setCurrentView, setTargetTab, setTargetSubcategory, setPreselectedSiteId } = useAppStore();
-  const { isAdmin, user, loading: authLoading } = useAuth();
+  const { isAdmin, user, loading: authLoading, precisionEnabled } = useAuth();
   const location = useLocation();
   const [isApprovedAgency, setIsApprovedAgency] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -189,12 +189,16 @@ const Index = () => {
       return DashboardView;
     }
     
-    // Regular user can only access public + user-only views
+    // Regular user can only access public + user-only views + precision if enabled
     if (publicViews[currentView]) {
       return publicViews[currentView];
     }
     if (userOnlyViews[currentView]) {
       return userOnlyViews[currentView];
+    }
+    // Allow precision-enabled users to access surveillance view
+    if (currentView === 'admin-surveillance' && precisionEnabled) {
+      return adminOnlyViews['admin-surveillance'];
     }
     
     // Unauthorized access - redirect to dashboard
@@ -223,8 +227,12 @@ const Index = () => {
     } else if (isApprovedAgency) {
       Object.assign(views, agencyOnlyViews);
     }
+    // Allow precision-enabled users to access surveillance
+    if (!isAdmin && precisionEnabled) {
+      views['admin-surveillance'] = adminOnlyViews['admin-surveillance'];
+    }
     return views;
-  }, [isAdmin, isApprovedAgency]);
+  }, [isAdmin, isApprovedAgency, precisionEnabled]);
   
   // If user tries to access unauthorized view, reset to dashboard
   // Only enforce AFTER both auth and agency status are fully resolved
@@ -235,10 +243,12 @@ const Index = () => {
     const isAgencyView = !!agencyOnlyViews[currentView];
     const isUserOnlyView = !!userOnlyViews[currentView];
     
-    // Block admin views for non-admins
+    // Block admin views for non-admins (except precision users accessing surveillance)
     if (isAdminView && !isAdmin) {
-      setCurrentView('dashboard');
-      return;
+      if (!(currentView === 'admin-surveillance' && precisionEnabled)) {
+        setCurrentView('dashboard');
+        return;
+      }
     }
     
     // Block user-only views for admins
