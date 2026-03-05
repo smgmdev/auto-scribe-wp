@@ -524,16 +524,21 @@ export function AdminSurveillanceView() {
       const hasEvents = activeCountryCodes.has(code);
       const hasTrajectory = trajectoryCountryCodes.has(code);
       const attackBoost = countryAttackScore.get(code) || 0;
-      // Preserve Perplexity's original score if the country was scored as caution/danger
-      const perplexityHadThreat = (c.score || 0) >= 30;
 
-      if (hasEvents || hasTrajectory || perplexityHadThreat) {
+      if (hasEvents || hasTrajectory) {
+        // Country has confirmed news events or trajectories — boost score
         const newScore = Math.min(100, Math.max(c.score || 0, attackBoost));
         const newLevel = newScore >= 60 ? 'danger' as const : newScore >= 30 ? 'caution' as const : 'safe' as const;
-        return { ...c, code, score: newScore, threat_level: newLevel, events: hasEvents ? c.events : c.events };
+        return { ...c, code, score: newScore, threat_level: newLevel };
       }
-      // Only zero out countries that Perplexity also scored as safe AND have no active events
-      return { ...c, code, score: 0, threat_level: 'safe' as const, events: [] };
+      
+      // No confirmed events in this time window — downgrade AI assessment
+      // AI may still know about ongoing threats, but without news evidence
+      // in the active time window, reduce to safe or low caution at most
+      const aiScore = c.score || 0;
+      // Allow a small residual score (max 20) for AI-only assessment — not enough for caution/danger
+      const downgradedScore = Math.min(aiScore, 20);
+      return { ...c, code, score: downgradedScore, threat_level: 'safe' as const };
     });
     
     // Add countries from trajectories that weren't in Perplexity's country list
