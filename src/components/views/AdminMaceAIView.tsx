@@ -69,7 +69,7 @@ export function AdminMaceAIView() {
   const scribeConnectedRef = useRef(false);
   const scribePartialRef = useRef('');
   const processUserMessageRef = useRef<(text: string) => void>(() => {});
-  const startListeningRef = useRef<() => void>(() => {});
+  const startListeningRef = useRef<(preAcquiredStream?: MediaStream | null) => void>(() => {});
   
   const wordRevealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prefetchedTokenRef = useRef<string | null>(null);
@@ -483,10 +483,11 @@ export function AdminMaceAIView() {
     }
   }, [startWordReveal]);
 
-  const startListening = useCallback(async () => {
+  const startListening = useCallback(async (preAcquiredStream?: MediaStream | null) => {
     // Bail if user signed out
     if (!isAuthenticatedRef.current || !isMountedRef.current) {
       console.log('[Mace] Blocked startListening — user signed out');
+      if (preAcquiredStream) preAcquiredStream.getTracks().forEach(t => t.stop());
       return;
     }
     // Only kill audio if NOT in a publish flow (prevents cutting off TTS during auto-listen)
@@ -524,12 +525,31 @@ export function AdminMaceAIView() {
           token = data.token;
         }
 
-        if (!scribeActiveRef.current || !isMountedRef.current) return;
+        if (!scribeActiveRef.current || !isMountedRef.current) {
+          if (preAcquiredStream) preAcquiredStream.getTracks().forEach(t => t.stop());
+          return;
+        }
 
-        await scribe.connect({
-          token,
-          microphone: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        });
+        // Safari fix: if we have a pre-acquired stream (captured in user gesture context),
+        // temporarily override getUserMedia so the SDK reuses our live stream
+        // instead of calling getUserMedia itself (which fails outside gesture context).
+        const originalGUM = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+        if (preAcquiredStream && retryCount === 0) {
+          console.log('[Scribe] Using pre-acquired mic stream for Safari');
+          navigator.mediaDevices.getUserMedia = async () => preAcquiredStream;
+        }
+
+        try {
+          await scribe.connect({
+            token,
+            microphone: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+          });
+        } finally {
+          // Always restore original getUserMedia
+          if (preAcquiredStream && retryCount === 0) {
+            navigator.mediaDevices.getUserMedia = originalGUM;
+          }
+        }
 
         // Initial silence timer — if no speech at all after 10s, stop
         scribeSilenceTimerRef.current = setTimeout(() => {
@@ -537,6 +557,8 @@ export function AdminMaceAIView() {
         }, 10000);
       } catch (err) {
         console.error(`[Scribe] Connection attempt ${retryCount + 1} failed:`, err);
+        // On retry, release the pre-acquired stream (it may be stale)
+        if (preAcquiredStream) { preAcquiredStream.getTracks().forEach(t => t.stop()); preAcquiredStream = null; }
         // Retry up to 2 times with a fresh token
         if (retryCount < 2 && scribeActiveRef.current && isMountedRef.current) {
           await new Promise(r => setTimeout(r, 300 * (retryCount + 1)));
@@ -550,6 +572,7 @@ export function AdminMaceAIView() {
       await attemptConnect(0);
     } catch (err) {
       console.error('Failed to start ElevenLabs STT after retries:', err);
+      if (preAcquiredStream) preAcquiredStream.getTracks().forEach(t => t.stop());
       scribeActiveRef.current = false;
       if (isMountedRef.current) setStep('idle');
       toast.error('Could not start speech recognition. Please try again.');
@@ -768,7 +791,7 @@ export function AdminMaceAIView() {
     }
   };
 
-  const handleMicClick = () => {
+  const handleMicClick = async () => {
     // Unlock audio playback on Safari (must happen in user gesture context)
     unlockAudioPlayback();
     // Block mic interaction during active publish flow to prevent voice cutoff
@@ -776,6 +799,25 @@ export function AdminMaceAIView() {
       console.log('[Mace] Mic click blocked — publish flow active');
       return;
     }
+
+    // Safari: capture microphone NOW in the user gesture context.
+    // If we wait until after the async token fetch inside scribe.connect(),
+    // Safari silently returns a dead stream (no audio data).
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    let preStream: MediaStream | null = null;
+    if (isSafari && step !== 'listening') {
+      try {
+        preStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        });
+        console.log('[Mace] Safari: mic pre-acquired in gesture context');
+      } catch (e) {
+        console.error('[Mace] Mic permission denied:', e);
+        toast.error('Microphone access denied. Check browser permissions.');
+        return;
+      }
+    }
+
     if (step === 'listening') {
       // Stop listening and process what we have
       finishScribeListening();
@@ -788,9 +830,9 @@ export function AdminMaceAIView() {
       isProcessingRef.current = false;
       // Add a system-level note so AI knows the user interrupted
       setMessages(prev => [...prev, { role: 'user', content: '[User interrupted your response to say something new]' }]);
-      startListening();
+      startListening(preStream);
     } else if (step === 'idle') {
-      startListening();
+      startListening(preStream);
     }
   };
 
