@@ -862,7 +862,18 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id)
       .eq('role', 'admin')
       .maybeSingle();
-    if (!roleData) {
+    
+    // Also allow precision-enabled users (non-admin) to scan
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('precision_enabled')
+      .eq('id', user.id)
+      .single();
+    
+    const isAdmin = !!roleData;
+    const isPrecisionEnabled = profileData?.precision_enabled === true;
+    
+    if (!isAdmin && !isPrecisionEnabled) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });

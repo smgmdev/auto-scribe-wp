@@ -14,7 +14,10 @@ enabled = true
 uri = "pg-functions://postgres/supabase_functions/http_request"
 
 [functions.scan-headlines]
-verify_jwt = true
+verify_jwt = false
+
+[functions.scan-surveillance]
+verify_jwt = false
 
 [functions.generate-article]
 verify_jwt = true
