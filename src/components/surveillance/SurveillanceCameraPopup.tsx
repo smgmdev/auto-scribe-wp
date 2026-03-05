@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
 
@@ -46,10 +47,10 @@ export function SurveillanceCameraPopup() {
             <div className="w-full relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
               <iframe
                 src={`https://www.youtube.com/embed/${feed.embedId}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1`}
-                className="absolute border-0"
+                className="absolute border-0 pointer-events-none"
                 style={{ top: '-60px', left: '-2px', right: '-2px', width: 'calc(100% + 4px)', height: 'calc(100% + 120px)' }}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+                tabIndex={-1}
                 title={feed.label}
               />
             </div>
