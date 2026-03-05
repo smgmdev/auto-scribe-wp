@@ -338,6 +338,7 @@ export function AdminSurveillanceView() {
       .not('severity', 'eq', 'drone')
       .not('severity', 'eq', 'nuke')
       .not('severity', 'eq', 'hbomb')
+      .not('severity', 'eq', 'trade')
       .gte('published_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
