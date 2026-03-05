@@ -188,6 +188,9 @@ export function AdminMaceAIView() {
     tokenFetchingRef.current = false;
   }, []);
 
+  // Track auth state — stop everything if user logs out mid-conversation
+  const isAuthenticatedRef = useRef(true);
+
   useEffect(() => {
     isMountedRef.current = true;
     // Request mic permission early so it's granted before user taps
@@ -196,9 +199,25 @@ export function AdminMaceAIView() {
       .then(s => { s.getTracks().forEach(t => t.stop()); })
       .then(() => prefetchScribeToken())
       .catch(() => { prefetchScribeToken(); });
+
+    // Listen for auth changes — if user signs out, kill everything immediately
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        console.log('[Mace] Auth lost — stopping all voice activity');
+        isAuthenticatedRef.current = false;
+        isMountedRef.current = false; // Prevent any further state updates
+        stopAll();
+        isProcessingRef.current = false;
+        publishFlowActiveRef.current = false;
+      } else {
+        isAuthenticatedRef.current = true;
+      }
+    });
+
     return () => {
       isMountedRef.current = false;
       stopAll();
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -289,18 +308,21 @@ export function AdminMaceAIView() {
     const cleanupAndFinish = (autoListen = false) => {
       if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
       setSpeakingWords([]);
-      if (isMountedRef.current) {
+      if (isMountedRef.current && isAuthenticatedRef.current) {
         if (!publishFlowActiveRef.current) {
-          if (autoListen) {
+          if (autoListen && isAuthenticatedRef.current) {
             // Auto-start listening after AI finishes speaking
             setTimeout(() => {
-              if (isMountedRef.current && !publishFlowActiveRef.current) startListeningRef.current();
+              if (isMountedRef.current && !publishFlowActiveRef.current && isAuthenticatedRef.current) startListeningRef.current();
             }, 800);
           } else {
             setStep('idle');
           }
         }
         onDone?.();
+      } else {
+        // User logged out during speech — just reset
+        setStep('idle');
       }
     };
 
@@ -392,6 +414,11 @@ export function AdminMaceAIView() {
   }, [startWordReveal]);
 
   const startListening = useCallback(async () => {
+    // Bail if user signed out
+    if (!isAuthenticatedRef.current || !isMountedRef.current) {
+      console.log('[Mace] Blocked startListening — user signed out');
+      return;
+    }
     // Only kill audio if NOT in a publish flow (prevents cutting off TTS during auto-listen)
     if (!publishFlowActiveRef.current) {
       if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ''; audioRef.current = null; }
@@ -460,6 +487,12 @@ export function AdminMaceAIView() {
 
   const processUserMessage = async (text: string) => {
     console.log('[Mace] processUserMessage called with:', text);
+    // Bail out immediately if user is no longer authenticated
+    if (!isAuthenticatedRef.current) {
+      console.log('[Mace] Blocked processUserMessage — user signed out');
+      isProcessingRef.current = false;
+      return;
+    }
     if (isProcessingRef.current) {
       console.warn('[Mace] Blocked: isProcessing is still true, force-resetting');
       isProcessingRef.current = false;
@@ -477,7 +510,7 @@ export function AdminMaceAIView() {
       window.speechSynthesis.cancel();
     }
 
-    if (!isMountedRef.current) { isProcessingRef.current = false; return; }
+    if (!isMountedRef.current || !isAuthenticatedRef.current) { isProcessingRef.current = false; return; }
     setStep('processing');
     setCurrentTranscript(text);
     setInterimTranscript('');
