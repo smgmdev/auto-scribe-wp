@@ -1,7 +1,7 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
-import { Menu, Search, Volume2, VolumeOff } from 'lucide-react';
+import { Menu, Search, Volume2, VolumeOff, ChevronDown } from 'lucide-react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { QuickNavBanner } from './QuickNavBanner';
@@ -28,6 +28,7 @@ export function MainLayout({
   const soundEnabled = useAppStore((state) => state.soundEnabled);
   const toggleSound = useAppStore((state) => state.toggleSound);
   const quickNavExpanded = useAppStore((state) => state.quickNavExpanded);
+  const setQuickNavExpanded = useAppStore((state) => state.setQuickNavExpanded);
   
   const isDarkFooter = (currentView === 'agency-application' && agencyDarkFooter) || currentView === 'admin-system';
   const isDashboardFooter = currentView === 'dashboard';
@@ -73,7 +74,16 @@ export function MainLayout({
         {/* Inline QuickNav for mobile */}
         <div className="bg-black text-white text-[10px] md:text-xs py-1.5 px-4 md:px-6 tracking-tight">
           <div className="flex items-center gap-2 md:gap-4 whitespace-nowrap overflow-hidden">
-            <span className="font-bold text-[#f2a547] mr-1">QUICK NAV</span>
+            <button
+              onClick={() => setQuickNavExpanded(!quickNavExpanded)}
+              className="font-bold text-[#f2a547] mr-1 flex items-center gap-1 hover:text-[#f5b96b] transition-colors"
+            >
+              QUICK NAV
+              <ChevronDown
+                size={12}
+                className={`transition-transform duration-200 ${quickNavExpanded ? 'rotate-180' : ''}`}
+              />
+            </button>
             <span><span className="font-bold">Media Products</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">Ctrl+K</kbd> / <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">⌘K</kbd></span>
             <span><span className="font-bold">Close</span>: <kbd className="px-1 py-0.5 bg-white/20 rounded text-[10px] font-mono">ESC</kbd></span>
             <button
