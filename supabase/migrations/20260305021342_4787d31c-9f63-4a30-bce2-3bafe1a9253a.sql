@@ -1,0 +1,1 @@
+UPDATE public.missile_alerts SET active = false WHERE severity = 'trade' AND origin_country_code != destination_country_code AND EXISTS (SELECT 1 FROM public.missile_alerts ma2 WHERE ma2.id = missile_alerts.id AND (ma2.title ILIKE '%supplies%' OR ma2.title ILIKE '%sends%' OR ma2.title ILIKE '%delivers%'));
