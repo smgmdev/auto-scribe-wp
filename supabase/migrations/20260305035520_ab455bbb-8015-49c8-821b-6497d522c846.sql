@@ -1,0 +1,1 @@
+UPDATE public.missile_alerts SET origin_country_code = 'US', origin_country_name = 'United States', destination_country_code = 'TR', destination_country_name = 'Turkey' WHERE id = '99bd11a0-2193-4d25-9033-7fd55b031766';
