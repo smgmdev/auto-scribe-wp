@@ -169,8 +169,10 @@ const REGION_CONFIGS: Record<string, { sources: string; focus: string; userPromp
 // ── Country inference from event text ─────────────────────────────────
 // Maps common country/region mentions to ISO codes for trajectory inference
 const COUNTRY_NAME_TO_CODE: Record<string, string> = {
-  'ukraine': 'UA', 'russia': 'RU', 'russian': 'RU', 'israel': 'IL', 'israeli': 'IL',
-  'iran': 'IR', 'iranian': 'IR', 'palestine': 'PS', 'palestinian': 'PS', 'gaza': 'PS',
+  // Countries & adjectives
+  'ukraine': 'UA', 'ukrainian': 'UA', 'russia': 'RU', 'russian': 'RU',
+  'israel': 'IL', 'israeli': 'IL', 'iran': 'IR', 'iranian': 'IR',
+  'palestine': 'PS', 'palestinian': 'PS', 'gaza': 'PS',
   'lebanon': 'LB', 'lebanese': 'LB', 'syria': 'SY', 'syrian': 'SY',
   'yemen': 'YE', 'yemeni': 'YE', 'houthi': 'YE', 'houthis': 'YE',
   'iraq': 'IQ', 'iraqi': 'IQ', 'saudi arabia': 'SA', 'saudi': 'SA',
@@ -183,51 +185,67 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   'turkey': 'TR', 'turkish': 'TR', 'egypt': 'EG', 'egyptian': 'EG',
   'libya': 'LY', 'libyan': 'LY', 'afghanistan': 'AF', 'afghan': 'AF',
   'uae': 'AE', 'emirates': 'AE', 'qatar': 'QA',
-  'hezbollah': 'LB', 'hamas': 'PS',
-  'kyiv': 'UA', 'kiev': 'UA', 'odessa': 'UA', 'kharkiv': 'UA', 'moscow': 'RU',
-  'tehran': 'IR', 'tel aviv': 'IL', 'jerusalem': 'IL', 'beirut': 'LB', 'damascus': 'SY',
-  'baghdad': 'IQ', 'riyadh': 'SA', 'sanaa': 'YE', 'aden': 'YE',
-  // Additional mappings for better coverage
   'kuwait': 'KW', 'kuwaiti': 'KW', 'bahrain': 'BH', 'bahraini': 'BH',
   'oman': 'OM', 'omani': 'OM', 'jordan': 'JO', 'jordanian': 'JO',
-  'dubai': 'AE', 'abu dhabi': 'AE',
-  'natanz': 'IR', 'isfahan': 'IR', 'bushehr': 'IR', 'fordow': 'IR', 'parchin': 'IR',
-  'haifa': 'IL', 'gaza city': 'PS', 'rafah': 'PS', 'khan younis': 'PS', 'west bank': 'PS',
-  'aleppo': 'SY', 'idlib': 'SY', 'homs': 'SY',
-  'tripoli': 'LY', 'benghazi': 'LY', 'misrata': 'LY',
-  'khartoum': 'SD', 'darfur': 'SD',
-  'mogadishu': 'SO', 'addis ababa': 'ET',
-  'taipei': 'TW', 'pyongyang': 'KP', 'seoul': 'KR',
-  'kabul': 'AF', 'kandahar': 'AF',
-  'kherson': 'UA', 'zaporizhzhia': 'UA', 'dnipro': 'UA', 'lviv': 'UA', 'crimea': 'UA',
-  'donetsk': 'UA', 'luhansk': 'UA', 'mariupol': 'UA',
-  'st. petersburg': 'RU', 'belgorod': 'RU', 'kursk': 'RU', 'bryansk': 'RU',
   'venezuela': 'VE', 'venezuelan': 'VE', 'colombia': 'CO', 'colombian': 'CO',
   'mexico': 'MX', 'mexican': 'MX', 'brazil': 'BR', 'brazilian': 'BR',
   'nigeria': 'NG', 'nigerian': 'NG', 'mali': 'ML', 'malian': 'ML',
   'burkina faso': 'BF', 'niger': 'NE', 'chad': 'TD', 'cameroon': 'CM',
   'mozambique': 'MZ', 'south africa': 'ZA',
+  'japan': 'JP', 'japanese': 'JP',
+  'germany': 'DE', 'german': 'DE', 'france': 'FR', 'french': 'FR',
+  'united kingdom': 'GB', 'british': 'GB', 'uk': 'GB',
+  'poland': 'PL', 'polish': 'PL', 'romania': 'RO', 'romanian': 'RO',
+  'georgia': 'GE', 'georgian': 'GE', 'armenia': 'AM', 'armenian': 'AM',
+  'azerbaijan': 'AZ', 'azerbaijani': 'AZ',
+  // Militant groups → country of origin
+  'hezbollah': 'LB', 'hamas': 'PS', 'idf': 'IL', 'irgc': 'IR',
+  'quds force': 'IR', 'ansar allah': 'YE',
+  'pkk': 'TR', // PKK targets Turkey (origin of strikes against them)
+  'isis': 'SY', 'islamic state': 'SY', 'daesh': 'SY',
+  'al-qaeda': 'AF', 'al qaeda': 'AF', 'taliban': 'AF',
+  'wagner': 'RU', 'prigozhin': 'RU',
+  // Cities → countries (critical for trajectory resolution)
+  'kyiv': 'UA', 'kiev': 'UA', 'odessa': 'UA', 'kharkiv': 'UA', 'kherson': 'UA',
+  'zaporizhzhia': 'UA', 'dnipro': 'UA', 'lviv': 'UA', 'crimea': 'UA',
+  'donetsk': 'UA', 'luhansk': 'UA', 'mariupol': 'UA', 'poltava': 'UA',
+  'sumy': 'UA', 'mykolaiv': 'UA', 'chernihiv': 'UA', 'vinnytsia': 'UA',
+  'moscow': 'RU', 'st. petersburg': 'RU', 'belgorod': 'RU', 'kursk': 'RU',
+  'bryansk': 'RU', 'rostov': 'RU', 'voronezh': 'RU', 'krasnodar': 'RU',
+  'sevastopol': 'UA', 'simferopol': 'UA',
+  'tehran': 'IR', 'isfahan': 'IR', 'natanz': 'IR', 'bushehr': 'IR',
+  'fordow': 'IR', 'parchin': 'IR', 'shiraz': 'IR', 'tabriz': 'IR',
+  'tel aviv': 'IL', 'jerusalem': 'IL', 'haifa': 'IL', 'beer sheva': 'IL',
+  'ashkelon': 'IL', 'eilat': 'IL', 'netanya': 'IL',
+  'gaza city': 'PS', 'rafah': 'PS', 'khan younis': 'PS', 'west bank': 'PS',
+  'jenin': 'PS', 'nablus': 'PS', 'ramallah': 'PS', 'tulkarm': 'PS',
+  'beirut': 'LB', 'tyre': 'LB', 'sidon': 'LB', 'baalbek': 'LB', 'nabatieh': 'LB',
+  'damascus': 'SY', 'aleppo': 'SY', 'idlib': 'SY', 'homs': 'SY', 'latakia': 'SY',
+  'deir ez-zor': 'SY', 'raqqa': 'SY',
+  'baghdad': 'IQ', 'basra': 'IQ', 'erbil': 'IQ', 'mosul': 'IQ', 'kirkuk': 'IQ',
+  'riyadh': 'SA', 'jeddah': 'SA', 'mecca': 'SA', 'medina': 'SA', 'aramco': 'SA',
+  'sanaa': 'YE', 'aden': 'YE', 'hodeidah': 'YE', 'marib': 'YE',
+  'dubai': 'AE', 'abu dhabi': 'AE', 'sharjah': 'AE', 'fujairah': 'AE',
+  'doha': 'QA', 'manama': 'BH', 'muscat': 'OM', 'amman': 'JO',
+  'cairo': 'EG', 'alexandria': 'EG', 'sinai': 'EG',
+  'tripoli': 'LY', 'benghazi': 'LY', 'misrata': 'LY',
+  'khartoum': 'SD', 'darfur': 'SD', 'port sudan': 'SD',
+  'mogadishu': 'SO', 'addis ababa': 'ET',
+  'taipei': 'TW', 'pyongyang': 'KP', 'seoul': 'KR', 'incheon': 'KR',
+  'kabul': 'AF', 'kandahar': 'AF', 'jalalabad': 'AF',
+  'islamabad': 'PK', 'karachi': 'PK', 'lahore': 'PK', 'peshawar': 'PK',
+  'new delhi': 'IN', 'mumbai': 'IN',
+  'ankara': 'TR', 'istanbul': 'TR', 'diyarbakir': 'TR',
+  'tokyo': 'JP', 'okinawa': 'JP',
+  'beijing': 'CN', 'shanghai': 'CN', 'guangzhou': 'CN',
+  'caracas': 'VE', 'bogota': 'CO', 'mexico city': 'MX',
+  'abuja': 'NG', 'lagos': 'NG', 'bamako': 'ML',
+  'maputo': 'MZ', 'cabo delgado': 'MZ',
+  'washington': 'US', 'pentagon': 'US',
 };
 
-// Reverse lookup: code → name (use the most natural/common name for each code)
-const CODE_TO_COUNTRY_NAME: Record<string, string> = {};
-// Build reverse map, preferring full country names over adjectives/cities
-const NAME_PRIORITY: Record<string, number> = {};
-for (const [name, code] of Object.entries(COUNTRY_NAME_TO_CODE)) {
-  const existing = NAME_PRIORITY[code] || 0;
-  // Prefer names that are NOT adjectives (don't end in 'i', 'n', 'an', 'ese') and not cities
-  const isAdjective = /i$|ian$|ish$|ese$|ch$/.test(name);
-  const isCity = ['kyiv','kiev','odessa','kharkiv','moscow','tehran','tel aviv','jerusalem','beirut','damascus','baghdad','riyadh','sanaa','aden','dubai','abu dhabi','natanz','isfahan','bushehr','fordow','parchin','haifa','gaza city','rafah','khan younis','aleppo','idlib','homs','tripoli','benghazi','misrata','khartoum','darfur','mogadishu','addis ababa','taipei','pyongyang','seoul','kabul','kandahar','kherson','zaporizhzhia','dnipro','lviv','crimea','donetsk','luhansk','mariupol','st. petersburg','belgorod','kursk','bryansk','west bank'].includes(name);
-  const isGroup = ['hezbollah','hamas','houthi','houthis','dprk','idf'].includes(name);
-  const priority = (isAdjective ? 1 : 0) + (isCity ? 2 : 0) + (isGroup ? 3 : 0);
-  // Lower priority number = better name. Keep the best (lowest priority, longest name for ties)
-  if (!CODE_TO_COUNTRY_NAME[code] || priority < existing || (priority === existing && name.length > CODE_TO_COUNTRY_NAME[code].length)) {
-    CODE_TO_COUNTRY_NAME[code] = name.charAt(0).toUpperCase() + name.slice(1);
-    NAME_PRIORITY[code] = priority;
-  }
-}
-// Manual overrides for correctness
-Object.assign(CODE_TO_COUNTRY_NAME, {
+// Reverse lookup: code → name
+const CODE_TO_COUNTRY_NAME: Record<string, string> = {
   US: 'United States', UA: 'Ukraine', RU: 'Russia', IL: 'Israel', IR: 'Iran',
   PS: 'Palestine', LB: 'Lebanon', SY: 'Syria', YE: 'Yemen', IQ: 'Iraq',
   SA: 'Saudi Arabia', KP: 'North Korea', KR: 'South Korea', CN: 'China',
@@ -237,132 +255,159 @@ Object.assign(CODE_TO_COUNTRY_NAME, {
   MM: 'Myanmar', CD: 'DRC', VE: 'Venezuela', CO: 'Colombia', MX: 'Mexico',
   BR: 'Brazil', NG: 'Nigeria', ML: 'Mali', BF: 'Burkina Faso', NE: 'Niger',
   TD: 'Chad', CM: 'Cameroon', MZ: 'Mozambique', ZA: 'South Africa', OM: 'Oman',
-});
+  JP: 'Japan', DE: 'Germany', FR: 'France', GB: 'United Kingdom', PL: 'Poland',
+  RO: 'Romania', GE: 'Georgia', AM: 'Armenia', AZ: 'Azerbaijan', PS2: 'Gaza',
+};
 
-// Known attack route patterns: attacker → target
-const KNOWN_ATTACK_ROUTES: Array<{ keywords: string[]; origin: string; destination: string }> = [
-  // Russia-Ukraine
-  { keywords: ['russia', 'russian', 'shahed', 'kalibr', 'iskander', 'kh-101', 'kh-555', 'kh-22', 'geran'], origin: 'RU', destination: 'UA' },
-  { keywords: ['ukraine', 'ukrainian'], origin: 'UA', destination: 'RU' },
-  // Middle East - Iran axis
-  { keywords: ['houthi', 'yemen', 'ansar allah'], origin: 'YE', destination: 'IL' },
-  { keywords: ['hezbollah', 'lebanon'], origin: 'LB', destination: 'IL' },
-  { keywords: ['hamas', 'gaza', 'palestinian islamic jihad', 'pij'], origin: 'PS', destination: 'IL' },
-  { keywords: ['israel', 'israeli', 'idf'], origin: 'IL', destination: 'PS' },
-  { keywords: ['iran', 'iranian', 'irgc', 'quds force'], origin: 'IR', destination: 'IL' },
-  // North Korea
-  { keywords: ['north korea', 'dprk', 'pyongyang', 'kim jong'], origin: 'KP', destination: 'KR' },
-  // Iran attacks on Gulf states
-  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'SA' },
-  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'AE' },
-  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'KW' },
-  { keywords: ['iran', 'iranian', 'irgc'], origin: 'IR', destination: 'BH' },
-  // Israel/US strikes on Iran
-  { keywords: ['israel', 'israeli', 'idf', 'us ', 'american'], origin: 'IL', destination: 'IR' },
-  // Turkey/PKK
-  { keywords: ['turkey', 'turkish'], origin: 'TR', destination: 'SY' },
-  { keywords: ['pkk', 'kurdistan workers'], origin: 'TR', destination: 'IQ' },
-  // India-Pakistan
-  { keywords: ['india', 'indian'], origin: 'IN', destination: 'PK' },
-  { keywords: ['pakistan', 'pakistani'], origin: 'PK', destination: 'IN' },
-  // China-Taiwan
-  { keywords: ['china', 'chinese', 'pla'], origin: 'CN', destination: 'TW' },
-];
+// ── Smart text search: find all country/city mentions with word boundaries ──
+function findCountryMentions(text: string): Array<{ code: string; position: number; term: string }> {
+  const found: Array<{ code: string; position: number; term: string }> = [];
+  const textLower = text.toLowerCase();
+  
+  // Sort entries by length descending so longer matches take priority (e.g. "north korea" before "korea")
+  const entries = Object.entries(COUNTRY_NAME_TO_CODE).sort((a, b) => b[0].length - a[0].length);
+  const coveredRanges: Array<[number, number]> = [];
+  
+  for (const [name, code] of entries) {
+    let searchFrom = 0;
+    while (true) {
+      const idx = textLower.indexOf(name, searchFrom);
+      if (idx < 0) break;
+      searchFrom = idx + 1;
+      
+      const end = idx + name.length;
+      
+      // Word boundary check: char before and after must not be a letter
+      if (idx > 0 && /[a-z]/.test(textLower[idx - 1])) continue;
+      if (end < textLower.length && /[a-z]/.test(textLower[end])) continue;
+      
+      // Skip if this range is already covered by a longer match
+      const overlaps = coveredRanges.some(([s, e]) => idx >= s && idx < e);
+      if (overlaps) continue;
+      
+      coveredRanges.push([idx, end]);
+      // Only add if we don't already have this code (keep first/earliest occurrence)
+      if (!found.some(f => f.code === code)) {
+        found.push({ code, position: idx, term: name });
+      }
+      break; // one match per term is enough
+    }
+  }
+  
+  return found.sort((a, b) => a.position - b.position);
+}
+
+// ── Determine attacker vs target from sentence structure ──
+// In news: "X attacks/strikes/hits Y" → X=attacker, Y=target
+// "Y hit by X" → X=attacker, Y=target
+const ATTACK_VERBS = ['strikes', 'strike', 'attacks', 'attack', 'hits', 'hit', 'bombs', 'bomb',
+  'shells', 'shell', 'targets', 'target', 'fires', 'fire', 'launches', 'launch',
+  'destroys', 'destroy', 'raids', 'raid', 'blasts', 'blast', 'pounds', 'pound',
+  'bombards', 'bombard', 'pummels', 'pummel', 'assaults', 'assault',
+  'struck', 'attacked', 'bombed', 'shelled', 'targeted', 'fired', 'launched',
+  'destroyed', 'raided', 'blasted', 'pounded', 'bombarded', 'pummeled', 'assaulted'];
 
 function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
   const text = `${title} ${description}`.toLowerCase();
-  const attackWords = ['strike', 'attack', 'launch', 'fire', 'hit', 'target', 'bomb', 'shell', 'intercept', 'shoot', 'barrage', 'salvo', 'raid', 'blast', 'destroy', 'damage', 'injure', 'kill', 'assault', 'offensive', 'bombard', 'pummel', 'hits', 'struck', 'fired', 'shelled', 'causing'];
-  const isAttack = attackWords.some(w => text.includes(w));
-  if (!isAttack) return { origin: null, destination: null };
-
-  // ── Smart pattern matching: "X strikes/attacks Y" ──
-  // Try to detect "ATTACKER verb TARGET" patterns
   
-  // Special cases first (most common conflicts)
-  // Russia → Ukraine
-  if ((text.includes('russia') || text.includes('russian') || text.includes('shahed') || text.includes('kalibr') || text.includes('iskander')) && 
-      (text.includes('ukraine') || text.includes('ukrainian') || text.includes('kyiv') || text.includes('kharkiv') || text.includes('odessa') || text.includes('dnipro') || text.includes('lviv') || text.includes('kherson') || text.includes('zaporizhzhia'))) {
-    return { origin: 'RU', destination: 'UA' };
+  // Find all country/city mentions in the text
+  const mentions = findCountryMentions(text);
+  if (mentions.length === 0) return { origin: null, destination: null };
+  
+  // Get unique country codes mentioned
+  const uniqueCodes = [...new Set(mentions.map(m => m.code))];
+  
+  // If only one country found and we have a countryCode from the event, use both
+  if (uniqueCodes.length === 1 && countryCode && countryCode !== uniqueCodes[0]) {
+    // The event's country_code is the primary location, the mentioned country could be attacker or target
+    // Try to determine direction from context
+    const mentioned = uniqueCodes[0];
+    const attackerIndicators = ['by ' + mentions[0].term, mentions[0].term + ' attack', mentions[0].term + ' strike', 
+      mentions[0].term + ' drone', mentions[0].term + ' missile', mentions[0].term + '-made', mentions[0].term + '-backed'];
+    const isAttacker = attackerIndicators.some(p => text.includes(p));
+    if (isAttacker) {
+      return { origin: mentioned, destination: countryCode };
+    }
+    // Default: event country attacks the mentioned entity
+    return { origin: countryCode, destination: mentioned };
   }
-  // Ukraine → Russia
-  if ((text.includes('ukraine') || text.includes('ukrainian')) && 
-      (text.includes('russia') || text.includes('russian') || text.includes('moscow') || text.includes('belgorod') || text.includes('kursk') || text.includes('bryansk')) &&
-      (text.includes('ukrainian drone') || text.includes('ukraine strike') || text.includes('ukraine attack') || text.includes('attacks russia') || text.includes('strikes russia') || text.includes('hit russia'))) {
-    return { origin: 'UA', destination: 'RU' };
+  
+  if (uniqueCodes.length < 2) {
+    // Only one country, no countryCode to pair with
+    return { origin: null, destination: null };
   }
-  // Israel → Gaza/Lebanon/Syria/Iran
-  if ((text.includes('israel') || text.includes('israeli') || text.includes('idf')) && 
-      (text.includes('gaza') || text.includes('palestinian') || text.includes('lebanon') || text.includes('beirut') || text.includes('hezbollah') || text.includes('syria') || text.includes('damascus'))) {
-    if (text.includes('gaza') || text.includes('palestinian') || text.includes('rafah') || text.includes('khan younis')) return { origin: 'IL', destination: 'PS' };
-    if (text.includes('syria') || text.includes('damascus') || text.includes('aleppo')) return { origin: 'IL', destination: 'SY' };
-    if (text.includes('iran') || text.includes('tehran') || text.includes('natanz') || text.includes('isfahan') || text.includes('nuclear facilit')) return { origin: 'IL', destination: 'IR' };
-    return { origin: 'IL', destination: 'LB' };
+  
+  // Two or more countries found — determine attacker vs target
+  // Strategy 1: Find an attack verb between two country mentions
+  for (let i = 0; i < mentions.length - 1; i++) {
+    const a = mentions[i];
+    const b = mentions[i + 1];
+    if (a.code === b.code) continue;
+    
+    // Get text between the two mentions
+    const between = text.substring(a.position + a.term.length, b.position).trim();
+    
+    // Check if there's an attack verb between them: "Iran attacks Dubai" → Iran=origin, AE=dest
+    const hasAttackVerb = ATTACK_VERBS.some(v => {
+      // Word boundary check for verb
+      const vi = between.indexOf(v);
+      if (vi < 0) return false;
+      const ve = vi + v.length;
+      if (vi > 0 && /[a-z]/.test(between[vi - 1])) return false;
+      if (ve < between.length && /[a-z]/.test(between[ve])) return false;
+      return true;
+    });
+    
+    if (hasAttackVerb) {
+      return { origin: a.code, destination: b.code };
+    }
+    
+    // Check passive: "Dubai hit by Iran" → Iran=origin, AE=dest
+    const passivePatterns = ['hit by', 'struck by', 'attacked by', 'bombed by', 'shelled by', 'targeted by', 'fired by', 'launched by', 'sent by'];
+    const hasPassive = passivePatterns.some(p => between.includes(p));
+    if (hasPassive) {
+      return { origin: b.code, destination: a.code };
+    }
   }
-  // Iran → Israel/Gulf/UAE/SA/KW
-  if ((text.includes('iran') || text.includes('iranian') || text.includes('irgc'))) {
-    if (text.includes('israel') || text.includes('tel aviv') || text.includes('haifa') || text.includes('jerusalem')) return { origin: 'IR', destination: 'IL' };
-    if (text.includes('saudi') || text.includes('riyadh') || text.includes('jeddah')) return { origin: 'IR', destination: 'SA' };
-    if (text.includes('dubai') || text.includes('abu dhabi') || text.includes('uae') || text.includes('emirates')) return { origin: 'IR', destination: 'AE' };
-    if (text.includes('kuwait')) return { origin: 'IR', destination: 'KW' };
-    if (text.includes('bahrain')) return { origin: 'IR', destination: 'BH' };
-    if (text.includes('iraq') || text.includes('baghdad')) return { origin: 'IR', destination: 'IQ' };
-  }
-  // US/Israel → Iran
-  if ((text.includes('us ') || text.includes('u.s.') || text.includes('american') || text.includes('pentagon')) && 
-      (text.includes('iran') || text.includes('iranian') || text.includes('tehran') || text.includes('natanz') || text.includes('nuclear facilit'))) {
-    return { origin: 'US', destination: 'IR' };
-  }
-  // Houthi attacks
-  if (text.includes('houthi') || (text.includes('yemen') && isAttack)) {
-    if (text.includes('israel') || text.includes('tel aviv')) return { origin: 'YE', destination: 'IL' };
-    if (text.includes('saudi') || text.includes('riyadh')) return { origin: 'YE', destination: 'SA' };
-    if (text.includes('red sea') || text.includes('shipping') || text.includes('vessel')) return { origin: 'YE', destination: 'SA' };
-    return { origin: 'YE', destination: 'IL' }; // default Houthi target
-  }
-  // Hamas/Gaza → Israel
-  if ((text.includes('hamas') || text.includes('gaza')) && (text.includes('israel') || text.includes('rocket'))) {
-    return { origin: 'PS', destination: 'IL' };
-  }
-  // Hezbollah → Israel
-  if (text.includes('hezbollah') && (text.includes('israel') || text.includes('attack') || text.includes('rocket') || text.includes('missile'))) {
-    return { origin: 'LB', destination: 'IL' };
-  }
-  // North Korea
-  if (text.includes('north korea') || text.includes('dprk') || text.includes('pyongyang')) {
-    if (text.includes('south korea') || text.includes('seoul')) return { origin: 'KP', destination: 'KR' };
-    if (text.includes('japan') || text.includes('tokyo')) return { origin: 'KP', destination: 'JP' };
-    return { origin: 'KP', destination: 'KR' };
-  }
-
-  // ── Generic inference: find all country mentions and determine attacker/target ──
-  const foundCountries: Array<{ code: string; position: number }> = [];
-  for (const [name, code] of Object.entries(COUNTRY_NAME_TO_CODE)) {
-    const idx = text.indexOf(name);
-    if (idx >= 0) {
-      // Avoid duplicate codes at different positions
-      if (!foundCountries.some(c => c.code === code)) {
-        foundCountries.push({ code, position: idx });
+  
+  // Strategy 2: Check "X → Y" patterns in full text using attacker keywords
+  // Attacker keywords: adjectives/groups that are clearly the aggressor
+  const attackerKeywords: Record<string, string> = {
+    'russian': 'RU', 'russia': 'RU', 'shahed': 'RU', 'kalibr': 'RU', 'iskander': 'RU',
+    'kh-101': 'RU', 'kh-555': 'RU', 'kh-22': 'RU', 'geran': 'RU', 'geran-2': 'RU',
+    'ukrainian': 'UA', 'ukraine': 'UA',
+    'israeli': 'IL', 'israel': 'IL', 'idf': 'IL',
+    'iranian': 'IR', 'iran': 'IR', 'irgc': 'IR',
+    'houthi': 'YE', 'houthis': 'YE', 'ansar allah': 'YE',
+    'hezbollah': 'LB', 'hamas': 'PS',
+    'turkish': 'TR', 'turkey': 'TR',
+    'american': 'US', 'u.s.': 'US', 'pentagon': 'US',
+    'chinese': 'CN', 'china': 'CN', 'pla': 'CN',
+    'north korean': 'KP', 'dprk': 'KP',
+    'indian': 'IN', 'pakistan': 'PK', 'pakistani': 'PK',
+  };
+  
+  // Check for "[Attacker adjective] [weapon] [verb] [target location]" patterns
+  const weaponWords = ['drone', 'missile', 'rocket', 'bomb', 'shell', 'munition', 'warhead', 'uav', 'cruise', 'ballistic', 'airstrike', 'air strike', 'strike', 'attack', 'barrage'];
+  for (const [keyword, attackerCode] of Object.entries(attackerKeywords)) {
+    if (!text.includes(keyword)) continue;
+    // Find a target that's different from the attacker
+    const targetMention = mentions.find(m => m.code !== attackerCode);
+    if (targetMention) {
+      const hasWeapon = weaponWords.some(w => text.includes(w));
+      const hasAttack = ATTACK_VERBS.some(v => text.includes(v));
+      if (hasWeapon || hasAttack) {
+        return { origin: attackerCode, destination: targetMention.code };
       }
     }
   }
   
-  if (foundCountries.length >= 2) {
-    // Sort by position in text - typically "ATTACKER strikes TARGET"
-    foundCountries.sort((a, b) => a.position - b.position);
-    const first = foundCountries[0];
-    const second = foundCountries[1];
-    if (first.code !== second.code) {
-      return { origin: first.code, destination: second.code };
-    }
+  // Strategy 3: First mentioned country is usually the attacker in news headlines
+  // "Iran drone strikes UAE consulate" → Iran=origin, first different code=destination
+  if (uniqueCodes.length >= 2) {
+    return { origin: uniqueCodes[0], destination: uniqueCodes[1] };
   }
-
-  // ── Fallback: known routes ──
-  for (const route of KNOWN_ATTACK_ROUTES) {
-    if (route.keywords.some(kw => text.includes(kw))) {
-      return { origin: route.origin, destination: route.destination };
-    }
-  }
-
+  
   return { origin: null, destination: null };
 }
 
