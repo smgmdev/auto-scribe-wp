@@ -795,7 +795,7 @@ Deno.serve(async (req) => {
       ev.destination_country_code = fixCode(ev.destination_country_code);
     }
 
-    // Detect threat events (missiles, drones, nukes) and create alerts
+    // Detect threat events (missiles, drones, nukes, trades) and create alerts
     const DRONE_KEYWORDS = ['drone strike', 'drone attack', 'kamikaze drone', 'shahed', 'loitering munition', 'uav attack', 'unmanned aerial attack', 'drone hits', 'drone strikes', 'geran-2', 'suicide drone', 'fpv drone'];
     // Nuke: ONLY confirmed launches/detonations — exclude diplomatic/political mentions
     const NUKE_LAUNCH_PHRASES = ['nuclear weapon launched', 'nuclear strike confirmed', 'nuclear warhead detonated', 'nuclear bomb dropped', 'nuclear detonation', 'thermonuclear strike', 'nuclear attack confirmed', 'nuclear missile launched'];
@@ -804,8 +804,12 @@ Deno.serve(async (req) => {
     // Exclude false positives: these phrases contain "nuclear" but are NOT actual launches
     const NUKE_FALSE_POSITIVES = ['nuclear deal', 'nuclear talks', 'nuclear program', 'nuclear threat', 'nuclear deterrent', 'nuclear capable', 'nuclear arsenal', 'nuclear policy', 'nuclear energy', 'nuclear power', 'nuclear facility', 'nuclear plant', 'nuclear reactor', 'nuclear proliferation', 'nuclear sanctions', 'nuclear agreement', 'nuclear diplomacy', 'nuclear posture', 'nuclear doctrine', 'nuclear option', 'nuclear warning', 'nuclear rhetoric', 'nuclear fears', 'nuclear risk', 'nuclear standoff'];
     const MISSILE_KEYWORDS = ['missile', 'icbm', 'ballistic', 'rocket attack', 'missile launch', 'missile strike', 'cruise missile', 'rocket fire', 'rocket barrage', 'cluster munition', 'munitions strike', 'air strike', 'airstrike', 'airstrikes', 'bombardment', 'shelling'];
+    // Trade: military equipment transfers, arms deals, weapon supplies between countries
+    const TRADE_KEYWORDS = ['supplies', 'supplying', 'supplied', 'sends', 'sending', 'sent', 'delivers', 'delivering', 'delivered', 'donates', 'donating', 'donated', 'sells', 'selling', 'sold', 'purchases', 'purchasing', 'purchased', 'buying', 'bought', 'arms deal', 'arms transfer', 'weapon supply', 'weapons supply', 'military aid', 'military assistance', 'military equipment', 'defense package', 'defence package', 'arms shipment', 'weapons shipment', 'military shipment', 'ammunition supply', 'munitions supply', 'weapons deal', 'arms sale', 'weapons sale', 'defense contract', 'defence contract', 'military trade', 'arms export', 'arms import', 'weapon delivery', 'weapons delivery', 'military package', 'aid package', 'lethal aid', 'military grant', 'weapon transfer', 'arms package'];
+    // Military context words that must appear alongside trade keywords
+    const TRADE_MILITARY_CONTEXT = ['weapon', 'weapons', 'missile', 'missiles', 'drone', 'drones', 'tank', 'tanks', 'artillery', 'ammunition', 'munition', 'munitions', 'fighter jet', 'fighter jets', 'f-16', 'f-35', 'himars', 'patriot', 'iron dome', 'air defense', 'air defence', 'military', 'defense', 'defence', 'arms', 'warship', 'submarine', 'radar', 'shahed', 'javelin', 'stinger', 'leopard', 'abrams', 'atacms', 'storm shadow', 'scalp', 'taurus', 'gepard', 'iris-t', 'nasams', 'hawk', 'armored', 'armoured', 'howitzer', 'mortar', 'grenade', 'rifle', 'bomb', 'bombs', 'cluster', 'ballistic', 'cruise', 'interceptor', 'sam', 's-300', 's-400', 's-500'];
 
-    const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | 'hbomb' | null => {
+    const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | 'hbomb' | 'trade' | null => {
       const text = `${title} ${description}`.toLowerCase();
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
@@ -813,6 +817,13 @@ Deno.serve(async (req) => {
       if (NUKE_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'nuke';
       if (DRONE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'drone';
       if (MISSILE_KEYWORDS.some((kw: string) => text.includes(kw))) return 'missile';
+      // Trade: must have a trade keyword AND a military context word
+      const hasTrade = TRADE_KEYWORDS.some((kw: string) => text.includes(kw));
+      const hasMilitaryContext = TRADE_MILITARY_CONTEXT.some((kw: string) => {
+        const regex = new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+        return regex.test(text);
+      });
+      if (hasTrade && hasMilitaryContext) return 'trade';
       return null;
     };
 

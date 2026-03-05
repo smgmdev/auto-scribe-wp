@@ -4,7 +4,7 @@ import { useAppStore } from '@/stores/appStore';
 import { DraggablePopup } from '@/components/ui/DraggablePopup';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AlertTriangle, Rocket, ShieldAlert, Radar, Radiation, Bomb } from 'lucide-react';
+import { AlertTriangle, Rocket, ShieldAlert, Radar, Radiation, Bomb, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function getThreatBadge(level: string, score?: number) {
@@ -40,10 +40,12 @@ export function SurveillanceCountryPopup() {
   const showDrones = useAppStore((s) => s.showDrones);
   const showNukes = useAppStore((s) => s.showNukes);
   const showHbombs = useAppStore((s) => s.showHbombs);
+  const showTrades = useAppStore((s) => s.showTrades);
   const missileTimeFilter = useAppStore((s) => s.missileTimeFilter);
   const droneTimeFilter = useAppStore((s) => s.droneTimeFilter);
   const nukeTimeFilter = useAppStore((s) => s.nukeTimeFilter);
   const hbombTimeFilter = useAppStore((s) => s.hbombTimeFilter);
+  const tradeTimeFilter = useAppStore((s) => s.tradeTimeFilter);
   const [countryMissiles, setCountryMissiles] = useState<MissileAlert[]>([]);
 
   // Build list of active severity types and their cutoff times
@@ -57,8 +59,9 @@ export function SurveillanceCountryPopup() {
     if (showDrones) filters.push({ severity: 'drone', cutoff: new Date(Date.now() - parseFloat(droneTimeFilter) * 3600000).toISOString() });
     if (showNukes) filters.push({ severity: 'nuke', cutoff: new Date(Date.now() - parseFloat(nukeTimeFilter) * 3600000).toISOString() });
     if (showHbombs) filters.push({ severity: 'hbomb', cutoff: new Date(Date.now() - parseFloat(hbombTimeFilter) * 3600000).toISOString() });
+    if (showTrades) filters.push({ severity: 'trade', cutoff: new Date(Date.now() - parseFloat(tradeTimeFilter) * 3600000).toISOString() });
     return filters;
-  }, [showMissiles, showDrones, showNukes, showHbombs, missileTimeFilter, droneTimeFilter, nukeTimeFilter, hbombTimeFilter]);
+  }, [showMissiles, showDrones, showNukes, showHbombs, showTrades, missileTimeFilter, droneTimeFilter, nukeTimeFilter, hbombTimeFilter, tradeTimeFilter]);
 
   // Compute widest time window label for display
   const displayTimeLabel = useMemo(() => {
@@ -67,10 +70,11 @@ export function SurveillanceCountryPopup() {
       ...(showDrones ? [parseFloat(droneTimeFilter)] : []),
       ...(showNukes ? [parseFloat(nukeTimeFilter)] : []),
       ...(showHbombs ? [parseFloat(hbombTimeFilter)] : []),
+      ...(showTrades ? [parseFloat(tradeTimeFilter)] : []),
     ];
     const max = Math.max(...(times.length ? times : [24]));
     return max >= 168 ? '7d' : `${max}h`;
-  }, [showMissiles, showDrones, showNukes, showHbombs, missileTimeFilter, droneTimeFilter, nukeTimeFilter, hbombTimeFilter]);
+  }, [showMissiles, showDrones, showNukes, showHbombs, showTrades, missileTimeFilter, droneTimeFilter, nukeTimeFilter, hbombTimeFilter, tradeTimeFilter]);
 
   useEffect(() => {
     if (!selectedCountry || activeFilters.length === 0) {
@@ -112,6 +116,7 @@ export function SurveillanceCountryPopup() {
   if (!selectedCountry) return null;
 
   const getSeverityIcon = (severity: string) => {
+    if (severity === 'trade') return <Package className="w-3 h-3 text-cyan-400 mt-0.5 flex-shrink-0" />;
     if (severity === 'hbomb') return <Bomb className="w-3 h-3 text-orange-400 mt-0.5 flex-shrink-0" />;
     if (severity === 'nuke') return <Radiation className="w-3 h-3 text-yellow-400 mt-0.5 flex-shrink-0" />;
     if (severity === 'drone') return <Radar className="w-3 h-3 text-purple-400 mt-0.5 flex-shrink-0" />;
@@ -119,6 +124,7 @@ export function SurveillanceCountryPopup() {
   };
 
   const getSeverityLabel = (severity: string) => {
+    if (severity === 'trade') return <span className="text-[9px] text-cyan-400 bg-cyan-500/10 px-1 rounded">TRADE</span>;
     if (severity === 'hbomb') return <span className="text-[9px] text-orange-400 bg-orange-500/10 px-1 rounded">H-BOMB</span>;
     if (severity === 'nuke') return <span className="text-[9px] text-yellow-400 bg-yellow-500/10 px-1 rounded">NUKE</span>;
     if (severity === 'drone') return <span className="text-[9px] text-purple-400 bg-purple-500/10 px-1 rounded">DRONE</span>;
@@ -131,6 +137,7 @@ export function SurveillanceCountryPopup() {
     return (
       <li key={m.id} className={cn(
         "text-xs flex items-start gap-1.5 p-1.5 rounded border",
+        m.severity === 'trade' ? 'bg-cyan-500/5 border-cyan-500/20' :
         m.severity === 'hbomb' ? 'bg-orange-500/5 border-orange-500/20' :
         m.severity === 'nuke' ? 'bg-yellow-500/5 border-yellow-500/20' :
         direction === 'launched' ? 'bg-red-500/5 border-red-500/10' : 'bg-white/5 border-white/5'

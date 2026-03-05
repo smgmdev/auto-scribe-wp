@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Rocket, PlaneTakeoff, Radiation, Bomb, CornerDownLeft } from 'lucide-react';
+import { Rocket, PlaneTakeoff, Radiation, Bomb, Package, CornerDownLeft } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,7 +25,7 @@ interface MissileAlert {
   published_at: string | null;
 }
 
-type AlertType = 'missile' | 'drone' | 'nuke' | 'hbomb';
+type AlertType = 'missile' | 'drone' | 'nuke' | 'hbomb' | 'trade';
 
 function getAlertColors(type: AlertType) {
   if (type === 'hbomb') {
@@ -94,6 +94,28 @@ function getAlertColors(type: AlertType) {
       btnShadow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
     };
   }
+  if (type === 'trade') {
+    return {
+      border: 'border-cyan-500/80',
+      bg: 'bg-[#051a1a]',
+      shadow: 'shadow-[0_0_60px_rgba(6,182,212,0.4)]',
+      bar: 'from-cyan-700 via-cyan-500 to-cyan-700',
+      iconBg: 'bg-cyan-600/20',
+      iconBorder: 'border-cyan-500',
+      iconColor: 'text-cyan-400',
+      pingBorder: 'border-cyan-500/40',
+      titleColor: 'text-cyan-400',
+      subtitleColor: 'text-cyan-400/70',
+      cardBg: 'bg-cyan-950/50',
+      cardBorder: 'border-cyan-800/40',
+      textPrimary: 'text-cyan-300',
+      textSecondary: 'text-cyan-400/80',
+      textTertiary: 'text-cyan-400/60',
+      btnBg: 'bg-cyan-600 hover:bg-cyan-700',
+      btnBorder: 'border-cyan-500/50',
+      btnShadow: 'shadow-[0_0_20px_rgba(6,182,212,0.3)]',
+    };
+  }
   // drone
   return {
     border: 'border-blue-700/80',
@@ -121,6 +143,7 @@ function getAlertIcon(type: AlertType, className: string) {
   if (type === 'hbomb') return <Bomb className={className} />;
   if (type === 'nuke') return <Radiation className={className} />;
   if (type === 'missile') return <Rocket className={className} />;
+  if (type === 'trade') return <Package className={className} />;
   return <PlaneTakeoff className={className} />;
 }
 
@@ -128,6 +151,7 @@ function getAlertLabel(type: AlertType) {
   if (type === 'hbomb') return 'H-BOMB';
   if (type === 'nuke') return 'NUCLEAR';
   if (type === 'missile') return 'MISSILE';
+  if (type === 'trade') return 'TRADE';
   return 'DRONE';
 }
 

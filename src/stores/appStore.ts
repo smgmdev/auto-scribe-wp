@@ -305,18 +305,22 @@ interface AppState {
   showDrones: boolean;
   showNukes: boolean;
   showHbombs: boolean;
+  showTrades: boolean;
   setShowMissiles: (v: boolean) => void;
   setShowDrones: (v: boolean) => void;
   setShowNukes: (v: boolean) => void;
   setShowHbombs: (v: boolean) => void;
+  setShowTrades: (v: boolean) => void;
   missileTimeFilter: string;
   droneTimeFilter: string;
   nukeTimeFilter: string;
   hbombTimeFilter: string;
+  tradeTimeFilter: string;
   setMissileTimeFilter: (v: string) => void;
   setDroneTimeFilter: (v: string) => void;
   setNukeTimeFilter: (v: string) => void;
   setHbombTimeFilter: (v: string) => void;
+  setTradeTimeFilter: (v: string) => void;
   openSurveillancePopup: (country: { code: string; name: string; threat_level: string; score: number; summary: string; events: string[] }) => void;
   closeSurveillancePopup: () => void;
 
@@ -827,18 +831,22 @@ export const useAppStore = create<AppState>()((set) => ({
   showDrones: true,
   showNukes: true,
   showHbombs: true,
+  showTrades: true,
   setShowMissiles: (v) => set({ showMissiles: v }),
   setShowDrones: (v) => set({ showDrones: v }),
   setShowNukes: (v) => set({ showNukes: v }),
   setShowHbombs: (v) => set({ showHbombs: v }),
+  setShowTrades: (v) => set({ showTrades: v }),
   missileTimeFilter: '24',
   droneTimeFilter: '24',
   nukeTimeFilter: '24',
   hbombTimeFilter: '24',
+  tradeTimeFilter: '24',
   setMissileTimeFilter: (v) => set({ missileTimeFilter: v }),
   setDroneTimeFilter: (v) => set({ droneTimeFilter: v }),
   setNukeTimeFilter: (v) => set({ nukeTimeFilter: v }),
   setHbombTimeFilter: (v) => set({ hbombTimeFilter: v }),
+  setTradeTimeFilter: (v) => set({ tradeTimeFilter: v }),
   openSurveillancePopup: (country) => set({ surveillanceCountry: country, showSurveillancePopup: true }),
   closeSurveillancePopup: () => set({ showSurveillancePopup: false, surveillanceCountry: null }),
 

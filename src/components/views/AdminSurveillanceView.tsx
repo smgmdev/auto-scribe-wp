@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 const SurveillanceGlobe = lazy(() => import('@/components/surveillance/SurveillanceGlobe').then(m => ({ default: m.SurveillanceGlobe })));
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -138,12 +138,15 @@ export function AdminSurveillanceView() {
   const setNukeTimeFilter = useAppStore((s) => s.setNukeTimeFilter);
   const hbombTimeFilter = useAppStore((s) => s.hbombTimeFilter);
   const setHbombTimeFilter = useAppStore((s) => s.setHbombTimeFilter);
+  const tradeTimeFilter = useAppStore((s) => s.tradeTimeFilter);
+  const setTradeTimeFilter = useAppStore((s) => s.setTradeTimeFilter);
   const globalTimeFilter = useAppStore((s) => s.surveillanceTimeFilter);
   const setGlobalTimeFilter = useAppStore((s) => s.setSurveillanceTimeFilter);
   const [missileTrajectories, setMissileTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [droneTrajectories, setDroneTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [hbombTrajectories, setHbombTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
+  const [tradeTrajectories, setTradeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
   const showMissiles = useAppStore((s) => s.showMissiles);
   const setShowMissiles = useAppStore((s) => s.setShowMissiles);
@@ -153,6 +156,8 @@ export function AdminSurveillanceView() {
   const setShowNukes = useAppStore((s) => s.setShowNukes);
   const showHbombs = useAppStore((s) => s.showHbombs);
   const setShowHbombs = useAppStore((s) => s.setShowHbombs);
+  const showTrades = useAppStore((s) => s.showTrades);
+  const setShowTrades = useAppStore((s) => s.setShowTrades);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
@@ -307,12 +312,27 @@ export function AdminSurveillanceView() {
     if (data) setHbombTrajectories(data);
   }, [hbombTimeFilter]);
 
+  const fetchTrades = useCallback(async () => {
+    const hours = parseFloat(tradeTimeFilter);
+    const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+      .from('missile_alerts')
+      .select('id, origin_country_code, destination_country_code')
+      .eq('active', true)
+      .eq('severity', 'trade')
+      .gte('published_at', cutoff)
+      .not('origin_country_code', 'is', null)
+      .not('destination_country_code', 'is', null);
+    if (data) setTradeTrajectories(data);
+  }, [tradeTimeFilter]);
+
   useEffect(() => {
     fetchMissiles();
     fetchDrones();
     fetchNukes();
     fetchHbombs();
-  }, [fetchMissiles, fetchDrones, fetchNukes, fetchHbombs, trajectoryRefresh]);
+    fetchTrades();
+  }, [fetchMissiles, fetchDrones, fetchNukes, fetchHbombs, fetchTrades, trajectoryRefresh]);
 
   // Feed always shows all events from latest scan (24h window) — no time filter
   const feedEvents = useMemo(() => {
@@ -349,6 +369,7 @@ export function AdminSurveillanceView() {
       ...(showDrones ? droneTrajectories : []),
       ...(showNukes ? nukeTrajectories : []),
       ...(showHbombs ? hbombTrajectories : []),
+      ...(showTrades ? tradeTrajectories : []),
     ];
     for (const t of allTrajectories) {
       if (t.origin_country_code) trajectoryCountryCodes.add(t.origin_country_code);
@@ -365,6 +386,7 @@ export function AdminSurveillanceView() {
     if (showHbombs) hbombTrajectories.forEach(t => { addScore(t.origin_country_code, 85); addScore(t.destination_country_code, 95); });
     if (showMissiles) missileTrajectories.forEach(t => { addScore(t.origin_country_code, 40); addScore(t.destination_country_code, 60); });
     if (showDrones) droneTrajectories.forEach(t => { addScore(t.origin_country_code, 25); addScore(t.destination_country_code, 40); });
+    if (showTrades) tradeTrajectories.forEach(t => { addScore(t.origin_country_code, 20); addScore(t.destination_country_code, 20); });
 
     const processed = scanData.countries.map(c => {
       const hasEvents = activeCountryCodes.has(c.code);
@@ -400,7 +422,7 @@ export function AdminSurveillanceView() {
     }
     
     return processed;
-  }, [scanData?.countries, filteredEvents, missileTrajectories, droneTrajectories, nukeTrajectories, hbombTrajectories, showMissiles, showDrones, showNukes, showHbombs]);
+  }, [scanData?.countries, filteredEvents, missileTrajectories, droneTrajectories, nukeTrajectories, hbombTrajectories, tradeTrajectories, showMissiles, showDrones, showNukes, showHbombs, showTrades]);
 
   const dangerCount = filteredCountries.filter(c => c.score >= 60).length || 0;
   const cautionCount = filteredCountries.filter(c => c.score >= 30 && c.score < 60).length || 0;
@@ -547,6 +569,23 @@ export function AdminSurveillanceView() {
                 </Select>
                 <span className="text-[10px] text-gray-600">({hbombTrajectories.length})</span>
               </div>
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
+                <button onClick={() => setShowTrades(!showTrades)} className={cn("flex items-center gap-1.5 transition-opacity", !showTrades && "opacity-30")} title={showTrades ? 'Hide trades on map' : 'Show trades on map'}>
+                  <Package className="w-3 h-3 text-cyan-400" />
+                  <span className="text-[10px] text-gray-400">Trade</span>
+                </button>
+                <Select value={tradeTimeFilter} onValueChange={setTradeTimeFilter}>
+                  <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                    <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                    <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                    <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                    <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                    <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-gray-600">({tradeTrajectories.length})</span>
+              </div>
             </div>
 
             {/* Shield menu for feed panel */}
@@ -644,6 +683,23 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({hbombTrajectories.length})</span>
             </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
+              <button onClick={() => setShowTrades(!showTrades)} className={cn("flex items-center gap-1.5 transition-opacity", !showTrades && "opacity-30")}>
+                <Package className="w-3 h-3 text-cyan-400" />
+                <span className="text-[10px] text-gray-400">Trade</span>
+              </button>
+              <Select value={tradeTimeFilter} onValueChange={setTradeTimeFilter}>
+                <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#0d1220] border-white/10 text-gray-300">
+                  <SelectItem value="1" className="text-[11px]">last 1h</SelectItem>
+                  <SelectItem value="6" className="text-[11px]">last 6h</SelectItem>
+                  <SelectItem value="12" className="text-[11px]">last 12h</SelectItem>
+                  <SelectItem value="24" className="text-[11px]">last 24h</SelectItem>
+                  <SelectItem value="168" className="text-[11px]">last 7d</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-[10px] text-gray-600">({tradeTrajectories.length})</span>
+            </div>
           </div>
         </div>
 
@@ -670,6 +726,7 @@ export function AdminSurveillanceView() {
                   droneTrajectories={showDrones ? dedupeTrajectories(droneTrajectories) : []}
                   nukeTrajectories={showNukes ? dedupeTrajectories(nukeTrajectories) : []}
                   hbombTrajectories={showHbombs ? dedupeTrajectories(hbombTrajectories) : []}
+                  tradeTrajectories={showTrades ? dedupeTrajectories(tradeTrajectories) : []}
                   isSpinning={globeSpinning}
                   onSpinChange={setGlobeSpinning}
                   resetTrigger={resetTrigger}
