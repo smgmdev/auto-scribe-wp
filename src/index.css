@@ -7,19 +7,19 @@
 /* Banner-aware fixed headers: override Tailwind's top-[28px] with CSS var */
 .top-\[28px\] {
   top: var(--banner-offset) !important;
-  transition: top 0.3s ease-in-out;
+  transition: top 0.3s ease-in-out !important;
 }
 
 /* Sub-headers that switch between top-[28px] and top-[92px] */
 .top-\[92px\] {
   top: calc(var(--banner-offset) + 64px) !important;
-  transition: top 0.3s ease-in-out;
+  transition: top 0.3s ease-in-out !important;
 }
 
 /* Spacers that account for banner + header height */
 .h-\[92px\] {
   height: calc(var(--banner-offset) + 64px) !important;
-  transition: height 0.3s ease-in-out;
+  transition: height 0.3s ease-in-out !important;
 }
 
 /* Hide scrollbars globally while keeping scroll functionality */
