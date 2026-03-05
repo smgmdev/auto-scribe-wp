@@ -377,6 +377,34 @@ function isAnalyticalTitle(text: string): boolean {
   return false;
 }
 
+// Headlines that are personal stories, travel, lifestyle, or anecdotal — not military events
+function isPersonalOrLifestyleTitle(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const personalPhrases = [
+    // Personal anecdotes / travel
+    'shares real-time', 'shares real - time', 'shares update', 'returns to',
+    'techie', 'employee', 'traveler', 'traveller', 'tourist', 'passenger',
+    'stranded', 'evacuated safely', 'personal account', 'eyewitness account',
+    'via muscat', 'via dubai', 'via doha', 'via istanbul',
+    'bengaluru', 'bangalore', 'hyderabad', 'pune', 'chennai', 'kolkata',  // Indian tech city mentions in travel context
+    'delhi news', 'times of india', 'hindustan times lifestyle',
+    // Non-military "struck" context (e.g. "missile struck 4.5km away" in a personal story)
+    'km away', 'miles away', 'close call', 'narrow escape', 'scary moment',
+    'felt the blast', 'heard the explosion', 'saw the smoke',
+    // Human interest / lifestyle
+    'viral video', 'goes viral', 'trending', 'social media reacts',
+    'interview with', 'speaks out', 'tells story', 'recounts',
+  ];
+  if (personalPhrases.some(p => lower.includes(p))) return true;
+  
+  // Pattern: title contains both a weapon word AND personal/travel context
+  const hasWeapon = ['missile', 'rocket', 'bomb', 'drone', 'strike'].some(w => lower.includes(w));
+  const hasTravelContext = ['returns to', 'travels to', 'flight to', 'landed in', 'arriving in', 'departing from', 'via '].some(p => lower.includes(p));
+  if (hasWeapon && hasTravelContext) return true;
+  
+  return false;
+}
+
 function isPoliticalTitle(text: string): boolean {
   const lower = text.toLowerCase();
   // If the title contains political/legislative keywords AND lacks direct attack evidence
@@ -403,6 +431,11 @@ function inferTrajectory(title: string, description: string, countryCode: string
   
   // Skip analytical/policy headlines — they discuss effects, not actual attacks
   if (isAnalyticalTitle(text)) {
+    return { origin: null, destination: null };
+  }
+  
+  // Skip personal/travel/lifestyle stories — not military events
+  if (isPersonalOrLifestyleTitle(text)) {
     return { origin: null, destination: null };
   }
   
@@ -1069,7 +1102,7 @@ Deno.serve(async (req) => {
     // Also strip trajectory from speculative/question headlines even if Perplexity provided it
     for (const ev of mergedEvents) {
       const evText = `${ev.title || ''} ${ev.description || ''}`;
-      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText)) {
+      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText)) {
         // Speculative/analytical headlines should never have attack trajectories
         ev.origin_country_code = null;
         ev.origin_country_name = null;
@@ -1177,6 +1210,8 @@ Deno.serve(async (req) => {
       if (isSpeculativeTitle(text)) return null;
       // Skip analytical/policy headlines — discussing effects, not actual strikes
       if (isAnalyticalTitle(text)) return null;
+      // Skip personal/travel/lifestyle stories — not military events
+      if (isPersonalOrLifestyleTitle(text)) return null;
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
       // Nuke requires explicit launch/detonation phrases
