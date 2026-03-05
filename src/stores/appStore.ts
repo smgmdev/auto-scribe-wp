@@ -324,10 +324,10 @@ interface AppState {
   openSurveillancePopup: (country: { code: string; name: string; threat_level: string; score: number; summary: string; events: string[] }) => void;
   closeSurveillancePopup: () => void;
 
-  // Surveillance camera feed popup (persists across navigation)
-  activeCameraRegion: { region: string; label: string; feeds: { label: string; embedId: string }[] } | null;
+  // Surveillance camera feed popups (multiple, persists across navigation)
+  activeCameraRegions: { region: string; label: string; feeds: { label: string; embedId: string }[] }[];
   openCameraFeed: (region: { region: string; label: string; feeds: { label: string; embedId: string }[] }) => void;
-  closeCameraFeed: () => void;
+  closeCameraFeed: (region?: string) => void;
 
   // Precision contact popup
   precisionContactOpen: boolean;
@@ -850,10 +850,21 @@ export const useAppStore = create<AppState>()((set) => ({
   openSurveillancePopup: (country) => set({ surveillanceCountry: country, showSurveillancePopup: true }),
   closeSurveillancePopup: () => set({ showSurveillancePopup: false, surveillanceCountry: null }),
 
-  // Surveillance camera feed popup
-  activeCameraRegion: null,
-  openCameraFeed: (region) => set({ activeCameraRegion: region }),
-  closeCameraFeed: () => set({ activeCameraRegion: null }),
+  // Surveillance camera feed popups (multiple)
+  activeCameraRegions: [],
+  openCameraFeed: (region) => set((state) => {
+    // Don't add duplicate
+    if (state.activeCameraRegions.some(r => r.region === region.region)) return state;
+    return { activeCameraRegions: [...state.activeCameraRegions, region] };
+  }),
+  closeCameraFeed: (region) => set((state) => {
+    if (!region) {
+      // Close last opened
+      if (state.activeCameraRegions.length <= 1) return { activeCameraRegions: [] };
+      return { activeCameraRegions: state.activeCameraRegions.slice(0, -1) };
+    }
+    return { activeCameraRegions: state.activeCameraRegions.filter(r => r.region !== region) };
+  }),
 
   // Reset all notification counts
   resetAllNotifications: () => set({
