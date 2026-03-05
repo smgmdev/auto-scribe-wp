@@ -106,7 +106,12 @@ export function SurveillanceCountryPopup() {
           const cutoff = cutoffMap.get(m.severity);
           if (!cutoff) return false;
           const pubDate = m.published_at || m.created_at;
-          return pubDate >= cutoff;
+          if (pubDate < cutoff) return false;
+          // Filter out speculative/question headlines — these are not confirmed attacks
+          const titleLower = (m.title || '').toLowerCase().trim();
+          if (/^(did|could|is|are|was|will|can|should|would|has|have|do|does|might|may|what if)\b/.test(titleLower)) return false;
+          if (titleLower.includes('?')) return false;
+          return true;
         });
         setCountryMissiles(filtered);
       }
