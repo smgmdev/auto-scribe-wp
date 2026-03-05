@@ -799,7 +799,7 @@ export function AdminSurveillanceView() {
                         {event.title}
                       </h4>
                       <Badge variant="outline" className={cn("text-[9px] flex-shrink-0 px-1.5 py-0 h-5 rounded-sm uppercase tracking-wider font-semibold", getSeverityColor(event.severity))}>
-                        {event.severity.toUpperCase()}
+                        {(event.severity || 'medium').toUpperCase()}
                       </Badge>
                     </div>
                     {event.description && !/^Published\s+\d{8}T/i.test(event.description.trim()) && (
