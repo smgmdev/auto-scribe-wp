@@ -322,6 +322,27 @@ const POLITICAL_FALSE_POSITIVE_PHRASES = [
   'un general assembly', 'security council', 'nato summit',
 ];
 
+// Headlines that are questions/speculation should NOT be treated as confirmed attacks
+function isSpeculativeTitle(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  // Starts with question words like "Did", "Could", "Is", "Are", "Was", "Will", "Can", "Should", "Would", "Has", "Have", "Do", "Does"
+  const questionStarters = /^(did|could|is|are|was|will|can|should|would|has|have|do|does|might|may|what if)\b/;
+  if (questionStarters.test(lower)) return true;
+  // Contains a question mark
+  if (lower.includes('?')) return true;
+  // Speculative phrases
+  const speculativePhrases = [
+    'questions grow', 'questions remain', 'questions arise', 'questions mount',
+    'raises questions', 'raise questions', 'raised questions',
+    'suspected of', 'allegedly', 'unconfirmed', 'rumored', 'rumoured',
+    'could have', 'may have', 'might have', 'possibly',
+    'investigation into', 'probe into', 'looking into whether',
+    'fears that', 'concerns that', 'worry that', 'worries that',
+    'accused of', 'denies', 'denied', 'claims to', 'claim that',
+  ];
+  return speculativePhrases.some(p => lower.includes(p));
+}
+
 function isPoliticalTitle(text: string): boolean {
   const lower = text.toLowerCase();
   // If the title contains political/legislative keywords AND lacks direct attack evidence
@@ -338,6 +359,11 @@ function inferTrajectory(title: string, description: string, countryCode: string
   
   // Skip political/legislative titles — they discuss policy, not actual attacks
   if (isPoliticalTitle(text)) {
+    return { origin: null, destination: null };
+  }
+  
+  // Skip speculative/question headlines — they are analysis, not confirmed attacks
+  if (isSpeculativeTitle(text)) {
     return { origin: null, destination: null };
   }
   
