@@ -111,16 +111,17 @@ const REGION_CONFIGS: Record<string, { sources: string; focus: string; userPromp
     sources: `MANDATORY SOURCES — you MUST check ALL of these for the latest developments:
 — Global wires: Reuters, AP News, AFP
 — Western: BBC, Sky News, NBC News, CNN, Fox News, ABC News
-— Middle East: Al Jazeera, Times of Israel, Al Arabiya, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International
+— Middle East: Al Jazeera, Times of Israel, Al Arabiya, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International, Al Mayadeen, Al Manar, Asharq Al-Awsat, Anadolu Agency
 — Asia: South China Morning Post (SCMP), Hindustan Times, The Japan Times, Nikkei Asia, Yonhap (South Korea), Straits Times (Singapore), Channel News Asia
 — China: Xinhua, Global Times, CGTN, Caixin
 — Europe: Euronews, France 24, Deutsche Welle (DW)
-— Ukraine: Ukrinform, Kyiv Independent, Ukrainian Air Force
+— Ukraine: Ukrinform, Kyiv Independent, Ukrainian Air Force, Ukrainska Pravda, Suspilne (Ukrainian Public Broadcasting), Liga.net, NV.ua, Censor.NET
+— Russia: TASS, RIA Novosti, Moscow Times, Meduza, SOTA, Mediazona
 — Latin America & Caribbean: Reuters Latin America, BBC Mundo, Infobae, El Nacional (Venezuela), El Tiempo (Colombia), Folha de S.Paulo (Brazil), La Nación (Argentina)
 — Africa: BBC Africa, Al Jazeera Africa, Reuters Africa
 — X/Twitter: Check for breaking reports from verified journalists and OSINT accounts`,
     focus: 'Cover ALL regions worldwide with geographic diversity. Include conflicts in Latin America (Venezuela, Colombia, etc.), Africa (Sudan, DRC, Somalia, etc.), Middle East, Europe, and Asia.',
-    userPromptExtra: 'You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, Ukrinform, Kyiv Independent, BBC Mundo, Infobae, El Nacional, X/Twitter. Cover the past 48 hours across ALL regions including Latin America, Africa, and everywhere else.',
+    userPromptExtra: 'You MUST check these sources: Reuters, BBC, Al Jazeera, AP News, Sky News, NBC News, Times of Israel, Hindustan Times, South China Morning Post, Japan Times, Xinhua, Global Times, Euronews, Al Arabiya, Gulf News, Arab News, Ukrinform, Kyiv Independent, Ukrainska Pravda, TASS, Meduza, BBC Mundo, Infobae, El Nacional, Al Mayadeen, Asharq Al-Awsat, X/Twitter. Cover the past 48 hours across ALL regions including Latin America, Africa, and everywhere else.',
   },
   asia: {
     sources: `MANDATORY SOURCES — you MUST check ALL of these:
@@ -135,22 +136,25 @@ const REGION_CONFIGS: Record<string, { sources: string; focus: string; userPromp
   },
   middle_east: {
     sources: `MANDATORY SOURCES — you MUST check ALL of these:
-— Global wires: Reuters, AP News
-— Middle East: Al Jazeera, Times of Israel, Al Arabiya, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International, Al-Monitor, Haaretz
-— North Africa: Libya Observer, Egypt Independent
-— X/Twitter: Check for breaking reports from verified Middle East journalists and OSINT accounts`,
-    focus: 'Focus ONLY on Middle East, North Africa, Gulf states, Iran, Israel/Palestine, Turkey.',
-    userPromptExtra: 'Focus on Middle East region ONLY. Check: Reuters, Al Jazeera, Times of Israel, Al Arabiya, Gulf News, Arab News, Middle East Eye, Iran International, Al-Monitor, Haaretz, X/Twitter. Cover past 48 hours.',
+— Global wires: Reuters, AP News, AFP
+— Arabic language sources: Al Jazeera Arabic, Al Arabiya, Asharq Al-Awsat, Al Mayadeen, Al Manar (Hezbollah-affiliated), Sky News Arabia, RT Arabic, Al Hadath, Alquds Alarabi, Al-Akhbar (Lebanon), Enab Baladi (Syria), Al-Monitor
+— English Middle East sources: Al Jazeera English, Times of Israel, The National (UAE), Gulf News, Arab News, Middle East Eye, Iran International, Haaretz, Jerusalem Post
+— Regional: Anadolu Agency (Turkey), Kurdistan24, Rudaw, IRNA (Iran), Mehr News (Iran), SANA (Syria), Petra (Jordan), SPA (Saudi Press Agency)
+— North Africa: Libya Observer, Egypt Independent, Daily News Egypt, Mada Masr
+— X/Twitter: Check for breaking reports from verified Middle East journalists, Arabic OSINT accounts, and military/security analysts`,
+    focus: 'Focus ONLY on Middle East, North Africa, Gulf states, Iran, Israel/Palestine, Turkey, Iraq, Syria, Yemen.',
+    userPromptExtra: 'Focus on Middle East region ONLY. CRITICAL: Check Arabic-language sources for events Western media may miss. Check: Reuters, Al Jazeera, Times of Israel, Al Arabiya, Al Mayadeen, Asharq Al-Awsat, Gulf News, Arab News, Middle East Eye, Iran International, Al-Monitor, Haaretz, Al Manar, Sky News Arabia, Anadolu Agency, IRNA, X/Twitter. Cover past 48 hours.',
   },
   europe: {
     sources: `MANDATORY SOURCES — you MUST check ALL of these:
 — Global wires: Reuters, AP News
 — Europe: Euronews, France 24, Deutsche Welle (DW), BBC, Sky News, The Guardian
-— Ukraine/Russia: Ukrinform, Kyiv Independent, Ukrainian Air Force, TASS, Moscow Times
+— Ukraine (Ukrainian sources): Ukrinform, Kyiv Independent, Ukrainian Air Force official channels, Ukrainska Pravda, Suspilne (Ukrainian Public Broadcasting), Liga.net, NV.ua, Censor.NET, Babel.ua, ZN.ua (Dzerkalo Tyzhnia), Espreso.tv, TSN.ua, UNIAN
+— Russia (Russian/independent sources): TASS, RIA Novosti, Moscow Times, Meduza, SOTA, Mediazona, Novaya Gazeta Europe, Verstka, iStories (Important Stories)
 — Balkans/Eastern: Balkan Insight
-— X/Twitter: Check for breaking reports from European journalists and OSINT accounts`,
+— X/Twitter: Check for breaking reports from European journalists, Ukrainian military officials, and OSINT accounts (DeepState, UAControlMap, WarMonitor)`,
     focus: 'Focus ONLY on Europe including UK, EU, Balkans, Ukraine-Russia war, Scandinavia.',
-    userPromptExtra: 'Focus on Europe ONLY. IMPORTANT: Always include latest Russian missile and drone strikes on Ukraine. Check: Reuters, BBC, Euronews, France 24, DW, Ukrinform, Kyiv Independent, Sky News, The Guardian, X/Twitter. Cover past 48 hours.',
+    userPromptExtra: 'Focus on Europe ONLY. CRITICAL: Always include latest Russian missile and drone strikes on Ukraine — check Ukrainian Air Force, Ukrinform, Ukrainska Pravda, Kyiv Independent, Suspilne, and OSINT sources. Also check Russian sources (TASS, Meduza, Mediazona) for the Russian perspective. Check: Reuters, BBC, Euronews, France 24, DW, Ukrinform, Kyiv Independent, Ukrainska Pravda, Suspilne, TASS, Meduza, Sky News, The Guardian, X/Twitter. Cover past 48 hours.',
   },
   us: {
     sources: `MANDATORY SOURCES — you MUST check ALL of these:
