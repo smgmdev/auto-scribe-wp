@@ -22,6 +22,16 @@ function isRateLimited(identifier: string): boolean {
   return false;
 }
 
+// Escape HTML to prevent injection in email templates
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -42,6 +52,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Validate input lengths to prevent abuse
+    if (full_name.length > 100 || email.length > 255 || mobile_number.length > 30 || organization_type.length > 50) {
+      return new Response(JSON.stringify({ error: "Invalid input" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate email format server-side
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return new Response(JSON.stringify({ error: "Invalid email" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Rate limit by email to prevent spam
     if (isRateLimited(email.toLowerCase().trim())) {
       return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
@@ -49,6 +76,12 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Sanitize all user inputs before embedding in HTML
+    const safeName = escapeHtml(full_name.trim());
+    const safeEmail = escapeHtml(email.trim());
+    const safeMobile = escapeHtml(mobile_number.trim());
+    const safeOrg = escapeHtml(organization_type);
 
     // Send email via Resend
     const emailRes = await fetch("https://api.resend.com/emails", {
@@ -60,27 +93,27 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: "Arcana Precision <noreply@arcanamace.com>",
         to: ["business@stankeviciusinternational.com"],
-        subject: `Arcana Precision Inquiry — ${organization_type}`,
-        reply_to: email,
+        subject: `Arcana Precision Inquiry — ${safeOrg}`,
+        reply_to: email.trim(),
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; color: #1a1a1a;">
             <h2 style="margin: 0 0 24px; font-size: 20px; font-weight: 600;">New Arcana Precision Interest</h2>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5; font-weight: 600; width: 160px;">Full Name</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;">${full_name}</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;">${safeName}</td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5; font-weight: 600;">Email</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;"><a href="mailto:${email}" style="color: #007AFF;">${email}</a></td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;"><a href="mailto:${safeEmail}" style="color: #007AFF;">${safeEmail}</a></td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5; font-weight: 600;">Mobile Number</td>
-                <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;">${mobile_number}</td>
+                <td style="padding: 12px 0; border-bottom: 1px solid #e5e5e5;">${safeMobile}</td>
               </tr>
               <tr>
                 <td style="padding: 12px 0; font-weight: 600;">Organization Type</td>
-                <td style="padding: 12px 0;">${organization_type}</td>
+                <td style="padding: 12px 0;">${safeOrg}</td>
               </tr>
             </table>
             <p style="margin: 24px 0 0; font-size: 13px; color: #888;">Submitted via Arcana Precision contact form</p>
