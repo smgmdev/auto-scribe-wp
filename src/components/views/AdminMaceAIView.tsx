@@ -310,8 +310,9 @@ export function AdminMaceAIView() {
     }, intervalMs);
   }, []);
 
-  const speak = useCallback(async (text: string, onDone?: () => void, options?: { autoListen?: boolean }) => {
+  const speak = useCallback(async (text: string, onDone?: () => void, options?: { autoListen?: boolean; accessToken?: string }) => {
     const autoListen = options?.autoListen ?? true; // Default: auto-listen after speaking
+    const cachedAccessToken = options?.accessToken;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
@@ -382,8 +383,8 @@ export function AdminMaceAIView() {
     };
 
     const fetchTTS = async (): Promise<Blob> => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      const accessToken = currentSession?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      // Use cached token to avoid calling getSession() which can trigger token refresh races
+      const accessToken = cachedAccessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
@@ -531,6 +532,13 @@ export function AdminMaceAIView() {
     setCurrentTranscript(text);
     setInterimTranscript('');
 
+    // Capture access token ONCE to avoid repeated getSession() calls that can race with token refreshes
+    let cachedAccessToken: string | undefined;
+    try {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      cachedAccessToken = currentSession?.access_token || undefined;
+    } catch { /* use anon key as fallback */ }
+
     const currentMessages = messagesRef.current;
     const currentPending = pendingArticleRef.current;
 
@@ -621,7 +629,7 @@ export function AdminMaceAIView() {
                 publishFlowActiveRef.current = false;
                 setTimeout(() => { if (isMountedRef.current) startListening(); }, 800);
                 done();
-              }, { autoListen: false });
+              }, { autoListen: false, accessToken: cachedAccessToken });
             } catch (err: any) {
               setPublishPhase('');
               const errorMsg = err.message || 'Publishing failed';
@@ -630,16 +638,16 @@ export function AdminMaceAIView() {
                 publishFlowActiveRef.current = false;
                 setTimeout(() => { if (isMountedRef.current) startListening(); }, 800);
                 done();
-              }, { autoListen: false });
+              }, { autoListen: false, accessToken: cachedAccessToken });
               toast.error(errorMsg);
             }
-          }, { autoListen: false });
+          }, { autoListen: false, accessToken: cachedAccessToken });
           return;
         } else if (isDenial(text)) {
           setPendingArticle(null);
           const cancelMsg = "No worries, I've cancelled that. Let me know if you want to try something else.";
           setMessages(prev => [...prev, { role: 'assistant', content: cancelMsg }]);
-          speak(cancelMsg, done);
+          speak(cancelMsg, done, { accessToken: cachedAccessToken });
           return;
         }
         // If not a clear yes/no, clear pending and treat as new input
@@ -683,7 +691,7 @@ export function AdminMaceAIView() {
       }
 
       // All responses auto-listen after speaking (continuous conversation mode)
-      await speak(displayMessage, done);
+      await speak(displayMessage, done, { accessToken: cachedAccessToken });
 
     } catch (err: any) {
       // Silently ignore aborts from speculative/superseded requests
@@ -695,7 +703,7 @@ export function AdminMaceAIView() {
       console.error('Voice publish error:', err);
       const errorMsg = err.message || 'Something went wrong';
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-      await speak(errorMsg, done);
+      await speak(errorMsg, done, { accessToken: cachedAccessToken });
       toast.error(errorMsg);
     } finally {
       clearTimeout(safetyTimer);
