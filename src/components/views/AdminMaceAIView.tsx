@@ -346,7 +346,10 @@ export function AdminMaceAIView() {
   }, []);
 
   const speak = useCallback(async (text: string, onDone?: () => void, options?: { autoListen?: boolean; accessToken?: string }) => {
-    const autoListen = options?.autoListen ?? true; // Default: auto-listen after speaking
+    // Safari blocks getUserMedia outside user gesture context, so auto-listen
+    // via setTimeout after audio ends silently fails. Disable it — user taps instead.
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const autoListen = isSafari ? false : (options?.autoListen ?? true);
     const cachedAccessToken = options?.accessToken;
     if (audioRef.current) {
       audioRef.current.pause();
