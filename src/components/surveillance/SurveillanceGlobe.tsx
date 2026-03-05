@@ -24,6 +24,14 @@ interface GeoFeature {
   geometry: { type: string; coordinates: any };
 }
 
+export interface SatelliteData {
+  satid: number;
+  satname: string;
+  satlatitude: number;
+  satlongitude: number;
+  sataltitude: number;
+}
+
 interface SurveillanceGlobeProps {
   countries: CountryData[];
   onCountryClick: (country: CountryData) => void;
@@ -33,6 +41,7 @@ interface SurveillanceGlobeProps {
   nukeTrajectories?: MissileTrajectory[];
   hbombTrajectories?: MissileTrajectory[];
   tradeTrajectories?: MissileTrajectory[];
+  satellites?: SatelliteData[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
   resetTrigger?: number;
@@ -703,6 +712,57 @@ function CameraResetter({ trigger }: { trigger: number }) {
   return null;
 }
 
+function SatelliteMarker({ satellite }: { satellite: SatelliteData }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+  
+  // Convert lat/lng to position above globe (altitude scaled)
+  const altitudeScale = 0.003; // Scale altitude to reasonable visual height
+  const orbitRadius = GLOBE_RADIUS + 0.05 + (satellite.sataltitude * altitudeScale);
+  const position = latLngToVector3(satellite.satlatitude, satellite.satlongitude, Math.min(orbitRadius, GLOBE_RADIUS + 1.2));
+  
+  useFrame(({ clock }) => {
+    if (glowRef.current) {
+      const pulse = 0.5 + Math.sin(clock.getElapsedTime() * 3 + satellite.satid) * 0.3;
+      (glowRef.current.material as THREE.MeshBasicMaterial).opacity = pulse;
+    }
+  });
+
+  return (
+    <group position={position}>
+      {/* Satellite dot */}
+      <mesh ref={meshRef}>
+        <sphereGeometry args={[0.015, 8, 8]} />
+        <meshBasicMaterial color="#00e5ff" />
+      </mesh>
+      {/* Glow */}
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[0.025, 8, 8]} />
+        <meshBasicMaterial color="#00e5ff" transparent opacity={0.4} />
+      </mesh>
+      {/* Connection line to surface */}
+      <SatelliteTether lat={satellite.satlatitude} lng={satellite.satlongitude} altitude={Math.min(orbitRadius, GLOBE_RADIUS + 1.2)} />
+      <pointLight color="#00e5ff" intensity={0.15} distance={0.3} />
+    </group>
+  );
+}
+
+function SatelliteTether({ lat, lng, altitude }: { lat: number; lng: number; altitude: number }) {
+  const geometry = useMemo(() => {
+    const surfacePos = new THREE.Vector3(...latLngToVector3(lat, lng, GLOBE_RADIUS + 0.01));
+    const satPos = new THREE.Vector3(...latLngToVector3(lat, lng, altitude));
+    const points = [surfacePos, satPos];
+    return new THREE.BufferGeometry().setFromPoints(points);
+  }, [lat, lng, altitude]);
+
+  return (
+    <lineSegments geometry={geometry}>
+      <lineBasicMaterial color="#00e5ff" transparent opacity={0.12} />
+    </lineSegments>
+  );
+}
+
+
 function RotatingGlobe({
   countries,
   onCountryClick,
@@ -712,6 +772,7 @@ function RotatingGlobe({
   nukeTrajectories = [],
   hbombTrajectories = [],
   tradeTrajectories = [],
+  satellites = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -860,6 +921,10 @@ function RotatingGlobe({
             <TradeArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
           ) : null
         )}
+
+        {satellites.map((sat) => (
+          <SatelliteMarker key={sat.satid} satellite={sat} />
+        ))}
       </group>
 
       <OrbitControls
@@ -886,6 +951,7 @@ export function SurveillanceGlobe({
   nukeTrajectories = [],
   hbombTrajectories = [],
   tradeTrajectories = [],
+  satellites = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -906,6 +972,7 @@ export function SurveillanceGlobe({
           nukeTrajectories={nukeTrajectories}
           hbombTrajectories={hbombTrajectories}
           tradeTrajectories={tradeTrajectories}
+          satellites={satellites}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
           resetTrigger={resetTrigger}

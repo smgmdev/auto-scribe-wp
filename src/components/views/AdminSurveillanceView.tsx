@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react
 import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
 const SurveillanceGlobe = lazy(() => import('@/components/surveillance/SurveillanceGlobe').then(m => ({ default: m.SurveillanceGlobe })));
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -152,6 +152,7 @@ export function AdminSurveillanceView() {
   const [nukeTrajectories, setNukeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [hbombTrajectories, setHbombTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [tradeTrajectories, setTradeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
+  const [satellites, setSatellites] = useState<Array<{ satid: number; satname: string; satlatitude: number; satlongitude: number; sataltitude: number }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
   const showMissiles = useAppStore((s) => s.showMissiles);
   const setShowMissiles = useAppStore((s) => s.setShowMissiles);
@@ -163,6 +164,8 @@ export function AdminSurveillanceView() {
   const setShowHbombs = useAppStore((s) => s.setShowHbombs);
   const showTrades = useAppStore((s) => s.showTrades);
   const setShowTrades = useAppStore((s) => s.setShowTrades);
+  const showSatellites = useAppStore((s) => s.showSatellites);
+  const setShowSatellites = useAppStore((s) => s.setShowSatellites);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
@@ -399,6 +402,19 @@ export function AdminSurveillanceView() {
     if (data) setTradeTrajectories(data);
   }, [tradeTimeFilter]);
 
+  const fetchSatellites = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-satellites', {
+        body: { category: 'military', lat: 0, lng: 0, alt: 0 },
+      });
+      if (!error && data?.satellites) {
+        setSatellites(data.satellites);
+      }
+    } catch (err) {
+      console.error('Failed to fetch satellites:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMissiles();
     fetchDrones();
@@ -406,6 +422,18 @@ export function AdminSurveillanceView() {
     fetchHbombs();
     fetchTrades();
   }, [fetchMissiles, fetchDrones, fetchNukes, fetchHbombs, fetchTrades, trajectoryRefresh]);
+
+  // Fetch satellites when toggle is enabled
+  useEffect(() => {
+    if (showSatellites) {
+      fetchSatellites();
+      // Refresh every 5 minutes
+      const interval = setInterval(fetchSatellites, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    } else {
+      setSatellites([]);
+    }
+  }, [showSatellites, fetchSatellites]);
 
   // Feed always shows all events from latest scan (24h window) — no time filter
   const feedEvents = useMemo(() => {
@@ -678,6 +706,13 @@ export function AdminSurveillanceView() {
                 </Select>
                 <span className="text-[10px] text-gray-600">({tradeTrajectories.length})</span>
               </div>
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
+                <button onClick={() => setShowSatellites(!showSatellites)} className={cn("flex items-center gap-1.5 transition-opacity", !showSatellites && "opacity-30")} title={showSatellites ? 'Hide satellites' : 'Show military satellites (N2YO)'}>
+                  <Radio className="w-3 h-3 text-cyan-300" />
+                  <span className="text-[10px] text-gray-400">Satellites</span>
+                </button>
+                <span className="text-[10px] text-gray-600">({satellites.length})</span>
+              </div>
             </div>
 
             {/* Shield menu for feed panel */}
@@ -792,6 +827,13 @@ export function AdminSurveillanceView() {
               </Select>
               <span className="text-[10px] text-gray-600">({tradeTrajectories.length})</span>
             </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
+              <button onClick={() => setShowSatellites(!showSatellites)} className={cn("flex items-center gap-1.5 transition-opacity", !showSatellites && "opacity-30")}>
+                <Radio className="w-3 h-3 text-cyan-300" />
+                <span className="text-[10px] text-gray-400">Satellites</span>
+              </button>
+              <span className="text-[10px] text-gray-600">({satellites.length})</span>
+            </div>
           </div>
         </div>
 
@@ -819,6 +861,7 @@ export function AdminSurveillanceView() {
                   nukeTrajectories={showNukes ? dedupeTrajectories(nukeTrajectories) : []}
                   hbombTrajectories={showHbombs ? dedupeTrajectories(hbombTrajectories) : []}
                   tradeTrajectories={showTrades ? dedupeTrajectories(tradeTrajectories) : []}
+                  satellites={showSatellites ? satellites : []}
                   isSpinning={globeSpinning}
                   onSpinChange={setGlobeSpinning}
                   resetTrigger={resetTrigger}
