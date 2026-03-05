@@ -1027,7 +1027,17 @@ Deno.serve(async (req) => {
     );
 
     // ── Auto-infer trajectory data for events missing origin/destination ──
+    // Also strip trajectory from speculative/question headlines even if Perplexity provided it
     for (const ev of mergedEvents) {
+      const evText = `${ev.title || ''} ${ev.description || ''}`;
+      if (isSpeculativeTitle(evText)) {
+        // Speculative headlines should never have attack trajectories
+        ev.origin_country_code = null;
+        ev.origin_country_name = null;
+        ev.destination_country_code = null;
+        ev.destination_country_name = null;
+        continue;
+      }
       if (!ev.origin_country_code || !ev.destination_country_code) {
         const inferred = inferTrajectory(ev.title || '', ev.description || '', ev.country_code || null);
         if (inferred.origin && inferred.destination) {
@@ -1124,6 +1134,8 @@ Deno.serve(async (req) => {
       const text = `${title} ${description}`.toLowerCase();
       // Skip political/legislative news — not actual attacks
       if (isPoliticalTitle(text)) return null;
+      // Skip speculative/question headlines — not confirmed events
+      if (isSpeculativeTitle(text)) return null;
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
       // Nuke requires explicit launch/detonation phrases
