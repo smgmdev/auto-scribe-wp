@@ -306,11 +306,13 @@ interface AppState {
   showNukes: boolean;
   showHbombs: boolean;
   showTrades: boolean;
+  showSatellites: boolean;
   setShowMissiles: (v: boolean) => void;
   setShowDrones: (v: boolean) => void;
   setShowNukes: (v: boolean) => void;
   setShowHbombs: (v: boolean) => void;
   setShowTrades: (v: boolean) => void;
+  setShowSatellites: (v: boolean) => void;
   missileTimeFilter: string;
   droneTimeFilter: string;
   nukeTimeFilter: string;
@@ -832,11 +834,13 @@ export const useAppStore = create<AppState>()((set) => ({
   showNukes: true,
   showHbombs: true,
   showTrades: true,
+  showSatellites: false,
   setShowMissiles: (v) => set({ showMissiles: v }),
   setShowDrones: (v) => set({ showDrones: v }),
   setShowNukes: (v) => set({ showNukes: v }),
   setShowHbombs: (v) => set({ showHbombs: v }),
   setShowTrades: (v) => set({ showTrades: v }),
+  setShowSatellites: (v) => set({ showSatellites: v }),
   missileTimeFilter: '24',
   droneTimeFilter: '24',
   nukeTimeFilter: '24',
