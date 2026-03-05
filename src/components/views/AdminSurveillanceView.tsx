@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react
 import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
 const SurveillanceGlobe = lazy(() => import('@/components/surveillance/SurveillanceGlobe').then(m => ({ default: m.SurveillanceGlobe })));
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -153,6 +153,7 @@ export function AdminSurveillanceView() {
   const [hbombTrajectories, setHbombTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [tradeTrajectories, setTradeTrajectories] = useState<Array<{ id: string; origin_country_code: string | null; destination_country_code: string | null }>>([]);
   const [satellites, setSatellites] = useState<Array<{ satid: number; satname: string; satlatitude: number; satlongitude: number; sataltitude: number }>>([]);
+  const [earthquakes, setEarthquakes] = useState<Array<{ id: string; magnitude: number; place: string; time: number; depth: number; latitude: number; longitude: number; tsunami: boolean; type: string }>>([]);
   const [globeSpinning, setGlobeSpinning] = useState(false);
   const showMissiles = useAppStore((s) => s.showMissiles);
   const setShowMissiles = useAppStore((s) => s.setShowMissiles);
@@ -166,6 +167,8 @@ export function AdminSurveillanceView() {
   const setShowTrades = useAppStore((s) => s.setShowTrades);
   const showSatellites = useAppStore((s) => s.showSatellites);
   const setShowSatellites = useAppStore((s) => s.setShowSatellites);
+  const showEarthquakes = useAppStore((s) => s.showEarthquakes);
+  const setShowEarthquakes = useAppStore((s) => s.setShowEarthquakes);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
@@ -435,6 +438,30 @@ export function AdminSurveillanceView() {
       setSatellites([]);
     }
   }, [showSatellites, fetchSatellites]);
+
+  const fetchEarthquakes = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-earthquakes', {
+        body: { minMagnitude: 2.5, period: 'day' },
+      });
+      if (!error && data?.earthquakes) {
+        setEarthquakes(data.earthquakes);
+      }
+    } catch (err) {
+      console.error('Failed to fetch earthquakes:', err);
+    }
+  }, []);
+
+  // Fetch earthquakes when toggle is enabled
+  useEffect(() => {
+    if (showEarthquakes) {
+      fetchEarthquakes();
+      const interval = setInterval(fetchEarthquakes, 10 * 60 * 1000); // refresh every 10 min
+      return () => clearInterval(interval);
+    } else {
+      setEarthquakes([]);
+    }
+  }, [showEarthquakes, fetchEarthquakes]);
 
   // Feed always shows all events from latest scan (24h window) — no time filter
   const feedEvents = useMemo(() => {
@@ -714,6 +741,13 @@ export function AdminSurveillanceView() {
                 </button>
                 <span className="text-[10px] text-gray-600">({satellites.length})</span>
               </div>
+              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
+                <button onClick={() => setShowEarthquakes(!showEarthquakes)} className={cn("flex items-center gap-1.5 transition-opacity", !showEarthquakes && "opacity-30")} title={showEarthquakes ? 'Hide earthquakes' : 'Show seismic events (USGS)'}>
+                  <Activity className="w-3 h-3 text-orange-400" />
+                  <span className="text-[10px] text-gray-400">Seismic</span>
+                </button>
+                <span className="text-[10px] text-gray-600">({earthquakes.length})</span>
+              </div>
             </div>
 
             {/* Shield menu for feed panel */}
@@ -835,6 +869,13 @@ export function AdminSurveillanceView() {
               </button>
               <span className="text-[10px] text-gray-600">({satellites.length})</span>
             </div>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
+              <button onClick={() => setShowEarthquakes(!showEarthquakes)} className={cn("flex items-center gap-1.5 transition-opacity", !showEarthquakes && "opacity-30")}>
+                <Activity className="w-3 h-3 text-orange-400" />
+                <span className="text-[10px] text-gray-400">Seismic</span>
+              </button>
+              <span className="text-[10px] text-gray-600">({earthquakes.length})</span>
+            </div>
           </div>
         </div>
 
@@ -863,6 +904,7 @@ export function AdminSurveillanceView() {
                   hbombTrajectories={showHbombs ? dedupeTrajectories(hbombTrajectories) : []}
                   tradeTrajectories={showTrades ? dedupeTrajectories(tradeTrajectories) : []}
                   satellites={showSatellites ? satellites : []}
+                  earthquakes={showEarthquakes ? earthquakes : []}
                   isSpinning={globeSpinning}
                   onSpinChange={setGlobeSpinning}
                   resetTrigger={resetTrigger}
