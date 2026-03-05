@@ -485,7 +485,7 @@ export function AdminSurveillanceView() {
             </div>
 
             {/* Global events filter + Trajectory filters - desktop inline */}
-            <div className="hidden lg:flex items-stretch flex-1">
+            <div className="hidden lg:flex items-stretch flex-1 overflow-x-auto">
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-l border-r border-white/10 self-stretch">
                 <Shield className="w-3 h-3 text-emerald-400" />
                 <span className="text-[10px] text-gray-400">Events</span>
