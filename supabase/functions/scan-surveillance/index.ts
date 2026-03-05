@@ -447,6 +447,36 @@ function isPersonalOrLifestyleTitle(text: string): boolean {
   return false;
 }
 
+// Headlines about military testing, drills, exercises, or cooperation — NOT actual attacks
+function isMilitaryTestingOrDrill(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const testingPhrases = [
+    'testing ', 'test ', 'tests ', 'tested ', 'test-fire', 'test-fired', 'test-fires',
+    'test launch', 'test-launch', 'test fire',
+    'drill ', 'drills ', 'military drill', 'naval drill', 'joint drill',
+    'exercise ', 'exercises ', 'military exercise', 'naval exercise', 'joint exercise',
+    'war games', 'wargames', 'war game', 'wargame',
+    'training ', 'training exercise', 'joint training',
+    'specialists', 'advisors', 'advisers', 'technicians',
+    'cooperation', 'co-operation', 'collaboration',
+    'joint development', 'joint production', 'co-production',
+    'inspect', 'inspects', 'inspecting', 'inspection',
+    'demonstrate', 'demonstrates', 'demonstrating', 'demonstration',
+    'unveil', 'unveils', 'unveiled', 'unveiling',
+    'display', 'displays', 'displayed', 'displaying',
+    'showcase', 'showcases', 'showcased', 'showcasing',
+    'simulate', 'simulates', 'simulated', 'simulation',
+  ];
+  const hasTestingPhrase = testingPhrases.some(p => lower.includes(p));
+  if (!hasTestingPhrase) return false;
+  
+  // Confirm it also has a weapon/military context (to avoid filtering unrelated "testing" headlines)
+  const militaryContext = ['missile', 'rocket', 'weapon', 'warhead', 'drone', 'uav', 'bomb',
+    'artillery', 'tank', 'fighter', 'jet', 'aircraft', 'naval', 'military', 'defense', 'defence',
+    'ballistic', 'hypersonic', 'nuclear', 'icbm', 'slbm'];
+  return militaryContext.some(w => lower.includes(w));
+}
+
 function isPoliticalTitle(text: string): boolean {
   const lower = text.toLowerCase();
   // If the title contains political/legislative keywords AND lacks direct attack evidence
@@ -530,6 +560,10 @@ function inferTrajectory(title: string, description: string, countryCode: string
   }
   // Skip aftermath/follow-up reporting — not new active attacks
   if (isAftermathOrFollowUpTitle(text)) {
+    return { origin: null, destination: null };
+  }
+  // Skip military testing, drills, exercises — these are NOT attacks
+  if (isMilitaryTestingOrDrill(text)) {
     return { origin: null, destination: null };
   }
   
@@ -782,6 +816,8 @@ function buildStoryFingerprint(title: string, description: string): {
   if (attackIndicators.some(w => lower.includes(w))) actionCategory = 'attack';
   if (tradeIndicators.some(w => lower.includes(w))) actionCategory = 'trade';
   if (protestIndicators.some(w => lower.includes(w))) actionCategory = 'protest';
+  // Military testing/drills/exercises should be classified as trade, not attack
+  if (actionCategory === 'attack' && isMilitaryTestingOrDrill(text)) actionCategory = 'trade';
 
   // Extract entity keywords (non-country significant words that define the specific event)
   const allWords = extractSignificantWords(title);
@@ -948,6 +984,7 @@ CRITICAL — NUCLEAR EVENTS: Do NOT classify any event as nuclear unless there i
 CRITICAL — NO HALLUCINATIONS: Only report events that ACTUALLY HAPPENED and are confirmed by real news sources. Do NOT fabricate, speculate, or predict events. If you cannot find a real source URL for an event, do NOT include it. Never invent attacks, strikes, or military operations that have not been reported by credible news outlets. Each event MUST have a real, verifiable source_url pointing to an actual published article.
 CRITICAL — GLOBAL COVERAGE: Include attacks and military operations from ALL regions — Russia-Ukraine, Middle East (Israel/Palestine, Yemen/Houthis, Iran), Latin America (Venezuela, Colombia, etc.), Africa (Sudan, DRC, Somalia, Ethiopia), Asia (Myanmar, North Korea), and anywhere else with active conflicts.
 CRITICAL — MILITARY TRADE & SUPPLIES: Include ALL military equipment transfers, arms deals, weapon donations, and supply shipments between countries. Examples: "Iran supplies drones to Russia", "US sends HIMARS to Ukraine", "North Korea ships ammunition to Russia", "Germany delivers Leopard tanks to Ukraine". For these trade/supply events, set origin_country_code to the SUPPLIER country and destination_country_code to the RECEIVING country. These are just as important as attack events — never omit them.
+CRITICAL — TESTING & DRILLS ARE NOT ATTACKS: Military testing, joint exercises, drills, weapon demonstrations, and military cooperation (e.g. "PRC specialists testing missiles in Iran", "joint naval exercise", "missile test launch") are NOT attacks. These should be treated as TRADE/cooperation events, NOT kinetic attacks. Do NOT set trajectory data for testing events. Set origin_country_code and destination_country_code to null for testing/drill/exercise events.
 Return ONLY the JSON object, no other text.`
         },
         {
@@ -1228,7 +1265,7 @@ Deno.serve(async (req) => {
     // Also strip trajectory from speculative/question headlines even if Perplexity provided it
     for (const ev of mergedEvents) {
       const evText = `${ev.title || ''} ${ev.description || ''}`;
-      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText) || isAftermathOrFollowUpTitle(evText)) {
+      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText) || isAftermathOrFollowUpTitle(evText) || isMilitaryTestingOrDrill(evText)) {
         // Speculative/analytical headlines should never have attack trajectories
         ev.origin_country_code = null;
         ev.origin_country_name = null;
