@@ -25,7 +25,7 @@ interface AuthContextType {
   verifyPin: (pin: string) => Promise<boolean>;
   setPinVerified: (verified: boolean) => void;
   extendSession: () => Promise<boolean>;
-  setSessionGrace: (durationMs: number) => void;
+  
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -351,8 +351,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    let consecutiveFailures = 0;
-    
     const checkSessionValidity = async () => {
       if (sessionKickedRef.current) return;
       if (Date.now() < sessionGraceUntilRef.current) return;
@@ -363,38 +361,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('id', user.id)
           .maybeSingle();
         
-        // If the query fails due to RLS (session expired/invalid), the auth session is broken
+        // If the query fails (network issue, RLS, etc.), just skip this cycle.
+        // Query failures do NOT mean the session is invalid — they typically mean
+        // the network is busy (e.g. during voice AI / TTS / edge function calls).
+        // Only an active_session_id mismatch is evidence of another device taking over.
         if (error || data === null) {
-          consecutiveFailures++;
-          console.warn(`[Auth] Session check failed (${consecutiveFailures}/10) - profile not accessible`, error?.message);
-          
-          // Only attempt recovery after 10 consecutive failures (~50 seconds)
-          // This prevents false logouts during heavy network usage (voice AI, etc.)
-          if (consecutiveFailures >= 10) {
-            console.warn('[Auth] 10 consecutive session check failures, attempting session recovery');
-            // First try getSession (lightweight, uses local storage)
-            const { data: { session: localSession } } = await supabase.auth.getSession();
-            if (localSession) {
-              // We still have a local session — try refreshing the token
-              const refreshResult = await safeRefreshSession();
-              if (refreshResult.success) {
-                console.log('[Auth] Session refreshed successfully after failures');
-                consecutiveFailures = 0;
-                return;
-              }
-            }
-            // Both getSession and refresh failed — wait one more cycle before giving up
-            if (consecutiveFailures >= 12) {
-              console.error('[Auth] Session unrecoverable after 12 failures, signing out');
-              handleSessionKicked();
-              return;
-            }
-          }
+          console.warn('[Auth] Session check query failed, skipping cycle:', error?.message);
           return;
         }
-        
-        // Success - reset failure counter
-        consecutiveFailures = 0;
         
         const currentActive = (data as any)?.active_session_id;
         if (currentActive && currentActive !== localSessionIdRef.current) {
@@ -1052,12 +1026,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verifyPin,
         setPinVerified,
         extendSession,
-        setSessionGrace: (durationMs: number) => {
-          const target = Date.now() + durationMs;
-          if (target > sessionGraceUntilRef.current) {
-            sessionGraceUntilRef.current = target;
-          }
-        },
       }}
     >
       {children}
@@ -1084,7 +1052,7 @@ const defaultAuthContext: AuthContextType = {
   verifyPin: async () => false,
   setPinVerified: () => {},
   extendSession: async () => false,
-  setSessionGrace: () => {},
+  
 };
 
 export function useAuth() {
