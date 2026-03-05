@@ -1,0 +1,1 @@
+DELETE FROM public.missile_alerts WHERE id IN ('23052459-0e3f-46a1-ab50-a47314b65916', 'dd40e805-7f9c-4788-a58f-7f41e041a05d');

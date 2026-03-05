@@ -343,6 +343,40 @@ function isSpeculativeTitle(text: string): boolean {
   return speculativePhrases.some(p => lower.includes(p));
 }
 
+// Headlines about policy, analysis, reserves, costs, or consequences — NOT actual kinetic attacks
+function isAnalyticalTitle(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  // Resource/logistics/policy phrases — these discuss effects of war, not actual strikes
+  const analyticalPhrases = [
+    'depletes', 'depleted', 'depleting', 'depletion',
+    'reserves', 'stockpile', 'stockpiles', 'running out', 'running low',
+    'cost of', 'costs of', 'price of', 'spending on', 'budget for',
+    'impact on', 'effect on', 'effects of', 'consequences of', 'toll of',
+    'analysis:', 'opinion:', 'editorial:', 'commentary:', 'perspective:',
+    'how the', 'why the', 'what the', 'lessons from', 'lessons of',
+    'strategy behind', 'implications of', 'aftermath of',
+    'warns about', 'warns of', 'warning about',
+    'prepares for', 'preparing for', 'braces for',
+    'plans to', 'planning to', 'considers', 'considering',
+    'threatens to', 'threatening to', 'vows to',
+    'readiness', 'preparedness', 'capability', 'capabilities',
+    'defense spending', 'defence spending', 'military spending',
+    'arms race', 'escalation risk', 'risk of escalation',
+    'war footing', 'war economy', 'war fatigue',
+  ];
+  if (analyticalPhrases.some(p => lower.includes(p))) {
+    // Double-check: if there's a DIRECT confirmed strike/hit, it's not analytical
+    const confirmedStrikePhrases = [
+      'struck ', 'hits ', 'hit ', 'killed ', 'destroys ', 'destroyed ',
+      'explosion ', 'detonated', 'casualties', 'wounded', 'injured',
+      'intercepted', 'shot down', 'crashed into',
+    ];
+    const hasConfirmedStrike = confirmedStrikePhrases.some(p => lower.includes(p));
+    if (!hasConfirmedStrike) return true;
+  }
+  return false;
+}
+
 function isPoliticalTitle(text: string): boolean {
   const lower = text.toLowerCase();
   // If the title contains political/legislative keywords AND lacks direct attack evidence
@@ -364,6 +398,11 @@ function inferTrajectory(title: string, description: string, countryCode: string
   
   // Skip speculative/question headlines — they are analysis, not confirmed attacks
   if (isSpeculativeTitle(text)) {
+    return { origin: null, destination: null };
+  }
+  
+  // Skip analytical/policy headlines — they discuss effects, not actual attacks
+  if (isAnalyticalTitle(text)) {
     return { origin: null, destination: null };
   }
   
@@ -1030,8 +1069,8 @@ Deno.serve(async (req) => {
     // Also strip trajectory from speculative/question headlines even if Perplexity provided it
     for (const ev of mergedEvents) {
       const evText = `${ev.title || ''} ${ev.description || ''}`;
-      if (isSpeculativeTitle(evText)) {
-        // Speculative headlines should never have attack trajectories
+      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText)) {
+        // Speculative/analytical headlines should never have attack trajectories
         ev.origin_country_code = null;
         ev.origin_country_name = null;
         ev.destination_country_code = null;
@@ -1136,6 +1175,8 @@ Deno.serve(async (req) => {
       if (isPoliticalTitle(text)) return null;
       // Skip speculative/question headlines — not confirmed events
       if (isSpeculativeTitle(text)) return null;
+      // Skip analytical/policy headlines — discussing effects, not actual strikes
+      if (isAnalyticalTitle(text)) return null;
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
       // Nuke requires explicit launch/detonation phrases

@@ -107,10 +107,13 @@ export function SurveillanceCountryPopup() {
           if (!cutoff) return false;
           const pubDate = m.published_at || m.created_at;
           if (pubDate < cutoff) return false;
-          // Filter out speculative/question headlines — these are not confirmed attacks
+          // Filter out speculative/question/analytical headlines — these are not confirmed attacks
           const titleLower = (m.title || '').toLowerCase().trim();
           if (/^(did|could|is|are|was|will|can|should|would|has|have|do|does|might|may|what if)\b/.test(titleLower)) return false;
           if (titleLower.includes('?')) return false;
+          // Filter out analytical/policy headlines (reserves, costs, analysis)
+          const analyticalPatterns = ['depletes', 'depleted', 'reserves', 'stockpile', 'running out', 'running low', 'cost of', 'costs of', 'spending on', 'impact on', 'effect on', 'consequences of', 'toll of', 'analysis:', 'opinion:', 'editorial:', 'commentary:', 'lessons from', 'warns about', 'warns of', 'prepares for', 'plans to', 'threatens to', 'vows to', 'arms race', 'war economy', 'war fatigue'];
+          if (analyticalPatterns.some(p => titleLower.includes(p))) return false;
           return true;
         });
         setCountryMissiles(filtered);
