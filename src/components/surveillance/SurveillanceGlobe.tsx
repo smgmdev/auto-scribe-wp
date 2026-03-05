@@ -32,6 +32,7 @@ interface SurveillanceGlobeProps {
   droneTrajectories?: MissileTrajectory[];
   nukeTrajectories?: MissileTrajectory[];
   hbombTrajectories?: MissileTrajectory[];
+  tradeTrajectories?: MissileTrajectory[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
   resetTrigger?: number;
@@ -604,6 +605,56 @@ function HBombArc({ originCode, destCode }: { originCode: string; destCode: stri
   );
 }
 
+function TradeArc({ originCode, destCode }: { originCode: string; destCode: string }) {
+  const tradeRef = useRef<THREE.Mesh>(null);
+
+  const { curve, tubeGeo } = useMemo(() => {
+    const oCoords = COUNTRY_COORDINATES[originCode];
+    const dCoords = COUNTRY_COORDINATES[destCode];
+    if (!oCoords || !dCoords) return { curve: null, tubeGeo: null };
+
+    const start = new THREE.Vector3(...latLngToVector3(oCoords.lat, oCoords.lng, GLOBE_RADIUS + 0.015));
+    const end = new THREE.Vector3(...latLngToVector3(dCoords.lat, dCoords.lng, GLOBE_RADIUS + 0.015));
+    const dist = start.distanceTo(end);
+    const arcHeight = Math.max(0.5, dist * 0.4);
+    const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+    mid.normalize().multiplyScalar(GLOBE_RADIUS + arcHeight);
+
+    const c = new THREE.QuadraticBezierCurve3(start, mid, end);
+    const tube = new THREE.TubeGeometry(c, 80, 0.005, 8, false);
+    return { curve: c, tubeGeo: tube };
+  }, [originCode, destCode]);
+
+  useFrame(({ clock }) => {
+    if (tradeRef.current && curve) {
+      const t = (clock.getElapsedTime() * 0.15) % 1;
+      const pos = curve.getPoint(t);
+      tradeRef.current.position.copy(pos);
+      const next = curve.getPoint(Math.min(t + 0.02, 1));
+      const dir = new THREE.Vector3().subVectors(next, pos).normalize();
+      const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+      tradeRef.current.quaternion.copy(quat);
+    }
+  });
+
+  if (!tubeGeo || !curve) return null;
+
+  return (
+    <group>
+      <mesh geometry={tubeGeo}>
+        <meshBasicMaterial color="#06b6d4" transparent opacity={0.6} />
+      </mesh>
+      <mesh ref={tradeRef}>
+        <boxGeometry args={[0.03, 0.03, 0.03]} />
+        <meshBasicMaterial color="#22d3ee" />
+      </mesh>
+      <pointLight ref={(light) => {
+        if (light && tradeRef.current) light.position.copy(tradeRef.current.position);
+      }} color="#06b6d4" intensity={0.3} distance={0.4} />
+    </group>
+  );
+}
+
 function ZoomTracker({ onZoomChange }: { onZoomChange: (d: number) => void }) {
   const { camera } = useThree();
   useFrame(() => onZoomChange(camera.position.length()));
@@ -660,6 +711,7 @@ function RotatingGlobe({
   droneTrajectories = [],
   nukeTrajectories = [],
   hbombTrajectories = [],
+  tradeTrajectories = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -802,6 +854,12 @@ function RotatingGlobe({
             <HBombArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
           ) : null
         )}
+
+        {tradeTrajectories.map((t) =>
+          t.origin_country_code && t.destination_country_code ? (
+            <TradeArc key={t.id} originCode={t.origin_country_code} destCode={t.destination_country_code} />
+          ) : null
+        )}
       </group>
 
       <OrbitControls
@@ -827,6 +885,7 @@ export function SurveillanceGlobe({
   droneTrajectories = [],
   nukeTrajectories = [],
   hbombTrajectories = [],
+  tradeTrajectories = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -846,6 +905,7 @@ export function SurveillanceGlobe({
           droneTrajectories={droneTrajectories}
           nukeTrajectories={nukeTrajectories}
           hbombTrajectories={hbombTrajectories}
+          tradeTrajectories={tradeTrajectories}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
           resetTrigger={resetTrigger}
