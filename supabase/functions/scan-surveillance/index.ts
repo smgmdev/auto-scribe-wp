@@ -378,6 +378,36 @@ function isAnalyticalTitle(text: string): boolean {
 }
 
 // Headlines that are personal stories, travel, lifestyle, or anecdotal — not military events
+// Headlines that are aftermath/follow-up reporting on previous attacks — not new active attacks
+function isAftermathOrFollowUpTitle(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const hasWeapon = ['missile', 'rocket', 'bomb', 'drone', 'strike', 'attack'].some(w => lower.includes(w));
+  if (!hasWeapon) return false;
+  
+  // Aftermath patterns: naming/identifying casualties, investigations, memorials, blame
+  const aftermathPhrases = [
+    'names ', 'named ', 'identifies ', 'identified ',
+    'believed to be', 'confirmed dead', 'confirmed killed',
+    'funeral ', 'funerals ', 'memorial ', 'mourns ', 'mourning ',
+    'pays tribute', 'tribute to', 'honors ', 'honoring ',
+    'investigation into', 'investigating ', 'probe into',
+    'autopsy ', 'remains of', 'body of', 'bodies of',
+    'toll rises', 'toll climbs', 'death toll', 'casualty count',
+    'recovering from', 'recovery efforts', 'cleanup ',
+    'damage assessment', 'assessed damage', 'surveying damage',
+    'rebuilding ', 'reconstruction ',
+    'blamed for', 'takes blame', 'claims responsibility',
+    'responsibility for', 'credited with',
+  ];
+  if (aftermathPhrases.some(p => lower.includes(p))) return true;
+  
+  // Pattern: "[ordinal] soldier/victim killed" — reporting on identifying past casualties
+  if (/\d+(st|nd|rd|th)\s+(soldier|service member|troop|victim|casualty|american|marine|airman)\s+(killed|dead|identified|named)/.test(lower)) return true;
+  
+  return false;
+}
+
+// Headlines that are personal stories, travel, lifestyle, or anecdotal — not military events
 function isPersonalOrLifestyleTitle(text: string): boolean {
   const lower = text.toLowerCase().trim();
   const personalPhrases = [
@@ -496,6 +526,10 @@ function inferTrajectory(title: string, description: string, countryCode: string
   
   // Skip personal/travel/lifestyle stories — not military events
   if (isPersonalOrLifestyleTitle(text)) {
+    return { origin: null, destination: null };
+  }
+  // Skip aftermath/follow-up reporting — not new active attacks
+  if (isAftermathOrFollowUpTitle(text)) {
     return { origin: null, destination: null };
   }
   
@@ -1194,7 +1228,7 @@ Deno.serve(async (req) => {
     // Also strip trajectory from speculative/question headlines even if Perplexity provided it
     for (const ev of mergedEvents) {
       const evText = `${ev.title || ''} ${ev.description || ''}`;
-      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText)) {
+      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText) || isAftermathOrFollowUpTitle(evText)) {
         // Speculative/analytical headlines should never have attack trajectories
         ev.origin_country_code = null;
         ev.origin_country_name = null;
@@ -1304,6 +1338,8 @@ Deno.serve(async (req) => {
       if (isAnalyticalTitle(text)) return null;
       // Skip personal/travel/lifestyle stories — not military events
       if (isPersonalOrLifestyleTitle(text)) return null;
+      // Skip aftermath/follow-up reporting — not new active attacks
+      if (isAftermathOrFollowUpTitle(text)) return null;
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
       // Nuke requires explicit launch/detonation phrases

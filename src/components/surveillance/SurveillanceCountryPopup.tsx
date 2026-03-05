@@ -117,6 +117,10 @@ export function SurveillanceCountryPopup() {
           // Filter out personal/travel/lifestyle/celebrity stories
           const personalPatterns = ['techie', 'returns to', 'shares real', 'traveler', 'traveller', 'tourist', 'passenger', 'km away', 'miles away', 'close call', 'narrow escape', 'viral video', 'goes viral', 'bengaluru', 'bangalore', 'delhi news', 'via muscat', 'via dubai', 'via doha', 'speaks out', 'tells story', 'recounts', 'real housewives', 'celebrity', 'celebrities', 'tv star', 'tv personality', 'influencer', 'reality tv', 'reality show', 'separated from', 'reunited with', 'fans react', 'fans worry', 'heartbreaking', 'emotional reunion'];
           if (personalPatterns.some(p => titleLower.includes(p))) return false;
+          // Filter out aftermath/follow-up reporting (naming casualties, investigations, etc.)
+          const aftermathPatterns = ['names ', 'named ', 'identifies ', 'identified ', 'believed to be', 'confirmed dead', 'confirmed killed', 'funeral', 'memorial', 'mourns', 'mourning', 'pays tribute', 'tribute to', 'investigation into', 'investigating', 'probe into', 'toll rises', 'toll climbs', 'death toll', 'casualty count', 'recovering from', 'recovery efforts', 'damage assessment', 'rebuilding', 'reconstruction', 'blamed for', 'claims responsibility'];
+          const hasWeaponWord = ['missile', 'rocket', 'bomb', 'drone', 'strike', 'attack'].some(w => titleLower.includes(w));
+          if (hasWeaponWord && aftermathPatterns.some(p => titleLower.includes(p))) return false;
           return true;
         });
         setCountryMissiles(filtered);

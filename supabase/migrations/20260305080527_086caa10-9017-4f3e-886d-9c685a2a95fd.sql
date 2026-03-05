@@ -1,0 +1,1 @@
+DELETE FROM public.missile_alerts WHERE title ILIKE '%pentagon names%soldier killed%';
