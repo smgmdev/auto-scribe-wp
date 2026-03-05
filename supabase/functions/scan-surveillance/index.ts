@@ -450,6 +450,11 @@ const TRADE_SUPPLY_VERBS = [
   'provides', 'providing', 'provided',
   'exports', 'exporting', 'exported',
   'gives', 'giving', 'gave',
+  'pledges', 'pledging', 'pledged',
+  'supports', 'supporting', 'supported', 'support',
+  'commits', 'committing', 'committed',
+  'grants', 'granting', 'granted',
+  'offers', 'offering', 'offered',
 ];
 const TRADE_RECEIVE_PATTERNS = ['to ', 'for ', 'destined for ', 'bound for '];
 
