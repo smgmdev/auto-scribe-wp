@@ -492,8 +492,8 @@ export function MissileAlertListener() {
   const queuedCount = alerts.length - visibleAlerts.length;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center animate-fade-in max-sm:top-[var(--mobile-header-height,128px)] max-sm:justify-between bg-black/40 backdrop-blur-[2px]">
-      <div className="flex items-start justify-center gap-4 max-w-[95vw] max-h-[85vh] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:max-h-none max-sm:max-w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0 max-sm:flex-1">
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-start pt-4 animate-fade-in max-sm:pt-0 max-sm:top-[var(--mobile-header-height,128px)] max-sm:justify-between bg-black/40 backdrop-blur-[2px]">
+      <div className="flex items-start justify-center gap-4 max-w-[95vw] overflow-auto px-4 max-sm:px-0 max-sm:w-full max-sm:max-h-none max-sm:max-w-full max-sm:flex-col max-sm:items-stretch max-sm:gap-0 max-sm:flex-1">
         {visibleAlerts.map(alert => (
           <AlertPopup
             key={alert.id}
