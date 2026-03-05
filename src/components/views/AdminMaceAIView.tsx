@@ -177,7 +177,13 @@ export function AdminMaceAIView() {
   });
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
+  // Sync pendingArticle ref immediately on state change — useEffect alone can delay
   useEffect(() => { pendingArticleRef.current = pendingArticle; }, [pendingArticle]);
+  // Helper to set both state and ref atomically (avoids useEffect lag)
+  const setPendingArticleSynced = useCallback((value: any) => {
+    pendingArticleRef.current = value;
+    setPendingArticle(value);
+  }, []);
 
   // Speculative AI call: fire during recording pauses so response is ready when user stops
   const startSpeculativeAICall = useCallback(async (text: string) => {
@@ -631,11 +637,17 @@ export function AdminMaceAIView() {
       isProcessingRef.current = false; 
     };
 
-    // Safety: if processing takes more than 60s, force-unlock
+    // Safety: if processing takes more than 90s, force-unlock (publish can take ~60s)
     const safetyTimer = setTimeout(() => {
       console.warn('[Mace] Safety timeout: force-unlocking isProcessing');
       isProcessingRef.current = false;
-    }, 60000);
+      if (publishFlowActiveRef.current) {
+        publishFlowActiveRef.current = false;
+        setPublishPhase('');
+        setStep('idle');
+        toast.error('Publishing timed out. Please check your articles and try again.');
+      }
+    }, 90000);
 
     try {
       if (currentPending) {
@@ -660,10 +672,26 @@ export function AdminMaceAIView() {
 
               const articleToPublish = { ...currentPending };
 
+              // Helper: invoke with timeout (Safari can silently hang on fetch)
+              const invokeWithTimeout = async (body: any, timeoutMs = 45000) => {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                  const result = await supabase.functions.invoke('voice-publish', { body });
+                  clearTimeout(timer);
+                  return result;
+                } catch (err: any) {
+                  clearTimeout(timer);
+                  if (err.name === 'AbortError') throw new Error('Request timed out. Please try again.');
+                  throw err;
+                }
+              };
+
               // Phase 1: Generate article content (AI only, no WP calls)
-              const genResult = await supabase.functions.invoke('voice-publish', {
-                body: { action: 'confirm_publish', pendingArticle: articleToPublish },
-              });
+              const genResult = await invokeWithTimeout(
+                { action: 'confirm_publish', pendingArticle: articleToPublish },
+                30000
+              );
 
               clearTimeout(phaseTimer1);
 
@@ -681,9 +709,10 @@ export function AdminMaceAIView() {
               setPublishPhase(`Publishing to ${currentPending.siteName || 'media site'}...`);
               const pubTimer = setTimeout(() => setPublishPhase('Finalizing...'), 5000);
 
-              const pubResult = await supabase.functions.invoke('voice-publish', {
-                body: { action: 'do_publish', generatedContent: genData.generatedContent },
-              });
+              const pubResult = await invokeWithTimeout(
+                { action: 'do_publish', generatedContent: genData.generatedContent },
+                45000
+              );
 
               clearTimeout(pubTimer);
               setPublishPhase('');
@@ -695,17 +724,20 @@ export function AdminMaceAIView() {
                 throw new Error(data.message || 'Publishing failed');
               }
 
+              // Only claim success if we got a valid publish_success response with a link
+              if (data?.type !== 'publish_success' || !data?.link) {
+                throw new Error(data?.message || 'Publishing did not complete successfully. Please check and try again.');
+              }
+
               const responseMessage = data?.message || "Something went wrong during publishing.";
               setMessages(prev => [...prev, { role: 'assistant', content: responseMessage }]);
-              setPendingArticle(null);
+              setPendingArticleSynced(null);
 
-              if (data?.type === 'publish_success') {
-                setPublishResult({
-                  title: data.title, site: data.site, link: data.link,
-                  creditsUsed: data.creditsUsed || 0, focusKeyword: data.focusKeyword || '',
-                });
-                toast.success(`Published to ${data.site}!`);
-              }
+              setPublishResult({
+                title: data.title, site: data.site, link: data.link,
+                creditsUsed: data.creditsUsed || 0, focusKeyword: data.focusKeyword || '',
+              });
+              toast.success(`Published to ${data.site}!`);
 
               speak(responseMessage, () => {
                 publishFlowActiveRef.current = false;
@@ -714,7 +746,8 @@ export function AdminMaceAIView() {
               }, { autoListen: false, accessToken: cachedAccessToken });
             } catch (err: any) {
               setPublishPhase('');
-              const errorMsg = err.message || 'Publishing failed';
+              const errorMsg = err.message || 'Publishing failed. Please try again.';
+              console.error('[Mace] Publish flow error:', errorMsg);
               setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
               speak(errorMsg, () => {
                 publishFlowActiveRef.current = false;
@@ -726,14 +759,14 @@ export function AdminMaceAIView() {
           }, { autoListen: false, accessToken: cachedAccessToken });
           return;
         } else if (isDenial(text)) {
-          setPendingArticle(null);
+          setPendingArticleSynced(null);
           const cancelMsg = "No worries, I've cancelled that. Let me know if you want to try something else.";
           setMessages(prev => [...prev, { role: 'assistant', content: cancelMsg }]);
           speak(cancelMsg, done, { accessToken: cachedAccessToken });
           return;
         }
         // If not a clear yes/no, clear pending and treat as new input
-        setPendingArticle(null);
+        setPendingArticleSynced(null);
       }
 
       // Check if speculative AI call already has the result for this exact text
@@ -761,7 +794,7 @@ export function AdminMaceAIView() {
       setMessages(prev => [...prev, { role: 'assistant', content: displayMessage }]);
 
       if (data?.type === 'pending_publish' && data?.pendingArticle) {
-        setPendingArticle(data.pendingArticle);
+        setPendingArticleSynced(data.pendingArticle);
       }
 
       if (data?.type === 'publish_success') {
@@ -854,7 +887,7 @@ export function AdminMaceAIView() {
     setCurrentTranscript('');
     setInterimTranscript('');
     setPublishResult(null);
-    setPendingArticle(null);
+    setPendingArticleSynced(null);
     setPublishPhase('');
     setSpeakingWords([]);
     // Re-warm the Scribe connection for instant next tap

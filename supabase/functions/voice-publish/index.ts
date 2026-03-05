@@ -481,7 +481,7 @@ IMPORTANT RULES:
 
       // ── Return confirmation request (don't generate yet) ──
       const selectedTone = parsed.tone || 'journalist';
-      const confirmMessage = `Understood, you want me to publish an article about "${parsed.topic}" on ${matchedSite.name}. Should I go ahead?`;
+      const confirmMessage = `Got it — "${parsed.topic}" on ${matchedSite.name}. Ready to publish?`;
 
       // SECURITY: Only send non-sensitive data to the client.
       // Credentials, admin status, and credit amounts are re-verified server-side in Phase 2.
