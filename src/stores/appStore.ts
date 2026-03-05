@@ -53,6 +53,9 @@ interface AppState {
   // 404 page flag
   is404Page: boolean;
   setIs404Page: (val: boolean) => void;
+  // Quick Nav expanded state
+  quickNavExpanded: boolean;
+  setQuickNavExpanded: (val: boolean) => void;
   // Headlines (session state only)
   headlines: Headline[];
   setHeadlines: (headlines: Headline[]) => void;
@@ -334,6 +337,9 @@ export const useAppStore = create<AppState>()((set) => ({
   // 404 page flag
   is404Page: false,
   setIs404Page: (val) => set({ is404Page: val }),
+  // Quick Nav expanded state
+  quickNavExpanded: false,
+  setQuickNavExpanded: (val) => set({ quickNavExpanded: val }),
   // Headlines
   headlines: [],
   setHeadlines: (headlines) => set({ headlines }),

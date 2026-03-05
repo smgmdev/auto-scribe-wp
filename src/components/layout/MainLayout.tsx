@@ -27,6 +27,7 @@ export function MainLayout({
   const agencyDarkFooter = useAppStore((state) => state.agencyDarkFooter);
   const soundEnabled = useAppStore((state) => state.soundEnabled);
   const toggleSound = useAppStore((state) => state.toggleSound);
+  const quickNavExpanded = useAppStore((state) => state.quickNavExpanded);
   
   const isDarkFooter = (currentView === 'agency-application' && agencyDarkFooter) || currentView === 'admin-system';
   const isDashboardFooter = currentView === 'dashboard';
@@ -56,7 +57,7 @@ export function MainLayout({
   return <div className="min-h-screen bg-background">
       {/* Desktop: separate fixed banners */}
       <div className="hidden lg:block">
-        <div className="fixed top-0 left-64 right-0 z-50 h-16 flex flex-col">
+        <div className={`fixed top-0 left-64 right-0 z-50 flex flex-col ${quickNavExpanded ? '' : 'h-16'}`}>
           <QuickNavBanner inDashboard />
           <div className="flex-1 bg-[#1d1d1f] border-b border-white/10 flex items-center px-6">
             <p className="text-white/80 text-xs flex items-center">

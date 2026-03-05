@@ -8,7 +8,7 @@ import amlogo from '@/assets/amlogo.png';
 export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { soundEnabled, toggleSound, is404Page } = useAppStore();
+  const { soundEnabled, toggleSound, is404Page, setQuickNavExpanded } = useAppStore();
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -18,6 +18,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
   // Close on route change
   useEffect(() => {
     setExpanded(false);
+    setQuickNavExpanded(false);
   }, [location.pathname]);
 
   // Close on ESC key
@@ -37,8 +38,9 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
     }
   }, []);
 
-  // Sync CSS variable with expanded state
+  // Sync store + CSS variable with expanded state
   useEffect(() => {
+    setQuickNavExpanded(expanded);
     const offset = expanded ? 28 + panelHeight : 28;
     document.documentElement.style.setProperty('--banner-offset', `${offset}px`);
   }, [expanded, panelHeight]);
