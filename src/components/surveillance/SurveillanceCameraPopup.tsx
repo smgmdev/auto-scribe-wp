@@ -52,10 +52,6 @@ export function SurveillanceCameraPopup() {
                 allowFullScreen
                 title={feed.label}
               />
-              {/* Bottom overlay to hide YouTube logo */}
-              <div className="absolute bottom-0 left-0 right-0 h-[50px] bg-gradient-to-t from-[#0d1220] via-[#0d1220]/90 to-transparent pointer-events-none z-10" />
-              {/* Top overlay to hide YouTube header */}
-              <div className="absolute top-0 left-0 right-0 h-[40px] bg-gradient-to-b from-[#0d1220] via-[#0d1220]/90 to-transparent pointer-events-none z-10" />
             </div>
           </div>
         ))}
