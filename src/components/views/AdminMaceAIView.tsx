@@ -708,7 +708,7 @@ export function AdminMaceAIView() {
 
               speak(responseMessage, () => {
                 publishFlowActiveRef.current = false;
-                setTimeout(() => { if (isMountedRef.current) startListening(); }, 800);
+                setStep('idle');
                 done();
               }, { autoListen: false, accessToken: cachedAccessToken });
             } catch (err: any) {
@@ -717,7 +717,7 @@ export function AdminMaceAIView() {
               setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
               speak(errorMsg, () => {
                 publishFlowActiveRef.current = false;
-                setTimeout(() => { if (isMountedRef.current) startListening(); }, 800);
+                setStep('idle');
                 done();
               }, { autoListen: false, accessToken: cachedAccessToken });
               toast.error(errorMsg);
