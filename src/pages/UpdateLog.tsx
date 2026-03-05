@@ -19,6 +19,20 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 const updates = [
   {
     date: 'March 5, 2026',
+    title: 'Mace AI Voice — Smarter Publishing & Conversation Flow',
+    changes: [
+      'Mace AI now publishes articles instantly when a topic and target site are identified — the previous confirmation step ("should I go ahead?") has been removed for a faster voice-to-publish experience',
+      'Improved voice site name matching — Mace AI now uses fuzzy matching with normalization and word-overlap detection to accurately resolve spoken site names, even with partial or imprecise pronunciation',
+      'Added hallucination safeguard — Mace AI can no longer claim an article was published unless the publishing tool was actually executed, preventing false success messages',
+      'Continuous conversation flow — the microphone now automatically re-activates 800ms after Mace finishes speaking, allowing natural back-and-forth without tapping the mic button each time',
+      'User interruption support — tap the voice icon while Mace is speaking to interrupt and say something new; the AI receives context that it was interrupted for a smoother conversational experience',
+      'Improved reliability on Safari and iOS — microphone capture, audio playback, and AudioContext management have been hardened for consistent behavior across all browsers',
+      'Publishing flow now enforces strict timeouts (30s for article generation, 45s for publishing) to prevent the assistant from getting stuck during multi-stage workflows',
+      'After a successful publication or failure, the voice assistant returns to an idle "Tap to continue" state for a clean restart',
+    ],
+  },
+  {
+    date: 'March 5, 2026',
     title: 'Quick Nav, Alert Sound Fix & Header Loading',
     changes: [
       'Quick Nav expanded panel now opens on mobile dashboard — tapping the QUICK NAV toggle with the dropdown arrow reveals the full mega menu on responsive screens',
