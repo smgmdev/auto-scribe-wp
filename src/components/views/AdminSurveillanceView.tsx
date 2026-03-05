@@ -555,7 +555,7 @@ export function AdminSurveillanceView() {
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
                 <button onClick={() => setShowHbombs(!showHbombs)} className={cn("flex items-center gap-1.5 transition-opacity", !showHbombs && "opacity-30")} title={showHbombs ? 'Hide H-bombs on map' : 'Show H-bombs on map'}>
                   <Bomb className="w-3 h-3 text-orange-400" />
-                  <span className="text-[10px] text-gray-400">H-Bomb</span>
+                  <span className="text-[10px] text-gray-400 whitespace-nowrap">H-Bomb</span>
                 </button>
                 <Select value={hbombTimeFilter} onValueChange={setHbombTimeFilter}>
                   <SelectTrigger className="h-5 w-[72px] text-[10px] bg-transparent border-0 text-gray-300 px-1.5 py-0"><SelectValue /></SelectTrigger>
