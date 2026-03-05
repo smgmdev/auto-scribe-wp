@@ -65,6 +65,7 @@ export function AdminMaceAIView() {
   const scribeSilenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scribeActiveRef = useRef(false);
   const scribeConnectedRef = useRef(false);
+  const processUserMessageRef = useRef<(text: string) => void>(() => {});
   
   const wordRevealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prefetchedTokenRef = useRef<string | null>(null);
@@ -219,7 +220,7 @@ export function AdminMaceAIView() {
     if (!isMountedRef.current) return;
     
     if (text.length > 1) {
-      processUserMessage(text);
+      processUserMessageRef.current(text);
     } else {
       setStep('idle');
       setInterimTranscript('');
@@ -286,9 +287,8 @@ export function AdminMaceAIView() {
     const audio = new Audio();
     audio.preload = 'auto';
     audioRef.current = audio;
-    // Unlock audio on Safari — must happen synchronously in gesture chain
-    try { await audio.play().catch(() => {}); } catch (_) {}
-    audio.pause();
+    // Unlock audio on Safari — fire-and-forget, don't await
+    audio.play().then(() => audio.pause()).catch(() => {});
 
     try {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -483,6 +483,7 @@ export function AdminMaceAIView() {
   }, [scribe, finishScribeListening]);
 
   const processUserMessage = async (text: string) => {
+    console.log('[Mace] processUserMessage called with:', text);
     if (isProcessingRef.current) {
       console.warn('[Mace] Blocked: isProcessing is still true, force-resetting');
       isProcessingRef.current = false;
@@ -731,6 +732,9 @@ export function AdminMaceAIView() {
     // Re-warm the Scribe connection for instant next tap
     prefetchScribeToken();
   };
+
+  // Keep ref always pointing to latest processUserMessage
+  processUserMessageRef.current = processUserMessage;
 
 
   const isProcessing = step === 'processing';
