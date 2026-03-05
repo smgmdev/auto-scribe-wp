@@ -1,0 +1,1 @@
+DELETE FROM public.missile_alerts WHERE id = 'b23b12fd-72a7-47a1-8ba1-dd23f6d975bf';
