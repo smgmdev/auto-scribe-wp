@@ -60,6 +60,7 @@ export function AdminMaceAIView() {
   const messagesRef = useRef<Message[]>([]);
   const pendingArticleRef = useRef<any>(null);
   const isProcessingRef = useRef(false);
+  const publishFlowActiveRef = useRef(false);
   const scribeCommittedTextRef = useRef('');
   const scribeSilenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scribeActiveRef = useRef(false);
@@ -327,7 +328,10 @@ export function AdminMaceAIView() {
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
         setSpeakingWords([]);
         if (isMountedRef.current) {
-          setStep('idle');
+          // During publish flow, keep step as 'processing' instead of resetting to 'idle'
+          if (!publishFlowActiveRef.current) {
+            setStep('idle');
+          }
           onDone?.();
         }
       };
@@ -337,7 +341,7 @@ export function AdminMaceAIView() {
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
         setSpeakingWords([]);
         if (isMountedRef.current) {
-          setStep('idle');
+          if (!publishFlowActiveRef.current) setStep('idle');
           onDone?.();
         }
       };
@@ -382,14 +386,14 @@ export function AdminMaceAIView() {
           audioRef.current = null;
           if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
           setSpeakingWords([]);
-          if (isMountedRef.current) { setStep('idle'); onDone?.(); }
+          if (isMountedRef.current) { if (!publishFlowActiveRef.current) setStep('idle'); onDone?.(); }
         };
         retryAudio.onerror = () => {
           URL.revokeObjectURL(retryUrl);
           audioRef.current = null;
           if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
           setSpeakingWords([]);
-          if (isMountedRef.current) { setStep('idle'); onDone?.(); }
+          if (isMountedRef.current) { if (!publishFlowActiveRef.current) setStep('idle'); onDone?.(); }
         };
         await retryAudio.play();
       } catch (retryErr) {
@@ -397,7 +401,7 @@ export function AdminMaceAIView() {
         // Skip speech entirely — do NOT fall back to browser voice
         if (wordRevealTimerRef.current) { clearInterval(wordRevealTimerRef.current); wordRevealTimerRef.current = null; }
         setSpeakingWords([]);
-        if (isMountedRef.current) { setStep('idle'); onDone?.(); }
+        if (isMountedRef.current) { if (!publishFlowActiveRef.current) setStep('idle'); onDone?.(); }
       }
     }
   }, [startWordReveal]);
@@ -496,14 +500,19 @@ export function AdminMaceAIView() {
     try {
       if (currentPending) {
         if (isConfirmation(text)) {
+          // Lock the publish flow — prevent mic/interruption until done
+          publishFlowActiveRef.current = true;
+          
           // Say "Got it" first, then publish in background
           const goMsg = "Got it, just a moment, doing it right now.";
           setMessages(prev => [...prev, { role: 'assistant', content: goMsg }]);
           
           speak(goMsg, async () => {
+            // Immediately set to processing so step never goes to 'idle' during publish
+            setStep('processing');
+            
             // Now actually publish — two-phase approach to avoid timeouts
             try {
-              setStep('processing');
               setPublishPhase('Researching topic...');
               const phaseTimer1 = setTimeout(() => setPublishPhase('Writing article...'), 3000);
 
@@ -558,12 +567,18 @@ export function AdminMaceAIView() {
                 toast.success(`Published to ${data.site}!`);
               }
 
-              speak(responseMessage, done);
+              speak(responseMessage, () => {
+                publishFlowActiveRef.current = false;
+                done();
+              });
             } catch (err: any) {
               setPublishPhase('');
               const errorMsg = err.message || 'Publishing failed';
               setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-              speak(errorMsg, done);
+              speak(errorMsg, () => {
+                publishFlowActiveRef.current = false;
+                done();
+              });
               toast.error(errorMsg);
             }
           });
@@ -635,6 +650,11 @@ export function AdminMaceAIView() {
   };
 
   const handleMicClick = () => {
+    // Block mic interaction during active publish flow to prevent voice cutoff
+    if (publishFlowActiveRef.current) {
+      console.log('[Mace] Mic click blocked — publish flow active');
+      return;
+    }
     if (step === 'listening') {
       // Stop listening and process what we have
       finishScribeListening();
@@ -652,6 +672,7 @@ export function AdminMaceAIView() {
   const resetConversation = () => {
     stopAll();
     isProcessingRef.current = false;
+    publishFlowActiveRef.current = false;
     scribeCommittedTextRef.current = '';
     scribeActiveRef.current = false;
     speculativeResultRef.current = null;
