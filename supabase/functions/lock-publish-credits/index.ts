@@ -101,11 +101,12 @@ Deno.serve(async (req) => {
     const WITHDRAWAL_TYPES = ['withdrawal_locked', 'withdrawal_unlocked', 'withdrawal_completed'];
 
     // Total balance (same formula as credit-calculations.ts)
+    const OUTGOING_EXCLUDED = ['locked', 'locked_superseded', 'offer_accepted', 'offer_superseded', 'order', 'order_accepted'];
     const incomingCredits = txs
       .filter((t: any) => t.amount > 0 && !WITHDRAWAL_TYPES.includes(t.type) && t.type !== 'unlocked')
       .reduce((sum: number, t: any) => sum + t.amount, 0);
     const outgoingCredits = txs
-      .filter((t: any) => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !WITHDRAWAL_TYPES.includes(t.type))
+      .filter((t: any) => t.amount < 0 && !OUTGOING_EXCLUDED.includes(t.type) && !WITHDRAWAL_TYPES.includes(t.type))
       .reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0);
     const totalBalance = incomingCredits - outgoingCredits;
 

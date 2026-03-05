@@ -20,12 +20,14 @@ export const WITHDRAWAL_TYPES = ['withdrawal_locked', 'withdrawal_unlocked', 'wi
  * Outgoing = negative amounts (excluding 'locked', 'offer_accepted', 'order', and withdrawals)
  */
 export function calculateTotalBalance(transactions: CreditTransaction[]): number {
+  const OUTGOING_EXCLUDED = ['locked', 'locked_superseded', 'offer_accepted', 'offer_superseded', 'order', 'order_accepted'];
+
   const incomingCredits = transactions
     .filter(t => t.amount > 0 && !WITHDRAWAL_TYPES.includes(t.type) && t.type !== 'unlocked')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const outgoingCredits = transactions
-    .filter(t => t.amount < 0 && t.type !== 'locked' && t.type !== 'offer_accepted' && t.type !== 'order' && !WITHDRAWAL_TYPES.includes(t.type))
+    .filter(t => t.amount < 0 && !OUTGOING_EXCLUDED.includes(t.type) && !WITHDRAWAL_TYPES.includes(t.type))
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   return incomingCredits - outgoingCredits;
@@ -290,8 +292,14 @@ export function calculateAdminUserCredits(input: AdminCreditInput): AdminUserCre
     let publishSpent = 0;
     let rawTxSum = 0;
     const withdrawalTypesSet = new Set(WITHDRAWAL_TYPES);
+    const outgoingExcludedSet = new Set(['locked', 'locked_superseded', 'offer_accepted', 'offer_superseded', 'order', 'order_accepted']);
     userTxs.forEach(tx => {
-      if (!withdrawalTypesSet.has(tx.type)) {
+      // rawTxSum mirrors the DB trigger: incoming (excl unlocked) - outgoing (excl lock types)
+      if (withdrawalTypesSet.has(tx.type)) {
+        // skip withdrawal types entirely
+      } else if (tx.amount > 0 && tx.type !== 'unlocked') {
+        rawTxSum += tx.amount;
+      } else if (tx.amount < 0 && !outgoingExcludedSet.has(tx.type)) {
         rawTxSum += tx.amount;
       }
       if (tx.type === 'admin_deduct') deductions += Math.abs(tx.amount);
@@ -377,8 +385,15 @@ export function recalculateSingleUser(
 
   let rawTxSum = 0;
   const withdrawalTypesSet = new Set(WITHDRAWAL_TYPES);
+  const outgoingExcludedSet = new Set(['locked', 'locked_superseded', 'offer_accepted', 'offer_superseded', 'order', 'order_accepted']);
   userTxs.forEach(tx => {
-    if (!withdrawalTypesSet.has(tx.type)) rawTxSum += tx.amount;
+    if (withdrawalTypesSet.has(tx.type)) {
+      // skip
+    } else if (tx.amount > 0 && tx.type !== 'unlocked') {
+      rawTxSum += tx.amount;
+    } else if (tx.amount < 0 && !outgoingExcludedSet.has(tx.type)) {
+      rawTxSum += tx.amount;
+    }
   });
 
   const isValid = rawTxSum === dbCreditsValue;
