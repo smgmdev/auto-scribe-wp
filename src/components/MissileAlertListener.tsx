@@ -170,7 +170,7 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
   }, [onDismiss]);
 
   return (
-    <div className={`relative w-full max-w-sm max-sm:max-w-full mx-2 max-sm:mx-0 rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden flex flex-col max-sm:h-full`}>
+    <div className={`relative w-full max-w-sm max-sm:max-w-full mx-2 max-sm:mx-0 rounded-none border-2 ${colors.border} ${colors.bg} ${colors.shadow} overflow-hidden flex flex-col max-sm:h-full max-h-[95dvh]`}>
       <div className={`h-0.5 w-full bg-gradient-to-r ${colors.bar} animate-pulse shrink-0`} />
       
       <div className="p-4 max-sm:p-3 text-center space-y-3 max-sm:space-y-2 flex-1 overflow-auto">
@@ -224,9 +224,9 @@ function AlertPopup({ alert, type, onDismiss }: { alert: MissileAlert; type: Ale
           onClick={onDismiss}
           className={`w-full rounded-none ${colors.btnBg} text-white font-mono font-bold tracking-wider text-sm py-3 border ${colors.btnBorder} ${colors.btnShadow} flex items-center justify-center gap-2`}
         >
-          <kbd className="inline-flex items-center justify-center min-w-[42px] px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ESC</kbd>
+          <kbd className="inline-flex items-center justify-center h-6 min-w-[52px] px-2 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ESC</kbd>
           <span className="text-[10px] opacity-40">/</span>
-          <kbd className="inline-flex items-center justify-center gap-1 min-w-[42px] px-1.5 py-0.5 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ENTER <CornerDownLeft size={10} /></kbd>
+          <kbd className="inline-flex items-center justify-center gap-1 h-6 min-w-[52px] px-2 text-[10px] font-mono bg-white/10 border border-white/20 rounded-[3px] leading-none">ENTER <CornerDownLeft size={10} /></kbd>
         </Button>
       </div>
 
