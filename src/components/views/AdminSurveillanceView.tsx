@@ -126,9 +126,13 @@ function dedupeTrajectories(trajectories: Array<{ id: string; origin_country_cod
   });
 }
 
+const FULL_SCAN_REGIONS: ScanRegion[] = ['europe', 'middle_east', 'asia', 'us', 'global'];
+const EST_SECONDS_PER_REGION = 25; // ~25s per region scan
+
 export function AdminSurveillanceView() {
   const [scanData, setScanData] = useState<ScanData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [scanProgress, setScanProgress] = useState<{ current: number; total: number; regionLabel: string; countdown: number } | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const missileTimeFilter = useAppStore((s) => s.missileTimeFilter);
   const setMissileTimeFilter = useAppStore((s) => s.setMissileTimeFilter);
@@ -174,6 +178,15 @@ export function AdminSurveillanceView() {
   const openSurveillancePopup = useAppStore((s) => s.openSurveillancePopup);
   const surveillanceCountry = useAppStore((s) => s.surveillanceCountry);
 
+  // Countdown timer effect
+  useEffect(() => {
+    if (!scanProgress || scanProgress.countdown <= 0) return;
+    const interval = setInterval(() => {
+      setScanProgress(prev => prev ? { ...prev, countdown: Math.max(0, prev.countdown - 1) } : null);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [scanProgress?.countdown]);
+
   const fetchLatestScan = useCallback(async () => {
     // Fetch recent scans (last 24h) to aggregate events and prevent data loss between scans
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -217,15 +230,18 @@ export function AdminSurveillanceView() {
     return !!(scans && scans.length > 0);
   }, []);
 
-  const runScan = useCallback(async (region: ScanRegion = 'global') => {
+  // Run a single region scan
+  const runSingleRegionScan = useCallback(async (region: ScanRegion) => {
     setLoading(true);
+    setScanProgress({ current: 1, total: 1, regionLabel: SCAN_REGIONS.find(r => r.value === region)?.label || region, countdown: EST_SECONDS_PER_REGION });
     try {
       const { data, error } = await supabase.functions.invoke('scan-surveillance', {
         body: { region },
       });
       if (error) throw error;
       if (data?.scan) {
-        setScanData(data.scan);
+        // After single scan, re-fetch aggregated data from DB
+        await fetchLatestScan();
         setTrajectoryRefresh(prev => prev + 1);
         toast.success(`Scan complete — ${SCAN_REGIONS.find(r => r.value === region)?.label}`);
       } else if (data?.error) {
@@ -236,8 +252,64 @@ export function AdminSurveillanceView() {
       toast.error(err.message || 'Failed to run scan');
     } finally {
       setLoading(false);
+      setScanProgress(null);
     }
-  }, []);
+  }, [fetchLatestScan]);
+
+  // Run full scan: all regions sequentially
+  const runFullScan = useCallback(async () => {
+    setLoading(true);
+    const totalRegions = FULL_SCAN_REGIONS.length;
+    const totalEstSeconds = totalRegions * EST_SECONDS_PER_REGION;
+    let remainingSeconds = totalEstSeconds;
+
+    try {
+      for (let i = 0; i < FULL_SCAN_REGIONS.length; i++) {
+        const region = FULL_SCAN_REGIONS[i];
+        const regionLabel = SCAN_REGIONS.find(r => r.value === region)?.label || region;
+        setScanProgress({ current: i + 1, total: totalRegions, regionLabel, countdown: remainingSeconds });
+
+        const startTime = Date.now();
+        const { data, error } = await supabase.functions.invoke('scan-surveillance', {
+          body: { region },
+        });
+        const elapsed = Math.round((Date.now() - startTime) / 1000);
+        remainingSeconds = Math.max(0, remainingSeconds - Math.max(elapsed, EST_SECONDS_PER_REGION));
+
+        if (error) {
+          console.error(`Region ${region} failed:`, error);
+          toast.error(`${regionLabel} scan failed — continuing...`);
+          continue;
+        }
+        if (data?.error) {
+          console.error(`Region ${region} error:`, data.error);
+          toast.error(`${regionLabel}: ${data.error}`);
+          continue;
+        }
+        toast.success(`✓ ${regionLabel} scan complete (${i + 1}/${totalRegions})`);
+      }
+
+      // After all regions, fetch aggregated results
+      await fetchLatestScan();
+      setTrajectoryRefresh(prev => prev + 1);
+      toast.success('Full scan complete — all regions scanned');
+    } catch (err: any) {
+      console.error('Full scan error:', err);
+      toast.error(err.message || 'Failed to run full scan');
+    } finally {
+      setLoading(false);
+      setScanProgress(null);
+    }
+  }, [fetchLatestScan]);
+
+  // Legacy runScan — now routes to full or single
+  const runScan = useCallback(async (region: ScanRegion = 'global') => {
+    if (region === 'global') {
+      await runFullScan();
+    } else {
+      await runSingleRegionScan(region);
+    }
+  }, [runFullScan, runSingleRegionScan]);
 
   // Auto-load on mount
   useEffect(() => {
@@ -443,8 +515,18 @@ export function AdminSurveillanceView() {
                 "w-2 h-2 rounded-full animate-pulse",
                 scanData ? "bg-green-500" : "bg-gray-500"
               )} />
-              <span className="text-xs text-gray-400 uppercase tracking-wider">
-                {loading ? 'Scanning...' : 'Live'}
+              <span className="text-xs text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                {scanProgress ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-blue-400">Scanning {scanProgress.regionLabel}</span>
+                    <span className="text-gray-500">({scanProgress.current}/{scanProgress.total})</span>
+                    {scanProgress.countdown > 0 && (
+                      <span className="text-yellow-400 font-mono tabular-nums">
+                        ~{Math.floor(scanProgress.countdown / 60)}:{String(scanProgress.countdown % 60).padStart(2, '0')}
+                      </span>
+                    )}
+                  </span>
+                ) : loading ? 'Scanning...' : 'Live'}
               </span>
             </div>
 
@@ -477,9 +559,15 @@ export function AdminSurveillanceView() {
                     <ChevronDown className="w-2.5 h-2.5" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-[#0d1220] border-white/10 min-w-[140px]">
-                  {SCAN_REGIONS.map(r => (
-                    <DropdownMenuItem key={r.value} onClick={() => runScan(r.value)} className="text-[11px] text-gray-300 hover:text-white cursor-pointer">
+                <DropdownMenuContent align="end" className="bg-[#0d1220] border-white/10 min-w-[180px]">
+                  <DropdownMenuItem onClick={() => runFullScan()} className="text-[11px] text-gray-300 hover:text-white cursor-pointer flex items-center gap-2 font-medium">
+                    <Satellite className="w-3 h-3 text-blue-400" />
+                    Full Scan (All Regions)
+                  </DropdownMenuItem>
+                  <div className="h-px bg-white/10 my-1" />
+                  {SCAN_REGIONS.filter(r => r.value !== 'global').map(r => (
+                    <DropdownMenuItem key={r.value} onClick={() => runSingleRegionScan(r.value)} className="text-[11px] text-gray-300 hover:text-white cursor-pointer flex items-center gap-2">
+                      <Radar className="w-3 h-3 text-gray-500" />
                       {r.label}
                     </DropdownMenuItem>
                   ))}
@@ -740,6 +828,44 @@ export function AdminSurveillanceView() {
                 <div className="text-center space-y-3">
                   <RefreshCw className="w-8 h-8 text-gray-600 animate-spin mx-auto" />
                   <p className="text-sm text-gray-500">Initializing scan...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Scan progress overlay */}
+            {scanProgress && scanProgress.total > 1 && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
+                <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-lg px-4 py-3 min-w-[280px]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] text-gray-400">Full Scan Progress</span>
+                    <span className="text-[11px] text-yellow-400 font-mono tabular-nums">
+                      ~{Math.floor(scanProgress.countdown / 60)}:{String(scanProgress.countdown % 60).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    {FULL_SCAN_REGIONS.map((region, i) => {
+                      const regionLabel = SCAN_REGIONS.find(r => r.value === region)?.label || region;
+                      const isDone = i < scanProgress.current - 1;
+                      const isCurrent = i === scanProgress.current - 1;
+                      return (
+                        <div key={region} className="flex-1 flex flex-col items-center gap-1">
+                          <div className={cn(
+                            "h-1.5 w-full rounded-full transition-all duration-500",
+                            isDone ? "bg-green-500" : isCurrent ? "bg-blue-500 animate-pulse" : "bg-white/10"
+                          )} />
+                          <span className={cn(
+                            "text-[8px] whitespace-nowrap",
+                            isDone ? "text-green-400" : isCurrent ? "text-blue-400" : "text-gray-600"
+                          )}>
+                            {regionLabel}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="text-center text-[10px] text-gray-400">
+                    Scanning <span className="text-white font-medium">{scanProgress.regionLabel}</span> ({scanProgress.current}/{scanProgress.total})
+                  </div>
                 </div>
               </div>
             )}
