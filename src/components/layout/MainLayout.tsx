@@ -95,6 +95,8 @@ export function MainLayout({
             </button>
           </div>
         </div>
+        {/* Mobile expandable Quick Nav panel */}
+        <QuickNavBanner inDashboard />
         <div className="bg-[#1d1d1f] border-b border-white/10 flex items-center py-3 px-4">
           <p className="text-white/80 text-xs flex flex-wrap items-center gap-2">
             <span>Get free credits by finding bugs on Arcana Mace</span>
