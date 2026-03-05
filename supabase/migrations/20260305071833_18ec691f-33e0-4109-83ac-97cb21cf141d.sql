@@ -1,0 +1,1 @@
+DELETE FROM public.missile_alerts WHERE title ILIKE '%Explosions in Doha%' AND origin_country_code = 'QA' AND destination_country_code = 'IR';

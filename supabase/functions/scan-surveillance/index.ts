@@ -416,6 +416,24 @@ function isPoliticalTitle(text: string): boolean {
   return !hasDirectAttack; // Political unless there's a direct attack on the political entity itself
 }
 
+// Detect titles that describe events AT a location without confirming who attacked
+// e.g. "Explosions in Doha, Qatar" — this does NOT mean Qatar attacked anyone
+function isLocationOnlyEvent(title: string): boolean {
+  const lower = title.toLowerCase().trim();
+  // Patterns like "Explosions in X", "Blasts in X", "Attack on X" — event AT location, no attacker named
+  const locationEventPrefixes = [
+    'explosions in ', 'explosion in ', 'blasts in ', 'blast in ',
+    'attack on ', 'attacks on ', 'strike on ', 'strikes on ',
+    'bombing in ', 'bombings in ', 'shelling in ', 'shelling of ',
+    'missiles hit ', 'missile hits ', 'rocket hits ', 'rockets hit ',
+    'drone attack on ', 'drone strike on ', 'air raid on ', 'air raids on ',
+    'fire in ', 'fires in ', 'incident in ', 'clashes in ',
+  ];
+  // If title starts with or contains these patterns AND only mentions ONE country/city
+  // then it's describing WHERE the event happened, not WHO launched it
+  return locationEventPrefixes.some(p => lower.startsWith(p));
+}
+
 function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
   const text = `${title} ${description}`.toLowerCase();
   
@@ -445,6 +463,27 @@ function inferTrajectory(title: string, description: string, countryCode: string
   
   // Get unique country codes mentioned
   const uniqueCodes = [...new Set(mentions.map(m => m.code))];
+  
+  // CRITICAL: If the TITLE only describes an event happening at a location
+  // (e.g. "Explosions in Doha, Qatar") without naming an attacker,
+  // do NOT assign trajectory — we don't know who attacked
+  if (isLocationOnlyEvent(title)) {
+    const titleMentions = findCountryMentions(title.toLowerCase());
+    const titleCodes = [...new Set(titleMentions.map(m => m.code))];
+    // If title only mentions one country, the title doesn't confirm an attacker
+    if (titleCodes.length <= 1) {
+      // Check description for explicit attacker mentions
+      const descMentions = findCountryMentions(description.toLowerCase());
+      const descCodes = [...new Set(descMentions.map(m => m.code))];
+      const newCodes = descCodes.filter(c => !titleCodes.includes(c));
+      if (newCodes.length === 0) {
+        // No additional country in description — cannot determine attacker
+        return { origin: null, destination: null };
+      }
+      // Description mentions another country — check if it confirms an attacker
+      // Only proceed if description has clear attack language linking the two
+    }
+  }
   
   // If only one country found and we have a countryCode from the event, use both
   // BUT: do NOT trust GDELT sourcecountry as event country — it's the publisher's location
@@ -528,10 +567,9 @@ function inferTrajectory(title: string, description: string, countryCode: string
     }
   }
   
-  // Strategy 3: First mentioned country is usually the attacker in news headlines
-  if (uniqueCodes.length >= 2) {
-    return { origin: uniqueCodes[0], destination: uniqueCodes[1] };
-  }
+  // Strategy 3: REMOVED — do NOT guess trajectory from mention order alone.
+  // If we can't determine attacker vs target from language, return null.
+  // This prevents wrong "launched" classifications.
   
   return { origin: null, destination: null };
 }
@@ -807,13 +845,14 @@ Mark countries with no issues as "safe".
 
 ${config.sources}
 
-CRITICAL — TRAJECTORY DATA: For ALL missile, drone, rocket, and bombing events, you MUST provide origin_country_code and destination_country_code. Examples:
-- Russian missile strikes on Ukraine: origin_country_code="RU", destination_country_code="UA"
-- Israeli airstrikes on Gaza: origin_country_code="IL", destination_country_code="PS"
-- Houthi attacks on Israel: origin_country_code="YE", destination_country_code="IL"
-- Iran attacks on Israel: origin_country_code="IR", destination_country_code="IL"
-- Ukrainian drone strikes on Russia: origin_country_code="UA", destination_country_code="RU"
-Never leave origin/destination null for attack events. Always determine the attacker and target.
+CRITICAL — TRAJECTORY DATA: For missile, drone, rocket, and bombing events, provide origin_country_code and destination_country_code ONLY when the title EXPLICITLY confirms both the attacker AND the target. Examples:
+- "Russian missile strikes on Ukraine": origin_country_code="RU", destination_country_code="UA" ✅ (attacker=Russia, target=Ukraine clearly stated)
+- "Israeli airstrikes on Gaza": origin_country_code="IL", destination_country_code="PS" ✅
+- "Iranian retaliatory missiles on Qatar": origin_country_code="IR", destination_country_code="QA" ✅
+- "Explosions in Doha, Qatar": origin_country_code=null, destination_country_code=null ❌ (NO attacker named — only describes WHERE it happened)
+- "Blasts reported in Baghdad": origin_country_code=null, destination_country_code=null ❌ (no attacker confirmed)
+- "Missile hits Qatar base": origin_country_code=null, destination_country_code=null ❌ (who fired is unknown)
+RULE: If the title does NOT explicitly name WHO attacked, set origin to null. A country where explosions/attacks happen is the TARGET, not the attacker. Never guess the attacker.
 
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
