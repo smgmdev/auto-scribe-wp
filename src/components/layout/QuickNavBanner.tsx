@@ -29,11 +29,21 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
     return () => window.removeEventListener('keydown', handleKey);
   }, [expanded]);
 
-  // Measure inner content height once on mount and set CSS variable
+  // Measure inner content height and re-measure on resize
   useEffect(() => {
-    if (innerRef.current) {
-      setPanelHeight(innerRef.current.offsetHeight);
-    }
+    const measure = () => {
+      if (innerRef.current) {
+        setPanelHeight(innerRef.current.scrollHeight);
+      }
+    };
+    measure();
+    // Re-measure after a short delay to catch late-rendering content
+    const timer = setTimeout(measure, 100);
+    window.addEventListener('resize', measure);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', measure);
+    };
   }, []);
 
   // Sync CSS variable with expanded state
