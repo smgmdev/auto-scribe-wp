@@ -307,8 +307,38 @@ const ATTACK_VERBS = ['strikes', 'strike', 'attacks', 'attack', 'hits', 'hit', '
   'struck', 'attacked', 'bombed', 'shelled', 'targeted', 'fired', 'launched',
   'destroyed', 'raided', 'blasted', 'pounded', 'bombarded', 'pummeled', 'assaulted'];
 
+// Political/legislative titles that should NOT be treated as actual attacks
+const POLITICAL_FALSE_POSITIVE_PHRASES = [
+  'senate', 'congress', 'parliament', 'legislation', 'lawmaker', 'lawmakers',
+  'vote', 'votes', 'voted', 'voting', 'bill', 'resolution', 'amendment',
+  'debate', 'debates', 'debated', 'hearing', 'hearings', 'committee',
+  'block', 'blocks', 'blocked', 'blocking', 'effort to limit', 'war powers',
+  'authorization', 'authorisation', 'approve', 'approves', 'approved',
+  'oppose', 'opposes', 'opposed', 'condemn', 'condemns', 'condemned',
+  'sanctions', 'sanction', 'embargo', 'diplomatic', 'diplomacy',
+  'negotiate', 'negotiation', 'negotiations', 'treaty', 'agreement',
+  'ceasefire talks', 'peace talks', 'summit', 'envoy', 'ambassador',
+  'un general assembly', 'security council', 'nato summit',
+];
+
+function isPoliticalTitle(text: string): boolean {
+  const lower = text.toLowerCase();
+  // If the title contains political/legislative keywords AND lacks direct attack evidence
+  const hasPolitical = POLITICAL_FALSE_POSITIVE_PHRASES.some(p => lower.includes(p));
+  if (!hasPolitical) return false;
+  // Check if there's a DIRECT attack indicator (e.g., "senate building struck by missile")
+  const directAttackPhrases = ['struck by', 'hit by', 'destroyed by', 'killed in', 'casualties from', 'explosion at', 'detonated at'];
+  const hasDirectAttack = directAttackPhrases.some(p => lower.includes(p));
+  return !hasDirectAttack; // Political unless there's a direct attack on the political entity itself
+}
+
 function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
   const text = `${title} ${description}`.toLowerCase();
+  
+  // Skip political/legislative titles — they discuss policy, not actual attacks
+  if (isPoliticalTitle(text)) {
+    return { origin: null, destination: null };
+  }
   
   // Find all country/city mentions in the text
   const mentions = findCountryMentions(text);
@@ -318,9 +348,15 @@ function inferTrajectory(title: string, description: string, countryCode: string
   const uniqueCodes = [...new Set(mentions.map(m => m.code))];
   
   // If only one country found and we have a countryCode from the event, use both
+  // BUT: do NOT trust GDELT sourcecountry as event country — it's the publisher's location
+  // Only use countryCode if it matches one of the countries mentioned in the text
   if (uniqueCodes.length === 1 && countryCode && countryCode !== uniqueCodes[0]) {
-    // The event's country_code is the primary location, the mentioned country could be attacker or target
-    // Try to determine direction from context
+    // Verify countryCode is actually relevant to the event text, not just the publisher
+    const countryCodeMentioned = mentions.some(m => m.code === countryCode);
+    if (!countryCodeMentioned) {
+      // countryCode is likely the publisher's country, not the event country — ignore it
+      return { origin: null, destination: null };
+    }
     const mentioned = uniqueCodes[0];
     const attackerIndicators = ['by ' + mentions[0].term, mentions[0].term + ' attack', mentions[0].term + ' strike', 
       mentions[0].term + ' drone', mentions[0].term + ' missile', mentions[0].term + '-made', mentions[0].term + '-backed'];
@@ -328,12 +364,10 @@ function inferTrajectory(title: string, description: string, countryCode: string
     if (isAttacker) {
       return { origin: mentioned, destination: countryCode };
     }
-    // Default: event country attacks the mentioned entity
     return { origin: countryCode, destination: mentioned };
   }
   
   if (uniqueCodes.length < 2) {
-    // Only one country, no countryCode to pair with
     return { origin: null, destination: null };
   }
   
@@ -344,12 +378,9 @@ function inferTrajectory(title: string, description: string, countryCode: string
     const b = mentions[i + 1];
     if (a.code === b.code) continue;
     
-    // Get text between the two mentions
     const between = text.substring(a.position + a.term.length, b.position).trim();
     
-    // Check if there's an attack verb between them: "Iran attacks Dubai" → Iran=origin, AE=dest
     const hasAttackVerb = ATTACK_VERBS.some(v => {
-      // Word boundary check for verb
       const vi = between.indexOf(v);
       if (vi < 0) return false;
       const ve = vi + v.length;
@@ -362,7 +393,6 @@ function inferTrajectory(title: string, description: string, countryCode: string
       return { origin: a.code, destination: b.code };
     }
     
-    // Check passive: "Dubai hit by Iran" → Iran=origin, AE=dest
     const passivePatterns = ['hit by', 'struck by', 'attacked by', 'bombed by', 'shelled by', 'targeted by', 'fired by', 'launched by', 'sent by'];
     const hasPassive = passivePatterns.some(p => between.includes(p));
     if (hasPassive) {
@@ -370,8 +400,7 @@ function inferTrajectory(title: string, description: string, countryCode: string
     }
   }
   
-  // Strategy 2: Check "X → Y" patterns in full text using attacker keywords
-  // Attacker keywords: adjectives/groups that are clearly the aggressor
+  // Strategy 2: Check "X → Y" patterns using attacker keywords
   const attackerKeywords: Record<string, string> = {
     'russian': 'RU', 'russia': 'RU', 'shahed': 'RU', 'kalibr': 'RU', 'iskander': 'RU',
     'kh-101': 'RU', 'kh-555': 'RU', 'kh-22': 'RU', 'geran': 'RU', 'geran-2': 'RU',
@@ -387,11 +416,9 @@ function inferTrajectory(title: string, description: string, countryCode: string
     'indian': 'IN', 'pakistan': 'PK', 'pakistani': 'PK',
   };
   
-  // Check for "[Attacker adjective] [weapon] [verb] [target location]" patterns
   const weaponWords = ['drone', 'missile', 'rocket', 'bomb', 'shell', 'munition', 'warhead', 'uav', 'cruise', 'ballistic', 'airstrike', 'air strike', 'strike', 'attack', 'barrage'];
   for (const [keyword, attackerCode] of Object.entries(attackerKeywords)) {
     if (!text.includes(keyword)) continue;
-    // Find a target that's different from the attacker
     const targetMention = mentions.find(m => m.code !== attackerCode);
     if (targetMention) {
       const hasWeapon = weaponWords.some(w => text.includes(w));
@@ -403,7 +430,6 @@ function inferTrajectory(title: string, description: string, countryCode: string
   }
   
   // Strategy 3: First mentioned country is usually the attacker in news headlines
-  // "Iran drone strikes UAE consulate" → Iran=origin, first different code=destination
   if (uniqueCodes.length >= 2) {
     return { origin: uniqueCodes[0], destination: uniqueCodes[1] };
   }
@@ -840,6 +866,8 @@ Deno.serve(async (req) => {
 
     const classifyThreatType = (title: string, description: string): 'missile' | 'drone' | 'nuke' | 'hbomb' | 'trade' | null => {
       const text = `${title} ${description}`.toLowerCase();
+      // Skip political/legislative news — not actual attacks
+      if (isPoliticalTitle(text)) return null;
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
       // Nuke requires explicit launch/detonation phrases
