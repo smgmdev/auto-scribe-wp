@@ -181,7 +181,7 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   'india': 'IN', 'indian': 'IN', 'pakistan': 'PK', 'pakistani': 'PK',
   'myanmar': 'MM', 'sudan': 'SD', 'sudanese': 'SD', 'ethiopia': 'ET', 'ethiopian': 'ET',
   'somalia': 'SO', 'somali': 'SO', 'drc': 'CD', 'congo': 'CD',
-  'united states': 'US', 'u.s.': 'US', 'american': 'US',
+  'united states': 'US', 'u.s.': 'US', 'usa': 'US', 'american': 'US',
   'turkey': 'TR', 'turkish': 'TR', 'egypt': 'EG', 'egyptian': 'EG',
   'libya': 'LY', 'libyan': 'LY', 'afghanistan': 'AF', 'afghan': 'AF',
   'uae': 'AE', 'emirates': 'AE', 'qatar': 'QA',
@@ -262,7 +262,8 @@ const CODE_TO_COUNTRY_NAME: Record<string, string> = {
 // ── Smart text search: find all country/city mentions with word boundaries ──
 function findCountryMentions(text: string): Array<{ code: string; position: number; term: string }> {
   const found: Array<{ code: string; position: number; term: string }> = [];
-  const textLower = text.toLowerCase();
+  // Normalize spaced abbreviations like "U . S ." → "u.s." before matching
+  const textLower = text.toLowerCase().replace(/u\s*\.\s*s\s*\./gi, 'u.s.');
   
   // Sort entries by length descending so longer matches take priority (e.g. "north korea" before "korea")
   const entries = Object.entries(COUNTRY_NAME_TO_CODE).sort((a, b) => b[0].length - a[0].length);
