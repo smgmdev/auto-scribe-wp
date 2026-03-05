@@ -716,9 +716,9 @@ const MAX_VISIBLE_SATELLITES = 80;
 
 function SatelliteInstances({ satellites }: { satellites: SatelliteData[] }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  const tetherGeoRef = useRef<THREE.BufferGeometry | null>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const altitudeScale = 0.003;
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
   const limited = useMemo(() => satellites.slice(0, MAX_VISIBLE_SATELLITES), [satellites]);
 
@@ -729,7 +729,6 @@ function SatelliteInstances({ satellites }: { satellites: SatelliteData[] }) {
       const orbitR = Math.min(GLOBE_RADIUS + 0.05 + sat.sataltitude * altitudeScale, GLOBE_RADIUS + 1.2);
       const p = latLngToVector3(sat.satlatitude, sat.satlongitude, orbitR);
       pos.push(new THREE.Vector3(...p));
-      // tether line from surface to satellite
       const sp = latLngToVector3(sat.satlatitude, sat.satlongitude, GLOBE_RADIUS + 0.01);
       tetherPoints.push(sp[0], sp[1], sp[2], p[0], p[1], p[2]);
     }
@@ -749,17 +748,56 @@ function SatelliteInstances({ satellites }: { satellites: SatelliteData[] }) {
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [positions, dummy]);
 
+  const handlePointerOver = useCallback((e: ThreeEvent<PointerEvent>) => {
+    if (e.instanceId !== undefined) {
+      setSelectedIdx(e.instanceId);
+      e.stopPropagation();
+    }
+  }, []);
+
+  const handlePointerOut = useCallback(() => {
+    setSelectedIdx(null);
+  }, []);
+
+  const handleClick = useCallback((e: ThreeEvent<MouseEvent>) => {
+    if (e.instanceId !== undefined) {
+      setSelectedIdx(prev => prev === e.instanceId ? null : e.instanceId!);
+      e.stopPropagation();
+    }
+  }, []);
+
   if (limited.length === 0) return null;
+
+  const selectedSat = selectedIdx !== null ? limited[selectedIdx] : null;
+  const selectedPos = selectedIdx !== null ? positions[selectedIdx] : null;
 
   return (
     <group>
-      <instancedMesh ref={meshRef} args={[undefined, undefined, limited.length]}>
-        <sphereGeometry args={[0.015, 6, 6]} />
+      <instancedMesh
+        ref={meshRef}
+        args={[undefined, undefined, limited.length]}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+        onClick={handleClick}
+      >
+        <sphereGeometry args={[0.02, 6, 6]} />
         <meshBasicMaterial color="#00e5ff" />
       </instancedMesh>
       <lineSegments geometry={tetherGeometry}>
         <lineBasicMaterial color="#00e5ff" transparent opacity={0.1} />
       </lineSegments>
+      {selectedSat && selectedPos && (
+        <Html position={selectedPos} center style={{ pointerEvents: 'none' }}>
+          <div className="bg-black/90 border border-cyan-500/50 rounded px-2 py-1.5 text-[10px] font-mono text-cyan-300 whitespace-nowrap shadow-lg shadow-cyan-500/20 -translate-y-6">
+            <div className="font-bold text-cyan-100 text-[11px]">{selectedSat.satname}</div>
+            <div className="text-cyan-400/80">NORAD: {selectedSat.satid}</div>
+            <div className="text-cyan-400/80">ALT: {selectedSat.sataltitude.toFixed(0)} km</div>
+            <div className="text-cyan-400/80">
+              {selectedSat.satlatitude.toFixed(2)}°, {selectedSat.satlongitude.toFixed(2)}°
+            </div>
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
