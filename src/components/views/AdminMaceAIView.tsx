@@ -78,6 +78,27 @@ export function AdminMaceAIView() {
   const speculativeAbortRef = useRef<AbortController | null>(null);
   const speculativeResultRef = useRef<{ text: string; result: any } | null>(null);
   const lastSessionExtendRef = useRef<number>(Date.now());
+  const audioUnlockedRef = useRef(false);
+
+  // Unlock audio playback on Safari — must be called from a user gesture (click/tap).
+  // Creates a silent AudioContext interaction so subsequent audio.play() calls work.
+  const unlockAudioPlayback = useCallback(() => {
+    if (audioUnlockedRef.current) return;
+    audioUnlockedRef.current = true;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+      // Also play a silent HTML5 audio to unlock that path
+      const silentAudio = new Audio();
+      silentAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjIwLjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjM1AAAAAAAAAAAAAAAAJAAAAAAAAAAAAYYoRwMHAAAAAAD/+1AEAAIAAAH+AAAAIAAAP8AAAAQAAAf4AAAAgAAA/wAAABAAABDgAAAAAAA//tQBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
+      silentAudio.play().catch(() => {});
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    } catch (_) {}
+  }, []);
 
   // Keep session alive while voice AI is actively used (every 10 min)
   const keepSessionAlive = useCallback(() => {
@@ -207,12 +228,8 @@ export function AdminMaceAIView() {
 
   useEffect(() => {
     isMountedRef.current = true;
-    // Request mic permission early so it's granted before user taps
-    // Then prefetch a Scribe token so connect() on tap is near-instant
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(s => { s.getTracks().forEach(t => t.stop()); })
-      .then(() => prefetchScribeToken())
-      .catch(() => { prefetchScribeToken(); });
+    // Prefetch Scribe token (don't request mic here — Safari blocks it without gesture)
+    prefetchScribeToken();
 
     // Listen for auth changes — if user signs out, kill everything immediately
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
