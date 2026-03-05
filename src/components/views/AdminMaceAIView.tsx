@@ -730,6 +730,8 @@ export function AdminMaceAIView() {
   };
 
   const handleMicClick = () => {
+    // Unlock audio playback on Safari (must happen in user gesture context)
+    unlockAudioPlayback();
     // Block mic interaction during active publish flow to prevent voice cutoff
     if (publishFlowActiveRef.current) {
       console.log('[Mace] Mic click blocked — publish flow active');
