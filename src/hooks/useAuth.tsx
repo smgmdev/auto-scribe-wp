@@ -98,6 +98,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Track current access token to avoid unnecessary re-renders on TOKEN_REFRESHED
   const accessTokenRef = useRef<string | null>(null);
 
+  // Mutex to prevent concurrent refreshSession() calls — the second call would
+  // get "Refresh Token Not Found" because the first already consumed the token.
+  const refreshLockRef = useRef<Promise<{ success: boolean; session: Session | null }> | null>(null);
+
+  const safeRefreshSession = async (): Promise<{ success: boolean; session: Session | null }> => {
+    // If a refresh is already in flight, wait for it instead of starting another
+    if (refreshLockRef.current) {
+      console.log('[Auth] safeRefreshSession: waiting for existing refresh');
+      return refreshLockRef.current;
+    }
+
+    const refreshPromise = (async () => {
+      try {
+        const { data, error } = await supabase.auth.refreshSession();
+        if (error || !data?.session) {
+          console.warn('[Auth] safeRefreshSession failed:', error?.message);
+          return { success: false, session: null };
+        }
+        console.log('[Auth] safeRefreshSession succeeded');
+        return { success: true, session: data.session };
+      } catch (err) {
+        console.error('[Auth] safeRefreshSession error:', err);
+        return { success: false, session: null };
+      } finally {
+        // Clear the lock after a short delay to debounce rapid-fire calls
+        setTimeout(() => { refreshLockRef.current = null; }, 500);
+      }
+    })();
+
+    refreshLockRef.current = refreshPromise;
+    return refreshPromise;
+  };
+
   // Helper to fully reset auth state
   const resetAuthState = () => {
     setSession(null);
@@ -342,8 +375,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const { data: { session: localSession } } = await supabase.auth.getSession();
             if (localSession) {
               // We still have a local session — try refreshing the token
-              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-              if (!refreshError && refreshData?.session) {
+              const refreshResult = await safeRefreshSession();
+              if (refreshResult.success) {
                 console.log('[Auth] Session refreshed successfully after failures');
                 consecutiveFailures = 0;
                 return;
@@ -527,8 +560,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               const { data: { session: recoveredSession }, error } = await supabase.auth.getSession();
               if (error || !recoveredSession) {
                 // Try refreshing
-                const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-                if (refreshError || !refreshData.session) {
+                const refreshResult = await safeRefreshSession();
+                if (!refreshResult.success) {
                   console.log('[Auth] Session recovery failed, clearing active session and resetting state');
                   // Clear active_session_id so next login isn't blocked
                   if (expiredUserId) {
@@ -542,8 +575,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   return;
                 }
                 console.log('[Auth] Session recovered via refresh');
-                setSession(refreshData.session);
-                setUser(refreshData.session.user);
+                setSession(refreshResult.session);
+                setUser(refreshResult.session!.user);
               } else {
                 console.log('[Auth] Session still valid, ignoring SIGNED_OUT');
                 setSession(recoveredSession);
@@ -859,14 +892,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sessionGraceUntilRef.current = Date.now() + 15000;
 
       // 2. Refresh the auth token first (most likely to fail)
-      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-      if (refreshError) {
-        console.error('[Auth] extendSession: refreshSession failed:', refreshError);
+      const refreshResult = await safeRefreshSession();
+      if (!refreshResult.success) {
+        console.error('[Auth] extendSession: refreshSession failed');
         return false;
       }
 
       // 3. Update realtime connection with the new access token so channels stay alive
-      const newToken = refreshData?.session?.access_token;
+      const newToken = refreshResult.session?.access_token;
       if (newToken) {
         supabase.realtime.setAuth(newToken);
       }
