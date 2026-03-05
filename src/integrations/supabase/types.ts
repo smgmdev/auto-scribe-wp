@@ -819,18 +819,21 @@ export type Database = {
         Row: {
           alert_id: string
           dismissed_at: string
+          dismissed_title: string | null
           id: string
           user_id: string
         }
         Insert: {
           alert_id: string
           dismissed_at?: string
+          dismissed_title?: string | null
           id?: string
           user_id: string
         }
         Update: {
           alert_id?: string
           dismissed_at?: string
+          dismissed_title?: string | null
           id?: string
           user_id?: string
         }

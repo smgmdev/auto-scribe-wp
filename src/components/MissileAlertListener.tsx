@@ -379,19 +379,25 @@ export function MissileAlertListener() {
     // Stop sound immediately on ANY dismiss — user is actively closing alerts
     stopSound();
     // Track both the ID and the title for content-based deduplication
-    const alertTitle = alerts.find(a => a.id === id)?.title;
+    const alertObj = alerts.find(a => a.id === id);
+    const alertTitle = alertObj?.title;
     dismissedRef.current.add(id);
     if (alertTitle) dismissedTitlesRef.current.add(alertTitle.toLowerCase().trim());
-    // Persist to DB (fire-and-forget)
-    supabase.auth.getUser().then(({ data }) => {
-      if (data?.user) {
-        supabase.from('dismissed_missile_alerts').insert({
-          user_id: data.user.id,
-          alert_id: id,
-        }).then(() => {});
-      }
-    });
     setAlerts(prev => prev.filter(a => a.id !== id));
+    // Persist to DB with title for future content-based dedup
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) {
+        const { error } = await supabase.from('dismissed_missile_alerts').upsert({
+          user_id: userData.user.id,
+          alert_id: id,
+          dismissed_title: alertTitle || null,
+        }, { onConflict: 'user_id,alert_id' });
+        if (error) console.error('[Alerts] Failed to persist dismissal:', error);
+      }
+    } catch (e) {
+      console.error('[Alerts] Error persisting dismissal:', e);
+    }
   }, [stopSound, alerts]);
 
   useEffect(() => {
@@ -404,16 +410,19 @@ export function MissileAlertListener() {
         dismissedLoadedRef.current = true;
         const { data: userData } = await supabase.auth.getUser();
         if (userData?.user) {
+          // Fetch dismissed alerts with stored titles (no join needed)
           const { data: dismissed } = await supabase
             .from('dismissed_missile_alerts')
-            .select('alert_id, missile_alerts!inner(title)')
+            .select('alert_id, dismissed_title')
             .eq('user_id', userData.user.id);
           if (dismissed) {
             dismissed.forEach((d: any) => {
               dismissedRef.current.add(d.alert_id);
-              const title = d.missile_alerts?.title;
-              if (title) dismissedTitlesRef.current.add(title.toLowerCase().trim());
+              if (d.dismissed_title) {
+                dismissedTitlesRef.current.add(d.dismissed_title.toLowerCase().trim());
+              }
             });
+            console.log(`[Alerts] Loaded ${dismissed.length} dismissed alerts (${dismissedTitlesRef.current.size} unique titles)`);
           }
         }
       }
