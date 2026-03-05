@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
+import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
 const SurveillanceGlobe = lazy(() => import('@/components/surveillance/SurveillanceGlobe').then(m => ({ default: m.SurveillanceGlobe })));
 import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package } from 'lucide-react';
@@ -487,7 +488,7 @@ export function AdminSurveillanceView() {
         const score = Math.min(100, boost);
         processed.push({
           code,
-          name: code, // Will be resolved by globe coordinate lookup
+          name: COUNTRY_COORDINATES[code]?.name || code,
           threat_level: score >= 60 ? 'danger' as const : score >= 30 ? 'caution' as const : 'safe' as const,
           score,
           summary: 'Country involved in active attack trajectories.',
