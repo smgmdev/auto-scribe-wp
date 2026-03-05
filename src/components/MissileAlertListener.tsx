@@ -242,8 +242,33 @@ function getAlertType(severity: string): AlertType {
   return 'missile';
 }
 
+// Normalize a title to keywords for fuzzy matching
+function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function titlesSimilar(a: string, b: string): boolean {
+  const na = normalizeTitle(a);
+  const nb = normalizeTitle(b);
+  if (na === nb) return true;
+  // Check if one contains the other
+  if (na.includes(nb) || nb.includes(na)) return true;
+  // Jaccard similarity on words
+  const wordsA = new Set(na.split(' ').filter(w => w.length > 2));
+  const wordsB = new Set(nb.split(' ').filter(w => w.length > 2));
+  if (wordsA.size === 0 || wordsB.size === 0) return false;
+  let intersection = 0;
+  wordsA.forEach(w => { if (wordsB.has(w)) intersection++; });
+  const union = new Set([...wordsA, ...wordsB]).size;
+  return (intersection / union) >= 0.5;
+}
+
 export function MissileAlertListener() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, precisionEnabled } = useAuth();
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
   const dismissedRef = useRef<Set<string>>(new Set());
   const dismissedTitlesRef = useRef<Set<string>>(new Set());
@@ -370,8 +395,8 @@ export function MissileAlertListener() {
   }, [stopSound, alerts]);
 
   useEffect(() => {
-    // Non-admin users should never fetch alerts or play sounds
-    if (!isAdmin) return;
+    // Non-admin, non-precision users should never fetch alerts
+    if (!isAdmin && !precisionEnabled) return;
 
     const fetchActive = async () => {
       // Load dismissed alerts from DB + their titles for content dedup
@@ -403,10 +428,17 @@ export function MissileAlertListener() {
         .not('destination_country_code', 'is', null)
         .order('created_at', { ascending: false });
       if (data && data.length > 0) {
-        const filtered = (data as MissileAlert[]).filter(a => 
-          !dismissedRef.current.has(a.id) && 
-          !dismissedTitlesRef.current.has(a.title.toLowerCase().trim())
-        );
+        const filtered = (data as MissileAlert[]).filter(a => {
+          if (dismissedRef.current.has(a.id)) return false;
+          const normalizedTitle = a.title.toLowerCase().trim();
+          // Exact title match
+          if (dismissedTitlesRef.current.has(normalizedTitle)) return false;
+          // Fuzzy title match against all dismissed titles
+          for (const dt of dismissedTitlesRef.current) {
+            if (titlesSimilar(a.title, dt)) return false;
+          }
+          return true;
+        });
         if (filtered.length > 0) {
           setAlerts(filtered);
           const hasHbomb = filtered.some(a => a.severity === 'hbomb');
@@ -422,9 +454,9 @@ export function MissileAlertListener() {
       if (alertIntervalRef.current) clearInterval(alertIntervalRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin]);
+  }, [isAdmin, precisionEnabled]);
 
-  if (!isAdmin || alerts.length === 0) return null;
+  if ((!isAdmin && !precisionEnabled) || alerts.length === 0) return null;
 
   // Show max 2 on desktop, 1 on mobile — remaining are queued behind
   const maxVisible = isMobile ? 1 : 2;
