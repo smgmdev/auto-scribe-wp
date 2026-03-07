@@ -248,7 +248,7 @@ export default function Auth() {
     }
 
     // Check if another session is already active for this account
-    // The RPC auto-clears stale sessions (>35 min) server-side
+    // The RPC auto-clears stale sessions (>5 min) server-side
     try {
       const { data: activeSessionId, error: sessionCheckError } = await supabase
         .rpc('check_active_session', { check_email: email });
