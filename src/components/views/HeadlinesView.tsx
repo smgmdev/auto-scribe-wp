@@ -118,7 +118,8 @@ export function HeadlinesView() {
         body: { sources: settings.selectedSources }
       });
 
-      console.log('[HeadlinesView] Response:', { data, error });
+      console.log('[HeadlinesView] Raw response data:', JSON.stringify(data)?.substring(0, 500));
+      console.log('[HeadlinesView] Raw response error:', JSON.stringify(error));
 
       if (error) {
         console.error('[HeadlinesView] Function error details:', JSON.stringify(error));
@@ -126,6 +127,8 @@ export function HeadlinesView() {
       }
 
       if (data?.success && data?.headlines) {
+        console.log('[HeadlinesView] Headlines count from response:', data.headlines.length);
+        console.log('[HeadlinesView] Debug breakdown:', data._debug_breakdown);
         const parsedHeadlines = data.headlines.map((h: any) => ({
           ...h,
           publishedAt: new Date(h.publishedAt)
@@ -134,10 +137,11 @@ export function HeadlinesView() {
         setHeadlines(parsedHeadlines);
         toast.success(`Found ${parsedHeadlines.length} headlines from ${settings.selectedSources.length} source(s)`);
       } else {
+        console.error('[HeadlinesView] Unexpected response structure:', { success: data?.success, hasHeadlines: !!data?.headlines, dataKeys: data ? Object.keys(data) : 'null' });
         throw new Error(data?.error || 'Failed to scan headlines');
       }
     } catch (error) {
-      console.error('Error scanning headlines:', error);
+      console.error('[HeadlinesView] Error scanning headlines:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to scan headlines');
     } finally {
       setIsScanning(false);
