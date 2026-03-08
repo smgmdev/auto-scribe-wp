@@ -204,6 +204,14 @@ export function useArticles() {
   const addArticle = async (article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return null;
 
+    // Refresh session to prevent RLS errors from expired tokens
+    const { error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError) {
+      console.error('[addArticle] Session refresh failed:', refreshError);
+      toast.error("Session expired. Please sign in again.");
+      return null;
+    }
+
     const insertData = {
       user_id: user.id,
       title: article.title,
@@ -262,6 +270,14 @@ export function useArticles() {
     if (updates.tags !== undefined) updateData.tags = updates.tags;
     if (updates.focusKeyword !== undefined) updateData.focus_keyword = updates.focusKeyword;
     if (updates.metaDescription !== undefined) updateData.meta_description = updates.metaDescription;
+
+    // Refresh session to prevent RLS errors from expired tokens
+    const { error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError) {
+      console.error('[updateArticle] Session refresh failed:', refreshError);
+      toast.error("Session expired. Please sign in again.");
+      return false;
+    }
 
     // When publishing a draft, update created_at to current time so the publish date is recent
     const existingArticle = articles.find(a => a.id === id);
