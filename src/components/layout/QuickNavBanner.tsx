@@ -167,7 +167,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                           className="group flex items-center justify-between py-2.5 border-t border-white/10 hover:text-[#1e90ff] transition-colors"
                         >
                           <span>Instagram</span>
-                          <Instagram size={18} className="text-white/40" />
+                          <Instagram size={18} className="text-white/40 group-hover:text-[#1e90ff] transition-colors" />
                         </a>
                       </li>
                     </ul>
