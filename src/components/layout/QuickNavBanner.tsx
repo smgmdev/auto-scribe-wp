@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Volume2, VolumeOff, ChevronDown, X, ArrowRight } from 'lucide-react';
+import { Volume2, VolumeOff, ChevronDown, X, ArrowRight, Instagram } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { useAuth } from '@/hooks/useAuth';
 import amlogo from '@/assets/amlogo.png';
