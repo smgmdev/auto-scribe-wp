@@ -888,7 +888,6 @@ export function AdminSurveillanceView() {
         <div className="flex-1 flex overflow-hidden items-center justify-center">
           {/* Globe area */}
           <div className="relative w-full h-full max-w-[100vw] md:max-w-none mx-auto aspect-square md:aspect-auto">
-            {scanData ? (
               <Suspense fallback={
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center space-y-3">
@@ -915,14 +914,6 @@ export function AdminSurveillanceView() {
                   resetTrigger={resetTrigger}
                 />
               </Suspense>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center space-y-3">
-                  <RefreshCw className="w-8 h-8 text-gray-600 animate-spin mx-auto" />
-                  <p className="text-sm text-gray-500">Initializing scan...</p>
-                </div>
-              </div>
-            )}
 
             {/* Scan progress overlay */}
             {scanProgress && scanProgress.total > 1 && (
