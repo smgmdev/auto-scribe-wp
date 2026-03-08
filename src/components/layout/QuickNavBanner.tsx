@@ -132,7 +132,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
 
               <div className="space-y-4">
                 {/* Info panels - moved above links */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-px pb-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-px pb-4">
                   <div className="bg-[#1a1a1a] p-6">
                     <h3 className="text-white text-lg font-bold mb-3 flex items-center gap-2">
                       <img src={amlogo} alt="Arcana Mace" className="h-6 w-6" />
