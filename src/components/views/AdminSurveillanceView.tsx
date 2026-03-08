@@ -177,8 +177,7 @@ export function AdminSurveillanceView() {
   // Trigger globe reset whenever the surveillance view becomes active
   useEffect(() => {
     if (currentView === 'admin-surveillance') {
-      const timer = setTimeout(() => setResetTrigger(t => t + 1), 500);
-      return () => clearTimeout(timer);
+      setResetTrigger(t => t + 1);
     }
   }, [currentView]);
   const [trajectoryRefresh, setTrajectoryRefresh] = useState(0);
