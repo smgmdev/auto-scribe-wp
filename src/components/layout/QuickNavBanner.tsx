@@ -158,17 +158,16 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                   </div>
                   <div className="bg-[#1a1a1a] p-6">
                     <h3 className="text-white text-lg font-bold mb-3">Follow</h3>
-                    <ul className="space-y-2 text-sm text-white/50">
+                    <ul className="text-sm text-white/50">
                       <li>
                         <a
                           href="https://instagram.com/arcanamacecom"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group flex items-center gap-1 hover:text-[#1e90ff] transition-colors"
+                          className="flex items-center justify-between py-2.5 border-t border-white/10 hover:text-white transition-colors"
                         >
-                          <Instagram size={14} className="flex-shrink-0" />
-                          Instagram
-                          <ArrowRight size={12} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                          <span>Instagram</span>
+                          <Instagram size={18} className="text-white/40" />
                         </a>
                       </li>
                     </ul>
