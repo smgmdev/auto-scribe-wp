@@ -166,6 +166,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                           rel="noopener noreferrer"
                           className="group flex items-center gap-1 hover:text-[#1e90ff] transition-colors"
                         >
+                          <Instagram size={14} className="flex-shrink-0" />
                           Instagram
                           <ArrowRight size={12} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
                         </a>
