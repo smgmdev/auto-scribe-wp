@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
-const SurveillanceGlobe = lazy(() => import('@/components/surveillance/SurveillanceGlobe').then(m => ({ default: m.SurveillanceGlobe })));
+import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
 import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -177,8 +177,7 @@ export function AdminSurveillanceView() {
   // Trigger globe reset whenever the surveillance view becomes active
   useEffect(() => {
     if (currentView === 'admin-surveillance') {
-      const timer = setTimeout(() => setResetTrigger(t => t + 1), 500);
-      return () => clearTimeout(timer);
+      setResetTrigger(t => t + 1);
     }
   }, [currentView]);
   const [trajectoryRefresh, setTrajectoryRefresh] = useState(0);
@@ -888,7 +887,6 @@ export function AdminSurveillanceView() {
         <div className="flex-1 flex overflow-hidden items-center justify-center">
           {/* Globe area */}
           <div className="relative w-full h-full max-w-[100vw] md:max-w-none mx-auto aspect-square md:aspect-auto">
-            {scanData ? (
               <Suspense fallback={
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center space-y-3">
@@ -915,14 +913,6 @@ export function AdminSurveillanceView() {
                   resetTrigger={resetTrigger}
                 />
               </Suspense>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center space-y-3">
-                  <RefreshCw className="w-8 h-8 text-gray-600 animate-spin mx-auto" />
-                  <p className="text-sm text-gray-500">Initializing scan...</p>
-                </div>
-              </div>
-            )}
 
             {/* Scan progress overlay */}
             {scanProgress && scanProgress.total > 1 && (
