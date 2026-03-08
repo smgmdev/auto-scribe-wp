@@ -204,6 +204,14 @@ export function useArticles() {
   const addArticle = async (article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return null;
 
+    // Refresh session to prevent RLS errors from expired tokens
+    const { error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError) {
+      console.error('[addArticle] Session refresh failed:', refreshError);
+      toast.error("Session expired. Please sign in again.");
+      return null;
+    }
+
     const insertData = {
       user_id: user.id,
       title: article.title,
