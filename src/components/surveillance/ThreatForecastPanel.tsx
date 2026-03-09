@@ -494,8 +494,8 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </button>
         )}
 
-        {/* Heatmap Globe Toggle - only show when viewing an individual report */}
-        {data && ((!loading && activeTab === 'generate' && !selectedHistoryId) || (activeTab === 'history' && selectedHistoryId)) ? <HeatmapToggle /> : null}
+        {/* Heatmap Globe Toggle - only show when viewing a report in history */}
+        {data && activeTab === 'history' && selectedHistoryId ? <HeatmapToggle /> : null}
 
         {/* Generate Tab */}
         <TabsContent value="generate" className="flex-1 overflow-y-auto p-0 space-y-0 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
