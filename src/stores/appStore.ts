@@ -339,6 +339,10 @@ interface AppState {
   precisionContactOpen: boolean;
   setPrecisionContactOpen: (open: boolean) => void;
 
+  // CRT Terminal Mode
+  crtMode: boolean;
+  setCrtMode: (val: boolean) => void;
+
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
 }
@@ -913,4 +917,8 @@ export const useAppStore = create<AppState>()((set) => ({
   // Precision contact popup
   precisionContactOpen: false,
   setPrecisionContactOpen: (open) => set({ precisionContactOpen: open }),
+
+  // CRT Terminal Mode
+  crtMode: false,
+  setCrtMode: (val) => set({ crtMode: val }),
 }));

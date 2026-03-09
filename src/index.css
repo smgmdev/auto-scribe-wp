@@ -46,7 +46,7 @@
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -470,4 +470,170 @@ details[open] .details-open-rotate {
     border-color: #f2a547;
     clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CRT TERMINAL MODE — Retro Intelligence Terminal Aesthetic
+   ═══════════════════════════════════════════════════════════════ */
+
+.crt-mode {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace !important;
+}
+
+.crt-mode * {
+  font-family: inherit !important;
+}
+
+/* Phosphor green text override */
+.crt-mode {
+  color: #00ff41 !important;
+}
+
+.crt-mode .text-gray-300,
+.crt-mode .text-gray-400,
+.crt-mode .text-gray-500,
+.crt-mode .text-gray-600,
+.crt-mode .text-white {
+  color: #00ff41 !important;
+}
+
+.crt-mode .text-gray-200 {
+  color: #33ff66 !important;
+}
+
+.crt-mode .text-gray-700 {
+  color: #00aa2a !important;
+}
+
+/* Accent colors → green variants */
+.crt-mode .text-blue-400,
+.crt-mode .text-blue-300\/70,
+.crt-mode .text-cyan-400 {
+  color: #00dd55 !important;
+}
+
+.crt-mode .text-amber-400,
+.crt-mode .text-amber-400\/60,
+.crt-mode .text-yellow-400,
+.crt-mode .text-orange-400 {
+  color: #88ff00 !important;
+}
+
+.crt-mode .text-red-400,
+.crt-mode .text-red-500 {
+  color: #ff3333 !important;
+  text-shadow: 0 0 6px rgba(255, 50, 50, 0.5);
+}
+
+.crt-mode .text-emerald-400,
+.crt-mode .text-green-400,
+.crt-mode .text-green-500 {
+  color: #00ff41 !important;
+}
+
+/* Backgrounds → pure black */
+.crt-mode .bg-\[\#1d1d1f\],
+.crt-mode .bg-\[\#0d1220\],
+.crt-mode .bg-white\/5 {
+  background-color: #000000 !important;
+}
+
+/* Borders → green tint */
+.crt-mode .border-white\/5,
+.crt-mode .border-white\/10 {
+  border-color: rgba(0, 255, 65, 0.15) !important;
+}
+
+/* Button overrides */
+.crt-mode .bg-\[\#f2a547\] {
+  background-color: #00ff41 !important;
+  color: #000000 !important;
+  border-color: #00ff41 !important;
+}
+
+.crt-mode .bg-\[\#f2a547\]:hover {
+  background-color: transparent !important;
+  color: #00ff41 !important;
+}
+
+/* Badge overrides */
+.crt-mode [class*="bg-red-500\/"],
+.crt-mode [class*="bg-amber-500\/"],
+.crt-mode [class*="bg-emerald-500\/"],
+.crt-mode [class*="bg-gray-500\/"] {
+  background-color: rgba(0, 255, 65, 0.1) !important;
+  border-color: rgba(0, 255, 65, 0.25) !important;
+}
+
+/* Green text glow */
+.crt-mode .text-sm,
+.crt-mode .text-xs,
+.crt-mode .text-\[11px\],
+.crt-mode .text-\[10px\],
+.crt-mode .text-\[9px\],
+.crt-mode h3 {
+  text-shadow: 0 0 4px rgba(0, 255, 65, 0.4);
+}
+
+/* Scan lines overlay */
+.crt-mode::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Vignette overlay */
+.crt-mode::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  pointer-events: none;
+  z-index: 9997;
+}
+
+/* Screen flicker animation */
+.crt-mode {
+  animation: crt-flicker 0.15s infinite alternate;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.97; }
+  100% { opacity: 1; }
+}
+
+/* Boot sequence animation */
+@keyframes crt-boot {
+  0% { opacity: 0; filter: brightness(3); }
+  20% { opacity: 1; filter: brightness(2); }
+  100% { opacity: 1; filter: brightness(1); }
+}
+
+.crt-boot-in {
+  animation: crt-boot 0.6s ease-out;
+}
+
+/* Active tab in CRT mode */
+.crt-mode [data-state="active"] {
+  background-color: #00ff41 !important;
+  color: #000000 !important;
 }

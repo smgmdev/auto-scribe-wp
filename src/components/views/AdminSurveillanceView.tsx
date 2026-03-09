@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react
 import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, BrainCircuit, Flame, Zap } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, BrainCircuit, Flame, Zap, Monitor } from 'lucide-react';
 import { useForecastStore } from '@/stores/forecastStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -196,6 +196,8 @@ export function AdminSurveillanceView() {
   const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast' | 'simulator' | 'alpha'>('feed');
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
   const currentView = useAppStore((s) => s.currentView);
+  const crtMode = useAppStore((s) => s.crtMode);
+  const setCrtMode = useAppStore((s) => s.setCrtMode);
 
   // Trigger globe reset whenever the surveillance view becomes active
   useEffect(() => {
@@ -588,7 +590,7 @@ export function AdminSurveillanceView() {
   const safeCount = filteredCountries.filter(c => c.score < 30).length || 0;
 
   return (
-    <div className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
+    <div className={cn("animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden", crtMode && "crt-mode crt-boot-in")}>
       <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen">
         {/* Top bar */}
         <div className="flex flex-col border-b border-white/5 bg-[#1d1d1f]">
@@ -620,6 +622,9 @@ export function AdminSurveillanceView() {
               </button>
               <button onClick={() => setGlobeSpinning(!globeSpinning)} className="text-gray-400 hover:text-white transition-colors p-1" title={globeSpinning ? 'Pause rotation' : 'Start rotation'}>
                 {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+              </button>
+              <button onClick={() => setCrtMode(!crtMode)} className={cn("transition-colors p-1", crtMode ? "text-green-400" : "text-gray-400 hover:text-white")} title={crtMode ? 'Disable terminal mode' : 'Terminal mode'}>
+                <Monitor className="w-3.5 h-3.5" />
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
