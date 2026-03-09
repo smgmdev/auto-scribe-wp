@@ -439,7 +439,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {data.forecast.analyst_notes && (
           <div className="p-2.5 bg-white/[0.02] border border-white/[0.05] mt-3">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <FileWarning className="w-3 h-3 text-gray-500" />
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Mace Notes</span>
             </div>
             <p className="text-[10px] text-gray-500 leading-relaxed italic">{data.forecast.analyst_notes}</p>
