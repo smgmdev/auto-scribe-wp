@@ -53,6 +53,8 @@ interface Simulation {
   alliance_responses: AllianceResponse[];
   economic_impact: EconomicImpact;
   most_likely_outcome: MostLikelyOutcome;
+  favored_nation?: string;
+  win_probability_pct?: number;
   deescalation_opportunities: string[];
   critical_indicators: string[];
 }
@@ -225,12 +227,18 @@ export function ConflictSimulatorPanel() {
   // Determine favored nation and win percentage
   const getFavoredInfo = () => {
     if (!sim || !result) return { nation: null, pct: 0 };
+
+    // Use explicit AI-provided fields if available (new schema)
+    if (sim.favored_nation && sim.win_probability_pct) {
+      return { nation: sim.favored_nation, pct: sim.win_probability_pct };
+    }
+
+    // Fallback for old simulations without explicit fields
     const pct = sim.most_likely_outcome?.probability_pct || 50;
     const outcome = (sim.most_likely_outcome?.outcome || '').toLowerCase() + ' ' + (sim.most_likely_outcome?.rationale || '').toLowerCase();
     const aLower = result.country_a.toLowerCase();
     const bLower = result.country_b.toLowerCase();
     
-    // Determine which country the outcome text favors
     const favorKeywords = ['advantage', 'superior', 'dominat', 'favor', 'prevail', 'win', 'successful', 'victory', 'stronger', 'overwhelm'];
     const aFavorCount = favorKeywords.filter(k => {
       const idx = outcome.indexOf(k);
@@ -249,14 +257,11 @@ export function ConflictSimulatorPanel() {
     if (aFavorCount > bFavorCount) textFavored = result.country_a;
     else if (bFavorCount > aFavorCount) textFavored = result.country_b;
     else {
-      // Fall back to mention count
       const aCount = outcome.split(aLower).length - 1;
       const bCount = outcome.split(bLower).length - 1;
       textFavored = aCount >= bCount ? result.country_a : result.country_b;
     }
 
-    // If pct > 50, the outcome text's favored nation wins with that pct
-    // If pct <= 50, the OTHER nation is actually favored with (100 - pct)
     if (pct > 50) {
       return { nation: textFavored, pct };
     } else {

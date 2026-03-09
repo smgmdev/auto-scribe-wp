@@ -114,6 +114,7 @@ Your analysis must be:
 - Structured with probability-scored escalation paths
 - Include economic impact modeling and alliance cascade analysis
 - Professional, detached, analytical tone — no speculation without evidence
+- The "favored_nation" field MUST be the name of whichever country has the overall military/strategic advantage in this conflict. The "win_probability_pct" must be between 51-99 representing that nation's probability of prevailing. Consider military strength, nuclear capability, GDP, alliances, geography, technology, and manpower.
 
 You must respond ONLY by calling the simulate_conflict function with structured data.`;
 
@@ -128,6 +129,7 @@ Produce a comprehensive conflict simulation covering:
 5. Most likely outcome with probability
 6. De-escalation opportunities
 7. Critical indicators to watch
+8. IMPORTANT: Which nation is FAVORED to win this conflict (favored_nation) and their win probability (win_probability_pct, 51-99%). This must reflect real-world military power balance. For example, Russia vs Lithuania — Russia is overwhelmingly favored. USA vs a small nation — USA is overwhelmingly favored.
 
 Base your analysis on current geopolitical realities, military capabilities, treaty obligations, and the intelligence data provided above.`;
 
@@ -218,21 +220,23 @@ Base your analysis on current geopolitical realities, military capabilities, tre
                     },
                     required: ["outcome", "probability_pct", "timeframe", "rationale"],
                     additionalProperties: false,
-                  },
-                  deescalation_opportunities: {
-                    type: "array",
-                    items: { type: "string" },
-                  },
-                  critical_indicators: {
-                    type: "array",
-                    items: { type: "string" },
-                  },
+                   },
+                   favored_nation: { type: "string", description: "The name of the country that has the overall strategic/military advantage and is favored to win" },
+                   win_probability_pct: { type: "number", description: "The favored nation's probability of prevailing (51-99)" },
+                   deescalation_opportunities: {
+                     type: "array",
+                     items: { type: "string" },
+                   },
+                   critical_indicators: {
+                     type: "array",
+                     items: { type: "string" },
+                   },
                 },
                 required: [
                   "scenario_title", "threat_level", "executive_summary",
                   "trigger_scenarios", "escalation_phases", "alliance_responses",
-                  "economic_impact", "most_likely_outcome", "deescalation_opportunities",
-                  "critical_indicators",
+                  "economic_impact", "most_likely_outcome", "favored_nation", "win_probability_pct",
+                  "deescalation_opportunities", "critical_indicators",
                 ],
                 additionalProperties: false,
               },
