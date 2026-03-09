@@ -107,8 +107,7 @@ function SummaryBlock({ text }: { text: string }) {
     </div>
   );
 }
-
-
+export function AlphaSignalsPanel() {
   const { loading, progress, data: storeData, setLoading, setProgress, setData: setStoreData, setError } = useAlphaStore();
   const [data, setData] = useState<AlphaData | null>(null);
   const [savedSignals, setSavedSignals] = useState<SavedSignal[]>([]);
