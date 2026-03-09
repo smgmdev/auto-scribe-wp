@@ -118,15 +118,17 @@ export function ConflictSimulatorPanel() {
         setResult(data.result as any);
         setLoading(false);
         setRunId(null);
+        setStartedAt(null);
         if (pollRef.current) clearInterval(pollRef.current);
       } else if (data?.status === 'error') {
         toast.error(data.error_message || 'Simulation failed');
         setLoading(false);
         setRunId(null);
+        setStartedAt(null);
         if (pollRef.current) clearInterval(pollRef.current);
       }
     }, 3000);
-  }, [setResult, setLoading, setRunId]);
+  }, [setResult, setLoading, setRunId, setStartedAt]);
 
   // Resume polling on mount if there's an active run
   useEffect(() => {
