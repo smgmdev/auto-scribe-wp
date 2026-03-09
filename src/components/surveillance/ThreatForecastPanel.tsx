@@ -178,15 +178,18 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
   const [historyLoading, setHistoryLoading] = useState(false);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
 
+  const historyLoadedRef = useRef(false);
+
   useEffect(() => {
-    if (activeTab === 'history') {
-      if (history.length === 0) setHistoryLoading(true);
+    if (activeTab === 'history' && !historyLoadedRef.current) {
+      setHistoryLoading(true);
       loadHistory();
+      historyLoadedRef.current = true;
     }
   }, [activeTab]);
 
-  const loadHistory = async () => {
-    setHistoryLoading(true);
+  const loadHistory = async (showLoading = false) => {
+    if (showLoading) setHistoryLoading(true);
     try {
       const { data: forecasts, error } = await supabase
         .from('threat_forecasts')
