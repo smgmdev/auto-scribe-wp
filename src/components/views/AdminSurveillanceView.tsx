@@ -171,6 +171,17 @@ export function AdminSurveillanceView() {
   const setShowSatellites = useAppStore((s) => s.setShowSatellites);
   const showEarthquakes = useAppStore((s) => s.showEarthquakes);
   const setShowEarthquakes = useAppStore((s) => s.setShowEarthquakes);
+  const showHeatmap = useAppStore((s) => s.showHeatmap);
+  const setShowHeatmap = useAppStore((s) => s.setShowHeatmap);
+  const forecastData = useForecastStore((s) => s.data);
+  const forecastHotspots = useMemo(() => {
+    if (!forecastData?.forecast?.hotspots) return [];
+    return forecastData.forecast.hotspots.map((h: any) => ({
+      region: h.region || h.name || '',
+      risk_score: h.risk_score ?? h.severity_score ?? 50,
+      threat_type: h.threat_type || h.type || 'unknown',
+    }));
+  }, [forecastData]);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const [showForecast] = useState(false);
