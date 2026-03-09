@@ -133,14 +133,6 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
       <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
         <div ref={contentRef}>
           <p className="text-[11px] text-gray-300 leading-relaxed">{text}</p>
-          <div className="flex flex-wrap items-center justify-between mt-2.5 text-[10px] text-gray-600">
-            <div className="flex items-center gap-3">
-              <span>{dataPoints.alerts_analyzed} alerts</span>
-              <span>{dataPoints.affected_nations} nations</span>
-              <span>{formatDate(generatedAt)}</span>
-            </div>
-            <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
-          </div>
           {dataPoints.severity_distribution && (
             <div className="flex items-center gap-1 mt-2">
               {dataPoints.severity_distribution.critical > 0 && (
@@ -165,7 +157,14 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
           )}
         </div>
       </div>
-      
+      <div className="flex items-center justify-between mt-1.5 text-[10px] text-gray-600">
+        <div className="flex items-center gap-3">
+          <span>{dataPoints.alerts_analyzed} alerts</span>
+          <span>{dataPoints.affected_nations} nations</span>
+          <span>{formatDate(generatedAt)}</span>
+        </div>
+        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
+      </div>
     </div>
   );
 }
@@ -440,7 +439,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {data.forecast.analyst_notes && (
           <div className="p-2.5 bg-white/[0.02] border border-white/[0.05] mt-3">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <FileWarning className="w-3 h-3 text-gray-500" />
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Mace Notes</span>
             </div>
             <p className="text-[10px] text-gray-500 leading-relaxed italic">{data.forecast.analyst_notes}</p>
