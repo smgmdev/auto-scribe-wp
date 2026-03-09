@@ -192,7 +192,7 @@ export function AdminSurveillanceView() {
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const [showForecast] = useState(false);
-  const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast'>('feed');
+  const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast' | 'simulator'>('feed');
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
   const currentView = useAppStore((s) => s.currentView);
 
