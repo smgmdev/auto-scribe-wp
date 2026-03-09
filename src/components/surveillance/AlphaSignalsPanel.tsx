@@ -297,7 +297,7 @@ export function AlphaSignalsPanel() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-400 h-7 w-7 p-0"
+            className="text-gray-400 hover:text-white hover:bg-transparent h-7 w-7 p-0"
             onClick={() => setShowHistory(true)}
             title="Signal history"
           >
