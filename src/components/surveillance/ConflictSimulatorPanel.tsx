@@ -369,6 +369,7 @@ export function ConflictSimulatorPanel() {
             New Simulation
           </Button>
         </div>
+        </div>
       </div>
     );
   }
