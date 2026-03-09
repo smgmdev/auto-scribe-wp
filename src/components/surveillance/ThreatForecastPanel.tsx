@@ -509,7 +509,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={(e) => { e.stopPropagation(); deleteForecast(f.id); }}
-                          className="p-1 rounded hover:bg-red-500/20 text-gray-600 hover:text-red-400 transition-colors"
+                          className="p-1 hover:bg-red-500/20 text-gray-600 hover:text-red-400 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
