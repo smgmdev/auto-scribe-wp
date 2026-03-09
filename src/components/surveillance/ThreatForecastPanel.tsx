@@ -200,14 +200,20 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'generate' | 'history')} className="flex-1 flex flex-col min-h-0">
-        <TabsList className="w-full grid grid-cols-2 h-9 bg-black rounded-none border-b border-white/10 p-0 gap-0">
-          <TabsTrigger value="generate" className="text-[11px] text-white/50 rounded-none h-full data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none border-0 transition-colors">
+        <div className="w-full flex h-9 bg-black border-b border-white/10">
+          <button
+            onClick={() => setActiveTab('generate')}
+            className={`flex-1 text-[11px] h-full transition-colors ${activeTab === 'generate' ? 'bg-white text-black' : 'text-white/50'}`}
+          >
             Generate
-          </TabsTrigger>
-          <TabsTrigger value="history" className="text-[11px] text-white/50 rounded-none h-full data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none border-0 transition-colors">
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 text-[11px] h-full transition-colors ${activeTab === 'history' ? 'bg-white text-black' : 'text-white/50'}`}
+          >
             History
-          </TabsTrigger>
-        </TabsList>
+          </button>
+        </div>
 
         {/* Generate Tab */}
         <TabsContent value="generate" className="flex-1 overflow-y-auto p-4 space-y-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
