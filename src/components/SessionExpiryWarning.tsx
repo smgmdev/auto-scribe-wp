@@ -15,8 +15,8 @@ import { Shield } from 'lucide-react';
 const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_BEFORE_EXPIRY_MS = 60 * 1000; // Show warning 1 min before
 const CHECK_INTERVAL_MS = 10 * 1000;
-// Grace period after component mounts to avoid firing immediately on page load/deploy
-const INIT_GRACE_MS = 15 * 1000;
+// Grace period after component mounts to avoid firing immediately on page load/deploy/HMR
+const INIT_GRACE_MS = 35 * 1000;
 
 export function SessionExpiryWarning() {
   const { session, signOut, extendSession } = useAuth();
