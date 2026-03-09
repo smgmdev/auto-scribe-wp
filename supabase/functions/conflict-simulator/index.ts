@@ -25,18 +25,20 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
     let userId: string | null = null;
 
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
-      const { data: { user }, error: authError } = await anonClient.auth.getUser(token);
-      if (authError || !user) {
+    if (authHeader?.startsWith("Bearer ")) {
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+      const anonClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(authHeader.replace("Bearer ", ""));
+      if (claimsError || !claimsData?.claims) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      userId = user.id;
-      const { data: hasAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
-      const { data: profile } = await supabase.from("profiles").select("precision_enabled").eq("id", user.id).single();
+      userId = claimsData.claims.sub as string;
+      const { data: hasAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+      const { data: profile } = await supabase.from("profiles").select("precision_enabled").eq("id", userId).single();
       if (!hasAdmin && !profile?.precision_enabled) {
         return new Response(JSON.stringify({ error: "Forbidden" }), {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -107,31 +109,58 @@ serve(async (req) => {
         ? `\n\nACTIVE ALERTS:\n${relevantAlerts.join("\n")}`
         : "";
 
-      const systemPrompt = `You are a senior geopolitical conflict analyst at a defense intelligence agency. You produce classified-level "What If" conflict simulations for military and policy decision makers.
+      const systemPrompt = `You are a senior geopolitical conflict analyst at a defense intelligence agency. You produce classified-level "What If" full-scale war simulations for military and policy decision makers.
 
 Your analysis must be:
-- Grounded in real-world military capabilities, alliances, and geography
+- A COMPREHENSIVE full-scale war scenario — not limited to current events or tensions
+- Grounded in REAL-WORLD military capabilities: actual troop numbers, equipment inventories, defense budgets, nuclear arsenals, missile systems, air defense networks, naval fleets, cyber warfare capability, space assets
+- Factor in GEOGRAPHY: terrain advantages, border length, strategic chokepoints, depth of territory, climate factors, proximity to supply lines
+- Factor in ECONOMICS: GDP, industrial capacity, war production potential, energy self-sufficiency, food security, sanctions resilience, reserve currency advantage
+- Factor in TECHNOLOGY: military R&D spending, indigenous arms production, 5th-gen fighter capability, hypersonic missiles, drone warfare, EW/cyber capabilities, satellite/ISR assets
+- Factor in LOGISTICS: force projection capability, overseas bases, airlift/sealift capacity, fuel reserves, ammunition stockpiles, supply chain vulnerability
+- Factor in ALLIANCES: treaty obligations (NATO Article 5, mutual defense pacts), likely coalition partners, nuclear umbrella coverage, intelligence sharing networks (Five Eyes, etc.)
+- Factor in POLITICS: domestic political will for war, conscription capability, population size/demographics, historical military culture, public morale factors
+- Factor in NUCLEAR DETERRENCE: first-strike capability, second-strike survivability, nuclear triad status, missile defense systems, MAD doctrine implications
 - Structured with probability-scored escalation paths
-- Include economic impact modeling and alliance cascade analysis
+- The "favored_nation" MUST reflect the TRUE military power balance. Be brutally honest — if one side massively outmatches the other, the win_probability should reflect that (e.g., USA vs North Korea = USA 95%+, Russia vs Estonia = Russia 90%+). Do NOT artificially balance results.
 - Professional, detached, analytical tone — no speculation without evidence
-- The "favored_nation" field MUST be the name of whichever country has the overall military/strategic advantage in this conflict. The "win_probability_pct" must be between 51-99 representing that nation's probability of prevailing. Consider military strength, nuclear capability, GDP, alliances, geography, technology, and manpower.
 
 You must respond ONLY by calling the simulate_conflict function with structured data.`;
 
-      const userPrompt = `Simulate a military conflict scenario between ${country_a} and ${country_b}.
+      const userPrompt = `Simulate a FULL-SCALE CONVENTIONAL WAR between ${country_a} and ${country_b}.
+
+This is NOT about current tensions — simulate an actual all-out military conflict between these two nations. Consider:
+
+MILITARY POWER COMPARISON:
+- Active & reserve military personnel for both sides
+- Main battle tanks, IFVs, artillery pieces
+- Combat aircraft (fighters, bombers, attack helicopters)
+- Naval assets (aircraft carriers, submarines, destroyers, frigates)
+- Missile systems (ballistic, cruise, hypersonic)
+- Air defense systems (S-400, Patriot, THAAD equivalents)
+- Nuclear weapons (warheads count, delivery systems, second-strike capability)
+- Special operations forces & cyber warfare units
+
+STRATEGIC FACTORS:
+- Geographic advantages/disadvantages (terrain, borders, strategic depth)
+- Economic war-sustaining capacity (GDP, industrial base, energy independence)
+- Alliance networks and who would likely intervene
+- Technology gap (generation of equipment, indigenous production capability)
+- Logistics and force projection (can they reach each other? supply lines?)
+- Population and conscription potential
+- Historical military performance and doctrine
+
 ${contextBlock}${alertBlock}
 
-Produce a comprehensive conflict simulation covering:
-1. Initial trigger scenarios (3 most likely)
-2. Escalation ladder (5 phases from diplomatic crisis to full conflict)
-3. Alliance responses and cascade effects
-4. Economic impact on both nations and globally
-5. Most likely outcome with probability
-6. De-escalation opportunities
-7. Critical indicators to watch
-8. IMPORTANT: Which nation is FAVORED to win this conflict (favored_nation) and their win probability (win_probability_pct, 51-99%). This must reflect real-world military power balance. For example, Russia vs Lithuania — Russia is overwhelmingly favored. USA vs a small nation — USA is overwhelmingly favored.
-
-Base your analysis on current geopolitical realities, military capabilities, treaty obligations, and the intelligence data provided above.`;
+Produce a comprehensive war simulation covering:
+1. THREE most likely initial trigger scenarios
+2. FIVE-phase escalation ladder from diplomatic crisis to full-scale war (with nuclear escalation assessment)
+3. Alliance responses — who joins which side, who stays neutral
+4. Economic devastation modeling for both nations and global spillover
+5. Most likely war outcome with realistic probability — WHO WINS and WHY
+6. De-escalation off-ramps at each phase
+7. Critical military indicators and red lines
+8. IMPORTANT: favored_nation must be the country with REAL military superiority. win_probability_pct (51-99%) must reflect actual power asymmetry honestly.`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
