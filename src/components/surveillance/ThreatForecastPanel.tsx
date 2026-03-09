@@ -467,7 +467,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <p className="text-sm text-gray-400 text-center">AI Threat Assessment</p>
               <p className="text-xs text-gray-600 text-center max-w-xs">Produces a professional-grade intelligence assessment analyzing 7 days of surveillance data, active alerts, and escalation patterns with probability-scored predictions.</p>
-              <Button onClick={() => { setSelectedHistoryId(null); generateForecast(); }} className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
+              <Button onClick={() => { setSelectedHistoryId(null); generateForecast(); }} className="w-full mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
                 Generate Assessment
               </Button>
             </div>
