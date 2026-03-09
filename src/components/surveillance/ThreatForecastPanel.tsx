@@ -109,7 +109,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
             <p className="text-sm text-gray-400 text-center">Generate an AI-powered threat forecast</p>
             <p className="text-xs text-gray-600 text-center max-w-xs">Analyzes 7 days of surveillance scans and active alerts to predict escalation patterns for the next 24-72 hours.</p>
             <Button onClick={generateForecast} className="mt-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30">
-              <Zap className="w-4 h-4 mr-2" />
+              <BrainCircuit className="w-4 h-4 mr-2" />
               Generate Forecast
             </Button>
           </div>
