@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react
 import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, BrainCircuit, Flame } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, BrainCircuit, Flame, Zap } from 'lucide-react';
 import { useForecastStore } from '@/stores/forecastStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ThreatForecastPanel } from '@/components/surveillance/ThreatForecastPanel';
 import { ConflictSimulatorPanel } from '@/components/surveillance/ConflictSimulatorPanel';
+import { AlphaSignalsPanel } from '@/components/surveillance/AlphaSignalsPanel';
 
 
 type ScanRegion = 'global' | 'asia' | 'middle_east' | 'europe' | 'us';
@@ -192,7 +193,7 @@ export function AdminSurveillanceView() {
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const [showForecast] = useState(false);
-  const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast' | 'simulator'>('feed');
+  const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast' | 'simulator' | 'alpha'>('feed');
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
   const currentView = useAppStore((s) => s.currentView);
 
@@ -1017,7 +1018,7 @@ export function AdminSurveillanceView() {
               >
                 Feed ({feedEvents.length})
               </button>
-              <button
+               <button
                 onClick={() => setMobileSliderTab('forecast')}
                 className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'forecast' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
@@ -1025,9 +1026,16 @@ export function AdminSurveillanceView() {
               </button>
               <button
                 onClick={() => setMobileSliderTab('simulator')}
-                className={`flex-1 text-[11px] h-full transition-colors flex items-center justify-center gap-1 ${mobileSliderTab === 'simulator' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+                className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'simulator' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
-                AI Simulator
+                Simulator
+              </button>
+              <button
+                onClick={() => setMobileSliderTab('alpha')}
+                className={`flex-1 text-[11px] h-full transition-colors flex items-center justify-center gap-1 ${mobileSliderTab === 'alpha' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+              >
+                <Zap className="w-3 h-3" />
+                Alpha
               </button>
             </div>
 
@@ -1079,9 +1087,13 @@ export function AdminSurveillanceView() {
               <div className="flex-1 overflow-hidden">
                 <ThreatForecastPanel onClose={() => setShowMobileFeed(false)} hideHeader />
               </div>
-            ) : (
+            ) : mobileSliderTab === 'simulator' ? (
               <div className="flex-1 overflow-hidden">
                 <ConflictSimulatorPanel />
+              </div>
+            ) : (
+              <div className="flex-1 overflow-hidden">
+                <AlphaSignalsPanel />
               </div>
             )}
           </div>
