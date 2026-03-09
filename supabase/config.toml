@@ -216,3 +216,6 @@ verify_jwt = false
 
 [functions.fetch-satellites]
 verify_jwt = false
+
+[functions.alpha-signals]
+verify_jwt = false
