@@ -109,7 +109,7 @@ function HeatmapToggle() {
 }
 
 export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
-  const { loading, data, setData, generate: generateForecast, clearGenerated } = useForecastStore();
+  const { loading, data, setData, generate: storeGenerate, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
   const [history, setHistory] = useState<SavedForecast[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -125,7 +125,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
 
   const loadHistory = async () => {
     setHistoryLoading(true);
-    setHistoryLoading(true);
     try {
       const { data: forecasts, error } = await supabase
         .from('threat_forecasts')
@@ -134,7 +133,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         .limit(20);
       
       if (error) throw error;
-      // Cast JSON fields to expected types
       const parsed = (forecasts || []).map((f: any) => ({
         id: f.id,
         created_at: f.created_at,
@@ -144,6 +142,43 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
       setHistory(parsed);
     } catch (err: any) {
       toast.error('Failed to load history');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // Generate and immediately switch to history tab with the new forecast selected
+  const generateForecast = async () => {
+    await storeGenerate();
+    // After generation, switch to history, reload, and auto-select the latest
+    setActiveTab('history');
+    setHistoryLoading(true);
+    setHistory([]);
+    try {
+      const { data: forecasts, error } = await supabase
+        .from('threat_forecasts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (!error && forecasts && forecasts.length > 0) {
+        const parsed = forecasts.map((f: any) => ({
+          id: f.id,
+          created_at: f.created_at,
+          forecast: f.forecast as Forecast,
+          data_points: f.data_points as ForecastResponse['data_points'],
+        }));
+        setHistory(parsed);
+        // Auto-select the newest one
+        const newest = parsed[0];
+        setSelectedHistoryId(newest.id);
+        setData({
+          forecast: newest.forecast,
+          generated_at: newest.created_at,
+          data_points: newest.data_points,
+        });
+      }
+    } catch {
+      // history will load when tab is visited
     } finally {
       setHistoryLoading(false);
     }
@@ -460,17 +495,16 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           )}
 
           {!loading && data && !selectedHistoryId && (
-            <>
-              {renderForecastReport()}
-              <div className="p-3">
-                <Button
-                  onClick={() => { setSelectedHistoryId(null); generateForecast(); }}
-                  className="w-full rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
-                >
-                  Generate New Assessment
-                </Button>
-              </div>
-            </>
+            <div className="flex flex-col items-center justify-center h-full gap-3 px-3">
+              <p className="text-sm text-gray-400 text-center">Assessment generated</p>
+              <p className="text-xs text-gray-600 text-center">Your latest forecast is available in History.</p>
+              <Button onClick={() => setActiveTab('history')} className="w-full mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
+                View in History
+              </Button>
+              <Button onClick={() => { setSelectedHistoryId(null); generateForecast(); }} variant="outline" className="w-full rounded-none border-white/10 text-gray-400 hover:text-white">
+                Generate New Assessment
+              </Button>
+            </div>
           )}
         </TabsContent>
 
