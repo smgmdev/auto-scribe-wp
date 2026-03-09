@@ -592,11 +592,9 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                           </div>
                         </div>
                         <p className="text-[10px] text-gray-500 mt-1.5 line-clamp-2 leading-snug">{f.forecast.trend_summary}</p>
-                        <div className="flex items-center gap-2 mt-2 text-[9px] text-gray-600">
+                        <div className="flex items-center gap-3 mt-2 text-[9px] text-gray-600">
                           <span>{formatDate(f.created_at)}</span>
-                          <span>•</span>
                           <span>{f.data_points.scans_analyzed} scans</span>
-                          <span>•</span>
                           <span>{f.forecast.hotspots?.length || 0} hotspots</span>
                         </div>
                       </div>
