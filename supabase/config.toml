@@ -210,3 +210,9 @@ verify_jwt = false
 
 [functions.country-risk-profile]
 verify_jwt = false
+
+[functions.fetch-earthquakes]
+verify_jwt = false
+
+[functions.fetch-satellites]
+verify_jwt = false
