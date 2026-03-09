@@ -19,7 +19,7 @@ const CHECK_INTERVAL_MS = 10 * 1000;
 const INIT_GRACE_MS = 35 * 1000;
 
 export function SessionExpiryWarning() {
-  const { session, signOut, extendSession } = useAuth();
+  const { session, loading, signOut, extendSession } = useAuth();
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
