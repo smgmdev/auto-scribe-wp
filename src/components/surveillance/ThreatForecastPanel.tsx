@@ -268,7 +268,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Escalation Drivers</span>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-0">
               {data.forecast.escalation_drivers.map((d, i) => (
                 <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                   <div className="flex items-center gap-2 mb-1">
@@ -295,7 +295,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Escalation Hotspots</span>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-0">
               {data.forecast.hotspots.map((h, i) => (
                 <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -327,7 +327,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Predictions</span>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-0">
               {data.forecast.predictions.map((p, i) => (
                 <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                   <div className="flex items-center gap-2 mb-1">
@@ -359,7 +359,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex items-center gap-1.5 pl-2.5 pt-3 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Stabilizing Factors</span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0">
               {data.forecast.stabilizing_factors.map((f, i) => (
                 <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 bg-emerald-500/[0.04] border border-emerald-500/10">
                   <span className="text-[12px] text-emerald-500 mt-[3px]">◆</span>
@@ -376,7 +376,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex items-center gap-1.5 pl-2.5 pt-3 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Key Indicators to Watch</span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0">
               {data.forecast.key_indicators.map((ind, i) => (
                 <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 bg-white/[0.02]">
                   <span className="text-[14px] text-purple-400 mt-[1px] leading-none">▸</span>
