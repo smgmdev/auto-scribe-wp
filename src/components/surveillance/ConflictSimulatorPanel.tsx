@@ -281,8 +281,8 @@ export function ConflictSimulatorPanel() {
       <div className="flex flex-col h-full overflow-hidden">
         <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
         {/* Favored Nation Banner */}
-        <div className={cn("h-9 flex items-center justify-center border", tc.border, tc.bg, tc.text)}>
-          <Shield className="w-4 h-4 mr-2" />
+        <div className={cn("min-h-[36px] flex items-start justify-center border px-3 py-2", tc.border, tc.bg, tc.text)}>
+          <Shield className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
           <span className="text-xs font-bold tracking-widest">IN FAVOR: {favoredInfo.nation?.toUpperCase()} — {favoredInfo.pct}%</span>
         </div>
 
