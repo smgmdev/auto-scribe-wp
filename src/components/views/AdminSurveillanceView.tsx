@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ThreatForecastPanel } from '@/components/surveillance/ThreatForecastPanel';
 import { ConflictSimulatorPanel } from '@/components/surveillance/ConflictSimulatorPanel';
+import { AlphaSignalsPanel } from '@/components/surveillance/AlphaSignalsPanel';
 
 
 type ScanRegion = 'global' | 'asia' | 'middle_east' | 'europe' | 'us';
