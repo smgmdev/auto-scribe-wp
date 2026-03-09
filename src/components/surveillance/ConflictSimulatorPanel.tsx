@@ -520,7 +520,7 @@ export function ConflictSimulatorPanel() {
               setSearchB(s.b);
               runSimulation(s.a, s.b);
             }}
-            className="text-[10px] px-2 py-1.5 bg-white/[0.03] border border-white/[0.06] text-gray-400 hover:bg-white/[0.08] hover:text-white transition-colors text-left"
+            className="text-[11px] px-2 py-1.5 bg-white/[0.03] border border-white/[0.06] text-gray-400 hover:bg-white/[0.08] hover:text-white transition-colors text-left"
           >
             {s.label}
           </button>
