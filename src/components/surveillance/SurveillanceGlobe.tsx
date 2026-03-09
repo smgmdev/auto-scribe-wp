@@ -44,6 +44,12 @@ export interface EarthquakeData {
   type: string;
 }
 
+export interface PredictedHotspot {
+  region: string;
+  risk_score: number;
+  threat_type: string;
+}
+
 interface SurveillanceGlobeProps {
   countries: CountryData[];
   onCountryClick: (country: CountryData) => void;
@@ -55,6 +61,7 @@ interface SurveillanceGlobeProps {
   tradeTrajectories?: MissileTrajectory[];
   satellites?: SatelliteData[];
   earthquakes?: EarthquakeData[];
+  predictedHotspots?: PredictedHotspot[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
   resetTrigger?: number;
