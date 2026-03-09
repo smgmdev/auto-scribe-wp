@@ -385,7 +385,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
           <div className="pt-2 pb-1 flex justify-center">
             <Button
               size="sm"
-              onClick={generateForecast}
+              onClick={() => { setSelectedHistoryId(null); generateForecast(); }}
               className="h-7 text-[10px] rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
             >
               Generate New Assessment
