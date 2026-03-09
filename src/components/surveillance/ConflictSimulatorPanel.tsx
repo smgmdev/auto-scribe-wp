@@ -558,10 +558,6 @@ export function ConflictSimulatorPanel() {
           )}
         </div>
 
-        {/* Separator */}
-        <div className="flex items-center justify-center">
-          <span className="text-[10px] font-bold text-red-500/40">—</span>
-        </div>
 
         {/* Country B */}
         <div className="relative">
