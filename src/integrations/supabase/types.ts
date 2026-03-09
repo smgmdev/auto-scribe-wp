@@ -744,6 +744,45 @@ export type Database = {
         }
         Relationships: []
       }
+      conflict_simulations: {
+        Row: {
+          completed_at: string | null
+          country_a: string
+          country_b: string
+          created_at: string
+          error_message: string | null
+          id: string
+          result: Json | null
+          run_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          country_a: string
+          country_b: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          result?: Json | null
+          run_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          country_a?: string
+          country_b?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          result?: Json | null
+          run_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       credit_packs: {
         Row: {
           active: boolean
