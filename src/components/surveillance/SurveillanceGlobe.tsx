@@ -1209,6 +1209,7 @@ function RotatingGlobe({
 
         <SatelliteInstances satellites={satellites} />
         <EarthquakeInstances earthquakes={earthquakes} />
+        {predictedHotspots.length > 0 && <HeatmapOverlay hotspots={predictedHotspots} />}
       </group>
 
       <OrbitControls
