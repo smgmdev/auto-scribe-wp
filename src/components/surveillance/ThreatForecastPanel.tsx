@@ -508,54 +508,56 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                 </div>
               )}
 
-          {!historyLoading && history.length > 0 && (
-            <div className="space-y-2">
-              {history.map((f) => {
-                const tlc = threatLevelConfig[f.forecast.threat_level_assessment] || threatLevelConfig.GUARDED;
-                return (
-                  <div
-                    key={f.id}
-                    className={cn(
-                      "p-3 border cursor-pointer transition-all hover:bg-white/[0.03]",
-                      selectedHistoryId === f.id ? "border-amber-500/40 bg-amber-500/5" : "border-white/[0.06] bg-white/[0.02]"
-                    )}
-                    onClick={() => viewHistoricalForecast(f)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", tlc.color, tlc.border)}>
-                          {f.forecast.threat_level_assessment}
-                        </Badge>
-                        <Badge variant="outline" className={cn(
-                          "text-[9px] px-1.5 py-0 h-4",
-                          f.forecast.overall_trend === 'escalating' ? 'text-red-400 border-red-500/30' :
-                          f.forecast.overall_trend === 'de-escalating' ? 'text-emerald-400 border-emerald-500/30' : 'text-amber-400 border-amber-500/30'
-                        )}>
-                          {f.forecast.overall_trend}
-                        </Badge>
+              {!historyLoading && history.length > 0 && (
+                <div className="space-y-2">
+                  {history.map((f) => {
+                    const tlc = threatLevelConfig[f.forecast.threat_level_assessment] || threatLevelConfig.GUARDED;
+                    return (
+                      <div
+                        key={f.id}
+                        className={cn(
+                          "p-3 border cursor-pointer transition-all hover:bg-white/[0.03]",
+                          selectedHistoryId === f.id ? "border-amber-500/40 bg-amber-500/5" : "border-white/[0.06] bg-white/[0.02]"
+                        )}
+                        onClick={() => viewHistoricalForecast(f)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", tlc.color, tlc.border)}>
+                              {f.forecast.threat_level_assessment}
+                            </Badge>
+                            <Badge variant="outline" className={cn(
+                              "text-[9px] px-1.5 py-0 h-4",
+                              f.forecast.overall_trend === 'escalating' ? 'text-red-400 border-red-500/30' :
+                              f.forecast.overall_trend === 'de-escalating' ? 'text-emerald-400 border-emerald-500/30' : 'text-amber-400 border-amber-500/30'
+                            )}>
+                              {f.forecast.overall_trend}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); deleteForecast(f.id); }}
+                              className="p-1 hover:bg-red-500/20 text-gray-600 hover:text-red-400 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                            <ChevronRight className="w-4 h-4 text-gray-600" />
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-1.5 line-clamp-2">{f.forecast.trend_summary}</p>
+                        <div className="flex items-center gap-2 mt-2 text-[9px] text-gray-600">
+                          <span>{formatDate(f.created_at)}</span>
+                          <span>•</span>
+                          <span>{f.data_points.scans_analyzed} scans</span>
+                          <span>•</span>
+                          <span>{f.forecast.hotspots?.length || 0} hotspots</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); deleteForecast(f.id); }}
-                          className="p-1 hover:bg-red-500/20 text-gray-600 hover:text-red-400 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                        <ChevronRight className="w-4 h-4 text-gray-600" />
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-gray-500 mt-1.5 line-clamp-2">{f.forecast.trend_summary}</p>
-                    <div className="flex items-center gap-2 mt-2 text-[9px] text-gray-600">
-                      <span>{formatDate(f.created_at)}</span>
-                      <span>•</span>
-                      <span>{f.data_points.scans_analyzed} scans</span>
-                      <span>•</span>
-                      <span>{f.forecast.hotspots?.length || 0} hotspots</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
           )}
         </TabsContent>
       </Tabs>
