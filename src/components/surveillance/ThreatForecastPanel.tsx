@@ -376,7 +376,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex items-center gap-1.5 pl-2.5 pt-3 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Key Indicators to Watch</span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0">
               {data.forecast.key_indicators.map((ind, i) => (
                 <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 bg-white/[0.02]">
                   <span className="text-[14px] text-purple-400 mt-[1px] leading-none">▸</span>
