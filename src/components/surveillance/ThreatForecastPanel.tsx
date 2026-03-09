@@ -108,11 +108,14 @@ function HeatmapToggle() {
   );
 }
 
-function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
+function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate, trendLabel, trendColor, TrendIcon }: {
   text: string;
   dataPoints: ForecastResponse['data_points'];
   generatedAt: string;
   formatDate: (d: string) => string;
+  trendLabel?: string;
+  trendColor?: string;
+  TrendIcon?: React.ElementType;
 }) {
   const [expanded, setExpanded] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -127,8 +130,16 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
       className="relative px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
       onClick={() => setExpanded(e => !e)}
     >
-      <div className="flex items-center justify-between pt-2.5 mb-1.5">
+      <div className="flex items-center gap-2 pt-2.5 mb-1.5">
         <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
+        {trendLabel && TrendIcon && (
+          <>
+            <TrendIcon className={cn("w-3.5 h-3.5", trendColor)} />
+            <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4 uppercase", trendColor, 'border-current')}>
+              {trendLabel}
+            </Badge>
+          </>
+        )}
       </div>
       <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
         <div ref={contentRef}>
