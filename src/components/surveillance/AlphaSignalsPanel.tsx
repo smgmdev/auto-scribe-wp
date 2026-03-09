@@ -231,11 +231,13 @@ export function AlphaSignalsPanel() {
   if (showHistory) {
     return (
       <div className="flex flex-col h-full text-white">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-          <span className="text-sm font-medium">Signal History</span>
-          <Button variant="ghost" size="sm" className="text-gray-400 h-7 text-xs" onClick={() => setShowHistory(false)}>
-            Back
-          </Button>
+        <div className="px-4 border-b border-white/10" style={{ height: 34, display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center justify-between w-full">
+            <h3 className="text-sm font-semibold tracking-tight">Signal History</h3>
+            <Button variant="ghost" size="sm" className="text-gray-400 h-7 text-xs" onClick={() => setShowHistory(false)}>
+              Back
+            </Button>
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
           {savedSignals.length === 0 ? (
