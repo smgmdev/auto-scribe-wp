@@ -452,7 +452,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
           {selectedHistoryId && data ? (
             <div className="space-y-4">
               <button
-                onClick={() => { setSelectedHistoryId(null); setData(null); }}
+                onClick={() => { setSelectedHistoryId(null); clearGenerated(); }}
                 className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-white transition-colors"
               >
                 <ChevronRight className="w-3 h-3 rotate-180" />
