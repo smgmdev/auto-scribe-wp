@@ -261,33 +261,29 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="space-y-1.5">
               {data.forecast.hotspots.map((h, i) => (
                 <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-10 text-center">
-                      <div className={cn("text-sm font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
-                        {h.risk_score}
-                      </div>
-                      <div className={cn("text-[9px]", h.trend === 'rising' ? 'text-red-500' : h.trend === 'declining' ? 'text-emerald-500' : 'text-gray-600')}>
-                        {trendArrow(h.trend)} {h.trend}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-medium text-white">{h.region}</span>
-                        <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 bg-white/5 text-gray-500 border-white/10">
-                          {h.threat_type}
-                        </Badge>
-                        <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
-                          <div className={cn("h-full rounded-full", riskColor(h.risk_score))} style={{ width: `${h.risk_score}%` }} />
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{h.rationale}</p>
-                      {h.cascade_risk && (
-                        <p className="text-[9px] text-amber-600 mt-1 leading-relaxed">
-                          <span>Cascade: {h.cascade_risk}</span>
-                        </p>
-                      )}
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[11px] font-medium text-white">{h.region}</span>
+                    <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 bg-white/5 text-gray-500 border-white/10">
+                      {h.threat_type}
+                    </Badge>
+                    <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div className={cn("h-full rounded-full", riskColor(h.risk_score))} style={{ width: `${h.risk_score}%` }} />
                     </div>
                   </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={cn("text-[11px] font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
+                      {h.risk_score}
+                    </span>
+                    <span className={cn("text-[9px]", h.trend === 'rising' ? 'text-red-500' : h.trend === 'declining' ? 'text-emerald-500' : 'text-gray-600')}>
+                      {trendArrow(h.trend)} {h.trend}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{h.rationale}</p>
+                  {h.cascade_risk && (
+                    <p className="text-[9px] text-amber-600 mt-1 leading-relaxed">
+                      <span>Cascade: {h.cascade_risk}</span>
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
