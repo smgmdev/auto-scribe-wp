@@ -53,6 +53,8 @@ interface Simulation {
   alliance_responses: AllianceResponse[];
   economic_impact: EconomicImpact;
   most_likely_outcome: MostLikelyOutcome;
+  favored_nation?: string;
+  win_probability_pct?: number;
   deescalation_opportunities: string[];
   critical_indicators: string[];
 }
