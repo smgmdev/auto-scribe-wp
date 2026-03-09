@@ -14,11 +14,13 @@ interface SimulatorStore {
   runId: string | null;
   countryA: string;
   countryB: string;
+  startedAt: number | null;
   setLoading: (v: boolean) => void;
   setResult: (r: SimulationResult | null) => void;
   setRunId: (id: string | null) => void;
   setCountryA: (c: string) => void;
   setCountryB: (c: string) => void;
+  setStartedAt: (t: number | null) => void;
   clear: () => void;
 }
 
@@ -28,10 +30,12 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
   runId: null,
   countryA: '',
   countryB: '',
+  startedAt: null,
   setLoading: (v) => set({ loading: v }),
   setResult: (r) => set({ result: r }),
   setRunId: (id) => set({ runId: id }),
   setCountryA: (c) => set({ countryA: c }),
   setCountryB: (c) => set({ countryB: c }),
-  clear: () => set({ loading: false, result: null, runId: null, countryA: '', countryB: '' }),
+  setStartedAt: (t) => set({ startedAt: t }),
+  clear: () => set({ loading: false, result: null, runId: null, countryA: '', countryB: '', startedAt: null }),
 }));
