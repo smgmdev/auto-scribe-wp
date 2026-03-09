@@ -272,6 +272,7 @@ export function MissileAlertListener() {
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
   const dismissedRef = useRef<Set<string>>(new Set());
   const dismissedTitlesRef = useRef<Set<string>>(new Set());
+  const dismissedPairsRef = useRef<Set<string>>(new Set());
   const dismissedLoadedRef = useRef(false);
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -378,11 +379,15 @@ export function MissileAlertListener() {
   const dismissAlert = useCallback(async (id: string) => {
     // Stop sound immediately on ANY dismiss — user is actively closing alerts
     stopSound();
-    // Track both the ID and the title for content-based deduplication
+    // Track the ID, title, and country pair for content-based deduplication
     const alertObj = alerts.find(a => a.id === id);
     const alertTitle = alertObj?.title;
     dismissedRef.current.add(id);
     if (alertTitle) dismissedTitlesRef.current.add(alertTitle.toLowerCase().trim());
+    // Track country pair so similar-trajectory alerts are suppressed
+    if (alertObj?.origin_country_code && alertObj?.destination_country_code) {
+      dismissedPairsRef.current.add(`${alertObj.origin_country_code}->${alertObj.destination_country_code}`);
+    }
     setAlerts(prev => prev.filter(a => a.id !== id));
     // Persist to DB with title for future content-based dedup
     try {
@@ -416,13 +421,29 @@ export function MissileAlertListener() {
             .select('alert_id, dismissed_title')
             .eq('user_id', userData.user.id);
           if (dismissed) {
+            // Collect all dismissed alert IDs to batch-fetch their country pairs
+            const dismissedIds = dismissed.map((d: any) => d.alert_id);
             dismissed.forEach((d: any) => {
               dismissedRef.current.add(d.alert_id);
               if (d.dismissed_title) {
                 dismissedTitlesRef.current.add(d.dismissed_title.toLowerCase().trim());
               }
             });
-            console.log(`[Alerts] Loaded ${dismissed.length} dismissed alerts (${dismissedTitlesRef.current.size} unique titles)`);
+            // Fetch origin/destination pairs for dismissed alerts to build pair dedup set
+            if (dismissedIds.length > 0) {
+              const { data: pairData } = await supabase
+                .from('missile_alerts')
+                .select('origin_country_code, destination_country_code')
+                .in('id', dismissedIds)
+                .not('origin_country_code', 'is', null)
+                .not('destination_country_code', 'is', null);
+              if (pairData) {
+                pairData.forEach((p: any) => {
+                  dismissedPairsRef.current.add(`${p.origin_country_code}->${p.destination_country_code}`);
+                });
+              }
+            }
+            console.log(`[Alerts] Loaded ${dismissed.length} dismissed alerts (${dismissedTitlesRef.current.size} titles, ${dismissedPairsRef.current.size} pairs)`);
           }
         }
       }
@@ -443,6 +464,11 @@ export function MissileAlertListener() {
           const normalizedTitle = a.title.toLowerCase().trim();
           // Exact title match
           if (dismissedTitlesRef.current.has(normalizedTitle)) return false;
+          // Country-pair dedup: if user dismissed any alert with same trajectory, skip
+          if (a.origin_country_code && a.destination_country_code) {
+            const pair = `${a.origin_country_code}->${a.destination_country_code}`;
+            if (dismissedPairsRef.current.has(pair)) return false;
+          }
           // Fuzzy title match against all dismissed titles
           for (const dt of dismissedTitlesRef.current) {
             if (titlesSimilar(a.title, dt)) return false;
