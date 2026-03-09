@@ -508,7 +508,7 @@ export function AlphaSignalsPanel() {
                             {risk.probability_pct}%
                           </span>
                         </div>
-                        <p className="text-[10px] text-gray-400 leading-snug">{risk.market_impact}</p>
+                        <p className="text-[10px] text-gray-400 leading-snug mt-1">{risk.market_impact}</p>
                         <span className="text-[9px] text-blue-300/70 leading-snug">{risk.hedge}</span>
                       </div>
                     </div>
