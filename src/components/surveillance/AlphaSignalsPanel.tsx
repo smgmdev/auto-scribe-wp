@@ -323,12 +323,7 @@ export function AlphaSignalsPanel() {
       ) : (
         <>
           {/* Market Summary */}
-          <div className="px-4 py-3 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5">
-            <div className="flex items-start gap-2">
-              <Eye className="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0" />
-              <p className="text-[11px] text-gray-300 leading-relaxed">{data.market_summary}</p>
-            </div>
-          </div>
+          <SummaryBlock text={data.market_summary} />
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
