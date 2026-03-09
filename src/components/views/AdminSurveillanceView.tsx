@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { ThreatForecastPanel } from '@/components/surveillance/ThreatForecastPanel';
 
 
 type ScanRegion = 'global' | 'asia' | 'middle_east' | 'europe' | 'us';
