@@ -326,7 +326,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1.5">
                     {data.forecast.hotspots.map((h, i) => (
-                      <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                      <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                         <div className="flex items-center gap-3">
                           <div className="flex-shrink-0 w-10 text-center">
                             <div className={cn("text-sm font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
