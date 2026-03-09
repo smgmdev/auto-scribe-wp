@@ -379,11 +379,15 @@ export function MissileAlertListener() {
   const dismissAlert = useCallback(async (id: string) => {
     // Stop sound immediately on ANY dismiss — user is actively closing alerts
     stopSound();
-    // Track both the ID and the title for content-based deduplication
+    // Track the ID, title, and country pair for content-based deduplication
     const alertObj = alerts.find(a => a.id === id);
     const alertTitle = alertObj?.title;
     dismissedRef.current.add(id);
     if (alertTitle) dismissedTitlesRef.current.add(alertTitle.toLowerCase().trim());
+    // Track country pair so similar-trajectory alerts are suppressed
+    if (alertObj?.origin_country_code && alertObj?.destination_country_code) {
+      dismissedPairsRef.current.add(`${alertObj.origin_country_code}->${alertObj.destination_country_code}`);
+    }
     setAlerts(prev => prev.filter(a => a.id !== id));
     // Persist to DB with title for future content-based dedup
     try {
