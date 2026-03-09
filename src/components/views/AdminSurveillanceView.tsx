@@ -1018,7 +1018,7 @@ export function AdminSurveillanceView() {
               >
                 Feed ({feedEvents.length})
               </button>
-              <button
+               <button
                 onClick={() => setMobileSliderTab('forecast')}
                 className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'forecast' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
@@ -1026,9 +1026,16 @@ export function AdminSurveillanceView() {
               </button>
               <button
                 onClick={() => setMobileSliderTab('simulator')}
-                className={`flex-1 text-[11px] h-full transition-colors flex items-center justify-center gap-1 ${mobileSliderTab === 'simulator' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+                className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'simulator' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
-                AI Simulator
+                Simulator
+              </button>
+              <button
+                onClick={() => setMobileSliderTab('alpha')}
+                className={`flex-1 text-[11px] h-full transition-colors flex items-center justify-center gap-1 ${mobileSliderTab === 'alpha' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+              >
+                <Zap className="w-3 h-3" />
+                Alpha
               </button>
             </div>
 
