@@ -562,9 +562,9 @@ export function ConflictSimulatorPanel() {
           )}
         </div>
 
-        {/* VS indicator */}
+        {/* Separator */}
         <div className="flex items-center justify-center">
-          <span className="text-[10px] font-bold text-red-500/40">VS</span>
+          <span className="text-[10px] font-bold text-red-500/40">—</span>
         </div>
 
         {/* Country B */}
