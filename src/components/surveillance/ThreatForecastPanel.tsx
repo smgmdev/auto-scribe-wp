@@ -124,12 +124,11 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
 
   return (
     <div
-      className="px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
+      className="relative px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
       onClick={() => setExpanded(e => !e)}
     >
       <div className="flex items-center justify-between pt-2.5 mb-1.5">
         <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
-        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
       </div>
       <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
         <div ref={contentRef}>
@@ -167,6 +166,7 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
           )}
         </div>
       </div>
+      <ChevronDown className={cn("absolute bottom-2 right-3 w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
     </div>
   );
 }
