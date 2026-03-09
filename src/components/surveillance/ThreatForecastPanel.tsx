@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useForecastStore } from '@/stores/forecastStore';
+import { useAppStore } from '@/stores/appStore';
 
 interface Hotspot {
   region: string;
