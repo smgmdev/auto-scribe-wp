@@ -87,7 +87,6 @@ function HeatmapToggle() {
       )}
     >
       <div className="flex items-center gap-2">
-        <Flame className={cn("w-3.5 h-3.5", showHeatmap ? "text-rose-400" : "text-gray-600")} />
         <span className={cn("text-[11px]", showHeatmap ? "text-rose-300" : "text-gray-500")}>
           Predictive Heatmap
         </span>
