@@ -92,16 +92,32 @@ const assetClassColors: Record<string, string> = {
 };
 
 export function AlphaSignalsPanel() {
-  const [loading, setLoading] = useState(false);
+  const { loading, progress, data: storeData, setLoading, setProgress, setData: setStoreData, setError } = useAlphaStore();
   const [data, setData] = useState<AlphaData | null>(null);
   const [savedSignals, setSavedSignals] = useState<SavedSignal[]>([]);
   const [activeTab, setActiveTab] = useState('signals');
   const [expandedSignal, setExpandedSignal] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Sync store data to local state
+  useEffect(() => {
+    if (storeData && !loading) {
+      setData(storeData);
+      loadSavedSignals();
+    }
+  }, [storeData, loading]);
 
   // Load latest saved signals on mount
   useEffect(() => {
     loadSavedSignals();
+  }, []);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (progressRef.current) clearInterval(progressRef.current);
+    };
   }, []);
 
   const loadSavedSignals = async () => {
@@ -122,7 +138,7 @@ export function AlphaSignalsPanel() {
       setSavedSignals(mapped);
 
       // Load most recent as current view if no fresh data
-      if (!data && mapped.length > 0) {
+      if (!data && !storeData && mapped.length > 0) {
         const latest = mapped[0];
         setData({
           market_summary: latest.market_summary,
@@ -136,23 +152,44 @@ export function AlphaSignalsPanel() {
     }
   };
 
-  const generateSignals = async () => {
+  const generateSignals = useCallback(async () => {
+    if (loading) return;
     setLoading(true);
+    setProgress(0);
+    setError(null);
+
+    // Simulate progress — AI call takes ~15-30s
+    let currentProgress = 0;
+    progressRef.current = setInterval(() => {
+      currentProgress += Math.random() * 8 + 2;
+      if (currentProgress > 92) currentProgress = 92;
+      setProgress(Math.round(currentProgress));
+    }, 800);
+
     try {
       const { data: result, error } = await supabase.functions.invoke('alpha-signals');
+      if (progressRef.current) clearInterval(progressRef.current);
+      setProgress(100);
+      
       if (error) throw error;
       if (result?.error) throw new Error(result.error);
+      
+      setStoreData(result);
       setData(result);
       setShowHistory(false);
       toast.success('Alpha signals generated');
-      // Refresh saved list
       loadSavedSignals();
     } catch (err: any) {
+      if (progressRef.current) clearInterval(progressRef.current);
+      setError(err.message || 'Failed to generate signals');
       toast.error(err.message || 'Failed to generate signals');
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+        setProgress(0);
+      }, 500);
     }
-  };
+  }, [loading, setLoading, setProgress, setError, setStoreData]);
 
   const deleteSignal = async (id: string) => {
     await supabase.from('geopolitical_alpha_signals').delete().eq('id', id);
