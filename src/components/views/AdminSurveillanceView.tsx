@@ -1051,12 +1051,6 @@ export function AdminSurveillanceView() {
           </div>
         </SheetContent>
       </Sheet>
-      {/* Forecast slide-over (desktop only) */}
-      <Sheet open={showForecast} onOpenChange={setShowForecast} modal={false}>
-        <SheetContent side="right" className="w-full sm:w-[420px] p-0 bg-[#080c14]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3 hidden sm:flex">
-          <ThreatForecastPanel onClose={() => setShowForecast(false)} />
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }
