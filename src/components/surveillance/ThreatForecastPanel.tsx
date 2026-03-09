@@ -300,13 +300,11 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                     </Badge>
                   </div>
                   <p className="text-[11px] text-gray-200 leading-relaxed">{p.prediction}</p>
-                  <p className="text-[10px] text-gray-600 mt-1 flex items-start gap-1">
-                    <FileWarning className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-gray-600 mt-1">
                     {p.evidence}
                   </p>
                   {p.trigger_conditions && (
-                    <p className="text-[9px] text-blue-600 mt-1 flex items-start gap-1">
-                      <Eye className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" />
+                    <p className="text-[9px] text-blue-600 mt-1">
                       <span>Trigger: {p.trigger_conditions}</span>
                     </p>
                   )}
