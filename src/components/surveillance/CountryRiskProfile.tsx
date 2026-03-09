@@ -99,11 +99,18 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
       const { data, error } = await supabase.functions.invoke('country-risk-profile', {
         body: { country_name: countryName, country_code: countryCode },
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        console.error('country-risk-profile invoke error:', error);
+        throw error;
+      }
+      if (data?.error) {
+        console.error('country-risk-profile data error:', data.error);
+        throw new Error(data.error);
+      }
       setProfile(data.profile);
       setExpanded(true);
     } catch (err: any) {
+      console.error('country-risk-profile caught:', err);
       toast.error(err.message || 'Failed to generate risk profile');
     } finally {
       setLoading(false);
