@@ -496,10 +496,10 @@ export function ConflictSimulatorPanel() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-3 border-b border-white/5">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[12px] font-bold text-white tracking-wide">CONFLICT SIMULATOR</span>
-        </div>
+      <div className="px-4 border-b border-white/10" style={{ height: 34, display: 'flex', alignItems: 'center' }}>
+        <h3 className="text-sm font-semibold tracking-tight">Conflict Simulator</h3>
+      </div>
+      <div className="px-3 pt-2 pb-2">
         <p className="text-[11px] text-gray-500 leading-relaxed">
           AI-powered "What If" scenario modeling. Select two nations to generate a comprehensive escalation analysis with probability-scored outcomes.
         </p>
