@@ -70,7 +70,7 @@ export const useForecastStore = create<ForecastStore>((set, get) => ({
 
   generate: async () => {
     if (get().loading) return;
-    set({ loading: true, error: null, data: null });
+    set({ loading: true, error: null, data: null, startedAt: Date.now() });
     try {
       const { data: result, error } = await supabase.functions.invoke('threat-forecast');
       if (error) throw error;
