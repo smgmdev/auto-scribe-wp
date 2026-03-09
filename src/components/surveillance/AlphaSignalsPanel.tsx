@@ -262,8 +262,8 @@ export function AlphaSignalsPanel() {
   return (
     <div className="flex flex-col h-full text-white">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/10">
-        <div className="flex items-center justify-between mb-2">
+      <div className="px-4 border-b border-white/10" style={{ height: 34, display: 'flex', alignItems: 'center' }}>
+        <div className="flex items-center justify-between w-full">
           <h3 className="text-sm font-semibold tracking-tight">Market Signals</h3>
           <Button
             variant="ghost"
