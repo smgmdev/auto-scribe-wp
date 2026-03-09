@@ -275,6 +275,8 @@ export function AlphaSignalsPanel() {
             <History className="w-3.5 h-3.5" />
           </Button>
         </div>
+      </div>
+      <div>
         <Button
           onClick={generateSignals}
           disabled={loading}
