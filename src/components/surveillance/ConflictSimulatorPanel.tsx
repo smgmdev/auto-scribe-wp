@@ -536,7 +536,7 @@ export function ConflictSimulatorPanel() {
         <span className="text-[9px] text-gray-600 uppercase tracking-wider">Custom Simulation</span>
       </div>
 
-      <div className="px-3 space-y-2 pb-3">
+      <div className="px-3 space-y-1 pb-3">
         {/* Country A */}
         <div className="relative">
           <label className="text-[9px] text-red-400/70 uppercase tracking-wider mb-0.5 block">Aggressor / Nation A</label>
@@ -545,7 +545,7 @@ export function ConflictSimulatorPanel() {
             onChange={(e) => { setSearchA(e.target.value); setShowDropdownA(true); setCountryA(''); }}
             onFocus={() => setShowDropdownA(true)}
             placeholder="Search country..."
-            className="w-full h-7 px-2 text-[11px] bg-white/5 border border-white/10 text-white placeholder:text-gray-600 outline-none focus:border-red-500/30"
+            className="w-full h-9 px-2 text-[11px] bg-white/5 border border-white/10 text-white placeholder:text-gray-600 outline-none focus:border-red-500/30"
           />
           {showDropdownA && searchA && filteredA.length > 0 && (
             <div className="absolute z-50 w-full mt-0.5 bg-[#0d1220] border border-white/10 max-h-32 overflow-y-auto [scrollbar-width:thin]">
@@ -575,7 +575,7 @@ export function ConflictSimulatorPanel() {
             onChange={(e) => { setSearchB(e.target.value); setShowDropdownB(true); setCountryB(''); }}
             onFocus={() => setShowDropdownB(true)}
             placeholder="Search country..."
-            className="w-full h-7 px-2 text-[11px] bg-white/5 border border-white/10 text-white placeholder:text-gray-600 outline-none focus:border-blue-500/30"
+            className="w-full h-9 px-2 text-[11px] bg-white/5 border border-white/10 text-white placeholder:text-gray-600 outline-none focus:border-blue-500/30"
           />
           {showDropdownB && searchB && filteredB.length > 0 && (
             <div className="absolute z-50 w-full mt-0.5 bg-[#0d1220] border border-white/10 max-h-32 overflow-y-auto [scrollbar-width:thin]">
