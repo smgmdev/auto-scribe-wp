@@ -166,15 +166,51 @@ export function ConflictSimulatorPanel() {
   const sim = result?.simulation;
   const tc = sim ? threatColors[sim.threat_level] || threatColors.MODERATE : null;
 
+  // Simulated progress for loading state
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (!loading) {
+      setProgress(0);
+      return;
+    }
+    setProgress(2);
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 95) return prev;
+        // Slow down as we approach 95%
+        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1 : 0.5;
+        return Math.min(prev + increment, 95);
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [loading]);
+
   if (loading) {
+    const stageLabel = progress < 20 ? 'Initializing simulation...'
+      : progress < 40 ? 'Analyzing military capabilities...'
+      : progress < 60 ? 'Mapping alliance networks...'
+      : progress < 80 ? 'Modeling escalation scenarios...'
+      : 'Compiling intelligence report...';
+
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3">
+      <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
         <div className="relative">
-          <Swords className="w-8 h-8 text-red-400 animate-pulse" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping" />
+          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
         </div>
-        <p className="text-xs text-gray-400">Running conflict simulation...</p>
-        <p className="text-[10px] text-gray-600">Analyzing military capabilities, alliances & intelligence</p>
+        <div className="w-full max-w-[220px] space-y-2">
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-gray-400">{stageLabel}</span>
+            <span className="text-[10px] font-mono text-blue-400">{Math.round(progress)}%</span>
+          </div>
+        </div>
+        <p className="text-[10px] text-gray-600 text-center">You can close this panel — simulation will continue in background</p>
       </div>
     );
   }
