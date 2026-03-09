@@ -174,6 +174,7 @@ export function AdminSurveillanceView() {
   const showHeatmap = useAppStore((s) => s.showHeatmap);
   const setShowHeatmap = useAppStore((s) => s.setShowHeatmap);
   const forecastData = useForecastStore((s) => s.data);
+  const loadLatestForecast = useForecastStore((s) => s.loadLatest);
   const forecastHotspots = useMemo(() => {
     if (!forecastData?.forecast?.hotspots) return [];
     return forecastData.forecast.hotspots.map((h: any) => ({
@@ -182,6 +183,11 @@ export function AdminSurveillanceView() {
       threat_type: h.threat_type || h.type || 'unknown',
     }));
   }, [forecastData]);
+
+  // Auto-load latest forecast from DB on mount so heatmap persists across refreshes
+  useEffect(() => {
+    loadLatestForecast();
+  }, [loadLatestForecast]);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const [showForecast] = useState(false);
