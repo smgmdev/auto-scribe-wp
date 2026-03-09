@@ -144,13 +144,33 @@ export function ConflictSimulatorPanel() {
     );
   }
 
+  // Determine favored nation from outcome text
+  const getFavoredNation = () => {
+    if (!sim || !result) return null;
+    const outcome = (sim.most_likely_outcome?.outcome || '').toLowerCase() + ' ' + (sim.most_likely_outcome?.rationale || '').toLowerCase();
+    const aCount = outcome.split(result.country_a.toLowerCase()).length - 1;
+    const bCount = outcome.split(result.country_b.toLowerCase()).length - 1;
+    // The country mentioned more in the outcome context with "advantage", "superior", "win", "favor" or simply more prominent
+    const favorKeywords = ['advantage', 'superior', 'dominat', 'favor', 'prevail', 'win', 'successful', 'victory'];
+    const aFavor = favorKeywords.some(k => outcome.includes(result.country_a.toLowerCase()) && outcome.includes(k));
+    const bFavor = favorKeywords.some(k => outcome.includes(result.country_b.toLowerCase()) && outcome.includes(k));
+    if (aFavor && !bFavor) return result.country_a;
+    if (bFavor && !aFavor) return result.country_b;
+    if (aCount > bCount) return result.country_a;
+    if (bCount > aCount) return result.country_b;
+    return result.country_a; // default to country_a
+  };
+
+  const favoredNation = sim ? getFavoredNation() : null;
+
   if (sim && tc) {
     return (
-      <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
-        {/* Threat Level Banner */}
+      <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex-1 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
+        {/* Favored Nation Banner */}
         <div className={cn("h-9 flex items-center justify-center border", tc.border, tc.bg, tc.text)}>
-          <Swords className="w-4 h-4 mr-2" />
-          <span className="text-xs font-bold tracking-widest">THREAT: {sim.threat_level}</span>
+          <Shield className="w-4 h-4 mr-2" />
+          <span className="text-xs font-bold tracking-widest">IN FAVOR: {favoredNation?.toUpperCase()}</span>
         </div>
 
         {/* Title */}
@@ -348,6 +368,7 @@ export function ConflictSimulatorPanel() {
           >
             New Simulation
           </Button>
+        </div>
         </div>
       </div>
     );
