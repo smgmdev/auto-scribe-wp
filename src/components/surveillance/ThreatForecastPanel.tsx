@@ -298,8 +298,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Predictions */}
         {data.forecast.predictions?.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <Clock className="w-3.5 h-3.5 text-blue-400" />
+            <div className="flex items-center gap-1.5 pt-3 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Predictions</span>
             </div>
             <div className="space-y-1.5">
