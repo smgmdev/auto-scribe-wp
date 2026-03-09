@@ -213,7 +213,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
         </TabsList>
 
         {/* Generate Tab */}
-        <TabsContent value="generate" className="flex-1 overflow-y-auto p-4 space-y-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0">
+        <TabsContent value="generate" className="flex-1 overflow-y-auto p-4 space-y-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
           {loading && (
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
