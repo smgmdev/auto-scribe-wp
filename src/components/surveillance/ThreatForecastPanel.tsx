@@ -370,7 +370,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1.5">
                     {data.forecast.predictions.map((p, i) => (
-                      <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                      <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                         <div className="flex items-center gap-2 mb-1">
                           <Badge variant="outline" className="text-[9px] bg-blue-500/10 text-blue-300 border-blue-500/20 px-1.5 py-0 h-4">
                             {p.timeframe}
