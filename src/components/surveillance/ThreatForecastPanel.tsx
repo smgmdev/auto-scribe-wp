@@ -178,7 +178,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
 
         {/* Threat Level Banner */}
         {currentTlConfig && (
-          <div className={cn("p-3 border text-center", currentTlConfig.border, currentTlConfig.color)}>
+          <div className={cn("h-9 flex items-center justify-center border", currentTlConfig.border, currentTlConfig.color)}>
             <div className="flex items-center justify-center gap-2">
               <ShieldAlert className="w-4 h-4" />
               <span className="text-xs font-bold tracking-widest">THREAT LEVEL: {data.forecast.threat_level_assessment}</span>
