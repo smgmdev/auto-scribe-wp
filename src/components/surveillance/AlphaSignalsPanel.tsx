@@ -93,16 +93,27 @@ const assetClassColors: Record<string, string> = {
 
 function SummaryBlock({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+  const [height, setHeight] = useState<number>(0);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(contentRef.current.scrollHeight);
+    }
+  }, [text]);
+
   return (
     <div
-      className="px-4 py-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
+      className="px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
       onClick={() => setExpanded(e => !e)}
     >
-      <p className={cn("text-[11px] text-gray-300 leading-relaxed", !expanded && "line-clamp-2")}>
-        {text}
-      </p>
-      <div className="flex justify-center mt-1">
-        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform", expanded && "rotate-180")} />
+      <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
+        <p ref={contentRef} className="text-[11px] text-gray-300 leading-relaxed">
+          {text}
+        </p>
+      </div>
+      <div className="flex justify-end mt-1">
+        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
       </div>
     </div>
   );
