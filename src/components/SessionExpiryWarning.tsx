@@ -15,11 +15,11 @@ import { Shield } from 'lucide-react';
 const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_BEFORE_EXPIRY_MS = 60 * 1000; // Show warning 1 min before
 const CHECK_INTERVAL_MS = 10 * 1000;
-// Grace period after component mounts to avoid firing immediately on page load/deploy
-const INIT_GRACE_MS = 15 * 1000;
+// Grace period after component mounts to avoid firing immediately on page load/deploy/HMR
+const INIT_GRACE_MS = 35 * 1000;
 
 export function SessionExpiryWarning() {
-  const { session, signOut, extendSession } = useAuth();
+  const { session, loading, signOut, extendSession } = useAuth();
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -89,6 +89,9 @@ export function SessionExpiryWarning() {
 
   // Main check loop - uses DB timestamp
   useEffect(() => {
+    // Don't run expiry checks while auth is still loading (e.g. after HMR/iframe rebuild)
+    if (loading) return;
+    
     if (!session?.user?.id) {
       setShowWarning(false);
       clearCountdown();
@@ -165,7 +168,7 @@ export function SessionExpiryWarning() {
       if (checkRef.current) clearInterval(checkRef.current);
       clearCountdown();
     };
-  }, [session?.user?.id, signOut, clearCountdown, fetchSessionStart]);
+  }, [session?.user?.id, loading, signOut, clearCountdown, fetchSessionStart]);
 
   // Cleanup on unmount
   useEffect(() => {
