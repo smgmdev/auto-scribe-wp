@@ -464,7 +464,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
         </TabsContent>
 
         {/* History Tab */}
-        <TabsContent value="history" className="flex-1 overflow-y-auto p-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0">
+        <TabsContent value="history" className="flex-1 overflow-y-auto p-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
           {historyLoading && (
             <div className="flex items-center justify-center h-32">
               <Loader2 className="w-6 h-6 text-gray-500 animate-spin" />
