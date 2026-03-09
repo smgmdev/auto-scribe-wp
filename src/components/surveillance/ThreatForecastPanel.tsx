@@ -488,7 +488,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   <div
                     key={f.id}
                     className={cn(
-                      "p-3 rounded border cursor-pointer transition-all hover:bg-white/[0.03]",
+                      "p-3 border cursor-pointer transition-all hover:bg-white/[0.03]",
                       selectedHistoryId === f.id ? "border-amber-500/40 bg-amber-500/5" : "border-white/[0.06] bg-white/[0.02]"
                     )}
                     onClick={() => viewHistoricalForecast(f)}
