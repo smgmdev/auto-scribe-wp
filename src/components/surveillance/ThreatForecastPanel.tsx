@@ -218,7 +218,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           <div className={cn("h-9 flex items-center justify-center border", currentTlConfig.border, currentTlConfig.color)}>
             <div className="flex items-center justify-center gap-2">
               <ShieldAlert className="w-4 h-4" />
-              <span className="text-xs font-bold tracking-widest">THREAT LEVEL: {data.forecast.threat_level_assessment}</span>
+              <span className="text-[11px] font-semibold tracking-widest">THREAT LEVEL: {data.forecast.threat_level_assessment}</span>
             </div>
           </div>
         )}
@@ -429,6 +429,17 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </button>
         </div>
 
+        {/* Back to history - above heatmap */}
+        {activeTab === 'history' && selectedHistoryId && (
+          <button
+            onClick={() => { setSelectedHistoryId(null); clearGenerated(); }}
+            className="flex items-center gap-1 px-3 py-2 text-[11px] text-gray-400 hover:text-white transition-colors border-b border-white/5"
+          >
+            <ChevronRight className="w-3 h-3 rotate-180" />
+            Back to history
+          </button>
+        )}
+
         {/* Heatmap Globe Toggle - only show when viewing an individual report */}
         {data && ((!loading && activeTab === 'generate' && !selectedHistoryId) || (activeTab === 'history' && selectedHistoryId)) ? <HeatmapToggle /> : null}
 
@@ -471,13 +482,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         <TabsContent value="history" className="flex-1 overflow-y-auto p-0 space-y-0 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
           {selectedHistoryId && data ? (
             <div className="space-y-0">
-              <button
-                onClick={() => { setSelectedHistoryId(null); clearGenerated(); }}
-                className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-white transition-colors"
-              >
-                <ChevronRight className="w-3 h-3 rotate-180" />
-                Back to history
-              </button>
               {renderForecastReport()}
             </div>
           ) : (
