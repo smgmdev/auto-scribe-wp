@@ -495,17 +495,16 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           )}
 
           {!loading && data && !selectedHistoryId && (
-            <>
-              {renderForecastReport()}
-              <div className="p-3">
-                <Button
-                  onClick={() => { setSelectedHistoryId(null); generateForecast(); }}
-                  className="w-full rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
-                >
-                  Generate New Assessment
-                </Button>
-              </div>
-            </>
+            <div className="flex flex-col items-center justify-center h-full gap-3 px-3">
+              <p className="text-sm text-gray-400 text-center">Assessment generated</p>
+              <p className="text-xs text-gray-600 text-center">Your latest forecast is available in History.</p>
+              <Button onClick={() => setActiveTab('history')} className="w-full mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
+                View in History
+              </Button>
+              <Button onClick={() => { setSelectedHistoryId(null); generateForecast(); }} variant="outline" className="w-full rounded-none border-white/10 text-gray-400 hover:text-white">
+                Generate New Assessment
+              </Button>
+            </div>
           )}
         </TabsContent>
 
