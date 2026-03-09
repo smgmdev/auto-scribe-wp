@@ -319,7 +319,7 @@ export function AlphaSignalsPanel() {
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="text-center space-y-3">
             <div>
-              <p className="text-sm text-gray-300 font-medium">Geopolitical Alpha</p>
+              <p className="text-sm text-gray-300 font-medium">Geopolitical Market Data</p>
               <p className="text-[11px] text-gray-600 mt-1 leading-relaxed max-w-[240px]">
                 AI analyzes surveillance intelligence to generate actionable investment signals with specific assets, timeframes, and risk/reward profiles.
               </p>
