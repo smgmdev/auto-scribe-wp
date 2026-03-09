@@ -75,10 +75,10 @@ export const useForecastStore = create<ForecastStore>((set, get) => ({
       const { data: result, error } = await supabase.functions.invoke('threat-forecast');
       if (error) throw error;
       if (result?.error) throw new Error(result.error);
-      set({ data: result, loading: false, loaded: true });
+      set({ data: result, loading: false, loaded: true, startedAt: null });
     } catch (err: any) {
       const msg = err.message || 'Failed to generate forecast';
-      set({ error: msg, loading: false });
+      set({ error: msg, loading: false, startedAt: null });
       toast.error(msg);
     }
   },
