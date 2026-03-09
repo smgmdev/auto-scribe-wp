@@ -258,9 +258,10 @@ export function SurveillanceCountryPopup() {
               </ul>
             </div>
           )}
-        </div>
 
-        {/* Attacks panel */}
+          {/* AI Risk Profile */}
+          <CountryRiskProfile countryName={selectedCountry.name} countryCode={selectedCountry.code} />
+        </div>
         <div className="md:w-1/2 p-4 space-y-3 border-t border-white/5 md:border-t-0">
           {/* Attacks section */}
           <div className="flex items-center gap-2 mb-2">
