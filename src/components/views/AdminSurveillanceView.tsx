@@ -171,6 +171,7 @@ export function AdminSurveillanceView() {
   const setShowEarthquakes = useAppStore((s) => s.setShowEarthquakes);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
+  const [showForecast, setShowForecast] = useState(false);
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
   const currentView = useAppStore((s) => s.currentView);
 
