@@ -509,7 +509,7 @@ export function AlphaSignalsPanel() {
                           </span>
                         </div>
                         <p className="text-[10px] text-gray-400 leading-snug mt-2">{risk.market_impact}</p>
-                        <span className="text-[9px] text-blue-300/70 leading-tight block">{risk.hedge}</span>
+                        <span className="text-[9px] text-blue-300/70 leading-tight block mt-2">{risk.hedge}</span>
                       </div>
                     </div>
                   </div>
