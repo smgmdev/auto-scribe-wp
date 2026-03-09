@@ -330,7 +330,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                       {p.timeframe}
                     </Badge>
                     <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", confidenceColor(p.confidence))}>
-                      {p.confidence} · {p.probability_pct}%
+                      {p.confidence.charAt(0).toUpperCase() + p.confidence.slice(1)} · {p.probability_pct}%
                     </Badge>
                   </div>
                    <p className="text-[11px] text-gray-200 leading-snug m-0">{p.prediction}</p>
