@@ -66,7 +66,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
     score >= 70 ? 'bg-red-500' : score >= 40 ? 'bg-amber-500' : 'bg-emerald-500';
 
   return (
-    <div className="absolute inset-0 z-50 bg-[#080c14]/95 backdrop-blur-sm flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div className="flex items-center gap-2">
@@ -90,9 +90,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               {data ? 'Refresh' : 'Generate'}
             </Button>
           )}
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
-            <X className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
