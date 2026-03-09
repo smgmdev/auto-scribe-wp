@@ -262,8 +262,8 @@ export function AlphaSignalsPanel() {
   return (
     <div className="flex flex-col h-full text-white">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/10">
-        <div className="flex items-center justify-between mb-2">
+      <div className="px-4 border-b border-white/10" style={{ height: 34, display: 'flex', alignItems: 'center' }}>
+        <div className="flex items-center justify-between w-full">
           <h3 className="text-sm font-semibold tracking-tight">Market Signals</h3>
           <Button
             variant="ghost"
@@ -331,13 +331,13 @@ export function AlphaSignalsPanel() {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="bg-transparent border-b border-white/10 rounded-none h-9 p-0 flex-shrink-0 w-full">
-              <TabsTrigger value="signals" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:shadow-none">
+              <TabsTrigger value="signals" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-[#f2a547] data-[state=active]:text-black data-[state=active]:shadow-none">
                 Signals ({data.signals.length})
               </TabsTrigger>
-              <TabsTrigger value="sectors" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:shadow-none">
+              <TabsTrigger value="sectors" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-[#f2a547] data-[state=active]:text-black data-[state=active]:shadow-none">
                 Sectors
               </TabsTrigger>
-              <TabsTrigger value="tail-risks" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:shadow-none">
+              <TabsTrigger value="tail-risks" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-[#f2a547] data-[state=active]:text-black data-[state=active]:shadow-none">
                 Tail Risks
               </TabsTrigger>
             </TabsList>
