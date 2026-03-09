@@ -308,14 +308,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
     if (!data) return null;
     return (
       <>
-        {/* Overall Trend */}
-        <div className="flex items-center gap-2 p-2.5 border-b border-white/5">
-          <TrendIcon className={cn("w-4 h-4", trendColor)} />
-          <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4 uppercase", trendColor, 'border-current')}>
-            {data.forecast.overall_trend.charAt(0).toUpperCase() + data.forecast.overall_trend.slice(1)}
-          </Badge>
-        </div>
-
         {/* Threat Level Banner */}
         {currentTlConfig && (
           <div className={cn("h-9 flex items-center justify-center border", currentTlConfig.border, currentTlConfig.color)}>
@@ -332,6 +324,9 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           dataPoints={data.data_points}
           generatedAt={data.generated_at}
           formatDate={formatDate}
+          trendLabel={data.forecast.overall_trend.charAt(0).toUpperCase() + data.forecast.overall_trend.slice(1)}
+          trendColor={trendColor}
+          TrendIcon={TrendIcon}
         />
 
         {/* Escalation Drivers */}
