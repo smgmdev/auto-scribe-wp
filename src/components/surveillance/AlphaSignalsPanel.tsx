@@ -167,7 +167,10 @@ export function AlphaSignalsPanel() {
     }, 800);
 
     try {
-      const { data: result, error } = await supabase.functions.invoke('alpha-signals');
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data: result, error } = await supabase.functions.invoke('alpha-signals', {
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+      });
       if (progressRef.current) clearInterval(progressRef.current);
       setProgress(100);
       
