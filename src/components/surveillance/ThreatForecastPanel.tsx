@@ -443,15 +443,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Heatmap Globe Toggle - only show when viewing an individual report */}
         {data && ((!loading && activeTab === 'generate' && !selectedHistoryId) || (activeTab === 'history' && selectedHistoryId)) ? <HeatmapToggle /> : null}
 
-        {/* Full-width regenerate button when assessment exists */}
-        {!loading && data && !selectedHistoryId && activeTab === 'generate' && (
-          <Button
-            onClick={() => { setSelectedHistoryId(null); generateForecast(); }}
-            className="w-full h-9 text-[11px] rounded-none bg-[#f2a547] text-black border border-transparent hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] transition-colors"
-          >
-            Generate New Assessment
-          </Button>
-        )}
 
         {/* Generate Tab */}
         <TabsContent value="generate" className="flex-1 overflow-y-auto p-0 space-y-0 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
