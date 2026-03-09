@@ -27,7 +27,9 @@ interface ForecastStore {
   loading: boolean;
   data: ForecastData | null;
   error: string | null;
+  loaded: boolean;
   generate: () => Promise<void>;
+  loadLatest: () => Promise<void>;
   setData: (data: ForecastData | null) => void;
   clearGenerated: () => void;
 }
@@ -36,15 +38,42 @@ export const useForecastStore = create<ForecastStore>((set, get) => ({
   loading: false,
   data: null,
   error: null,
+  loaded: false,
+
+  loadLatest: async () => {
+    if (get().loaded || get().data) return; // already loaded or has fresh data
+    try {
+      const { data: forecasts } = await supabase
+        .from('threat_forecasts')
+        .select('forecast, data_points, created_at')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (forecasts && forecasts.length > 0) {
+        const f = forecasts[0] as any;
+        set({
+          data: {
+            forecast: f.forecast,
+            data_points: f.data_points,
+            generated_at: f.created_at,
+          },
+          loaded: true,
+        });
+      } else {
+        set({ loaded: true });
+      }
+    } catch {
+      set({ loaded: true });
+    }
+  },
 
   generate: async () => {
-    if (get().loading) return; // prevent double-trigger
+    if (get().loading) return;
     set({ loading: true, error: null, data: null });
     try {
       const { data: result, error } = await supabase.functions.invoke('threat-forecast');
       if (error) throw error;
       if (result?.error) throw new Error(result.error);
-      set({ data: result, loading: false });
+      set({ data: result, loading: false, loaded: true });
     } catch (err: any) {
       const msg = err.message || 'Failed to generate forecast';
       set({ error: msg, loading: false });
@@ -52,7 +81,7 @@ export const useForecastStore = create<ForecastStore>((set, get) => ({
     }
   },
 
-  setData: (data) => set({ data }),
+  setData: (data) => set({ data, loaded: true }),
 
   clearGenerated: () => set({ data: null, error: null }),
 }));
