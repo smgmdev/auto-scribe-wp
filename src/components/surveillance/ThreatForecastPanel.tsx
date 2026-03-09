@@ -217,7 +217,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
     await storeGenerate();
     setActiveTab('history');
     setHistoryLoading(true);
-    setHistory([]);
     try {
       const { data: forecasts, error } = await supabase
         .from('threat_forecasts')
@@ -232,6 +231,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           data_points: f.data_points as ForecastResponse['data_points'],
         }));
         setHistory(parsed);
+        historyLoadedRef.current = true;
         const newest = parsed[0];
         setSelectedHistoryId(newest.id);
         setData({
