@@ -1027,8 +1027,7 @@ export function AdminSurveillanceView() {
                 onClick={() => setMobileSliderTab('simulator')}
                 className={`flex-1 text-[11px] h-full transition-colors flex items-center justify-center gap-1 ${mobileSliderTab === 'simulator' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
-                <Swords className="w-3 h-3" />
-                Simulator
+                Mace Intelligence Simulator
               </button>
             </div>
 
