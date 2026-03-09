@@ -486,25 +486,27 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               {renderForecastReport()}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="w-6 h-6 text-gray-500 animate-spin" />
-            </div>
-          )}
+            <>
+              {historyLoading && (
+                <div className="flex items-center justify-center h-32">
+                  <Loader2 className="w-6 h-6 text-gray-500 animate-spin" />
+                </div>
+              )}
 
-          {!historyLoading && history.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full gap-3">
-              <History className="w-10 h-10 text-gray-700" />
-              <p className="text-sm text-gray-400 text-center">No saved forecasts</p>
-              <p className="text-xs text-gray-600 text-center">Generate a forecast to save it to your history.</p>
-              <Button
-                size="sm"
-                onClick={() => setActiveTab('generate')}
-                className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
-              >
-                Generate First Forecast
-              </Button>
-            </div>
-          )}
+              {!historyLoading && history.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full gap-3">
+                  <History className="w-10 h-10 text-gray-700" />
+                  <p className="text-sm text-gray-400 text-center">No saved forecasts</p>
+                  <p className="text-xs text-gray-600 text-center">Generate a forecast to save it to your history.</p>
+                  <Button
+                    size="sm"
+                    onClick={() => setActiveTab('generate')}
+                    className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
+                  >
+                    Generate First Forecast
+                  </Button>
+                </div>
+              )}
 
           {!historyLoading && history.length > 0 && (
             <div className="space-y-2">
