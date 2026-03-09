@@ -621,6 +621,9 @@ export function AdminSurveillanceView() {
               <button onClick={() => setGlobeSpinning(!globeSpinning)} className="text-gray-400 hover:text-white transition-colors p-1" title={globeSpinning ? 'Pause rotation' : 'Start rotation'}>
                 {globeSpinning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
               </button>
+              <button onClick={() => setCrtMode(!crtMode)} className={cn("transition-colors p-1", crtMode ? "text-green-400" : "text-gray-400 hover:text-white")} title={crtMode ? 'Disable terminal mode' : 'Terminal mode'}>
+                <Monitor className="w-3.5 h-3.5" />
+              </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="text-gray-400 hover:text-white transition-colors p-1" title="Live camera feeds">
