@@ -930,6 +930,7 @@ export function AdminSurveillanceView() {
                   tradeTrajectories={showTrades ? dedupeTrajectories(tradeTrajectories) : []}
                   satellites={showSatellites ? satellites : []}
                   earthquakes={showEarthquakes ? earthquakes : []}
+                  predictedHotspots={showHeatmap ? forecastHotspots : []}
                   isSpinning={globeSpinning}
                   onSpinChange={setGlobeSpinning}
                   resetTrigger={resetTrigger}
