@@ -19,9 +19,12 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 const updates = [
   {
     date: 'March 9, 2026',
-    title: 'Arcana Precision — Market Signals UI Refinements',
+    title: 'Session Stability & Market Signals Refinements',
     changes: [
-      'Renamed "Geopolitical Alpha" to "Geopolitical Market Data" for clearer terminology across the Precision intelligence platform',
+      'Added proactive session health monitor — the app now detects silent auth token failures (caused by backgrounded tabs or network interruptions) and automatically recovers or prompts re-login instead of silently breaking',
+      'Session recovery on tab focus — returning to the app after extended inactivity now triggers an immediate health check with automatic token refresh',
+      'Renamed "Alpha Signals" to "Market Signals" across the Arcana Precision intelligence platform for clearer terminology',
+      'Renamed "Geopolitical Alpha" to "Geopolitical Market Data" for consistent naming',
       'Updated Generate Market Signals button styling to match the Generate New Assessment button with consistent colors, font, and hover behavior',
       'Market Signals tab bar now uses the same accent color as the Generate button for visual consistency across the panel',
       'Matched Market Signals panel header height to the Threat Forecast tabs for aligned, uniform panel layouts',
