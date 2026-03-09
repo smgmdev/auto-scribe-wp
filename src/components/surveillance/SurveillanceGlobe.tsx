@@ -44,6 +44,12 @@ export interface EarthquakeData {
   type: string;
 }
 
+export interface PredictedHotspot {
+  region: string;
+  risk_score: number;
+  threat_type: string;
+}
+
 interface SurveillanceGlobeProps {
   countries: CountryData[];
   onCountryClick: (country: CountryData) => void;
@@ -55,6 +61,7 @@ interface SurveillanceGlobeProps {
   tradeTrajectories?: MissileTrajectory[];
   satellites?: SatelliteData[];
   earthquakes?: EarthquakeData[];
+  predictedHotspots?: PredictedHotspot[];
   isSpinning?: boolean;
   onSpinChange?: (spinning: boolean) => void;
   resetTrigger?: number;
@@ -928,6 +935,117 @@ function EarthquakeInstances({ earthquakes }: { earthquakes: EarthquakeData[] })
   );
 }
 
+/** Resolves a hotspot region name to lat/lng coordinates */
+function resolveHotspotCoords(region: string): { lat: number; lng: number } | null {
+  const regionLower = region.toLowerCase();
+  for (const [, v] of Object.entries(COUNTRY_COORDINATES)) {
+    if (v.name?.toLowerCase() === regionLower) return { lat: v.lat, lng: v.lng };
+  }
+  for (const [, v] of Object.entries(COUNTRY_COORDINATES)) {
+    if (v.name && (regionLower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(regionLower))) {
+      return { lat: v.lat, lng: v.lng };
+    }
+  }
+  const REGION_ALIASES: Record<string, { lat: number; lng: number }> = {
+    'middle east': { lat: 29.0, lng: 47.0 },
+    'taiwan strait': { lat: 24.0, lng: 119.5 },
+    'south china sea': { lat: 12.0, lng: 114.0 },
+    'korean peninsula': { lat: 37.5, lng: 127.0 },
+    'east africa': { lat: 1.0, lng: 38.0 },
+    'west africa': { lat: 10.0, lng: -3.0 },
+    'north africa': { lat: 28.0, lng: 3.0 },
+    'central asia': { lat: 41.0, lng: 65.0 },
+    'south asia': { lat: 22.0, lng: 78.0 },
+    'southeast asia': { lat: 5.0, lng: 110.0 },
+    'eastern europe': { lat: 50.0, lng: 30.0 },
+    'western europe': { lat: 48.0, lng: 5.0 },
+    'horn of africa': { lat: 8.0, lng: 46.0 },
+    'baltic states': { lat: 57.0, lng: 24.0 },
+    'persian gulf': { lat: 27.0, lng: 51.0 },
+    'sahel': { lat: 14.0, lng: 2.0 },
+    'caucasus': { lat: 42.0, lng: 44.0 },
+    'levant': { lat: 33.0, lng: 36.0 },
+    'indo-pacific': { lat: 0.0, lng: 120.0 },
+  };
+  for (const [key, coords] of Object.entries(REGION_ALIASES)) {
+    if (regionLower.includes(key) || key.includes(regionLower)) return coords;
+  }
+  return null;
+}
+
+function getHeatmapColor(riskScore: number): THREE.Color {
+  if (riskScore >= 80) return new THREE.Color('#ff1744');
+  if (riskScore >= 60) return new THREE.Color('#ff6d00');
+  if (riskScore >= 40) return new THREE.Color('#ffab00');
+  return new THREE.Color('#ffd600');
+}
+
+function HeatmapOverlay({ hotspots }: { hotspots: PredictedHotspot[] }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const resolvedHotspots = useMemo(() => {
+    return hotspots
+      .map(h => {
+        const coords = resolveHotspotCoords(h.region);
+        if (!coords) return null;
+        return { ...h, coords };
+      })
+      .filter(Boolean) as (PredictedHotspot & { coords: { lat: number; lng: number } })[];
+  }, [hotspots]);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    groupRef.current.children.forEach((child, i) => {
+      if (child instanceof THREE.Group) {
+        const outerMesh = child.children[1] as THREE.Mesh;
+        if (outerMesh?.material) {
+          (outerMesh.material as THREE.MeshBasicMaterial).opacity = 0.08 + Math.sin(t * 1.5 + i * 1.2) * 0.04;
+        }
+        const midMesh = child.children[2] as THREE.Mesh;
+        if (midMesh?.material) {
+          (midMesh.material as THREE.MeshBasicMaterial).opacity = 0.12 + Math.sin(t * 2.0 + i * 0.8) * 0.05;
+        }
+      }
+    });
+  });
+
+  if (resolvedHotspots.length === 0) return null;
+
+  return (
+    <group ref={groupRef}>
+      {resolvedHotspots.map((h, i) => {
+        const color = getHeatmapColor(h.risk_score);
+        const baseRadius = 0.15 + (h.risk_score / 100) * 0.25;
+        const pos = latLngToVector3(h.coords.lat, h.coords.lng, GLOBE_RADIUS + 0.008);
+        const normal = new THREE.Vector3(...pos).normalize();
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(
+          new THREE.Vector3(0, 0, 1),
+          normal
+        );
+
+        return (
+          <group key={`heatmap-${i}`} position={pos} quaternion={quaternion}>
+            <mesh>
+              <circleGeometry args={[baseRadius * 0.4, 32]} />
+              <meshBasicMaterial color={color} transparent opacity={0.2} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+            <mesh>
+              <ringGeometry args={[baseRadius * 0.7, baseRadius, 48]} />
+              <meshBasicMaterial color={color} transparent opacity={0.08} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+            <mesh>
+              <ringGeometry args={[baseRadius * 0.35, baseRadius * 0.7, 48]} />
+              <meshBasicMaterial color={color} transparent opacity={0.12} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+            <pointLight color={color} intensity={0.3 + (h.risk_score / 100) * 0.4} distance={baseRadius * 3} />
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
 function RotatingGlobe({
   countries,
   onCountryClick,
@@ -939,6 +1057,7 @@ function RotatingGlobe({
   tradeTrajectories = [],
   satellites = [],
   earthquakes = [],
+  predictedHotspots = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -1090,6 +1209,7 @@ function RotatingGlobe({
 
         <SatelliteInstances satellites={satellites} />
         <EarthquakeInstances earthquakes={earthquakes} />
+        {predictedHotspots.length > 0 && <HeatmapOverlay hotspots={predictedHotspots} />}
       </group>
 
       <OrbitControls
@@ -1118,6 +1238,7 @@ export function SurveillanceGlobe({
   tradeTrajectories = [],
   satellites = [],
   earthquakes = [],
+  predictedHotspots = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -1140,6 +1261,7 @@ export function SurveillanceGlobe({
           tradeTrajectories={tradeTrajectories}
           satellites={satellites}
           earthquakes={earthquakes}
+          predictedHotspots={predictedHotspots}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
           resetTrigger={resetTrigger}

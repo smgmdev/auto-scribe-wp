@@ -308,6 +308,7 @@ interface AppState {
   showTrades: boolean;
   showSatellites: boolean;
   showEarthquakes: boolean;
+  showHeatmap: boolean;
   setShowMissiles: (v: boolean) => void;
   setShowDrones: (v: boolean) => void;
   setShowNukes: (v: boolean) => void;
@@ -315,6 +316,7 @@ interface AppState {
   setShowTrades: (v: boolean) => void;
   setShowSatellites: (v: boolean) => void;
   setShowEarthquakes: (v: boolean) => void;
+  setShowHeatmap: (v: boolean) => void;
   missileTimeFilter: string;
   droneTimeFilter: string;
   nukeTimeFilter: string;
@@ -838,6 +840,7 @@ export const useAppStore = create<AppState>()((set) => ({
   showTrades: true,
   showSatellites: false,
   showEarthquakes: false,
+  showHeatmap: true,
   setShowMissiles: (v) => set({ showMissiles: v }),
   setShowDrones: (v) => set({ showDrones: v }),
   setShowNukes: (v) => set({ showNukes: v }),
@@ -845,6 +848,7 @@ export const useAppStore = create<AppState>()((set) => ({
   setShowTrades: (v) => set({ showTrades: v }),
   setShowSatellites: (v) => set({ showSatellites: v }),
   setShowEarthquakes: (v) => set({ showEarthquakes: v }),
+  setShowHeatmap: (v) => set({ showHeatmap: v }),
   missileTimeFilter: '24',
   droneTimeFilter: '24',
   nukeTimeFilter: '24',

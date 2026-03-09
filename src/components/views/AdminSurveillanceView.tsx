@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react
 import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, BrainCircuit } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, BrainCircuit, Flame } from 'lucide-react';
+import { useForecastStore } from '@/stores/forecastStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -170,6 +171,17 @@ export function AdminSurveillanceView() {
   const setShowSatellites = useAppStore((s) => s.setShowSatellites);
   const showEarthquakes = useAppStore((s) => s.showEarthquakes);
   const setShowEarthquakes = useAppStore((s) => s.setShowEarthquakes);
+  const showHeatmap = useAppStore((s) => s.showHeatmap);
+  const setShowHeatmap = useAppStore((s) => s.setShowHeatmap);
+  const forecastData = useForecastStore((s) => s.data);
+  const forecastHotspots = useMemo(() => {
+    if (!forecastData?.forecast?.hotspots) return [];
+    return forecastData.forecast.hotspots.map((h: any) => ({
+      region: h.region || h.name || '',
+      risk_score: h.risk_score ?? h.severity_score ?? 50,
+      threat_type: h.threat_type || h.type || 'unknown',
+    }));
+  }, [forecastData]);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const [showForecast] = useState(false);
@@ -882,8 +894,15 @@ export function AdminSurveillanceView() {
                 <span className="text-[10px] text-gray-400">Seismic</span>
               </button>
               <span className="text-[10px] text-gray-600">({earthquakes.length})</span>
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
+              <button onClick={() => setShowHeatmap(!showHeatmap)} className={cn("flex items-center gap-1.5 transition-opacity", !showHeatmap && "opacity-30")}>
+                <Flame className="w-3 h-3 text-rose-400" />
+                <span className="text-[10px] text-gray-400">Heatmap</span>
+              </button>
+              <span className="text-[10px] text-gray-600">({forecastHotspots.length})</span>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Main content */}
@@ -911,6 +930,7 @@ export function AdminSurveillanceView() {
                   tradeTrajectories={showTrades ? dedupeTrajectories(tradeTrajectories) : []}
                   satellites={showSatellites ? satellites : []}
                   earthquakes={showEarthquakes ? earthquakes : []}
+                  predictedHotspots={showHeatmap ? forecastHotspots : []}
                   isSpinning={globeSpinning}
                   onSpinChange={setGlobeSpinning}
                   resetTrigger={resetTrigger}
