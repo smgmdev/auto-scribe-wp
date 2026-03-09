@@ -245,7 +245,7 @@ export function AlphaSignalsPanel() {
         <div className="px-4 border-b border-white/10" style={{ height: 34, display: 'flex', alignItems: 'center' }}>
           <div className="flex items-center justify-between w-full">
             <h3 className="text-sm font-semibold tracking-tight">Signal History</h3>
-            <Button variant="ghost" size="sm" className="text-gray-400 h-7 text-xs" onClick={() => setShowHistory(false)}>
+            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-transparent h-7 text-xs" onClick={() => setShowHistory(false)}>
               Back
             </Button>
           </div>
@@ -297,7 +297,7 @@ export function AlphaSignalsPanel() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-400 h-7 w-7 p-0"
+            className="text-gray-400 hover:text-white hover:bg-transparent h-7 w-7 p-0"
             onClick={() => setShowHistory(true)}
             title="Signal history"
           >
