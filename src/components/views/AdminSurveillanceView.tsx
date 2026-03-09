@@ -982,7 +982,7 @@ export function AdminSurveillanceView() {
       {/* Feed + Forecast slide-over (mobile) */}
       <Sheet open={showMobileFeed} onOpenChange={setShowMobileFeed} modal={false}>
         <SheetContent side="right" className="w-full sm:w-[420px] p-0 bg-[#0a0e1a]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full pt-10">
             {/* Tabs */}
             <div className="w-full flex h-9 bg-[#1a1a1a] border-b border-white/10">
               <button
