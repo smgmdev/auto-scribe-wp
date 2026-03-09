@@ -277,7 +277,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[11px] font-medium text-white">{d.driver}</span>
                     <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", severityColor(d.severity))}>
-                      {d.severity}
+                      {d.severity.charAt(0).toUpperCase() + d.severity.slice(1)}
                     </Badge>
                   </div>
                   <p className="text-[10px] text-gray-400 leading-relaxed">{d.description}</p>
