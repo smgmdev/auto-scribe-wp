@@ -104,7 +104,7 @@ function SummaryBlock({ text }: { text: string }) {
 
   return (
     <div
-      className="px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
+      className="relative px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
       onClick={() => setExpanded(e => !e)}
     >
       <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
@@ -112,9 +112,7 @@ function SummaryBlock({ text }: { text: string }) {
           {text}
         </p>
       </div>
-      <div className="flex justify-end mt-1">
-        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
-      </div>
+      <ChevronDown className={cn("absolute bottom-2 right-3 w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
     </div>
   );
 }
