@@ -266,9 +266,6 @@ export function AlphaSignalsPanel() {
       <div className="px-4 py-3 border-b border-white/10">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
             <div>
               <h3 className="text-sm font-semibold tracking-tight">Alpha Signals</h3>
               <p className="text-[10px] text-gray-500">Geopolitical Intelligence → Market Alpha</p>
@@ -292,18 +289,23 @@ export function AlphaSignalsPanel() {
           className="w-full h-8 text-xs bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 border-0"
         >
           {loading ? (
-            <>
-              <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-              Analyzing intelligence...
-            </>
+            <span className="flex items-center gap-2 w-full">
+              <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
+              <span className="flex-1 text-left">Analyzing intelligence... {progress}%</span>
+            </span>
           ) : (
-            <>
-              <BarChart3 className="w-3 h-3 mr-1.5" />
-              Generate Alpha Signals
-            </>
+            'Generate Alpha Signals'
           )}
         </Button>
-        {data?.generated_at && (
+        {loading && (
+          <div className="mt-1.5 h-1 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+        {data?.generated_at && !loading && (
           <p className="text-[10px] text-gray-600 mt-1.5 text-center">
             Generated {new Date(data.generated_at).toLocaleString(undefined, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
             {data.data_points && (
