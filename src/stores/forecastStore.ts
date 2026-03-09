@@ -25,6 +25,7 @@ interface ForecastData {
 
 interface ForecastStore {
   loading: boolean;
+  startedAt: number | null;
   data: ForecastData | null;
   error: string | null;
   loaded: boolean;
@@ -36,6 +37,7 @@ interface ForecastStore {
 
 export const useForecastStore = create<ForecastStore>((set, get) => ({
   loading: false,
+  startedAt: null,
   data: null,
   error: null,
   loaded: false,
@@ -68,15 +70,15 @@ export const useForecastStore = create<ForecastStore>((set, get) => ({
 
   generate: async () => {
     if (get().loading) return;
-    set({ loading: true, error: null, data: null });
+    set({ loading: true, error: null, data: null, startedAt: Date.now() });
     try {
       const { data: result, error } = await supabase.functions.invoke('threat-forecast');
       if (error) throw error;
       if (result?.error) throw new Error(result.error);
-      set({ data: result, loading: false, loaded: true });
+      set({ data: result, loading: false, loaded: true, startedAt: null });
     } catch (err: any) {
       const msg = err.message || 'Failed to generate forecast';
-      set({ error: msg, loading: false });
+      set({ error: msg, loading: false, startedAt: null });
       toast.error(msg);
     }
   },
