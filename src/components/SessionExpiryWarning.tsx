@@ -168,7 +168,7 @@ export function SessionExpiryWarning() {
       if (checkRef.current) clearInterval(checkRef.current);
       clearCountdown();
     };
-  }, [session?.user?.id, signOut, clearCountdown, fetchSessionStart]);
+  }, [session?.user?.id, loading, signOut, clearCountdown, fetchSessionStart]);
 
   // Cleanup on unmount
   useEffect(() => {
