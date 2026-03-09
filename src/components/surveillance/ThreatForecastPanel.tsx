@@ -94,7 +94,14 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
         .limit(20);
       
       if (error) throw error;
-      setHistory((forecasts || []) as SavedForecast[]);
+      // Cast JSON fields to expected types
+      const parsed = (forecasts || []).map((f: any) => ({
+        id: f.id,
+        created_at: f.created_at,
+        forecast: f.forecast as Forecast,
+        data_points: f.data_points as ForecastResponse['data_points'],
+      }));
+      setHistory(parsed);
     } catch (err: any) {
       toast.error('Failed to load history');
     } finally {
