@@ -941,6 +941,95 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Proactive token health monitor: detects silently expired JWTs and recovers
+  // or forces re-login with clear indication to the user
+  useEffect(() => {
+    if (!user || shadowModeRef.current) return;
+
+    let tokenHealthMounted = true;
+    // Track when the tab was last visible for background detection
+    let lastVisibleAt = Date.now();
+
+    const checkTokenHealth = async () => {
+      if (!tokenHealthMounted || sessionKickedRef.current) return;
+      try {
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (error || !currentSession) {
+          console.warn('[Auth] Token health check: no active session, attempting refresh...');
+          const refreshResult = await safeRefreshSession();
+          if (!refreshResult.success) {
+            console.error('[Auth] Token health check: refresh failed, session is dead');
+            if (tokenHealthMounted) {
+              toast.error('Your session has expired. Please log in again.', {
+                id: 'session-expired-health',
+                duration: 6000,
+              });
+              userInitiatedSignOutRef.current = true;
+              resetAuthState();
+              try { await supabase.auth.signOut({ scope: 'local' }); } catch {}
+            }
+            return;
+          }
+          // Refresh succeeded — update state
+          if (tokenHealthMounted && refreshResult.session) {
+            console.log('[Auth] Token health check: session recovered via refresh');
+            accessTokenRef.current = refreshResult.session.access_token;
+            setSession(refreshResult.session);
+            setUser(refreshResult.session.user);
+            supabase.realtime.setAuth(refreshResult.session.access_token);
+          }
+          return;
+        }
+
+        // Session exists — check if the token is about to expire (within 2 minutes)
+        const expiresAt = currentSession.expires_at;
+        if (expiresAt) {
+          const expiresAtMs = expiresAt * 1000;
+          const timeUntilExpiry = expiresAtMs - Date.now();
+          if (timeUntilExpiry < 2 * 60 * 1000) {
+            console.log('[Auth] Token expiring soon, proactively refreshing...');
+            const refreshResult = await safeRefreshSession();
+            if (refreshResult.success && refreshResult.session && tokenHealthMounted) {
+              accessTokenRef.current = refreshResult.session.access_token;
+              setSession(refreshResult.session);
+              supabase.realtime.setAuth(refreshResult.session.access_token);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Auth] Token health check error:', err);
+      }
+    };
+
+    // Check every 4 minutes
+    const healthInterval = setInterval(checkTokenHealth, 4 * 60 * 1000);
+
+    // On tab focus: if the tab was backgrounded for >2 minutes, force a health check
+    const handleVisibilityForToken = () => {
+      if (document.visibilityState === 'visible') {
+        const backgroundDuration = Date.now() - lastVisibleAt;
+        if (backgroundDuration > 2 * 60 * 1000) {
+          console.log('[Auth] Tab was backgrounded for', Math.round(backgroundDuration / 1000), 's — checking token health');
+          checkTokenHealth();
+        }
+        lastVisibleAt = Date.now();
+      } else {
+        lastVisibleAt = Date.now();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityForToken);
+
+    // Run initial check after a short delay
+    const initialCheck = setTimeout(checkTokenHealth, 5000);
+
+    return () => {
+      tokenHealthMounted = false;
+      clearInterval(healthInterval);
+      clearTimeout(initialCheck);
+      document.removeEventListener('visibilitychange', handleVisibilityForToken);
+    };
+  }, [user?.id]);
+
   // Update last_online_at periodically while user is active (skip in shadow mode)
   useEffect(() => {
     if (!user || shadowModeRef.current) return;
