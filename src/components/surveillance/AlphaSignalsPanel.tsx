@@ -419,10 +419,10 @@ export function AlphaSignalsPanel() {
                             <p className="text-[10px] text-gray-300 leading-relaxed">{signal.market_not_pricing}</p>
                           </div>
                           {signal.related_plays && signal.related_plays.length > 0 && (
-                            <div className="flex items-center gap-1 flex-wrap">
-                              <span className="text-[9px] text-gray-600">Related:</span>
+                            <div className="flex items-start gap-1 flex-wrap">
+                              <span className="text-[9px] text-gray-600 mt-0.5">Related:</span>
                               {signal.related_plays.map((play, j) => (
-                                <Badge key={j} variant="outline" className="text-[8px] px-1 py-0 h-4 bg-white/5 border-white/10 text-gray-400 font-mono">
+                                <Badge key={j} variant="outline" className="text-[8px] px-1.5 py-0.5 h-auto whitespace-normal break-words bg-white/5 border-white/10 text-gray-400 font-mono leading-snug">
                                   {play}
                                 </Badge>
                               ))}
