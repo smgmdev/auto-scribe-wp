@@ -298,7 +298,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1.5">
                     {data.forecast.escalation_drivers.map((d, i) => (
-                      <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                      <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[11px] font-medium text-white">{d.driver}</span>
                           <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", severityColor(d.severity))}>
