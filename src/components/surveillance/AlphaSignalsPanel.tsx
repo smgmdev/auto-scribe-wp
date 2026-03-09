@@ -217,7 +217,6 @@ export function AlphaSignalsPanel() {
       <div className="flex flex-col h-full text-white">
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <span className="text-sm font-medium">Signal History</span>
-          </div>
           <Button variant="ghost" size="sm" className="text-gray-400 h-7 text-xs" onClick={() => setShowHistory(false)}>
             Back
           </Button>
@@ -225,7 +224,6 @@ export function AlphaSignalsPanel() {
         <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
           {savedSignals.length === 0 ? (
             <div className="text-center py-12">
-              <DollarSign className="w-8 h-8 text-gray-700 mx-auto mb-3" />
               <p className="text-sm text-gray-500">No historical signals</p>
             </div>
           ) : savedSignals.map((s) => (
