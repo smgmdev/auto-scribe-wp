@@ -288,7 +288,7 @@ export function ConflictSimulatorPanel() {
           <h3 className="text-[12px] font-bold text-white mb-1">{sim.scenario_title}</h3>
           <p className="text-[10px] text-gray-400 leading-relaxed">{sim.executive_summary}</p>
           <div className="flex items-center gap-3 mt-2 text-[9px] text-gray-600">
-            <span>{result.country_a} vs {result.country_b}</span>
+            <span>{result.country_a} — {result.country_b}</span>
             <span>•</span>
             <span>{result.intelligence_points} intel points</span>
             <span>•</span>
