@@ -25,6 +25,7 @@ interface ForecastData {
 
 interface ForecastStore {
   loading: boolean;
+  startedAt: number | null;
   data: ForecastData | null;
   error: string | null;
   loaded: boolean;
