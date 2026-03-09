@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react
 import { COUNTRY_COORDINATES } from '@/constants/countryCoordinates';
 import { supabase } from '@/integrations/supabase/client';
 import { SurveillanceGlobe } from '@/components/surveillance/SurveillanceGlobe';
-import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, Zap } from 'lucide-react';
+import { RefreshCw, AlertTriangle, Shield, ShieldAlert, X, ExternalLink, Rocket, Play, Pause, ChevronDown, Radar, Radiation, Crosshair, PlaneTakeoff, Video, Menu, Satellite, Bomb, Package, Radio, Activity, BrainCircuit } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -756,7 +756,7 @@ export function AdminSurveillanceView() {
               </div>
               <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
                 <button onClick={() => setShowForecast(true)} className="flex items-center gap-1.5 transition-opacity hover:opacity-80" title="AI Threat Forecast">
-                  <Zap className="w-3 h-3 text-amber-400" />
+                  <BrainCircuit className="w-3 h-3 text-amber-400" />
                   <span className="text-[10px] text-gray-400">Forecast</span>
                 </button>
               </div>
