@@ -72,9 +72,8 @@ const threatLevelConfig = {
 };
 
 export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
+  const { loading, data, setData, generate: generateForecast, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<ForecastResponse | null>(null);
   const [history, setHistory] = useState<SavedForecast[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
