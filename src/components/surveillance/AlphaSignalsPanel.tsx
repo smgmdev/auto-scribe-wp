@@ -461,8 +461,8 @@ export function AlphaSignalsPanel() {
                   const outlook = outlookConfig[sector.outlook] || outlookConfig.neutral;
                   const OutlookIcon = outlook.icon;
                   return (
-                    <div key={i} className="px-3 py-2.5">
-                      <div className="flex items-center justify-between mb-1">
+                    <div key={i} className="px-3 py-2">
+                      <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-gray-200">{sector.sector}</span>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className={cn(
@@ -479,7 +479,7 @@ export function AlphaSignalsPanel() {
                           </div>
                         </div>
                       </div>
-                      <p className="text-[10px] text-gray-500">{sector.key_driver}</p>
+                      <p className="text-[10px] text-gray-500 leading-snug mt-0.5">{sector.key_driver}</p>
                     </div>
                   );
                 })}
