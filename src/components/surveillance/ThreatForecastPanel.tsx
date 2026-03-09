@@ -416,7 +416,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {!loading && data && !selectedHistoryId && activeTab === 'generate' && (
           <Button
             onClick={() => { setSelectedHistoryId(null); generateForecast(); }}
-            className="w-full h-8 text-[11px] rounded-none bg-[#f2a547] text-black border-0 border-b border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
+            className="w-full h-9 text-[11px] rounded-none bg-[#f2a547] text-black border border-transparent hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547] transition-colors"
           >
             Generate New Assessment
           </Button>
