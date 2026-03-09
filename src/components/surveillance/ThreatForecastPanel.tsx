@@ -448,9 +448,8 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                 <Button
                   size="sm"
                   onClick={generateForecast}
-                  className="h-7 text-[10px] bg-white/5 text-gray-500 border border-white/10 hover:bg-white/10"
+                  className="h-7 text-[10px] rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
                 >
-                  <BrainCircuit className="w-3 h-3 mr-1" />
                   Generate New Assessment
                 </Button>
               </div>
