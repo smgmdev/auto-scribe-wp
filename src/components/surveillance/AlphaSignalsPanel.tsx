@@ -341,14 +341,14 @@ export function AlphaSignalsPanel() {
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="bg-transparent border-b border-white/10 rounded-none h-8 px-2 flex-shrink-0">
-              <TabsTrigger value="signals" className="text-[10px] data-[state=active]:bg-white/10 rounded-sm h-6 px-2">
+            <TabsList className="bg-transparent border-b border-white/10 rounded-none h-9 p-0 flex-shrink-0 w-full">
+              <TabsTrigger value="signals" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-none">
                 Signals ({data.signals.length})
               </TabsTrigger>
-              <TabsTrigger value="sectors" className="text-[10px] data-[state=active]:bg-white/10 rounded-sm h-6 px-2">
+              <TabsTrigger value="sectors" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-none">
                 Sectors
               </TabsTrigger>
-              <TabsTrigger value="tail-risks" className="text-[10px] data-[state=active]:bg-white/10 rounded-sm h-6 px-2">
+              <TabsTrigger value="tail-risks" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-none">
                 Tail Risks
               </TabsTrigger>
             </TabsList>
