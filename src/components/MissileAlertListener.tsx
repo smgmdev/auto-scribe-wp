@@ -464,6 +464,11 @@ export function MissileAlertListener() {
           const normalizedTitle = a.title.toLowerCase().trim();
           // Exact title match
           if (dismissedTitlesRef.current.has(normalizedTitle)) return false;
+          // Country-pair dedup: if user dismissed any alert with same trajectory, skip
+          if (a.origin_country_code && a.destination_country_code) {
+            const pair = `${a.origin_country_code}->${a.destination_country_code}`;
+            if (dismissedPairsRef.current.has(pair)) return false;
+          }
           // Fuzzy title match against all dismissed titles
           for (const dt of dismissedTitlesRef.current) {
             if (titlesSimilar(a.title, dt)) return false;
