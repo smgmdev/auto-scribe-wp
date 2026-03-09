@@ -221,11 +221,9 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
           {!loading && !data && (
             <div className="flex flex-col items-center justify-center h-full gap-3">
-              <BrainCircuit className="w-10 h-10 text-gray-700" />
               <p className="text-sm text-gray-400 text-center">AI Threat Assessment</p>
               <p className="text-xs text-gray-600 text-center max-w-xs">Produces a professional-grade intelligence assessment analyzing 7 days of surveillance data, active alerts, and escalation patterns with probability-scored predictions.</p>
-              <Button onClick={generateForecast} className="mt-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30">
-                <BrainCircuit className="w-4 h-4 mr-2" />
+              <Button onClick={generateForecast} className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
                 Generate Assessment
               </Button>
             </div>
