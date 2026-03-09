@@ -266,14 +266,9 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                     <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 bg-white/5 text-gray-500 border-white/10">
                       {h.threat_type}
                     </Badge>
-                  </div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={cn("text-[11px] font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
-                      {h.risk_score}
-                    </span>
-                    <span className={cn("text-[9px]", h.trend === 'rising' ? 'text-red-500' : h.trend === 'declining' ? 'text-emerald-500' : 'text-gray-600')}>
-                      {trendArrow(h.trend)} {h.trend}
-                    </span>
+                    <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5 border-white/10", h.risk_score >= 70 ? 'bg-red-500/10 text-red-400' : h.risk_score >= 40 ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400')}>
+                      {h.risk_score} {trendArrow(h.trend)} {h.trend}
+                    </Badge>
                   </div>
                   <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{h.rationale}</p>
                   {h.cascade_risk && (
