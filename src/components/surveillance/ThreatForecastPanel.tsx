@@ -429,6 +429,17 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </button>
         </div>
 
+        {/* Back to history - above heatmap */}
+        {activeTab === 'history' && selectedHistoryId && (
+          <button
+            onClick={() => { setSelectedHistoryId(null); clearGenerated(); }}
+            className="flex items-center gap-1 px-3 py-2 text-[11px] text-gray-400 hover:text-white transition-colors border-b border-white/5"
+          >
+            <ChevronRight className="w-3 h-3 rotate-180" />
+            Back to history
+          </button>
+        )}
+
         {/* Heatmap Globe Toggle - only show when viewing an individual report */}
         {data && ((!loading && activeTab === 'generate' && !selectedHistoryId) || (activeTab === 'history' && selectedHistoryId)) ? <HeatmapToggle /> : null}
 
