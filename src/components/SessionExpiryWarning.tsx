@@ -89,6 +89,9 @@ export function SessionExpiryWarning() {
 
   // Main check loop - uses DB timestamp
   useEffect(() => {
+    // Don't run expiry checks while auth is still loading (e.g. after HMR/iframe rebuild)
+    if (loading) return;
+    
     if (!session?.user?.id) {
       setShowWarning(false);
       clearCountdown();
