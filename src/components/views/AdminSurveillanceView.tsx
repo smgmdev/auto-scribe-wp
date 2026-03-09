@@ -196,6 +196,8 @@ export function AdminSurveillanceView() {
   const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast' | 'simulator' | 'alpha'>('feed');
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
   const currentView = useAppStore((s) => s.currentView);
+  const crtMode = useAppStore((s) => s.crtMode);
+  const setCrtMode = useAppStore((s) => s.setCrtMode);
 
   // Trigger globe reset whenever the surveillance view becomes active
   useEffect(() => {
