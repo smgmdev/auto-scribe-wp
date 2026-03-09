@@ -423,7 +423,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'generate' | 'history')} className="flex-1 flex flex-col min-h-0">
         <div className="w-full flex h-9 bg-[#1a1a1a] border-b border-white/10">
           <button
-            onClick={() => { setActiveTab('generate'); setSelectedHistoryId(null); }}
+            onClick={() => { setActiveTab('generate'); if (selectedHistoryId) { setSelectedHistoryId(null); setData(null); } }}
             className={`flex-1 text-[11px] h-full transition-colors ${activeTab === 'generate' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
           >
             Generate
