@@ -18,6 +18,17 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 
 const updates = [
   {
+    date: 'March 9, 2026',
+    title: 'Arcana Precision — Market Signals UI Refinements',
+    changes: [
+      'Renamed "Geopolitical Alpha" to "Geopolitical Market Data" for clearer terminology across the Precision intelligence platform',
+      'Updated Generate Market Signals button styling to match the Generate New Assessment button with consistent colors, font, and hover behavior',
+      'Moved the Signal History icon inline with the Market Signals title for a cleaner, more compact header layout',
+      'Removed subtitle text from the Market Signals panel header for a streamlined appearance',
+      'Removed decorative icon from Signal History title and empty state for a cleaner minimal look',
+    ],
+  },
+  {
     date: 'March 5, 2026',
     title: 'Mace AI Voice — Smarter Publishing & Conversation Flow',
     changes: [
