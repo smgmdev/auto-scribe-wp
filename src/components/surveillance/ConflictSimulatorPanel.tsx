@@ -441,8 +441,7 @@ export function ConflictSimulatorPanel() {
         <div className="p-3">
           <Button
             onClick={() => { clear(); }}
-            variant="outline"
-            className="w-full h-8 text-[10px] rounded-none border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+            className="w-full rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
           >
             New Simulation
           </Button>
