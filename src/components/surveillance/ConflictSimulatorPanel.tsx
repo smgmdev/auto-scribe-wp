@@ -82,12 +82,12 @@ const confidenceColor = (c: string) =>
       : 'bg-gray-500/10 text-gray-400 border-gray-500/20';
 
 const QUICK_SCENARIOS = [
-  { a: 'China', b: 'Taiwan', label: '🇨🇳 China vs Taiwan' },
-  { a: 'Russia', b: 'NATO (via Ukraine)', label: '🇷🇺 Russia vs NATO' },
-  { a: 'Iran', b: 'Israel', label: '🇮🇷 Iran vs Israel' },
-  { a: 'North Korea', b: 'South Korea', label: '🇰🇵 N.Korea vs S.Korea' },
-  { a: 'India', b: 'Pakistan', label: '🇮🇳 India vs Pakistan' },
-  { a: 'China', b: 'United States', label: '🇨🇳 China vs USA' },
+  { a: 'China', b: 'Taiwan', label: '🇨🇳 China — Taiwan' },
+  { a: 'Russia', b: 'NATO (via Ukraine)', label: '🇷🇺 Russia — NATO' },
+  { a: 'Iran', b: 'Israel', label: '🇮🇷 Iran — Israel' },
+  { a: 'North Korea', b: 'South Korea', label: '🇰🇵 N.Korea — S.Korea' },
+  { a: 'India', b: 'Pakistan', label: '🇮🇳 India — Pakistan' },
+  { a: 'China', b: 'United States', label: '🇨🇳 China — USA' },
 ];
 
 export function ConflictSimulatorPanel() {
@@ -288,7 +288,7 @@ export function ConflictSimulatorPanel() {
           <h3 className="text-[12px] font-bold text-white mb-1">{sim.scenario_title}</h3>
           <p className="text-[10px] text-gray-400 leading-relaxed">{sim.executive_summary}</p>
           <div className="flex items-center gap-3 mt-2 text-[9px] text-gray-600">
-            <span>{result.country_a} vs {result.country_b}</span>
+            <span>{result.country_a} — {result.country_b}</span>
             <span>•</span>
             <span>{result.intelligence_points} intel points</span>
             <span>•</span>
@@ -500,7 +500,7 @@ export function ConflictSimulatorPanel() {
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[12px] font-bold text-white tracking-wide">CONFLICT SIMULATOR</span>
         </div>
-        <p className="text-[10px] text-gray-500 leading-relaxed">
+        <p className="text-[11px] text-gray-500 leading-relaxed">
           AI-powered "What If" scenario modeling. Select two nations to generate a comprehensive escalation analysis with probability-scored outcomes.
         </p>
       </div>
@@ -520,7 +520,7 @@ export function ConflictSimulatorPanel() {
               setSearchB(s.b);
               runSimulation(s.a, s.b);
             }}
-            className="text-[10px] px-2 py-1.5 bg-white/[0.03] border border-white/[0.06] text-gray-400 hover:bg-white/[0.08] hover:text-white transition-colors text-left"
+            className="text-[11px] px-2 py-1.5 bg-white/[0.03] border border-white/[0.06] text-gray-400 hover:bg-white/[0.08] hover:text-white transition-colors text-left"
           >
             {s.label}
           </button>
@@ -562,9 +562,9 @@ export function ConflictSimulatorPanel() {
           )}
         </div>
 
-        {/* VS indicator */}
+        {/* Separator */}
         <div className="flex items-center justify-center">
-          <span className="text-[10px] font-bold text-red-500/40">VS</span>
+          <span className="text-[10px] font-bold text-red-500/40">—</span>
         </div>
 
         {/* Country B */}

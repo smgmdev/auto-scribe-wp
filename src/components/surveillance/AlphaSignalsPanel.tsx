@@ -261,7 +261,7 @@ export function AlphaSignalsPanel() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-gray-300 line-clamp-2 mb-1">{s.market_summary}</p>
+                  <p className="text-[11px] text-gray-300 line-clamp-2 leading-snug mb-1">{s.market_summary}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] text-gray-500">
                       {new Date(s.created_at).toLocaleString(undefined, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
