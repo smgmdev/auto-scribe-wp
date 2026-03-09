@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertTriangle, Rocket, ShieldAlert, Radar, Radiation, Bomb, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CountryRiskProfile } from './CountryRiskProfile';
 
 function getThreatBadge(level: string, score?: number) {
   if (score !== undefined) {
