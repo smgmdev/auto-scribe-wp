@@ -1034,7 +1034,7 @@ export function AdminSurveillanceView() {
                 onClick={() => setMobileSliderTab('alpha')}
                 className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'alpha' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
-                Alpha
+                Markets
               </button>
             </div>
 

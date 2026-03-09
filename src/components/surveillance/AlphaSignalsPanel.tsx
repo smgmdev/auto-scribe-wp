@@ -294,7 +294,7 @@ export function AlphaSignalsPanel() {
               <span className="flex-1 text-left">Analyzing intelligence... {progress}%</span>
             </span>
           ) : (
-            'Generate Alpha Signals'
+            'Generate Market Signals'
           )}
         </Button>
         {loading && (
