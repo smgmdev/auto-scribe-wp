@@ -308,6 +308,7 @@ interface AppState {
   showTrades: boolean;
   showSatellites: boolean;
   showEarthquakes: boolean;
+  showHeatmap: boolean;
   setShowMissiles: (v: boolean) => void;
   setShowDrones: (v: boolean) => void;
   setShowNukes: (v: boolean) => void;
