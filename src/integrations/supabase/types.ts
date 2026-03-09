@@ -1915,6 +1915,30 @@ export type Database = {
         }
         Relationships: []
       }
+      threat_forecasts: {
+        Row: {
+          created_at: string
+          data_points: Json
+          forecast: Json
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_points?: Json
+          forecast: Json
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_points?: Json
+          forecast?: Json
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           created_at: string
