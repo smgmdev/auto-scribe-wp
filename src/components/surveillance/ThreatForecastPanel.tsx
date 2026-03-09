@@ -295,7 +295,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Escalation Hotspots</span>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-0">
               {data.forecast.hotspots.map((h, i) => (
                 <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
