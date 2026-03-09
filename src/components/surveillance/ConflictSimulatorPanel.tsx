@@ -149,6 +149,7 @@ export function ConflictSimulatorPanel() {
     setLoading(true);
     setResult(null);
     setRunId(rid);
+    setStartedAt(Date.now());
 
     // Fire-and-forget: don't await the full response
     supabase.functions.invoke('conflict-simulator', {
