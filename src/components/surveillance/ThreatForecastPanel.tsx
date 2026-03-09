@@ -208,6 +208,68 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
     });
   };
 
+function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
+  text: string;
+  dataPoints: ForecastResponse['data_points'];
+  generatedAt: string;
+  formatDate: (d: string) => string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) setHeight(contentRef.current.scrollHeight);
+  }, [text]);
+
+  return (
+    <div
+      className="px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
+      onClick={() => setExpanded(e => !e)}
+    >
+      <div className="flex items-center justify-between pt-2.5 mb-1.5">
+        <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
+        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
+      </div>
+      <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
+        <div ref={contentRef}>
+          <p className="text-[11px] text-gray-300 leading-relaxed">{text}</p>
+          <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[10px] text-gray-600">
+            <span>{dataPoints.scans_analyzed} scans</span>
+            <span>•</span>
+            <span>{dataPoints.alerts_analyzed} alerts</span>
+            <span>•</span>
+            <span>{dataPoints.affected_nations} nations</span>
+            <span>•</span>
+            <span>{formatDate(generatedAt)}</span>
+          </div>
+          {dataPoints.severity_distribution && (
+            <div className="flex items-center gap-1 mt-2">
+              {dataPoints.severity_distribution.critical > 0 && (
+                <div className="flex items-center gap-1 text-[9px] text-red-400">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  {dataPoints.severity_distribution.critical} critical
+                </div>
+              )}
+              {dataPoints.severity_distribution.high > 0 && (
+                <div className="flex items-center gap-1 text-[9px] text-orange-400 ml-2">
+                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                  {dataPoints.severity_distribution.high} high
+                </div>
+              )}
+              {dataPoints.severity_distribution.medium > 0 && (
+                <div className="flex items-center gap-1 text-[9px] text-amber-400 ml-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  {dataPoints.severity_distribution.medium} medium
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
   const TrendIcon = data?.forecast.overall_trend === 'escalating' ? TrendingUp
     : data?.forecast.overall_trend === 'de-escalating' ? TrendingDown : Minus;
