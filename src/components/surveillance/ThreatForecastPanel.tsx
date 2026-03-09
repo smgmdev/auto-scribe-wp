@@ -531,7 +531,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                               f.forecast.overall_trend === 'escalating' ? 'text-red-400 border-red-500/30' :
                               f.forecast.overall_trend === 'de-escalating' ? 'text-emerald-400 border-emerald-500/30' : 'text-amber-400 border-amber-500/30'
                             )}>
-                              {f.forecast.overall_trend}
+                              {f.forecast.overall_trend.charAt(0).toUpperCase() + f.forecast.overall_trend.slice(1)}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-1">
