@@ -180,7 +180,7 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate, tren
 }
 
 export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
-  const { loading, data, setData, generate: storeGenerate, clearGenerated } = useForecastStore();
+  const { loading, data, startedAt, setData, generate: storeGenerate, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
   const [history, setHistory] = useState<SavedForecast[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
