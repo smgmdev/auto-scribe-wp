@@ -186,7 +186,12 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
           <BrainCircuit className="w-4 h-4 text-amber-400" />
           <span className="text-sm font-semibold text-white tracking-wide">AI THREAT FORECAST</span>
           {data && activeTab === 'generate' && (
-            <Badge variant="outline" className={cn("text-[9px] ml-1 uppercase", trendColor, "border-current/30")}>
+            <Badge className={cn(
+              "text-[9px] ml-1 uppercase border-0 rounded-none",
+              data.forecast.overall_trend === 'escalating' ? 'bg-[#f2a547] text-black hover:bg-[#f2a547]'
+                : data.forecast.overall_trend === 'de-escalating' ? 'bg-emerald-500 text-black hover:bg-emerald-500'
+                  : 'bg-amber-400 text-black hover:bg-amber-400'
+            )}>
               <TrendIcon className="w-3 h-3 mr-1" />
               {data.forecast.overall_trend}
             </Badge>
@@ -208,7 +213,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
         </TabsList>
 
         {/* Generate Tab */}
-        <TabsContent value="generate" className="flex-1 overflow-y-auto p-4 space-y-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0">
+        <TabsContent value="generate" className="flex-1 overflow-y-auto p-4 space-y-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
           {loading && (
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
@@ -459,7 +464,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
         </TabsContent>
 
         {/* History Tab */}
-        <TabsContent value="history" className="flex-1 overflow-y-auto p-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0">
+        <TabsContent value="history" className="flex-1 overflow-y-auto p-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
           {historyLoading && (
             <div className="flex items-center justify-center h-32">
               <Loader2 className="w-6 h-6 text-gray-500 animate-spin" />
