@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Swords, Shield, TrendingUp, DollarSign, Handshake, AlertTriangle, Eye, ChevronDown, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { COUNTRIES } from '@/constants/countries';
+import { useSimulatorStore } from '@/stores/simulatorStore';
 
 interface TriggerScenario {
   trigger: string;
@@ -36,20 +37,22 @@ interface EconomicImpact {
   estimated_cost_range: string;
 }
 
+interface MostLikelyOutcome {
+  outcome: string;
+  probability_pct: number;
+  timeframe: string;
+  rationale: string;
+}
+
 interface Simulation {
   scenario_title: string;
-  threat_level: string;
+  threat_level: 'CRITICAL' | 'HIGH' | 'ELEVATED' | 'MODERATE' | 'LOW';
   executive_summary: string;
   trigger_scenarios: TriggerScenario[];
   escalation_phases: EscalationPhase[];
   alliance_responses: AllianceResponse[];
   economic_impact: EconomicImpact;
-  most_likely_outcome: {
-    outcome: string;
-    probability_pct: number;
-    timeframe: string;
-    rationale: string;
-  };
+  most_likely_outcome: MostLikelyOutcome;
   deescalation_opportunities: string[];
   critical_indicators: string[];
 }
@@ -63,19 +66,18 @@ interface SimulationResult {
 }
 
 const threatColors: Record<string, { bg: string; text: string; border: string }> = {
-  CRITICAL: { bg: 'bg-red-600', text: 'text-white', border: 'border-red-500' },
-  HIGH: { bg: 'bg-red-500/30', text: 'text-red-300', border: 'border-red-500/40' },
-  ELEVATED: { bg: 'bg-amber-500/30', text: 'text-amber-300', border: 'border-amber-500/40' },
-  MODERATE: { bg: 'bg-blue-500/30', text: 'text-blue-300', border: 'border-blue-500/40' },
-  LOW: { bg: 'bg-emerald-500/30', text: 'text-emerald-300', border: 'border-emerald-500/40' },
+  CRITICAL: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' },
+  HIGH: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30' },
+  ELEVATED: { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' },
+  MODERATE: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30' },
+  LOW: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30' },
 };
 
 const confidenceColor = (c: string) =>
-  c === 'high' ? 'bg-red-500/20 text-red-300 border-red-500/30'
-    : c === 'medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-      : 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+  c === 'high' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+    : c === 'medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+      : 'bg-gray-500/10 text-gray-400 border-gray-500/20';
 
-// Featured conflict pairs for quick selection
 const QUICK_SCENARIOS = [
   { a: 'China', b: 'Taiwan', label: '🇨🇳 China vs Taiwan' },
   { a: 'Russia', b: 'NATO (via Ukraine)', label: '🇷🇺 Russia vs NATO' },
@@ -86,14 +88,14 @@ const QUICK_SCENARIOS = [
 ];
 
 export function ConflictSimulatorPanel() {
+  const { loading, result, runId, setLoading, setResult, setRunId, clear } = useSimulatorStore();
   const [countryA, setCountryA] = useState('');
   const [countryB, setCountryB] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<SimulationResult | null>(null);
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
   const [showDropdownA, setShowDropdownA] = useState(false);
   const [showDropdownB, setShowDropdownB] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const filteredA = useMemo(() => 
     COUNTRIES.filter(c => c.toLowerCase().includes(searchA.toLowerCase()) && c !== countryB).slice(0, 8),
@@ -104,6 +106,40 @@ export function ConflictSimulatorPanel() {
     [searchB, countryA]
   );
 
+  // Poll for results when we have a runId and are loading
+  const startPolling = useCallback((rid: string) => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      const { data } = await supabase
+        .from('conflict_simulations')
+        .select('status, result, error_message')
+        .eq('run_id', rid)
+        .maybeSingle();
+
+      if (data?.status === 'completed' && data.result) {
+        setResult(data.result as any);
+        setLoading(false);
+        setRunId(null);
+        if (pollRef.current) clearInterval(pollRef.current);
+      } else if (data?.status === 'error') {
+        toast.error(data.error_message || 'Simulation failed');
+        setLoading(false);
+        setRunId(null);
+        if (pollRef.current) clearInterval(pollRef.current);
+      }
+    }, 3000);
+  }, [setResult, setLoading, setRunId]);
+
+  // Resume polling on mount if there's an active run
+  useEffect(() => {
+    if (loading && runId) {
+      startPolling(runId);
+    }
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [loading, runId, startPolling]);
+
   const runSimulation = async (a?: string, b?: string) => {
     const ca = a || countryA;
     const cb = b || countryB;
@@ -111,21 +147,20 @@ export function ConflictSimulatorPanel() {
       toast.error('Select both countries');
       return;
     }
+    const rid = crypto.randomUUID();
     setLoading(true);
     setResult(null);
-    try {
-      const { data, error } = await supabase.functions.invoke('conflict-simulator', {
-        body: { country_a: ca, country_b: cb },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setResult(data);
-    } catch (err: any) {
-      console.error('Simulation error:', err);
-      toast.error(err.message || 'Failed to run simulation');
-    } finally {
-      setLoading(false);
-    }
+    setRunId(rid);
+
+    // Fire-and-forget: don't await the full response
+    supabase.functions.invoke('conflict-simulator', {
+      body: { country_a: ca, country_b: cb, run_id: rid },
+    }).catch((err) => {
+      console.error('Simulation request error:', err);
+    });
+
+    // Start polling for results
+    startPolling(rid);
   };
 
   const sim = result?.simulation;
