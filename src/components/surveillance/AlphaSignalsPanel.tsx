@@ -232,7 +232,8 @@ export function AlphaSignalsPanel() {
     return (
       <div className="flex flex-col h-full text-white">
         <div className="px-4 border-b border-white/10" style={{ height: 34, display: 'flex', alignItems: 'center' }}>
-          <span className="text-sm font-medium">Signal History</span>
+          <div className="flex items-center justify-between w-full">
+            <h3 className="text-sm font-semibold tracking-tight">Signal History</h3>
           <Button variant="ghost" size="sm" className="text-gray-400 h-7 text-xs" onClick={() => setShowHistory(false)}>
             Back
           </Button>
