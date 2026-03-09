@@ -222,24 +222,50 @@ export function ConflictSimulatorPanel() {
     );
   }
 
-  // Determine favored nation from outcome text
-  const getFavoredNation = () => {
-    if (!sim || !result) return null;
+  // Determine favored nation and win percentage
+  const getFavoredInfo = () => {
+    if (!sim || !result) return { nation: null, pct: 0 };
+    const pct = sim.most_likely_outcome?.probability_pct || 50;
     const outcome = (sim.most_likely_outcome?.outcome || '').toLowerCase() + ' ' + (sim.most_likely_outcome?.rationale || '').toLowerCase();
-    const aCount = outcome.split(result.country_a.toLowerCase()).length - 1;
-    const bCount = outcome.split(result.country_b.toLowerCase()).length - 1;
-    // The country mentioned more in the outcome context with "advantage", "superior", "win", "favor" or simply more prominent
-    const favorKeywords = ['advantage', 'superior', 'dominat', 'favor', 'prevail', 'win', 'successful', 'victory'];
-    const aFavor = favorKeywords.some(k => outcome.includes(result.country_a.toLowerCase()) && outcome.includes(k));
-    const bFavor = favorKeywords.some(k => outcome.includes(result.country_b.toLowerCase()) && outcome.includes(k));
-    if (aFavor && !bFavor) return result.country_a;
-    if (bFavor && !aFavor) return result.country_b;
-    if (aCount > bCount) return result.country_a;
-    if (bCount > aCount) return result.country_b;
-    return result.country_a; // default to country_a
+    const aLower = result.country_a.toLowerCase();
+    const bLower = result.country_b.toLowerCase();
+    
+    // Determine which country the outcome text favors
+    const favorKeywords = ['advantage', 'superior', 'dominat', 'favor', 'prevail', 'win', 'successful', 'victory', 'stronger', 'overwhelm'];
+    const aFavorCount = favorKeywords.filter(k => {
+      const idx = outcome.indexOf(k);
+      if (idx === -1) return false;
+      const nearby = outcome.substring(Math.max(0, idx - 80), idx + 80);
+      return nearby.includes(aLower);
+    }).length;
+    const bFavorCount = favorKeywords.filter(k => {
+      const idx = outcome.indexOf(k);
+      if (idx === -1) return false;
+      const nearby = outcome.substring(Math.max(0, idx - 80), idx + 80);
+      return nearby.includes(bLower);
+    }).length;
+
+    let textFavored: string;
+    if (aFavorCount > bFavorCount) textFavored = result.country_a;
+    else if (bFavorCount > aFavorCount) textFavored = result.country_b;
+    else {
+      // Fall back to mention count
+      const aCount = outcome.split(aLower).length - 1;
+      const bCount = outcome.split(bLower).length - 1;
+      textFavored = aCount >= bCount ? result.country_a : result.country_b;
+    }
+
+    // If pct > 50, the outcome text's favored nation wins with that pct
+    // If pct <= 50, the OTHER nation is actually favored with (100 - pct)
+    if (pct > 50) {
+      return { nation: textFavored, pct };
+    } else {
+      const other = textFavored === result.country_a ? result.country_b : result.country_a;
+      return { nation: other, pct: 100 - pct };
+    }
   };
 
-  const favoredNation = sim ? getFavoredNation() : null;
+  const favoredInfo = sim ? getFavoredInfo() : { nation: null, pct: 0 };
 
   if (sim && tc) {
     return (
@@ -248,7 +274,7 @@ export function ConflictSimulatorPanel() {
         {/* Favored Nation Banner */}
         <div className={cn("h-9 flex items-center justify-center border", tc.border, tc.bg, tc.text)}>
           <Shield className="w-4 h-4 mr-2" />
-          <span className="text-xs font-bold tracking-widest">IN FAVOR: {favoredNation?.toUpperCase()} — {sim.most_likely_outcome?.probability_pct || '?'}%</span>
+          <span className="text-xs font-bold tracking-widest">IN FAVOR: {favoredInfo.nation?.toUpperCase()} — {favoredInfo.pct}%</span>
         </div>
 
         {/* Title */}
