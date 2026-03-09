@@ -71,7 +71,7 @@ const threatLevelConfig = {
   LOW: { color: 'bg-emerald-500/30 text-emerald-300', border: 'border-emerald-500/40', text: 'text-emerald-400' },
 };
 
-export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
+export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
   const { loading, data, setData, generate: generateForecast, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
   const [history, setHistory] = useState<SavedForecast[]>([]);
