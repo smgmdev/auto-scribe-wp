@@ -282,8 +282,8 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                       </div>
                       <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{h.rationale}</p>
                       {h.cascade_risk && (
-                        <p className="text-[9px] text-amber-600 mt-1 flex items-center gap-1">
-                          <AlertTriangle className="w-2.5 h-2.5 flex-shrink-0" />
+                        <p className="text-[9px] text-amber-600 mt-1 flex items-start gap-1">
+                          <AlertTriangle className="w-2.5 h-2.5 flex-shrink-0 translate-y-[1px]" />
                           <span>Cascade: {h.cascade_risk}</span>
                         </p>
                       )}
