@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useForecastStore } from '@/stores/forecastStore';
 
 interface Hotspot {
   region: string;
@@ -71,9 +72,8 @@ const threatLevelConfig = {
 };
 
 export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
+  const { loading, data, setData, generate: generateForecast, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<ForecastResponse | null>(null);
   const [history, setHistory] = useState<SavedForecast[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
@@ -133,20 +133,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
     });
   };
 
-  const generateForecast = async () => {
-    setLoading(true);
-    setSelectedHistoryId(null);
-    try {
-      const { data: result, error } = await supabase.functions.invoke('threat-forecast');
-      if (error) throw error;
-      if (result?.error) throw new Error(result.error);
-      setData(result);
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to generate forecast');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const TrendIcon = data?.forecast.overall_trend === 'escalating' ? TrendingUp
     : data?.forecast.overall_trend === 'de-escalating' ? TrendingDown : Minus;
@@ -399,7 +385,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
           <div className="pt-2 pb-1 flex justify-center">
             <Button
               size="sm"
-              onClick={generateForecast}
+              onClick={() => { setSelectedHistoryId(null); generateForecast(); }}
               className="h-7 text-[10px] rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
             >
               Generate New Assessment
@@ -423,7 +409,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'generate' | 'history')} className="flex-1 flex flex-col min-h-0">
         <div className="w-full flex h-9 bg-[#1a1a1a] border-b border-white/10">
           <button
-            onClick={() => { setActiveTab('generate'); if (selectedHistoryId) { setSelectedHistoryId(null); setData(null); } }}
+            onClick={() => { setActiveTab('generate'); if (selectedHistoryId) { setSelectedHistoryId(null); clearGenerated(); } }}
             className={`flex-1 text-[11px] h-full transition-colors ${activeTab === 'generate' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
           >
             Generate
@@ -450,7 +436,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <p className="text-sm text-gray-400 text-center">AI Threat Assessment</p>
               <p className="text-xs text-gray-600 text-center max-w-xs">Produces a professional-grade intelligence assessment analyzing 7 days of surveillance data, active alerts, and escalation patterns with probability-scored predictions.</p>
-              <Button onClick={generateForecast} className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
+              <Button onClick={() => { setSelectedHistoryId(null); generateForecast(); }} className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
                 Generate Assessment
               </Button>
             </div>
@@ -466,7 +452,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
           {selectedHistoryId && data ? (
             <div className="space-y-4">
               <button
-                onClick={() => { setSelectedHistoryId(null); setData(null); }}
+                onClick={() => { setSelectedHistoryId(null); clearGenerated(); }}
                 className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-white transition-colors"
               >
                 <ChevronRight className="w-3 h-3 rotate-180" />
