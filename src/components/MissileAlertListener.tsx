@@ -272,6 +272,7 @@ export function MissileAlertListener() {
   const [alerts, setAlerts] = useState<MissileAlert[]>([]);
   const dismissedRef = useRef<Set<string>>(new Set());
   const dismissedTitlesRef = useRef<Set<string>>(new Set());
+  const dismissedPairsRef = useRef<Set<string>>(new Set());
   const dismissedLoadedRef = useRef(false);
   const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
