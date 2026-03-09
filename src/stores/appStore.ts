@@ -316,6 +316,7 @@ interface AppState {
   setShowTrades: (v: boolean) => void;
   setShowSatellites: (v: boolean) => void;
   setShowEarthquakes: (v: boolean) => void;
+  setShowHeatmap: (v: boolean) => void;
   missileTimeFilter: string;
   droneTimeFilter: string;
   nukeTimeFilter: string;
