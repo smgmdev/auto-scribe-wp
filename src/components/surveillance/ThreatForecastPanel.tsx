@@ -266,9 +266,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                     <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 bg-white/5 text-gray-500 border-white/10">
                       {h.threat_type}
                     </Badge>
-                    <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
-                      <div className={cn("h-full rounded-full", riskColor(h.risk_score))} style={{ width: `${h.risk_score}%` }} />
-                    </div>
                   </div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className={cn("text-[11px] font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
