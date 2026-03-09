@@ -20,7 +20,7 @@ serve(async (req) => {
       });
     }
 
-    // Auth check - require admin
+    // Auth check - require admin or precision_enabled
     const authHeader = req.headers.get("authorization");
     const supabase = createClient(supabaseUrl, serviceKey);
 
@@ -33,7 +33,6 @@ serve(async (req) => {
           status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Check admin or precision_enabled
       const { data: hasAdmin } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
       const { data: profile } = await supabase.from("profiles").select("precision_enabled").eq("id", user.id).single();
       if (!hasAdmin && !profile?.precision_enabled) {
@@ -43,14 +42,14 @@ serve(async (req) => {
       }
     }
 
-    // Fetch last 7 days of surveillance scans
+    // Fetch last 7 days of surveillance scans (more data)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: scans } = await supabase
       .from("surveillance_scans")
       .select("country_data, events, global_tension_level, global_tension_score, scanned_at")
       .gte("scanned_at", sevenDaysAgo)
       .order("scanned_at", { ascending: false })
-      .limit(20);
+      .limit(30);
 
     // Fetch active missile alerts
     const { data: alerts } = await supabase
@@ -58,43 +57,99 @@ serve(async (req) => {
       .select("title, severity, country_name, origin_country_name, destination_country_name, description, published_at")
       .eq("active", true)
       .order("published_at", { ascending: false })
-      .limit(30);
+      .limit(50);
 
-    // Build intelligence summary for AI
-    const scanSummaries = (scans || []).map(s => ({
+    // Build enriched intelligence summary
+    const scanSummaries = (scans || []).map(s => {
+      const countries = Array.isArray(s.country_data) ? s.country_data as any[] : [];
+      const dangerCountries = countries.filter((c: any) => c.threat_level === 'danger');
+      const cautionCountries = countries.filter((c: any) => c.threat_level === 'caution');
+      const events = Array.isArray(s.events) ? s.events as any[] : [];
+
+      return {
+        date: s.scanned_at,
+        tension_level: s.global_tension_level,
+        tension_score: s.global_tension_score,
+        event_count: events.length,
+        danger_countries: dangerCountries.slice(0, 8).map((c: any) => ({
+          name: c.name,
+          score: c.score,
+          summary: c.summary?.slice(0, 200),
+        })),
+        caution_countries: cautionCountries.slice(0, 5).map((c: any) => ({
+          name: c.name,
+          score: c.score,
+        })),
+        threat_distribution: {
+          danger: dangerCountries.length,
+          caution: cautionCountries.length,
+          safe: countries.length - dangerCountries.length - cautionCountries.length,
+        },
+        notable_events: events.slice(0, 10).map((e: any) => ({
+          title: typeof e === 'string' ? e : e.title || e.headline,
+          country: e.country || e.location,
+          type: e.type || e.category,
+        })),
+      };
+    });
+
+    // Analyze tension trend over time
+    const tensionScores = (scans || []).map(s => ({
       date: s.scanned_at,
-      tension: `${s.global_tension_level} (${s.global_tension_score}/100)`,
-      eventCount: Array.isArray(s.events) ? s.events.length : 0,
-      topCountries: Array.isArray(s.country_data)
-        ? (s.country_data as any[]).filter((c: any) => c.threat_level === 'danger').slice(0, 5).map((c: any) => `${c.name}: ${c.score}`)
-        : [],
-    }));
+      score: s.global_tension_score,
+    })).reverse();
 
     const alertSummaries = (alerts || []).map(a => ({
       title: a.title,
       severity: a.severity,
       target: a.country_name || a.destination_country_name,
       origin: a.origin_country_name,
+      description: a.description?.slice(0, 300),
       date: a.published_at,
     }));
 
-    const prompt = `You are a geopolitical intelligence analyst. Analyze the following surveillance data and produce a threat forecast for the next 24-72 hours.
+    // Compute severity distribution
+    const severityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+    (alerts || []).forEach(a => {
+      const sev = (a.severity || 'medium').toLowerCase();
+      if (sev in severityCounts) severityCounts[sev as keyof typeof severityCounts]++;
+    });
 
-SURVEILLANCE SCAN HISTORY (last 7 days):
+    // Count unique affected countries
+    const affectedCountries = new Set<string>();
+    (alerts || []).forEach(a => {
+      if (a.country_name) affectedCountries.add(a.country_name);
+      if (a.destination_country_name) affectedCountries.add(a.destination_country_name);
+      if (a.origin_country_name) affectedCountries.add(a.origin_country_name);
+    });
+
+    const prompt = `You are a senior geopolitical intelligence analyst at a defense intelligence agency. Produce a comprehensive, professional-grade threat assessment based on the following OSINT surveillance data.
+
+TEMPORAL CONTEXT: Analysis window covers the last 7 days. Current UTC time: ${new Date().toISOString()}.
+
+---
+GLOBAL TENSION TREND (chronological):
+${JSON.stringify(tensionScores, null, 2)}
+
+SURVEILLANCE SCAN DATA (${scanSummaries.length} scans):
 ${JSON.stringify(scanSummaries, null, 2)}
 
-ACTIVE ALERTS:
+ACTIVE ALERTS (${alertSummaries.length} total):
+Severity distribution: ${JSON.stringify(severityCounts)}
+Unique affected nations: ${affectedCountries.size}
 ${JSON.stringify(alertSummaries, null, 2)}
+---
 
-Produce a structured analysis with:
-1. Overall trend assessment (escalating/stable/de-escalating)
-2. Top 5 hotspot regions with risk scores (0-100) and brief rationale
-3. 3-5 specific predictions for the next 24-72 hours with confidence levels (low/medium/high)
-4. Key indicators to watch
+Produce an intelligence-grade structured assessment following these guidelines:
+- Be precise and analytical. Reference specific data points, countries, dates, and trend movements.
+- Quantify risk with numerical scores backed by evidence from the data.
+- Distinguish between confirmed kinetic events vs diplomatic tensions vs military posturing.
+- Identify cascading risk chains (e.g., conflict in Region A could trigger escalation in Region B).
+- Provide actionable indicators — specific observable events that would confirm or deny predictions.
+- Use professional intelligence terminology (SIGINT patterns, force posture, escalation ladder, etc.).
+- Avoid generic statements. Every claim must be grounded in the provided data.
+- For predictions, specify clear trigger conditions and probability assessments.`;
 
-Be precise, data-driven, and avoid speculation beyond what the data supports.`;
-
-    // Call Lovable AI with tool calling for structured output
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -102,27 +157,47 @@ Be precise, data-driven, and avoid speculation beyond what the data supports.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: "You are a military intelligence analyst producing structured threat forecasts. Always use the provided tool to return structured data." },
+          { role: "system", content: "You are a senior defense intelligence analyst producing classified-grade threat assessments. Your analysis must be rigorous, evidence-based, and actionable. Use the provided tool to return structured data. Every assessment must reference specific data points from the surveillance feeds." },
           { role: "user", content: prompt },
         ],
         tools: [{
           type: "function",
           function: {
             name: "threat_forecast",
-            description: "Return a structured threat forecast",
+            description: "Return a comprehensive structured threat forecast assessment",
             parameters: {
               type: "object",
               properties: {
                 overall_trend: {
                   type: "string",
                   enum: ["escalating", "stable", "de-escalating"],
-                  description: "Overall global threat trajectory"
+                  description: "Overall global threat trajectory based on tension score movement"
                 },
                 trend_summary: {
                   type: "string",
-                  description: "2-3 sentence summary of the overall situation"
+                  description: "4-6 sentence executive summary of the global threat landscape. Reference specific tension score changes, key events, and dominant threat vectors."
+                },
+                threat_level_assessment: {
+                  type: "string",
+                  enum: ["CRITICAL", "HIGH", "ELEVATED", "GUARDED", "LOW"],
+                  description: "Overall threat advisory level"
+                },
+                escalation_drivers: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      driver: { type: "string", description: "Name of the escalation driver" },
+                      severity: { type: "string", enum: ["critical", "high", "moderate"] },
+                      description: { type: "string", description: "2-3 sentence analysis of this driver, referencing specific events" },
+                      affected_regions: { type: "array", items: { type: "string" } },
+                    },
+                    required: ["driver", "severity", "description", "affected_regions"],
+                    additionalProperties: false,
+                  },
+                  description: "Top 3-5 factors driving escalation"
                 },
                 hotspots: {
                   type: "array",
@@ -130,13 +205,16 @@ Be precise, data-driven, and avoid speculation beyond what the data supports.`;
                     type: "object",
                     properties: {
                       region: { type: "string" },
-                      risk_score: { type: "number" },
-                      rationale: { type: "string" },
+                      risk_score: { type: "number", description: "0-100 risk score" },
+                      trend: { type: "string", enum: ["rising", "stable", "declining"] },
+                      threat_type: { type: "string", description: "Primary threat category (kinetic, diplomatic, military posturing, humanitarian, cyber)" },
+                      rationale: { type: "string", description: "3-4 sentence analysis with specific event references" },
+                      cascade_risk: { type: "string", description: "Potential for this hotspot to trigger escalation elsewhere" },
                     },
-                    required: ["region", "risk_score", "rationale"],
+                    required: ["region", "risk_score", "trend", "threat_type", "rationale", "cascade_risk"],
                     additionalProperties: false,
                   },
-                  description: "Top 5 hotspot regions"
+                  description: "Top 5-7 hotspot regions ranked by risk"
                 },
                 predictions: {
                   type: "array",
@@ -144,22 +222,33 @@ Be precise, data-driven, and avoid speculation beyond what the data supports.`;
                     type: "object",
                     properties: {
                       timeframe: { type: "string", enum: ["24h", "48h", "72h"] },
-                      prediction: { type: "string" },
+                      prediction: { type: "string", description: "Specific, falsifiable prediction" },
                       confidence: { type: "string", enum: ["low", "medium", "high"] },
-                      evidence: { type: "string" },
+                      probability_pct: { type: "number", description: "Estimated probability 0-100" },
+                      evidence: { type: "string", description: "Data points supporting this prediction" },
+                      trigger_conditions: { type: "string", description: "Observable conditions that would confirm this prediction" },
                     },
-                    required: ["timeframe", "prediction", "confidence", "evidence"],
+                    required: ["timeframe", "prediction", "confidence", "probability_pct", "evidence", "trigger_conditions"],
                     additionalProperties: false,
                   },
-                  description: "Specific predictions"
+                  description: "5-8 specific predictions for the next 24-72 hours"
+                },
+                stabilizing_factors: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "2-4 factors that could reduce tensions"
                 },
                 key_indicators: {
                   type: "array",
                   items: { type: "string" },
-                  description: "Key indicators to watch in the next 72 hours"
+                  description: "5-8 specific observable indicators to watch in the next 72 hours"
+                },
+                analyst_notes: {
+                  type: "string",
+                  description: "2-3 sentence analyst commentary on data quality, confidence caveats, and intelligence gaps"
                 },
               },
-              required: ["overall_trend", "trend_summary", "hotspots", "predictions", "key_indicators"],
+              required: ["overall_trend", "trend_summary", "threat_level_assessment", "escalation_drivers", "hotspots", "predictions", "stabilizing_factors", "key_indicators", "analyst_notes"],
               additionalProperties: false,
             },
           },
@@ -204,6 +293,8 @@ Be precise, data-driven, and avoid speculation beyond what the data supports.`;
       data_points: {
         scans_analyzed: scans?.length || 0,
         alerts_analyzed: alerts?.length || 0,
+        affected_nations: affectedCountries.size,
+        severity_distribution: severityCounts,
       },
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
