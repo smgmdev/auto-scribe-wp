@@ -500,7 +500,7 @@ export function ConflictSimulatorPanel() {
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[12px] font-bold text-white tracking-wide">CONFLICT SIMULATOR</span>
         </div>
-        <p className="text-[10px] text-gray-500 leading-relaxed">
+        <p className="text-[11px] text-gray-500 leading-relaxed">
           AI-powered "What If" scenario modeling. Select two nations to generate a comprehensive escalation analysis with probability-scored outcomes.
         </p>
       </div>
