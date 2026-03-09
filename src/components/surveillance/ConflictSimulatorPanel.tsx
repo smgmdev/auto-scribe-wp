@@ -230,12 +230,15 @@ export function ConflictSimulatorPanel() {
     if (!sim || !result) return { nation: null, pct: 0 };
 
     // Use explicit AI-provided fields if available (new schema)
-    if (sim.favored_nation && sim.win_probability_pct) {
-      return { nation: sim.favored_nation, pct: sim.win_probability_pct };
+    if (sim.favored_nation && typeof sim.win_probability_pct === 'number') {
+      // If AI returned a value under 50 (e.g. 0.75 meaning 75%), try to correct it
+      let pct = sim.win_probability_pct;
+      if (pct < 1) pct = Math.round(pct * 100); // 0.75 → 75
+      if (pct < 50) pct = 100 - pct; // flip if below 50
+      return { nation: sim.favored_nation, pct: Math.min(99, Math.max(51, pct)) };
     }
 
-    // Fallback for old simulations without explicit fields
-    const pct = sim.most_likely_outcome?.probability_pct || 50;
+    // Fallback: determine from most_likely_outcome text
     const outcome = (sim.most_likely_outcome?.outcome || '').toLowerCase() + ' ' + (sim.most_likely_outcome?.rationale || '').toLowerCase();
     const aLower = result.country_a.toLowerCase();
     const bLower = result.country_b.toLowerCase();
@@ -254,21 +257,21 @@ export function ConflictSimulatorPanel() {
       return nearby.includes(bLower);
     }).length;
 
-    let textFavored: string;
-    if (aFavorCount > bFavorCount) textFavored = result.country_a;
-    else if (bFavorCount > aFavorCount) textFavored = result.country_b;
+    let favored: string;
+    if (aFavorCount > bFavorCount) favored = result.country_a;
+    else if (bFavorCount > aFavorCount) favored = result.country_b;
     else {
       const aCount = outcome.split(aLower).length - 1;
       const bCount = outcome.split(bLower).length - 1;
-      textFavored = aCount >= bCount ? result.country_a : result.country_b;
+      favored = aCount >= bCount ? result.country_a : result.country_b;
     }
 
-    if (pct > 50) {
-      return { nation: textFavored, pct };
-    } else {
-      const other = textFavored === result.country_a ? result.country_b : result.country_a;
-      return { nation: other, pct: 100 - pct };
-    }
+    // Use most_likely_outcome probability but ensure it makes sense as a win %
+    let pct = sim.most_likely_outcome?.probability_pct || 65;
+    if (pct < 50) pct = 100 - pct;
+    pct = Math.min(99, Math.max(51, pct));
+
+    return { nation: favored, pct };
   };
 
   const favoredInfo = sim ? getFavoredInfo() : { nation: null, pct: 0 };
