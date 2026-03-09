@@ -82,12 +82,12 @@ const confidenceColor = (c: string) =>
       : 'bg-gray-500/10 text-gray-400 border-gray-500/20';
 
 const QUICK_SCENARIOS = [
-  { a: 'China', b: 'Taiwan', label: '🇨🇳 China vs Taiwan' },
-  { a: 'Russia', b: 'NATO (via Ukraine)', label: '🇷🇺 Russia vs NATO' },
-  { a: 'Iran', b: 'Israel', label: '🇮🇷 Iran vs Israel' },
-  { a: 'North Korea', b: 'South Korea', label: '🇰🇵 N.Korea vs S.Korea' },
-  { a: 'India', b: 'Pakistan', label: '🇮🇳 India vs Pakistan' },
-  { a: 'China', b: 'United States', label: '🇨🇳 China vs USA' },
+  { a: 'China', b: 'Taiwan', label: '🇨🇳 China — Taiwan' },
+  { a: 'Russia', b: 'NATO (via Ukraine)', label: '🇷🇺 Russia — NATO' },
+  { a: 'Iran', b: 'Israel', label: '🇮🇷 Iran — Israel' },
+  { a: 'North Korea', b: 'South Korea', label: '🇰🇵 N.Korea — S.Korea' },
+  { a: 'India', b: 'Pakistan', label: '🇮🇳 India — Pakistan' },
+  { a: 'China', b: 'United States', label: '🇨🇳 China — USA' },
 ];
 
 export function ConflictSimulatorPanel() {
