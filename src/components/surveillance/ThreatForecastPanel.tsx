@@ -393,7 +393,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                      {p.evidence}
                    </p>
                    {p.trigger_conditions && (
-                     <p className="text-[9px] text-blue-600 leading-snug m-0 mt-0.5">
+                     <p className="text-[9px] text-blue-600 leading-snug m-0 mt-2">
                        Trigger: {p.trigger_conditions}
                      </p>
                    )}
