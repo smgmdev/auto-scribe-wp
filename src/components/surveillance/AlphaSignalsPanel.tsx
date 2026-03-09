@@ -267,8 +267,8 @@ export function AlphaSignalsPanel() {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <div>
-              <h3 className="text-sm font-semibold tracking-tight">Alpha Signals</h3>
-              <p className="text-[10px] text-gray-500">Geopolitical Intelligence → Market Alpha</p>
+              <h3 className="text-sm font-semibold tracking-tight">Market Signals</h3>
+              <p className="text-[10px] text-gray-500">Geopolitical Intelligence → Market Data</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
