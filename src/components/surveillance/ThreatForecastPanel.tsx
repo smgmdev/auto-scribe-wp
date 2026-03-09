@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BrainCircuit, TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, X, Loader2 } from 'lucide-react';
+import { BrainCircuit, TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, Loader2, Shield, ShieldAlert, Flame, Scale, FileWarning } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -9,29 +9,58 @@ import { toast } from 'sonner';
 interface Hotspot {
   region: string;
   risk_score: number;
+  trend: 'rising' | 'stable' | 'declining';
+  threat_type: string;
   rationale: string;
+  cascade_risk: string;
 }
 
 interface Prediction {
   timeframe: string;
   prediction: string;
   confidence: string;
+  probability_pct: number;
   evidence: string;
+  trigger_conditions: string;
+}
+
+interface EscalationDriver {
+  driver: string;
+  severity: 'critical' | 'high' | 'moderate';
+  description: string;
+  affected_regions: string[];
 }
 
 interface Forecast {
   overall_trend: 'escalating' | 'stable' | 'de-escalating';
   trend_summary: string;
+  threat_level_assessment: 'CRITICAL' | 'HIGH' | 'ELEVATED' | 'GUARDED' | 'LOW';
+  escalation_drivers: EscalationDriver[];
   hotspots: Hotspot[];
   predictions: Prediction[];
+  stabilizing_factors: string[];
   key_indicators: string[];
+  analyst_notes: string;
 }
 
 interface ForecastResponse {
   forecast: Forecast;
   generated_at: string;
-  data_points: { scans_analyzed: number; alerts_analyzed: number };
+  data_points: {
+    scans_analyzed: number;
+    alerts_analyzed: number;
+    affected_nations: number;
+    severity_distribution: { critical: number; high: number; medium: number; low: number };
+  };
 }
+
+const threatLevelConfig = {
+  CRITICAL: { color: 'bg-red-600 text-white', border: 'border-red-500', text: 'text-red-400' },
+  HIGH: { color: 'bg-red-500/30 text-red-300', border: 'border-red-500/40', text: 'text-red-400' },
+  ELEVATED: { color: 'bg-amber-500/30 text-amber-300', border: 'border-amber-500/40', text: 'text-amber-400' },
+  GUARDED: { color: 'bg-blue-500/30 text-blue-300', border: 'border-blue-500/40', text: 'text-blue-400' },
+  LOW: { color: 'bg-emerald-500/30 text-emerald-300', border: 'border-emerald-500/40', text: 'text-emerald-400' },
+};
 
 export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(false);
@@ -65,6 +94,16 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
   const riskColor = (score: number) =>
     score >= 70 ? 'bg-red-500' : score >= 40 ? 'bg-amber-500' : 'bg-emerald-500';
 
+  const trendArrow = (t: string) =>
+    t === 'rising' ? '↑' : t === 'declining' ? '↓' : '→';
+
+  const severityColor = (s: string) =>
+    s === 'critical' ? 'bg-red-500/20 text-red-300 border-red-500/30'
+      : s === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+        : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+
+  const tlConfig = data ? threatLevelConfig[data.forecast.threat_level_assessment] || threatLevelConfig.GUARDED : null;
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -73,13 +112,11 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
           <BrainCircuit className="w-4 h-4 text-amber-400" />
           <span className="text-sm font-semibold text-white tracking-wide">AI THREAT FORECAST</span>
           {data && (
-            <Badge variant="outline" className={cn("text-[9px] ml-2 uppercase", trendColor, "border-current/30")}>
+            <Badge variant="outline" className={cn("text-[9px] ml-1 uppercase", trendColor, "border-current/30")}>
               <TrendIcon className="w-3 h-3 mr-1" />
               {data.forecast.overall_trend}
             </Badge>
           )}
-        </div>
-        <div className="flex items-center gap-2">
         </div>
       </div>
 
@@ -88,36 +125,101 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
         {loading && (
           <div className="flex flex-col items-center justify-center h-full gap-3">
             <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
-            <p className="text-xs text-gray-400">Analyzing surveillance data with AI...</p>
-            <p className="text-[10px] text-gray-600">Processing scans & active alerts</p>
+            <p className="text-xs text-gray-400">Running intelligence analysis...</p>
+            <p className="text-[10px] text-gray-600">Processing surveillance scans, alerts & trajectories</p>
           </div>
         )}
 
         {!loading && !data && (
           <div className="flex flex-col items-center justify-center h-full gap-3">
             <BrainCircuit className="w-10 h-10 text-gray-700" />
-            <p className="text-sm text-gray-400 text-center">Generate an AI-powered threat forecast</p>
-            <p className="text-xs text-gray-600 text-center max-w-xs">Analyzes 7 days of surveillance scans and active alerts to predict escalation patterns for the next 24-72 hours.</p>
+            <p className="text-sm text-gray-400 text-center">AI Threat Assessment</p>
+            <p className="text-xs text-gray-600 text-center max-w-xs">Produces a professional-grade intelligence assessment analyzing 7 days of surveillance data, active alerts, and escalation patterns with probability-scored predictions.</p>
             <Button onClick={generateForecast} className="mt-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30">
               <BrainCircuit className="w-4 h-4 mr-2" />
-              Generate Forecast
+              Generate Assessment
             </Button>
           </div>
         )}
 
         {!loading && data && (
           <>
-            {/* Summary */}
+            {/* Threat Level Banner */}
+            {tlConfig && (
+              <div className={cn("p-3 rounded border text-center", tlConfig.border, tlConfig.color)}>
+                <div className="flex items-center justify-center gap-2">
+                  <ShieldAlert className="w-4 h-4" />
+                  <span className="text-xs font-bold tracking-widest">THREAT LEVEL: {data.forecast.threat_level_assessment}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Executive Summary */}
             <div className="p-3 rounded bg-white/[0.03] border border-white/[0.06]">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Shield className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
+              </div>
               <p className="text-[11px] text-gray-300 leading-relaxed">{data.forecast.trend_summary}</p>
-              <div className="flex items-center gap-3 mt-2 text-[10px] text-gray-600">
-                <span>{data.data_points.scans_analyzed} scans analyzed</span>
+              <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[10px] text-gray-600">
+                <span>{data.data_points.scans_analyzed} scans</span>
                 <span>•</span>
-                <span>{data.data_points.alerts_analyzed} alerts analyzed</span>
+                <span>{data.data_points.alerts_analyzed} alerts</span>
+                <span>•</span>
+                <span>{data.data_points.affected_nations} nations</span>
                 <span>•</span>
                 <span>{new Date(data.generated_at).toLocaleTimeString()}</span>
               </div>
+              {/* Severity distribution bar */}
+              <div className="flex items-center gap-1 mt-2">
+                {data.data_points.severity_distribution.critical > 0 && (
+                  <div className="flex items-center gap-1 text-[9px] text-red-400">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    {data.data_points.severity_distribution.critical} critical
+                  </div>
+                )}
+                {data.data_points.severity_distribution.high > 0 && (
+                  <div className="flex items-center gap-1 text-[9px] text-orange-400 ml-2">
+                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    {data.data_points.severity_distribution.high} high
+                  </div>
+                )}
+                {data.data_points.severity_distribution.medium > 0 && (
+                  <div className="flex items-center gap-1 text-[9px] text-amber-400 ml-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500" />
+                    {data.data_points.severity_distribution.medium} medium
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Escalation Drivers */}
+            {data.forecast.escalation_drivers?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Flame className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Escalation Drivers</span>
+                </div>
+                <div className="space-y-1.5">
+                  {data.forecast.escalation_drivers.map((d, i) => (
+                    <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-medium text-white">{d.driver}</span>
+                        <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", severityColor(d.severity))}>
+                          {d.severity}
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] text-gray-400 leading-relaxed">{d.description}</p>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {d.affected_regions.map((r, j) => (
+                          <span key={j} className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-gray-500">{r}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Hotspots */}
             <div>
@@ -127,20 +229,34 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               </div>
               <div className="space-y-1.5">
                 {data.forecast.hotspots.map((h, i) => (
-                  <div key={i} className="flex items-center gap-3 p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
-                    <div className="flex-shrink-0 w-10 text-center">
-                      <div className={cn("text-sm font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
-                        {h.risk_score}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-medium text-white">{h.region}</span>
-                        <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
-                          <div className={cn("h-full rounded-full", riskColor(h.risk_score))} style={{ width: `${h.risk_score}%` }} />
+                  <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-10 text-center">
+                        <div className={cn("text-sm font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
+                          {h.risk_score}
+                        </div>
+                        <div className={cn("text-[9px]", h.trend === 'rising' ? 'text-red-500' : h.trend === 'declining' ? 'text-emerald-500' : 'text-gray-600')}>
+                          {trendArrow(h.trend)} {h.trend}
                         </div>
                       </div>
-                      <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2">{h.rationale}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-medium text-white">{h.region}</span>
+                          <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 bg-white/5 text-gray-500 border-white/10">
+                            {h.threat_type}
+                          </Badge>
+                          <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                            <div className={cn("h-full rounded-full", riskColor(h.risk_score))} style={{ width: `${h.risk_score}%` }} />
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{h.rationale}</p>
+                        {h.cascade_risk && (
+                          <p className="text-[9px] text-amber-600 mt-1 flex items-start gap-1">
+                            <AlertTriangle className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" />
+                            <span>Cascade: {h.cascade_risk}</span>
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -161,18 +277,42 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                         {p.timeframe}
                       </Badge>
                       <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", confidenceColor(p.confidence))}>
-                        {p.confidence}
+                        {p.confidence} · {p.probability_pct}%
                       </Badge>
                     </div>
                     <p className="text-[11px] text-gray-200 leading-relaxed">{p.prediction}</p>
                     <p className="text-[10px] text-gray-600 mt-1 flex items-start gap-1">
-                      <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                      <FileWarning className="w-3 h-3 flex-shrink-0 mt-0.5" />
                       {p.evidence}
                     </p>
+                    {p.trigger_conditions && (
+                      <p className="text-[9px] text-blue-600 mt-1 flex items-start gap-1">
+                        <Eye className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" />
+                        <span>Trigger: {p.trigger_conditions}</span>
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Stabilizing Factors */}
+            {data.forecast.stabilizing_factors?.length > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Scale className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Stabilizing Factors</span>
+                </div>
+                <div className="space-y-1">
+                  {data.forecast.stabilizing_factors.map((f, i) => (
+                    <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 rounded bg-emerald-500/[0.04] border border-emerald-500/10">
+                      <span className="text-[10px] text-emerald-500 mt-0.5">◆</span>
+                      <span className="text-[10px] text-gray-400 leading-relaxed">{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Key Indicators */}
             <div>
@@ -188,6 +328,29 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Analyst Notes */}
+            {data.forecast.analyst_notes && (
+              <div className="p-3 rounded bg-white/[0.02] border border-white/[0.06] border-dashed">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <AlertTriangle className="w-3 h-3 text-gray-500" />
+                  <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Analyst Notes</span>
+                </div>
+                <p className="text-[10px] text-gray-500 leading-relaxed italic">{data.forecast.analyst_notes}</p>
+              </div>
+            )}
+
+            {/* Regenerate */}
+            <div className="pt-2 pb-1 flex justify-center">
+              <Button
+                size="sm"
+                onClick={generateForecast}
+                className="h-7 text-[10px] bg-white/5 text-gray-500 border border-white/10 hover:bg-white/10"
+              >
+                <BrainCircuit className="w-3 h-3 mr-1" />
+                Regenerate Assessment
+              </Button>
             </div>
           </>
         )}
