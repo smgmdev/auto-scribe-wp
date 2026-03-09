@@ -486,7 +486,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
               )}
 
               {!historyLoading && history.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {history.map((f) => {
                     const tlc = threatLevelConfig[f.forecast.threat_level_assessment] || threatLevelConfig.GUARDED;
                     return (
