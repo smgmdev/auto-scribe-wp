@@ -204,3 +204,6 @@ verify_jwt = false
 
 [functions.threat-forecast]
 verify_jwt = false
+
+[functions.conflict-simulator]
+verify_jwt = false
