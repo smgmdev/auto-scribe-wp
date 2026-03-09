@@ -590,7 +590,7 @@ export function AdminSurveillanceView() {
   const safeCount = filteredCountries.filter(c => c.score < 30).length || 0;
 
   return (
-    <div className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden">
+    <div className={cn("animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 text-white overflow-hidden", crtMode && "crt-mode crt-boot-in")}>
       <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen">
         {/* Top bar */}
         <div className="flex flex-col border-b border-white/5 bg-[#1d1d1f]">
