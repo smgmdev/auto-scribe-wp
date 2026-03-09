@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Zap, TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, X, Loader2 } from 'lucide-react';
+import { BrainCircuit, TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
