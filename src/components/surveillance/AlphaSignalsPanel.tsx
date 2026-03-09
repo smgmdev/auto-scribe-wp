@@ -108,7 +108,7 @@ function SummaryBlock({ text }: { text: string }) {
       onClick={() => setExpanded(e => !e)}
     >
       <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
-        <p ref={contentRef} className="text-[11px] text-gray-300 leading-relaxed">
+        <p ref={contentRef} className="text-[11px] text-gray-300 leading-relaxed pr-5">
           {text}
         </p>
       </div>
