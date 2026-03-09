@@ -220,15 +220,17 @@ Base your analysis on current geopolitical realities, military capabilities, tre
                     },
                     required: ["outcome", "probability_pct", "timeframe", "rationale"],
                     additionalProperties: false,
-                  },
-                  deescalation_opportunities: {
-                    type: "array",
-                    items: { type: "string" },
-                  },
-                  critical_indicators: {
-                    type: "array",
-                    items: { type: "string" },
-                  },
+                   },
+                   favored_nation: { type: "string", description: "The name of the country that has the overall strategic/military advantage and is favored to win" },
+                   win_probability_pct: { type: "number", description: "The favored nation's probability of prevailing (51-99)" },
+                   deescalation_opportunities: {
+                     type: "array",
+                     items: { type: "string" },
+                   },
+                   critical_indicators: {
+                     type: "array",
+                     items: { type: "string" },
+                   },
                 },
                 required: [
                   "scenario_title", "threat_level", "executive_summary",
