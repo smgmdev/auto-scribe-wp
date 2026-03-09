@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   TrendingUp, TrendingDown, Minus, Loader2, Shield, AlertTriangle, 
-  Target, Clock, DollarSign, Flame, Eye, ChevronRight, 
+  Target, Clock, DollarSign, Flame, ChevronRight, ChevronDown,
   Trash2, History, ArrowUpRight, ArrowDownRight, Scale
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
