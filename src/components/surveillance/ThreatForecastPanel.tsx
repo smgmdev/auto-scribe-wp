@@ -108,7 +108,7 @@ function HeatmapToggle() {
   );
 }
 
-
+export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
   const { loading, data, setData, generate: generateForecast, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
   const [history, setHistory] = useState<SavedForecast[]>([]);
