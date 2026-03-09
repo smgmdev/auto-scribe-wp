@@ -196,12 +196,12 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'generate' | 'history')} className="flex-1 flex flex-col min-h-0">
-        <TabsList className="mx-4 mt-3 grid grid-cols-2 h-8 bg-white/5">
-          <TabsTrigger value="generate" className="text-[11px] data-[state=active]:bg-white/10">
+        <TabsList className="w-full grid grid-cols-2 h-9 bg-white/5 rounded-none border-b border-white/10 p-0">
+          <TabsTrigger value="generate" className="text-[11px] text-white rounded-none h-full data-[state=active]:bg-white/10 data-[state=active]:shadow-none data-[state=active]:text-white border-0">
             <BrainCircuit className="w-3 h-3 mr-1" />
             Generate
           </TabsTrigger>
-          <TabsTrigger value="history" className="text-[11px] data-[state=active]:bg-white/10">
+          <TabsTrigger value="history" className="text-[11px] text-white rounded-none h-full data-[state=active]:bg-white/10 data-[state=active]:shadow-none data-[state=active]:text-white border-0">
             <History className="w-3 h-3 mr-1" />
             History
           </TabsTrigger>
