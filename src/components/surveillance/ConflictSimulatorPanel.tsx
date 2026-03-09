@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Swords, Shield, TrendingUp, DollarSign, Handshake, AlertTriangle, Eye, ChevronDown, Zap } from 'lucide-react';
+import { NuclearEscalationLadder } from './NuclearEscalationLadder';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -413,6 +414,15 @@ export function ConflictSimulatorPanel() {
             </div>
           </div>
         </div>
+
+        {/* Nuclear Escalation Ladder */}
+        {sim.escalation_phases?.length > 0 && (
+          <NuclearEscalationLadder
+            escalationPhases={sim.escalation_phases}
+            countryA={result.country_a}
+            countryB={result.country_b}
+          />
+        )}
 
         {/* Most Likely Outcome */}
         <div>

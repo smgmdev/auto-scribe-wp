@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertTriangle, Rocket, ShieldAlert, Radar, Radiation, Bomb, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CountryRiskProfile } from './CountryRiskProfile';
 
 function getThreatBadge(level: string, score?: number) {
   if (score !== undefined) {
@@ -257,9 +258,10 @@ export function SurveillanceCountryPopup() {
               </ul>
             </div>
           )}
-        </div>
 
-        {/* Attacks panel */}
+          {/* AI Risk Profile */}
+          <CountryRiskProfile countryName={selectedCountry.name} countryCode={selectedCountry.code} />
+        </div>
         <div className="md:w-1/2 p-4 space-y-3 border-t border-white/5 md:border-t-0">
           {/* Attacks section */}
           <div className="flex items-center gap-2 mb-2">
