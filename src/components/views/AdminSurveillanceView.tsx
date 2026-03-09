@@ -1018,7 +1018,7 @@ export function AdminSurveillanceView() {
               </button>
               <button
                 onClick={() => setMobileSliderTab('forecast')}
-                className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'forecast' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+                className={`flex-1 text-[11px] py-1 transition-colors ${mobileSliderTab === 'forecast' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
                 Forecast
               </button>
