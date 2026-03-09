@@ -123,10 +123,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
             Generating Intelligence Dossier...
           </>
         ) : (
-          <>
-            <Target className="w-3 h-3" />
-            AI Risk Profile
-          </>
+          'AI Risk Profile'
         )}
       </button>
     );
