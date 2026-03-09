@@ -425,7 +425,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         </div>
 
         {/* Generate Tab */}
-        <TabsContent value="generate" className="flex-1 overflow-y-auto p-4 space-y-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
+        <TabsContent value="generate" className="flex-1 overflow-y-auto p-0 space-y-0 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
           {loading && (
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
@@ -450,9 +450,9 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         </TabsContent>
 
         {/* History Tab */}
-        <TabsContent value="history" className="flex-1 overflow-y-auto p-4 space-y-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
+        <TabsContent value="history" className="flex-1 overflow-y-auto p-0 space-y-0 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
           {selectedHistoryId && data ? (
-            <div className="space-y-4">
+            <div className="space-y-0">
               <button
                 onClick={() => { setSelectedHistoryId(null); clearGenerated(); }}
                 className="flex items-center gap-1 text-[11px] text-gray-400 hover:text-white transition-colors"
@@ -486,7 +486,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
               )}
 
               {!historyLoading && history.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-0">
                   {history.map((f) => {
                     const tlc = threatLevelConfig[f.forecast.threat_level_assessment] || threatLevelConfig.GUARDED;
                     return (
