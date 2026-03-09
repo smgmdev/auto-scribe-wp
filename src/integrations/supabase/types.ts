@@ -994,6 +994,33 @@ export type Database = {
         }
         Relationships: []
       }
+      geopolitical_alpha_signals: {
+        Row: {
+          created_at: string
+          data_points: Json
+          id: string
+          market_summary: string
+          signals: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_points?: Json
+          id?: string
+          market_summary: string
+          signals: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_points?: Json
+          id?: string
+          market_summary?: string
+          signals?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       lost_chat_global_state: {
         Row: {
           active_model_id: string
