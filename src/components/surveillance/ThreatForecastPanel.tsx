@@ -133,20 +133,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
     });
   };
 
-  const generateForecast = async () => {
-    setLoading(true);
-    setSelectedHistoryId(null);
-    try {
-      const { data: result, error } = await supabase.functions.invoke('threat-forecast');
-      if (error) throw error;
-      if (result?.error) throw new Error(result.error);
-      setData(result);
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to generate forecast');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const TrendIcon = data?.forecast.overall_trend === 'escalating' ? TrendingUp
     : data?.forecast.overall_trend === 'de-escalating' ? TrendingDown : Minus;
