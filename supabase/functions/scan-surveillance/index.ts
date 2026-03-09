@@ -358,7 +358,7 @@ function isAnalyticalTitle(text: string): boolean {
     'warns about', 'warns of', 'warning about',
     'prepares for', 'preparing for', 'braces for',
     'plans to', 'planning to', 'considers', 'considering',
-    'threatens to', 'threatening to', 'vows to',
+    'threatens to', 'threatening to', 'vows to', 'vows no', 'vows not', 'vows never', 'vows revenge', 'vows retaliation', 'vowed', 'pledges to', 'pledged to', 'promises to', 'promised to', 'no retreat', 'will not back down', 'doubles down', 'stands firm', 'reaffirms', 'signals intent',
     'readiness', 'preparedness', 'capability', 'capabilities',
     'defense spending', 'defence spending', 'military spending',
     'arms race', 'escalation risk', 'risk of escalation',
