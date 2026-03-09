@@ -1238,6 +1238,7 @@ export function SurveillanceGlobe({
   tradeTrajectories = [],
   satellites = [],
   earthquakes = [],
+  predictedHotspots = [],
   isSpinning = false,
   onSpinChange,
   resetTrigger = 0,
@@ -1260,6 +1261,7 @@ export function SurveillanceGlobe({
           tradeTrajectories={tradeTrajectories}
           satellites={satellites}
           earthquakes={earthquakes}
+          predictedHotspots={predictedHotspots}
           isSpinning={isSpinning}
           onSpinChange={onSpinChange}
           resetTrigger={resetTrigger}
