@@ -268,23 +268,16 @@ export function AlphaSignalsPanel() {
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/10">
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div>
-              <h3 className="text-sm font-semibold tracking-tight">Market Signals</h3>
-              <p className="text-[10px] text-gray-500">Geopolitical Intelligence → Market Data</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-400 h-7 w-7 p-0"
-              onClick={() => setShowHistory(true)}
-              title="Signal history"
-            >
-              <History className="w-3.5 h-3.5" />
-            </Button>
-          </div>
+          <h3 className="text-sm font-semibold tracking-tight">Market Signals</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 h-7 w-7 p-0"
+            onClick={() => setShowHistory(true)}
+            title="Signal history"
+          >
+            <History className="w-3.5 h-3.5" />
+          </Button>
         </div>
         <Button
           onClick={generateSignals}
