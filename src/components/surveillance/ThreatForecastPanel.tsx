@@ -179,6 +179,56 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate, tren
   );
 }
 
+function ForecastLoadingIndicator({ startedAt }: { startedAt: number | null }) {
+  const [progress, setProgress] = useState(() => {
+    if (!startedAt) return 0;
+    const elapsed = (Date.now() - startedAt) / 1000;
+    return Math.min(95, elapsed < 8 ? elapsed * 4 : elapsed < 20 ? 32 + (elapsed - 8) * 2.5 : elapsed < 40 ? 62 + (elapsed - 20) * 0.9 : 80 + (elapsed - 40) * 0.3);
+  });
+
+  useEffect(() => {
+    if (!startedAt) { setProgress(0); return; }
+    const calcProgress = () => {
+      const elapsed = (Date.now() - startedAt) / 1000;
+      const p = elapsed < 8 ? elapsed * 4
+        : elapsed < 20 ? 32 + (elapsed - 8) * 2.5
+        : elapsed < 40 ? 62 + (elapsed - 20) * 0.9
+        : 80 + (elapsed - 40) * 0.3;
+      return Math.min(95, p);
+    };
+    setProgress(calcProgress());
+    const interval = setInterval(() => setProgress(calcProgress()), 1000);
+    return () => clearInterval(interval);
+  }, [startedAt]);
+
+  const stageLabel = progress < 20 ? 'Collecting surveillance data...'
+    : progress < 40 ? 'Analyzing threat patterns...'
+    : progress < 60 ? 'Mapping escalation hotspots...'
+    : progress < 80 ? 'Generating predictions...'
+    : 'Compiling intelligence report...';
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
+      <div className="relative">
+        <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+      </div>
+      <div className="w-full max-w-[220px] space-y-2">
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-gray-400">{stageLabel}</span>
+          <span className="text-[10px] font-mono text-blue-400">{Math.round(progress)}%</span>
+        </div>
+      </div>
+      <p className="text-[10px] text-gray-600 text-center">Processing surveillance scans, alerts & trajectories</p>
+    </div>
+  );
+}
+
 export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
   const { loading, data, startedAt, setData, generate: storeGenerate, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
