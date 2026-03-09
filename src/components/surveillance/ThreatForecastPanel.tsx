@@ -131,7 +131,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
       generated_at: f.created_at,
       data_points: f.data_points,
     });
-    setActiveTab('generate');
   };
 
   const generateForecast = async () => {
