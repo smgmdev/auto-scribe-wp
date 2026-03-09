@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Swords, Shield, TrendingUp, DollarSign, Handshake, AlertTriangle, Eye, ChevronDown, Zap } from 'lucide-react';
+import { NuclearEscalationLadder } from './NuclearEscalationLadder';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
