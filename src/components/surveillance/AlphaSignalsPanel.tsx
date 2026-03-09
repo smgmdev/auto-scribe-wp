@@ -205,7 +205,7 @@ export function AlphaSignalsPanel() {
       setStoreData(result);
       setData(result);
       setShowHistory(false);
-      toast.success('Alpha signals generated');
+      toast.success('Market signals generated');
       loadSavedSignals();
     } catch (err: any) {
       if (progressRef.current) clearInterval(progressRef.current);
