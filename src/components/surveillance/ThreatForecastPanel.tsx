@@ -341,11 +341,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                     </Badge>
                   </div>
                   <p className="text-[10px] text-gray-400 leading-relaxed">{d.description}</p>
-                  <div className="flex flex-wrap gap-1 mt-1.5">
-                    {d.affected_regions.map((r, j) => (
-                      <span key={j} className="text-[9px] text-gray-500 bg-white/[0.04] px-1.5 py-0.5 border border-white/[0.06]">{r}</span>
-                    ))}
-                  </div>
                 </div>
               ))}
             </div>
