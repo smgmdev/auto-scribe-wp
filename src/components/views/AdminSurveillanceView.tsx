@@ -1067,14 +1067,11 @@ export function AdminSurveillanceView() {
                           {(event.severity || 'medium').toUpperCase()}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-gray-600">{event.country_name}</span>
-                        {event.published_at && (
-                          <span className="text-[10px] text-gray-600 tabular-nums">
-                            {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        )}
-                      </div>
+                      {event.published_at && (
+                        <span className="text-[10px] text-gray-600 tabular-nums">
+                          {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
                     </div>
                   )) || (
                     <div className="text-center py-8">
