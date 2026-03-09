@@ -338,13 +338,13 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                       {p.confidence} · {p.probability_pct}%
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-gray-200 leading-relaxed">{p.prediction}</p>
-                   <p className="text-[10px] text-gray-600">
+                   <p className="text-[11px] text-gray-200 leading-snug m-0">{p.prediction}</p>
+                   <p className="text-[10px] text-gray-600 leading-snug m-0">
                      {p.evidence}
                    </p>
                    {p.trigger_conditions && (
-                     <p className="text-[9px] text-blue-600">
-                       <span>Trigger: {p.trigger_conditions}</span>
+                     <p className="text-[9px] text-blue-600 leading-snug m-0">
+                       Trigger: {p.trigger_conditions}
                      </p>
                    )}
                 </div>
