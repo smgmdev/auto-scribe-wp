@@ -419,7 +419,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
             onClick={() => { setActiveTab('generate'); if (selectedHistoryId) { setSelectedHistoryId(null); clearGenerated(); } }}
             className={`flex-1 text-[11px] h-full transition-colors ${activeTab === 'generate' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
           >
-            New Assessment
+            New
           </button>
           <button
             onClick={() => setActiveTab('history')}
