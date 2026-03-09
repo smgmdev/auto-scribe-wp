@@ -1009,10 +1009,10 @@ export function AdminSurveillanceView() {
               </button>
             </div>
             {/* Tabs */}
-            <div className="w-full flex bg-[#1a1a1a] border-b border-white/10">
+            <div className="w-full flex h-7 bg-[#1a1a1a] border-b border-white/10">
               <button
                 onClick={() => setMobileSliderTab('feed')}
-                className={`flex-1 text-[11px] py-1 transition-colors ${mobileSliderTab === 'feed' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+                className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'feed' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
                 Feed ({feedEvents.length})
               </button>
