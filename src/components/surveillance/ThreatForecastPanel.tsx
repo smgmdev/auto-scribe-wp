@@ -250,7 +250,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               )}
 
               {/* Executive Summary */}
-              <div className="p-3 rounded bg-white/[0.03] border border-white/[0.06]">
+              <div className="p-3 bg-white/[0.03] border border-white/[0.06]">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Shield className="w-3.5 h-3.5 text-blue-400" />
                   <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
