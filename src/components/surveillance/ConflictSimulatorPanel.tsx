@@ -457,7 +457,7 @@ export function ConflictSimulatorPanel() {
         <Button
           onClick={() => runSimulation()}
           disabled={!countryA || !countryB}
-          className="w-full h-8 text-[11px] rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors disabled:opacity-30"
+          className="w-full h-9 text-[11px] rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors disabled:opacity-30"
         >
           Run Simulation
         </Button>
