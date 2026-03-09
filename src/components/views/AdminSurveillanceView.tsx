@@ -172,7 +172,7 @@ export function AdminSurveillanceView() {
   const setShowEarthquakes = useAppStore((s) => s.setShowEarthquakes);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
-  const [showForecast, setShowForecast] = useState(false);
+  const [showForecast] = useState(false);
   const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast'>('feed');
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
   const currentView = useAppStore((s) => s.currentView);
@@ -755,11 +755,6 @@ export function AdminSurveillanceView() {
                 </button>
                 <span className="text-[10px] text-gray-600">({earthquakes.length})</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 self-stretch">
-                <button onClick={() => setShowForecast(true)} className="flex items-center gap-1.5 transition-opacity hover:opacity-80" title="AI Threat Forecast">
-                  <span className="text-[10px] text-gray-400">Forecast</span>
-                </button>
-              </div>
             </div>
 
             {/* Shield menu for feed panel */}
@@ -1054,12 +1049,6 @@ export function AdminSurveillanceView() {
               </div>
             )}
           </div>
-        </SheetContent>
-      </Sheet>
-      {/* Forecast slide-over (desktop only) */}
-      <Sheet open={showForecast} onOpenChange={setShowForecast} modal={false}>
-        <SheetContent side="right" className="w-full sm:w-[420px] p-0 bg-[#080c14]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3 hidden sm:flex">
-          <ThreatForecastPanel onClose={() => setShowForecast(false)} />
         </SheetContent>
       </Sheet>
     </div>
