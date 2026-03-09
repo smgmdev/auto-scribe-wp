@@ -366,8 +366,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Analyst Notes */}
         {data.forecast.analyst_notes && (
           <div className="p-3 bg-white/[0.02] border border-white/[0.06] border-dashed">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <AlertTriangle className="w-3 h-3 text-gray-500" />
+            <div className="flex items-center gap-1.5 pt-3 mb-1.5">
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Analyst Notes</span>
             </div>
             <p className="text-[10px] text-gray-500 leading-relaxed italic">{data.forecast.analyst_notes}</p>
