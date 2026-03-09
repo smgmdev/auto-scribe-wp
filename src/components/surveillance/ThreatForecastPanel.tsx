@@ -233,7 +233,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
             <>
               {/* Historical indicator */}
               {selectedHistoryId && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-300">
+                <div className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-300">
                   <History className="w-3.5 h-3.5" />
                   Viewing historical forecast from {formatDate(data.generated_at)}
                 </div>
