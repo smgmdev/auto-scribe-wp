@@ -473,9 +473,8 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               <Button
                 size="sm"
                 onClick={() => setActiveTab('generate')}
-                className="mt-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30"
+                className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
               >
-                <BrainCircuit className="w-4 h-4 mr-2" />
                 Generate First Forecast
               </Button>
             </div>
