@@ -421,13 +421,29 @@ export function MissileAlertListener() {
             .select('alert_id, dismissed_title')
             .eq('user_id', userData.user.id);
           if (dismissed) {
+            // Collect all dismissed alert IDs to batch-fetch their country pairs
+            const dismissedIds = dismissed.map((d: any) => d.alert_id);
             dismissed.forEach((d: any) => {
               dismissedRef.current.add(d.alert_id);
               if (d.dismissed_title) {
                 dismissedTitlesRef.current.add(d.dismissed_title.toLowerCase().trim());
               }
             });
-            console.log(`[Alerts] Loaded ${dismissed.length} dismissed alerts (${dismissedTitlesRef.current.size} unique titles)`);
+            // Fetch origin/destination pairs for dismissed alerts to build pair dedup set
+            if (dismissedIds.length > 0) {
+              const { data: pairData } = await supabase
+                .from('missile_alerts')
+                .select('origin_country_code, destination_country_code')
+                .in('id', dismissedIds)
+                .not('origin_country_code', 'is', null)
+                .not('destination_country_code', 'is', null);
+              if (pairData) {
+                pairData.forEach((p: any) => {
+                  dismissedPairsRef.current.add(`${p.origin_country_code}->${p.destination_country_code}`);
+                });
+              }
+            }
+            console.log(`[Alerts] Loaded ${dismissed.length} dismissed alerts (${dismissedTitlesRef.current.size} titles, ${dismissedPairsRef.current.size} pairs)`);
           }
         }
       }
