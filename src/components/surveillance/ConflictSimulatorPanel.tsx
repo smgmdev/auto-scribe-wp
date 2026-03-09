@@ -532,7 +532,7 @@ export function ConflictSimulatorPanel() {
         <span className="text-[9px] text-gray-600 uppercase tracking-wider">Custom Simulation</span>
       </div>
 
-      <div className="px-3 space-y-0 pb-3">
+      <div className="px-3 space-y-1.5 pb-3">
         {/* Country A */}
         <div className="relative">
           <label className="text-[9px] text-red-400/70 uppercase tracking-wider mb-0.5 block">Aggressor / Nation A</label>
@@ -587,7 +587,7 @@ export function ConflictSimulatorPanel() {
         <Button
           onClick={() => runSimulation()}
           disabled={!countryA || !countryB}
-          className="w-full rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors disabled:opacity-30"
+          className="w-full mt-1 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors disabled:opacity-30"
         >
           Run Simulation
         </Button>
