@@ -286,7 +286,7 @@ export function AlphaSignalsPanel() {
         <Button
           onClick={generateSignals}
           disabled={loading}
-          className="w-full h-8 text-xs bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 border-0"
+          className="w-full h-8 text-xs bg-amber-500 hover:bg-amber-400 text-black border-0"
         >
           {loading ? (
             <span className="flex items-center gap-2 w-full">
@@ -339,13 +339,13 @@ export function AlphaSignalsPanel() {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="bg-transparent border-b border-white/10 rounded-none h-9 p-0 flex-shrink-0 w-full">
-              <TabsTrigger value="signals" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-none">
+              <TabsTrigger value="signals" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:shadow-none">
                 Signals ({data.signals.length})
               </TabsTrigger>
-              <TabsTrigger value="sectors" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-none">
+              <TabsTrigger value="sectors" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:shadow-none">
                 Sectors
               </TabsTrigger>
-              <TabsTrigger value="tail-risks" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-none">
+              <TabsTrigger value="tail-risks" className="flex-1 text-[10px] rounded-none h-full data-[state=active]:bg-amber-500 data-[state=active]:text-black data-[state=active]:shadow-none">
                 Tail Risks
               </TabsTrigger>
             </TabsList>
