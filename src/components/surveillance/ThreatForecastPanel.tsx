@@ -188,7 +188,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
 
         {/* Executive Summary */}
         <div className="p-3 bg-white/[0.03] border border-white/[0.06]">
-          <div className="flex items-center gap-1.5 pt-3 mb-2">
+          <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
             <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
           </div>
           <p className="text-[11px] text-gray-300 leading-relaxed">{data.forecast.trend_summary}</p>
@@ -228,7 +228,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Escalation Drivers */}
         {data.forecast.escalation_drivers?.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 pt-3 mb-2">
+            <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Escalation Drivers</span>
             </div>
             <div className="space-y-1.5">
@@ -255,7 +255,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Hotspots */}
         {data.forecast.hotspots?.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 pt-3 mb-2">
+            <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Escalation Hotspots</span>
             </div>
             <div className="space-y-1.5">
@@ -298,7 +298,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Predictions */}
         {data.forecast.predictions?.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 pt-3 mb-2">
+            <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Predictions</span>
             </div>
             <div className="space-y-1.5">
@@ -332,7 +332,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Stabilizing Factors */}
         {data.forecast.stabilizing_factors?.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 pt-3 mb-2">
+            <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Stabilizing Factors</span>
             </div>
             <div className="space-y-1">
@@ -349,7 +349,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Key Indicators */}
         {data.forecast.key_indicators?.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 pt-3 mb-2">
+            <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Key Indicators to Watch</span>
             </div>
             <div className="space-y-1">
@@ -366,7 +366,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Analyst Notes */}
         {data.forecast.analyst_notes && (
           <div className="p-3 bg-white/[0.02] border border-white/[0.06] border-dashed">
-            <div className="flex items-center gap-1.5 pt-3 mb-1.5">
+            <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-1.5">
               <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Analyst Notes</span>
             </div>
             <p className="text-[10px] text-gray-500 leading-relaxed italic">{data.forecast.analyst_notes}</p>
