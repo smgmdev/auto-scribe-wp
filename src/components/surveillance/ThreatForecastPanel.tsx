@@ -90,9 +90,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               {data ? 'Refresh' : 'Generate'}
             </Button>
           )}
-          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors">
-            <X className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
