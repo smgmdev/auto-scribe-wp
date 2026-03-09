@@ -506,10 +506,10 @@ export function ConflictSimulatorPanel() {
       </div>
 
       {/* Quick Scenarios */}
-      <div className="px-3 pt-3 pb-1">
+      <div className="px-3 pt-2 pb-0.5">
         <span className="text-[9px] text-gray-600 uppercase tracking-wider">Quick Scenarios</span>
       </div>
-      <div className="px-3 pb-3 grid grid-cols-2 gap-1">
+      <div className="px-3 pb-2 grid grid-cols-2 gap-1">
         {QUICK_SCENARIOS.map((s, i) => (
           <button
             key={i}
@@ -527,12 +527,8 @@ export function ConflictSimulatorPanel() {
         ))}
       </div>
 
-      <div className="px-3 py-1">
-        <div className="h-px bg-white/5" />
-      </div>
-
       {/* Custom selection */}
-      <div className="px-3 pt-2 pb-1">
+      <div className="px-3 pt-1 pb-0.5">
         <span className="text-[9px] text-gray-600 uppercase tracking-wider">Custom Simulation</span>
       </div>
 
