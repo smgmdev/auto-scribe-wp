@@ -329,7 +329,7 @@ export function AlphaSignalsPanel() {
           </div>
         )}
         {data?.generated_at && !loading && (
-          <p className="text-[10px] text-gray-600 mt-1.5 text-center">
+          <p className="text-[10px] text-gray-600 mt-1.5 px-4">
             Generated {new Date(data.generated_at).toLocaleString(undefined, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
             {data.data_points && (
               <span className="text-gray-700"> · {data.data_points.scans_analyzed} scans · {data.data_points.alerts_analyzed} alerts</span>
