@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   TrendingUp, TrendingDown, Minus, Loader2, Shield, AlertTriangle, 
-  Target, Clock, DollarSign, Flame, Eye, ChevronRight, 
+  Target, Clock, DollarSign, Flame, ChevronRight, ChevronDown,
   Trash2, History, ArrowUpRight, ArrowDownRight, Scale
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -91,6 +91,22 @@ const assetClassColors: Record<string, string> = {
   crypto: 'text-orange-400',
 };
 
+function SummaryBlock({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div
+      className="px-4 py-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
+      onClick={() => setExpanded(e => !e)}
+    >
+      <p className={cn("text-[11px] text-gray-300 leading-relaxed", !expanded && "line-clamp-2")}>
+        {text}
+      </p>
+      <div className="flex justify-center mt-1">
+        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform", expanded && "rotate-180")} />
+      </div>
+    </div>
+  );
+}
 export function AlphaSignalsPanel() {
   const { loading, progress, data: storeData, setLoading, setProgress, setData: setStoreData, setError } = useAlphaStore();
   const [data, setData] = useState<AlphaData | null>(null);
@@ -323,12 +339,7 @@ export function AlphaSignalsPanel() {
       ) : (
         <>
           {/* Market Summary */}
-          <div className="px-4 py-3 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5">
-            <div className="flex items-start gap-2">
-              <Eye className="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0" />
-              <p className="text-[11px] text-gray-300 leading-relaxed">{data.market_summary}</p>
-            </div>
-          </div>
+          <SummaryBlock text={data.market_summary} />
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
