@@ -72,7 +72,43 @@ const threatLevelConfig = {
   LOW: { color: 'bg-emerald-500/30 text-emerald-300', border: 'border-emerald-500/40', text: 'text-emerald-400' },
 };
 
-export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
+function HeatmapToggle() {
+  const showHeatmap = useAppStore((s) => s.showHeatmap);
+  const setShowHeatmap = useAppStore((s) => s.setShowHeatmap);
+  const forecastData = useForecastStore((s) => s.data);
+  const hotspotCount = forecastData?.forecast?.hotspots?.length || 0;
+
+  return (
+    <button
+      onClick={() => setShowHeatmap(!showHeatmap)}
+      className={cn(
+        "w-full flex items-center justify-between px-3 py-2 border-b border-white/5 transition-colors",
+        showHeatmap ? "bg-rose-500/10" : "bg-white/[0.02] hover:bg-white/[0.04]"
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <Flame className={cn("w-3.5 h-3.5", showHeatmap ? "text-rose-400" : "text-gray-600")} />
+        <span className={cn("text-[11px]", showHeatmap ? "text-rose-300" : "text-gray-500")}>
+          Predictive Heatmap
+        </span>
+        {hotspotCount > 0 && (
+          <span className="text-[9px] text-gray-600">({hotspotCount} zones)</span>
+        )}
+      </div>
+      <div className={cn(
+        "w-7 h-4 rounded-full transition-colors relative",
+        showHeatmap ? "bg-rose-500/40" : "bg-white/10"
+      )}>
+        <div className={cn(
+          "absolute top-0.5 w-3 h-3 rounded-full transition-all",
+          showHeatmap ? "left-3.5 bg-rose-400" : "left-0.5 bg-gray-600"
+        )} />
+      </div>
+    </button>
+  );
+}
+
+
   const { loading, data, setData, generate: generateForecast, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
   const [history, setHistory] = useState<SavedForecast[]>([]);
