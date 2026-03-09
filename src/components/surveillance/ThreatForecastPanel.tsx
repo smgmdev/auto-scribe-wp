@@ -80,16 +80,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {!loading && (
-            <Button
-              size="sm"
-              onClick={generateForecast}
-              className="h-7 text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30"
-            >
-              <BrainCircuit className="w-3 h-3 mr-1" />
-              {data ? 'Refresh' : 'Generate'}
-            </Button>
-          )}
         </div>
       </div>
 
