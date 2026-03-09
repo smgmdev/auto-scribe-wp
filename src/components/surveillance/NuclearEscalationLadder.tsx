@@ -22,9 +22,12 @@ interface NuclearEscalationLadderProps {
 }
 
 export function NuclearEscalationLadder({ escalationPhases, countryA, countryB }: NuclearEscalationLadderProps) {
-  // Determine the highest phase that has > 30% probability (the "current position")
+  // Determine the highest phase that has crossed its activation threshold
+  // Higher phases require higher probabilities to be considered "active"
+  const PHASE_THRESHOLDS: Record<number, number> = { 1: 30, 2: 40, 3: 45, 4: 50, 5: 60 };
   const activeLevel = escalationPhases.reduce((max, phase) => {
-    if (phase.probability_pct >= 30 && phase.phase > max) return phase.phase;
+    const threshold = PHASE_THRESHOLDS[phase.phase] || 50;
+    if (phase.probability_pct >= threshold && phase.phase > max) return phase.phase;
     return max;
   }, 0);
 

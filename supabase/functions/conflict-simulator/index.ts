@@ -160,7 +160,18 @@ Produce a comprehensive war simulation covering:
 5. Most likely war outcome with realistic probability — WHO WINS and WHY
 6. De-escalation off-ramps at each phase
 7. Critical military indicators and red lines
-8. IMPORTANT: favored_nation must be the country with REAL military superiority. win_probability_pct (51-99%) must reflect actual power asymmetry honestly.`;
+8. IMPORTANT: favored_nation must be the country with REAL military superiority. win_probability_pct (51-99%) must reflect actual power asymmetry honestly.
+
+CRITICAL — NUCLEAR ESCALATION PROBABILITY CALIBRATION:
+The escalation_phases array has 5 phases. Each phase's probability_pct represents the REALISTIC probability that the conflict ACTUALLY REACHES that phase. You MUST follow these strict rules:
+- Phase 1 (Diplomatic Tensions): 60-95% — most conflicts start here
+- Phase 2 (Military Mobilization): 30-70% — only if both sides have credible military reach
+- Phase 3 (Conventional Conflict): 15-50% — actual combat is a major threshold; most disputes never reach it
+- Phase 4 (Strategic Escalation / Infrastructure Strikes): 3-20% — extremely rare, only for near-peer adversaries with deep strategic capability
+- Phase 5 (Nuclear Threshold): 0-8% — nuclear use is almost NEVER probable. Only assign >5% if BOTH nations possess nuclear weapons AND the conflict involves existential threats to a nuclear state's survival
+- Probabilities MUST DECREASE as phases increase — each phase is harder to reach than the last
+- If neither country has nuclear weapons, Phase 5 probability MUST be 0-1%
+- Do NOT inflate probabilities for dramatic effect — be coldly realistic`;
 
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
