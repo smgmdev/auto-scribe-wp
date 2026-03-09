@@ -1050,7 +1050,7 @@ export function AdminSurveillanceView() {
               </div>
             ) : (
               <div className="flex-1 overflow-hidden">
-                <ThreatForecastPanel onClose={() => setShowMobileFeed(false)} />
+                <ThreatForecastPanel onClose={() => setShowMobileFeed(false)} hideHeader />
               </div>
             )}
           </div>
