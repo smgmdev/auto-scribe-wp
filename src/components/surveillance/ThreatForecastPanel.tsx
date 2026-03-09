@@ -183,7 +183,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <BrainCircuit className="w-4 h-4 text-amber-400" />
           <span className="text-sm font-semibold text-white tracking-wide">AI THREAT FORECAST</span>
           {data && activeTab === 'generate' && (
             <Badge className={cn(
