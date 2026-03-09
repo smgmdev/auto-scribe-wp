@@ -1044,6 +1044,7 @@ export function AdminSurveillanceView() {
           </div>
         </SheetContent>
       </Sheet>
+      {showForecast && <ThreatForecastPanel onClose={() => setShowForecast(false)} />}
     </div>
   );
 }
