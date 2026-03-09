@@ -363,6 +363,13 @@ function isAnalyticalTitle(text: string): boolean {
     'defense spending', 'defence spending', 'military spending',
     'arms race', 'escalation risk', 'risk of escalation',
     'war footing', 'war economy', 'war fatigue',
+    'superiority', 'air superiority', 'naval superiority',
+    'cuts missile attacks', 'cuts attacks', 'reduces attacks',
+    'attacks by ', 'reduced by ', 'down by ',
+    'deterrence', 'deterrent', 'countermeasures',
+    'effectiveness of', 'effective against', 'success rate',
+    'intercept rate', 'interception rate', 'defense system',
+    'defence system', 'shield against', 'protection against',
   ];
   if (analyticalPhrases.some(p => lower.includes(p))) {
     // Double-check: if there's a DIRECT confirmed strike/hit, it's not analytical
