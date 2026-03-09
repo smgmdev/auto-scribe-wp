@@ -241,7 +241,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
               {/* Threat Level Banner */}
               {tlConfig && (
-                <div className={cn("p-3 rounded border text-center", tlConfig.border, tlConfig.color)}>
+                <div className={cn("p-3 border text-center", tlConfig.border, tlConfig.color)}>
                   <div className="flex items-center justify-center gap-2">
                     <ShieldAlert className="w-4 h-4" />
                     <span className="text-xs font-bold tracking-widest">THREAT LEVEL: {data.forecast.threat_level_assessment}</span>
