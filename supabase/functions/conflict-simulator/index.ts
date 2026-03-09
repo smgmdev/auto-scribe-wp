@@ -235,8 +235,8 @@ Base your analysis on current geopolitical realities, military capabilities, tre
                 required: [
                   "scenario_title", "threat_level", "executive_summary",
                   "trigger_scenarios", "escalation_phases", "alliance_responses",
-                  "economic_impact", "most_likely_outcome", "deescalation_opportunities",
-                  "critical_indicators",
+                  "economic_impact", "most_likely_outcome", "favored_nation", "win_probability_pct",
+                  "deescalation_opportunities", "critical_indicators",
                 ],
                 additionalProperties: false,
               },
