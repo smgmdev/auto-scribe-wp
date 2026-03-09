@@ -71,7 +71,7 @@ const threatLevelConfig = {
   LOW: { color: 'bg-emerald-500/30 text-emerald-300', border: 'border-emerald-500/40', text: 'text-emerald-400' },
 };
 
-export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
+export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
   const { loading, data, setData, generate: generateForecast, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
   const [history, setHistory] = useState<SavedForecast[]>([]);
@@ -399,11 +399,13 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-300 uppercase tracking-wider font-medium">AI Threat Forecast</span>
+      {!hideHeader && (
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-300 uppercase tracking-wider font-medium">AI Threat Forecast</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'generate' | 'history')} className="flex-1 flex flex-col min-h-0">

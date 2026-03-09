@@ -173,6 +173,7 @@ export function AdminSurveillanceView() {
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showMobileFeed, setShowMobileFeed] = useState(false);
   const [showForecast, setShowForecast] = useState(false);
+  const [mobileSliderTab, setMobileSliderTab] = useState<'feed' | 'forecast'>('feed');
   const openCameraFeed = useAppStore((s) => s.openCameraFeed);
   const currentView = useAppStore((s) => s.currentView);
 
@@ -983,68 +984,81 @@ export function AdminSurveillanceView() {
         </div>
       </div>
 
-      {/* Feed slide-over */}
+      {/* Feed + Forecast slide-over (mobile) */}
       <Sheet open={showMobileFeed} onOpenChange={setShowMobileFeed} modal={false}>
-        <SheetContent side="right" className="w-full sm:w-[400px] p-0 bg-[#0a0e1a]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
+        <SheetContent side="right" className="w-full sm:w-[420px] p-0 bg-[#0a0e1a]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
           <div className="flex flex-col h-full">
-            <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-400/80" />
-                <span className="text-xs text-gray-300 uppercase tracking-wider font-medium">Feed</span>
-                <span className="text-[10px] text-gray-600 tabular-nums">
-                  ({feedEvents.length})
-                </span>
-              </div>
+            {/* Tabs */}
+            <div className="w-full flex h-9 bg-[#1a1a1a] border-b border-white/10">
+              <button
+                onClick={() => setMobileSliderTab('feed')}
+                className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'feed' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+              >
+                Feed ({feedEvents.length})
+              </button>
+              <button
+                onClick={() => setMobileSliderTab('forecast')}
+                className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'forecast' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+              >
+                Forecast
+              </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/[0.08] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/[0.14]">
-              <div className="p-2.5 space-y-1.5">
-                {feedEvents.map((event, i) => (
-                  <div
-                    key={i}
-                    className="group p-3 rounded bg-white/[0.03] border-l-2 border-l-white/[0.06] border-y-0 border-r-0 hover:bg-white/[0.06] hover:border-l-amber-400/40 transition-all duration-200 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const country = filteredCountries.find(c => c.code === event.country_code) || scanData?.countries.find(c => c.code === event.country_code);
-                      if (country) {
-                        openSurveillancePopup(country);
-                        setShowMobileFeed(false);
-                      }
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <h4 className="text-[11px] font-medium text-gray-200 leading-snug line-clamp-2 group-hover:text-white transition-colors">
-                        {event.title}
-                      </h4>
-                      <Badge variant="outline" className={cn("text-[9px] flex-shrink-0 px-1.5 py-0 h-5 rounded-sm uppercase tracking-wider font-semibold", getSeverityColor(event.severity))}>
-                        {(event.severity || 'medium').toUpperCase()}
-                      </Badge>
-                    </div>
-                    {event.description && !/^Published\s+\d{8}T/i.test(event.description.trim()) && (
-                      <p className="text-[10px] text-gray-500 line-clamp-2 mb-1.5 leading-relaxed">{event.description.replace(/Published\s+\d{4}-?\d{2}-?\d{2}T\d+Z?\s*/gi, '').trim()}</p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-gray-600">{event.country_name}</span>
-                      {event.published_at && (
-                        <span className="text-[10px] text-gray-600 tabular-nums">
-                          {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                        </span>
+            {mobileSliderTab === 'feed' ? (
+              <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
+                <div className="p-2.5 space-y-1.5">
+                  {feedEvents.map((event, i) => (
+                    <div
+                      key={i}
+                      className="group p-3 rounded bg-white/[0.03] border-l-2 border-l-white/[0.06] border-y-0 border-r-0 hover:bg-white/[0.06] hover:border-l-amber-400/40 transition-all duration-200 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const country = filteredCountries.find(c => c.code === event.country_code) || scanData?.countries.find(c => c.code === event.country_code);
+                        if (country) {
+                          openSurveillancePopup(country);
+                          setShowMobileFeed(false);
+                        }
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <h4 className="text-[11px] font-medium text-gray-200 leading-snug line-clamp-2 group-hover:text-white transition-colors">
+                          {event.title}
+                        </h4>
+                        <Badge variant="outline" className={cn("text-[9px] flex-shrink-0 px-1.5 py-0 h-5 rounded-sm uppercase tracking-wider font-semibold", getSeverityColor(event.severity))}>
+                          {(event.severity || 'medium').toUpperCase()}
+                        </Badge>
+                      </div>
+                      {event.description && !/^Published\s+\d{8}T/i.test(event.description.trim()) && (
+                        <p className="text-[10px] text-gray-500 line-clamp-2 mb-1.5 leading-relaxed">{event.description.replace(/Published\s+\d{4}-?\d{2}-?\d{2}T\d+Z?\s*/gi, '').trim()}</p>
                       )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-gray-600">{event.country_name}</span>
+                        {event.published_at && (
+                          <span className="text-[10px] text-gray-600 tabular-nums">
+                            {new Date(event.published_at).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )) || (
-                  <div className="text-center py-8">
-                    <Shield className="w-6 h-6 text-gray-700 mx-auto mb-2" />
-                    <p className="text-xs text-gray-600">No events loaded</p>
-                  </div>
-                )}
+                  )) || (
+                    <div className="text-center py-8">
+                      <Shield className="w-6 h-6 text-gray-700 mx-auto mb-2" />
+                      <p className="text-xs text-gray-600">No events loaded</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex-1 overflow-hidden">
+                <ThreatForecastPanel onClose={() => setShowMobileFeed(false)} hideHeader />
+              </div>
+            )}
           </div>
         </SheetContent>
       </Sheet>
+      {/* Forecast slide-over (desktop only) */}
       <Sheet open={showForecast} onOpenChange={setShowForecast} modal={false}>
-        <SheetContent side="right" className="w-full sm:w-[420px] p-0 bg-[#080c14]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3">
+        <SheetContent side="right" className="w-full sm:w-[420px] p-0 bg-[#080c14]/95 backdrop-blur-xl border-white/5 text-white [&>button]:text-white [&>button]:top-3 [&>button]:right-3 hidden sm:flex">
           <ThreatForecastPanel onClose={() => setShowForecast(false)} />
         </SheetContent>
       </Sheet>
