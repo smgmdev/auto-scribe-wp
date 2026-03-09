@@ -429,8 +429,8 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </button>
         </div>
 
-        {/* Heatmap Globe Toggle */}
-        <HeatmapToggle />
+        {/* Heatmap Globe Toggle - only show when we have data on generate tab or on history tab */}
+        {activeTab === 'history' || (!loading && data && activeTab === 'generate') ? <HeatmapToggle /> : null}
 
         {/* Full-width regenerate button when assessment exists */}
         {!loading && data && !selectedHistoryId && activeTab === 'generate' && (
