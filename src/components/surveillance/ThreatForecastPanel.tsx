@@ -268,7 +268,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           generatedAt={data.generated_at}
           formatDate={formatDate}
         />
-        </div>
 
         {/* Escalation Drivers */}
         {data.forecast.escalation_drivers?.length > 0 && (
