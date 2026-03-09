@@ -261,43 +261,13 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </div>
         )}
 
-        {/* Executive Summary */}
-        <div className="p-2.5 bg-white/[0.03] border border-white/[0.06]">
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
-          </div>
-          <p className="text-[11px] text-gray-300 leading-relaxed">{data.forecast.trend_summary}</p>
-          <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[10px] text-gray-600">
-            <span>{data.data_points.scans_analyzed} scans</span>
-            <span>•</span>
-            <span>{data.data_points.alerts_analyzed} alerts</span>
-            <span>•</span>
-            <span>{data.data_points.affected_nations} nations</span>
-            <span>•</span>
-            <span>{formatDate(data.generated_at)}</span>
-          </div>
-          {data.data_points.severity_distribution && (
-            <div className="flex items-center gap-1 mt-2">
-              {data.data_points.severity_distribution.critical > 0 && (
-                <div className="flex items-center gap-1 text-[9px] text-red-400">
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
-                  {data.data_points.severity_distribution.critical} critical
-                </div>
-              )}
-              {data.data_points.severity_distribution.high > 0 && (
-                <div className="flex items-center gap-1 text-[9px] text-orange-400 ml-2">
-                  <div className="w-2 h-2 rounded-full bg-orange-500" />
-                  {data.data_points.severity_distribution.high} high
-                </div>
-              )}
-              {data.data_points.severity_distribution.medium > 0 && (
-                <div className="flex items-center gap-1 text-[9px] text-amber-400 ml-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-500" />
-                  {data.data_points.severity_distribution.medium} medium
-                </div>
-              )}
-            </div>
-          )}
+        {/* Executive Summary - collapsible */}
+        <ExecutiveSummaryBlock
+          text={data.forecast.trend_summary}
+          dataPoints={data.data_points}
+          generatedAt={data.generated_at}
+          formatDate={formatDate}
+        />
         </div>
 
         {/* Escalation Drivers */}
