@@ -117,12 +117,14 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
 
   useEffect(() => {
     if (activeTab === 'history') {
+      setHistory([]);
+      setHistoryLoading(true);
       loadHistory();
     }
   }, [activeTab]);
 
   const loadHistory = async () => {
-    setHistory([]);
+    setHistoryLoading(true);
     setHistoryLoading(true);
     try {
       const { data: forecasts, error } = await supabase
