@@ -165,7 +165,7 @@ function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
           )}
         </div>
       </div>
-      <ChevronDown className={cn("absolute bottom-2 right-3 w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
+      
     </div>
   );
 }
