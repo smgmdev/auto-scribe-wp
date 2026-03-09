@@ -53,7 +53,7 @@ export function NuclearEscalationLadder({ escalationPhases, countryA, countryB }
             activeLevelClamped >= 2 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
             'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
           )}>
-            DEFCON {6 - activeLevelClamped}
+            DEFCON {Math.max(1, 6 - activeLevelClamped)}
           </span>
         </div>
 

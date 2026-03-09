@@ -460,7 +460,7 @@ export function ConflictSimulatorPanel() {
             </div>
             {sim.deescalation_opportunities.map((d, i) => (
               <div key={i} className="p-2 bg-emerald-500/[0.03] border border-emerald-500/10">
-                <p className="text-[10px] text-emerald-300/80 leading-relaxed">• {d}</p>
+                <p className="text-[10px] text-emerald-300/80 leading-relaxed">{d}</p>
               </div>
             ))}
           </div>
