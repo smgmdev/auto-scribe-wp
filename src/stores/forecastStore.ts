@@ -37,6 +37,7 @@ interface ForecastStore {
 
 export const useForecastStore = create<ForecastStore>((set, get) => ({
   loading: false,
+  startedAt: null,
   data: null,
   error: null,
   loaded: false,
