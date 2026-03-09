@@ -318,9 +318,6 @@ export function AlphaSignalsPanel() {
       {!data ? (
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="text-center space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center mx-auto border border-amber-500/20">
-              <DollarSign className="w-6 h-6 text-amber-400" />
-            </div>
             <div>
               <p className="text-sm text-gray-300 font-medium">Geopolitical Alpha</p>
               <p className="text-[11px] text-gray-600 mt-1 leading-relaxed max-w-[240px]">
