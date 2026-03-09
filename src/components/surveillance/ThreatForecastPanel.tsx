@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, Loader2, Shield, ShieldAlert, Flame, Scale, FileWarning, History, Trash2, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, Loader2, Shield, ShieldAlert, Flame, Scale, FileWarning, History, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -108,6 +108,69 @@ function HeatmapToggle() {
   );
 }
 
+function ExecutiveSummaryBlock({ text, dataPoints, generatedAt, formatDate }: {
+  text: string;
+  dataPoints: ForecastResponse['data_points'];
+  generatedAt: string;
+  formatDate: (d: string) => string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) setHeight(contentRef.current.scrollHeight);
+  }, [text]);
+
+  return (
+    <div
+      className="px-4 pb-2.5 bg-gradient-to-r from-amber-500/5 to-transparent border-b border-white/5 cursor-pointer select-none"
+      onClick={() => setExpanded(e => !e)}
+    >
+      <div className="flex items-center justify-between pt-2.5 mb-1.5">
+        <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
+        <ChevronDown className={cn("w-3 h-3 text-gray-500 transition-transform duration-300", expanded && "rotate-180")} />
+      </div>
+      <div className="overflow-hidden transition-all duration-300 ease-out" style={{ maxHeight: expanded ? height : 32 }}>
+        <div ref={contentRef}>
+          <p className="text-[11px] text-gray-300 leading-relaxed">{text}</p>
+          <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[10px] text-gray-600">
+            <span>{dataPoints.scans_analyzed} scans</span>
+            <span>•</span>
+            <span>{dataPoints.alerts_analyzed} alerts</span>
+            <span>•</span>
+            <span>{dataPoints.affected_nations} nations</span>
+            <span>•</span>
+            <span>{formatDate(generatedAt)}</span>
+          </div>
+          {dataPoints.severity_distribution && (
+            <div className="flex items-center gap-1 mt-2">
+              {dataPoints.severity_distribution.critical > 0 && (
+                <div className="flex items-center gap-1 text-[9px] text-red-400">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  {dataPoints.severity_distribution.critical} critical
+                </div>
+              )}
+              {dataPoints.severity_distribution.high > 0 && (
+                <div className="flex items-center gap-1 text-[9px] text-orange-400 ml-2">
+                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                  {dataPoints.severity_distribution.high} high
+                </div>
+              )}
+              {dataPoints.severity_distribution.medium > 0 && (
+                <div className="flex items-center gap-1 text-[9px] text-amber-400 ml-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  {dataPoints.severity_distribution.medium} medium
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => void; hideHeader?: boolean }) {
   const { loading, data, setData, generate: storeGenerate, clearGenerated } = useForecastStore();
   const [activeTab, setActiveTab] = useState<'generate' | 'history'>('generate');
@@ -150,7 +213,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
   // Generate and immediately switch to history tab with the new forecast selected
   const generateForecast = async () => {
     await storeGenerate();
-    // After generation, switch to history, reload, and auto-select the latest
     setActiveTab('history');
     setHistoryLoading(true);
     setHistory([]);
@@ -168,7 +230,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           data_points: f.data_points as ForecastResponse['data_points'],
         }));
         setHistory(parsed);
-        // Auto-select the newest one
         const newest = parsed[0];
         setSelectedHistoryId(newest.id);
         setData({
@@ -208,7 +269,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
     });
   };
 
-
   const TrendIcon = data?.forecast.overall_trend === 'escalating' ? TrendingUp
     : data?.forecast.overall_trend === 'de-escalating' ? TrendingDown : Minus;
 
@@ -216,40 +276,34 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
     : data?.forecast.overall_trend === 'de-escalating' ? 'text-emerald-400' : 'text-amber-400';
 
   const confidenceColor = (c: string) =>
-    c === 'high' ? 'bg-red-500/20 text-red-300 border-red-500/30'
-      : c === 'medium' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-        : 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+    c === 'high' ? 'bg-red-500/10 text-red-300 border-red-500/20' :
+    c === 'medium' ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' :
+    'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
 
-  const riskColor = (score: number) =>
-    score >= 70 ? 'bg-red-500' : score >= 40 ? 'bg-amber-500' : 'bg-emerald-500';
+  const severityColor = (s: string) =>
+    s === 'critical' ? 'bg-red-500/15 text-red-300 border-red-500/20' :
+    s === 'high' ? 'bg-orange-500/15 text-orange-300 border-orange-500/20' :
+    'bg-amber-500/15 text-amber-300 border-amber-500/20';
 
   const trendArrow = (t: string) =>
     t === 'rising' ? '↑' : t === 'declining' ? '↓' : '→';
 
-  const severityColor = (s: string) =>
-    s === 'critical' ? 'bg-red-500/20 text-red-300 border-red-500/30'
-      : s === 'high' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
-        : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  const tlConfig = data ? threatLevelConfig[data.forecast.threat_level_assessment] || threatLevelConfig.GUARDED : null;
-
-  const formatDate = (d: string) => {
-    const date = new Date(d);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  };
+  const currentTlConfig = data ? threatLevelConfig[data.forecast.threat_level_assessment] || threatLevelConfig.GUARDED : null;
 
   const renderForecastReport = () => {
     if (!data) return null;
-    const currentTlConfig = threatLevelConfig[data.forecast.threat_level_assessment] || threatLevelConfig.GUARDED;
     return (
       <>
-        {/* Historical indicator */}
-        {selectedHistoryId && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-300">
-            <History className="w-3.5 h-3.5" />
-            Viewing historical forecast from {formatDate(data.generated_at)}
-          </div>
-        )}
+        {/* Overall Trend */}
+        <div className="flex items-center gap-2 p-2.5 border-b border-white/5">
+          <TrendIcon className={cn("w-4 h-4", trendColor)} />
+          <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4 uppercase", trendColor, 'border-current')}>
+            {data.forecast.overall_trend.charAt(0).toUpperCase() + data.forecast.overall_trend.slice(1)}
+          </Badge>
+        </div>
 
         {/* Threat Level Banner */}
         {currentTlConfig && (
@@ -261,44 +315,13 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </div>
         )}
 
-        {/* Executive Summary */}
-        <div className="p-2.5 bg-white/[0.03] border border-white/[0.06]">
-          <div className="flex items-center gap-1.5 mb-2">
-            <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
-          </div>
-          <p className="text-[11px] text-gray-300 leading-relaxed">{data.forecast.trend_summary}</p>
-          <div className="flex flex-wrap items-center gap-3 mt-2.5 text-[10px] text-gray-600">
-            <span>{data.data_points.scans_analyzed} scans</span>
-            <span>•</span>
-            <span>{data.data_points.alerts_analyzed} alerts</span>
-            <span>•</span>
-            <span>{data.data_points.affected_nations} nations</span>
-            <span>•</span>
-            <span>{formatDate(data.generated_at)}</span>
-          </div>
-          {data.data_points.severity_distribution && (
-            <div className="flex items-center gap-1 mt-2">
-              {data.data_points.severity_distribution.critical > 0 && (
-                <div className="flex items-center gap-1 text-[9px] text-red-400">
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
-                  {data.data_points.severity_distribution.critical} critical
-                </div>
-              )}
-              {data.data_points.severity_distribution.high > 0 && (
-                <div className="flex items-center gap-1 text-[9px] text-orange-400 ml-2">
-                  <div className="w-2 h-2 rounded-full bg-orange-500" />
-                  {data.data_points.severity_distribution.high} high
-                </div>
-              )}
-              {data.data_points.severity_distribution.medium > 0 && (
-                <div className="flex items-center gap-1 text-[9px] text-amber-400 ml-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-500" />
-                  {data.data_points.severity_distribution.medium} medium
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {/* Executive Summary - collapsible */}
+        <ExecutiveSummaryBlock
+          text={data.forecast.trend_summary}
+          dataPoints={data.data_points}
+          generatedAt={data.generated_at}
+          formatDate={formatDate}
+        />
 
         {/* Escalation Drivers */}
         {data.forecast.escalation_drivers?.length > 0 && (
@@ -318,7 +341,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                   <p className="text-[10px] text-gray-400 leading-relaxed">{d.description}</p>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {d.affected_regions.map((r, j) => (
-                      <span key={j} className="text-[9px] px-1.5 py-0.5 bg-white/5 text-gray-500">{r}</span>
+                      <span key={j} className="text-[9px] text-gray-500 bg-white/[0.04] px-1.5 py-0.5 border border-white/[0.06]">{r}</span>
                     ))}
                   </div>
                 </div>
@@ -417,11 +440,12 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </div>
         )}
 
-        {/* Analyst Notes */}
+        {/* Mace Notes */}
         {data.forecast.analyst_notes && (
-          <div className="p-2.5 bg-white/[0.02] border border-white/[0.06] border-dashed">
+          <div className="p-2.5 bg-white/[0.02] border border-white/[0.05] mt-3">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Mace Notes</span>
+              <FileWarning className="w-3 h-3 text-gray-500" />
+              <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Mace Notes</span>
             </div>
             <p className="text-[10px] text-gray-500 leading-relaxed italic">{data.forecast.analyst_notes}</p>
           </div>
@@ -472,7 +496,6 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
 
         {/* Heatmap Globe Toggle - only show when viewing an individual report */}
         {data && ((!loading && activeTab === 'generate' && !selectedHistoryId) || (activeTab === 'history' && selectedHistoryId)) ? <HeatmapToggle /> : null}
-
 
         {/* Generate Tab */}
         <TabsContent value="generate" className="flex-1 overflow-y-auto p-0 space-y-0 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
