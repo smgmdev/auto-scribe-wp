@@ -14,6 +14,7 @@ import { useAppStore } from '@/stores/appStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ThreatForecastPanel } from '@/components/surveillance/ThreatForecastPanel';
+import { ConflictSimulatorPanel } from '@/components/surveillance/ConflictSimulatorPanel';
 
 
 type ScanRegion = 'global' | 'asia' | 'middle_east' | 'europe' | 'us';
