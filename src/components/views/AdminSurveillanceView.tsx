@@ -1032,9 +1032,8 @@ export function AdminSurveillanceView() {
               </button>
               <button
                 onClick={() => setMobileSliderTab('alpha')}
-                className={`flex-1 text-[11px] h-full transition-colors flex items-center justify-center gap-1 ${mobileSliderTab === 'alpha' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
+                className={`flex-1 text-[11px] h-full transition-colors ${mobileSliderTab === 'alpha' ? 'bg-[#2a2a2a] text-white' : 'text-white/40'}`}
               >
-                <Zap className="w-3 h-3" />
                 Alpha
               </button>
             </div>

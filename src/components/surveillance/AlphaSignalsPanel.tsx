@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  TrendingUp, TrendingDown, Minus, Loader2, Zap, Shield, AlertTriangle, 
-  BarChart3, Target, Clock, DollarSign, Flame, Eye, ChevronRight, 
+  TrendingUp, TrendingDown, Minus, Loader2, Shield, AlertTriangle, 
+  Target, Clock, DollarSign, Flame, Eye, ChevronRight, 
   Trash2, History, ArrowUpRight, ArrowDownRight, Scale
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useAlphaStore } from '@/stores/alphaStore';
 
 interface AlphaSignal {
   asset: string;
@@ -91,16 +92,32 @@ const assetClassColors: Record<string, string> = {
 };
 
 export function AlphaSignalsPanel() {
-  const [loading, setLoading] = useState(false);
+  const { loading, progress, data: storeData, setLoading, setProgress, setData: setStoreData, setError } = useAlphaStore();
   const [data, setData] = useState<AlphaData | null>(null);
   const [savedSignals, setSavedSignals] = useState<SavedSignal[]>([]);
   const [activeTab, setActiveTab] = useState('signals');
   const [expandedSignal, setExpandedSignal] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Sync store data to local state
+  useEffect(() => {
+    if (storeData && !loading) {
+      setData(storeData);
+      loadSavedSignals();
+    }
+  }, [storeData, loading]);
 
   // Load latest saved signals on mount
   useEffect(() => {
     loadSavedSignals();
+  }, []);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (progressRef.current) clearInterval(progressRef.current);
+    };
   }, []);
 
   const loadSavedSignals = async () => {
@@ -121,7 +138,7 @@ export function AlphaSignalsPanel() {
       setSavedSignals(mapped);
 
       // Load most recent as current view if no fresh data
-      if (!data && mapped.length > 0) {
+      if (!data && !storeData && mapped.length > 0) {
         const latest = mapped[0];
         setData({
           market_summary: latest.market_summary,
@@ -135,23 +152,44 @@ export function AlphaSignalsPanel() {
     }
   };
 
-  const generateSignals = async () => {
+  const generateSignals = useCallback(async () => {
+    if (loading) return;
     setLoading(true);
+    setProgress(0);
+    setError(null);
+
+    // Simulate progress — AI call takes ~15-30s
+    let currentProgress = 0;
+    progressRef.current = setInterval(() => {
+      currentProgress += Math.random() * 8 + 2;
+      if (currentProgress > 92) currentProgress = 92;
+      setProgress(Math.round(currentProgress));
+    }, 800);
+
     try {
       const { data: result, error } = await supabase.functions.invoke('alpha-signals');
+      if (progressRef.current) clearInterval(progressRef.current);
+      setProgress(100);
+      
       if (error) throw error;
       if (result?.error) throw new Error(result.error);
+      
+      setStoreData(result);
       setData(result);
       setShowHistory(false);
       toast.success('Alpha signals generated');
-      // Refresh saved list
       loadSavedSignals();
     } catch (err: any) {
+      if (progressRef.current) clearInterval(progressRef.current);
+      setError(err.message || 'Failed to generate signals');
       toast.error(err.message || 'Failed to generate signals');
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+        setProgress(0);
+      }, 500);
     }
-  };
+  }, [loading, setLoading, setProgress, setError, setStoreData]);
 
   const deleteSignal = async (id: string) => {
     await supabase.from('geopolitical_alpha_signals').delete().eq('id', id);
@@ -228,9 +266,6 @@ export function AlphaSignalsPanel() {
       <div className="px-4 py-3 border-b border-white/10">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
             <div>
               <h3 className="text-sm font-semibold tracking-tight">Alpha Signals</h3>
               <p className="text-[10px] text-gray-500">Geopolitical Intelligence → Market Alpha</p>
@@ -254,18 +289,23 @@ export function AlphaSignalsPanel() {
           className="w-full h-8 text-xs bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 border-0"
         >
           {loading ? (
-            <>
-              <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-              Analyzing intelligence...
-            </>
+            <span className="flex items-center gap-2 w-full">
+              <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
+              <span className="flex-1 text-left">Analyzing intelligence... {progress}%</span>
+            </span>
           ) : (
-            <>
-              <BarChart3 className="w-3 h-3 mr-1.5" />
-              Generate Alpha Signals
-            </>
+            'Generate Alpha Signals'
           )}
         </Button>
-        {data?.generated_at && (
+        {loading && (
+          <div className="mt-1.5 h-1 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+        {data?.generated_at && !loading && (
           <p className="text-[10px] text-gray-600 mt-1.5 text-center">
             Generated {new Date(data.generated_at).toLocaleString(undefined, { month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
             {data.data_points && (
