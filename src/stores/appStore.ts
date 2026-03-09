@@ -848,6 +848,7 @@ export const useAppStore = create<AppState>()((set) => ({
   setShowTrades: (v) => set({ showTrades: v }),
   setShowSatellites: (v) => set({ showSatellites: v }),
   setShowEarthquakes: (v) => set({ showEarthquakes: v }),
+  setShowHeatmap: (v) => set({ showHeatmap: v }),
   missileTimeFilter: '24',
   droneTimeFilter: '24',
   nukeTimeFilter: '24',
