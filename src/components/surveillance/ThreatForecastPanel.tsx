@@ -416,7 +416,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-white tracking-wide">AI THREAT FORECAST</span>
-          {data && activeTab === 'generate' && (
+          {data && (activeTab === 'generate' || selectedHistoryId) && (
             <Badge className={cn(
               "text-[9px] ml-1 uppercase border-0 rounded-none",
               data.forecast.overall_trend === 'escalating' ? 'bg-[#f2a547] text-black hover:bg-[#f2a547]'
