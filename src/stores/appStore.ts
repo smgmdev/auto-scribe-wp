@@ -339,6 +339,10 @@ interface AppState {
   precisionContactOpen: boolean;
   setPrecisionContactOpen: (open: boolean) => void;
 
+  // CRT Terminal Mode
+  crtMode: boolean;
+  setCrtMode: (val: boolean) => void;
+
   // Reset all notification counts (for user switch)
   resetAllNotifications: () => void;
 }
