@@ -397,7 +397,7 @@ export function ConflictSimulatorPanel() {
         {/* Re-run button */}
         <div className="p-3">
           <Button
-            onClick={() => { setResult(null); }}
+            onClick={() => { clear(); }}
             variant="outline"
             className="w-full h-8 text-[10px] rounded-none border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
           >
