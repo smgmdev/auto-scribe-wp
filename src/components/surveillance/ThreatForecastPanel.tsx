@@ -317,12 +317,12 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
         {/* Stabilizing Factors */}
         {data.forecast.stabilizing_factors?.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
+            <div className="flex items-center gap-1.5 pt-3 mb-2">
               <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Stabilizing Factors</span>
             </div>
             <div className="space-y-1">
               {data.forecast.stabilizing_factors.map((f, i) => (
-                <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 bg-emerald-500/[0.04] border border-emerald-500/10">
+                <div key={i} className="flex items-start gap-2 py-1.5 bg-emerald-500/[0.04] border border-emerald-500/10">
                   <span className="text-[10px] text-emerald-500 mt-0.5">◆</span>
                   <span className="text-[10px] text-gray-400 leading-relaxed">{f}</span>
                 </div>
