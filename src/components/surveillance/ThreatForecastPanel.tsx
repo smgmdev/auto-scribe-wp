@@ -339,14 +339,14 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
                     </Badge>
                   </div>
                   <p className="text-[11px] text-gray-200 leading-relaxed">{p.prediction}</p>
-                  <p className="text-[10px] text-gray-600 mt-1">
-                    {p.evidence}
-                  </p>
-                  {p.trigger_conditions && (
-                    <p className="text-[9px] text-blue-600 mt-1">
-                      <span>Trigger: {p.trigger_conditions}</span>
-                    </p>
-                  )}
+                   <p className="text-[10px] text-gray-600">
+                     {p.evidence}
+                   </p>
+                   {p.trigger_conditions && (
+                     <p className="text-[9px] text-blue-600">
+                       <span>Trigger: {p.trigger_conditions}</span>
+                     </p>
+                   )}
                 </div>
               ))}
             </div>
