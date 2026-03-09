@@ -405,7 +405,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1">
                     {data.forecast.stabilizing_factors.map((f, i) => (
-                      <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 rounded bg-emerald-500/[0.04] border border-emerald-500/10">
+                      <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 bg-emerald-500/[0.04] border border-emerald-500/10">
                         <span className="text-[10px] text-emerald-500 mt-0.5">◆</span>
                         <span className="text-[10px] text-gray-400 leading-relaxed">{f}</span>
                       </div>
