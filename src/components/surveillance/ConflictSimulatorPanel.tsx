@@ -88,9 +88,7 @@ const QUICK_SCENARIOS = [
 ];
 
 export function ConflictSimulatorPanel() {
-  const { loading, result, runId, setLoading, setResult, setRunId, clear } = useSimulatorStore();
-  const [countryA, setCountryA] = useState('');
-  const [countryB, setCountryB] = useState('');
+  const { loading, result, runId, countryA, countryB, startedAt, setLoading, setResult, setRunId, setCountryA, setCountryB, setStartedAt, clear } = useSimulatorStore();
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
   const [showDropdownA, setShowDropdownA] = useState(false);
@@ -120,15 +118,17 @@ export function ConflictSimulatorPanel() {
         setResult(data.result as any);
         setLoading(false);
         setRunId(null);
+        setStartedAt(null);
         if (pollRef.current) clearInterval(pollRef.current);
       } else if (data?.status === 'error') {
         toast.error(data.error_message || 'Simulation failed');
         setLoading(false);
         setRunId(null);
+        setStartedAt(null);
         if (pollRef.current) clearInterval(pollRef.current);
       }
     }, 3000);
-  }, [setResult, setLoading, setRunId]);
+  }, [setResult, setLoading, setRunId, setStartedAt]);
 
   // Resume polling on mount if there's an active run
   useEffect(() => {
@@ -151,6 +151,7 @@ export function ConflictSimulatorPanel() {
     setLoading(true);
     setResult(null);
     setRunId(rid);
+    setStartedAt(Date.now());
 
     // Fire-and-forget: don't await the full response
     supabase.functions.invoke('conflict-simulator', {
@@ -166,25 +167,31 @@ export function ConflictSimulatorPanel() {
   const sim = result?.simulation;
   const tc = sim ? threatColors[sim.threat_level] || threatColors.MODERATE : null;
 
-  // Simulated progress for loading state
-  const [progress, setProgress] = useState(0);
+  // Time-based progress that survives remounts
+  const [progress, setProgress] = useState(() => {
+    if (!loading || !startedAt) return 0;
+    const elapsed = (Date.now() - startedAt) / 1000;
+    return Math.min(95, elapsed < 10 ? elapsed * 3 : elapsed < 25 ? 30 + (elapsed - 10) * 2 : elapsed < 45 ? 60 + (elapsed - 25) : 80 + (elapsed - 45) * 0.5);
+  });
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading || !startedAt) {
       setProgress(0);
       return;
     }
-    setProgress(2);
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 95) return prev;
-        // Slow down as we approach 95%
-        const increment = prev < 30 ? 3 : prev < 60 ? 2 : prev < 80 ? 1 : 0.5;
-        return Math.min(prev + increment, 95);
-      });
-    }, 1000);
+    const calcProgress = () => {
+      const elapsed = (Date.now() - startedAt) / 1000;
+      // ~30% in first 10s, ~60% by 25s, ~80% by 45s, then slow crawl to 95%
+      const p = elapsed < 10 ? elapsed * 3
+        : elapsed < 25 ? 30 + (elapsed - 10) * 2
+        : elapsed < 45 ? 60 + (elapsed - 25)
+        : 80 + (elapsed - 45) * 0.5;
+      return Math.min(95, p);
+    };
+    setProgress(calcProgress());
+    const interval = setInterval(() => setProgress(calcProgress()), 1000);
     return () => clearInterval(interval);
-  }, [loading]);
+  }, [loading, startedAt]);
 
   if (loading) {
     const stageLabel = progress < 20 ? 'Initializing simulation...'
