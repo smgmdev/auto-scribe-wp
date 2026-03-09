@@ -286,7 +286,7 @@ export function AlphaSignalsPanel() {
         <Button
           onClick={generateSignals}
           disabled={loading}
-          className="w-full h-8 text-xs bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 border-0"
+          className="w-full h-8 text-xs bg-amber-500 hover:bg-amber-400 text-black border-0"
         >
           {loading ? (
             <span className="flex items-center gap-2 w-full">
