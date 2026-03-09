@@ -308,7 +308,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                         <p className="text-[10px] text-gray-400 leading-relaxed">{d.description}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {d.affected_regions.map((r, j) => (
-                            <span key={j} className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-gray-500">{r}</span>
+                            <span key={j} className="text-[9px] px-1.5 py-0.5 bg-white/5 text-gray-500">{r}</span>
                           ))}
                         </div>
                       </div>
