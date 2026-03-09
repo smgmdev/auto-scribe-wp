@@ -532,7 +532,7 @@ export function ConflictSimulatorPanel() {
         <span className="text-[9px] text-gray-600 uppercase tracking-wider">Custom Simulation</span>
       </div>
 
-      <div className="px-3 space-y-1 pb-3">
+      <div className="px-3 space-y-0 pb-3">
         {/* Country A */}
         <div className="relative">
           <label className="text-[9px] text-red-400/70 uppercase tracking-wider mb-0.5 block">Aggressor / Nation A</label>
@@ -558,10 +558,6 @@ export function ConflictSimulatorPanel() {
           )}
         </div>
 
-        {/* Separator */}
-        <div className="flex items-center justify-center">
-          <span className="text-[10px] font-bold text-red-500/40">—</span>
-        </div>
 
         {/* Country B */}
         <div className="relative">
