@@ -1030,7 +1030,7 @@ export function AdminSurveillanceView() {
                   {feedEvents.map((event, i) => (
                     <div
                       key={i}
-                      className="group p-3 rounded bg-white/[0.03] border-l-2 border-l-white/[0.06] border-y-0 border-r-0 hover:bg-white/[0.06] hover:border-l-amber-400/40 transition-all duration-200 cursor-pointer"
+                      className="group p-3 bg-white/[0.03] border-l-2 border-l-white/[0.06] border-y-0 border-r-0 hover:bg-white/[0.06] hover:border-l-amber-400/40 transition-all duration-200 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         const country = filteredCountries.find(c => c.code === event.country_code) || scanData?.countries.find(c => c.code === event.country_code);
