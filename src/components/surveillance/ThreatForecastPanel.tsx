@@ -180,8 +180,7 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
 
   useEffect(() => {
     if (activeTab === 'history') {
-      setHistory([]);
-      setHistoryLoading(true);
+      if (history.length === 0) setHistoryLoading(true);
       loadHistory();
     }
   }, [activeTab]);
