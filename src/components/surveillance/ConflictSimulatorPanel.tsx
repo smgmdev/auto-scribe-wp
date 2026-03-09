@@ -248,7 +248,7 @@ export function ConflictSimulatorPanel() {
         {/* Favored Nation Banner */}
         <div className={cn("h-9 flex items-center justify-center border", tc.border, tc.bg, tc.text)}>
           <Shield className="w-4 h-4 mr-2" />
-          <span className="text-xs font-bold tracking-widest">IN FAVOR: {favoredNation?.toUpperCase()}</span>
+          <span className="text-xs font-bold tracking-widest">IN FAVOR: {favoredNation?.toUpperCase()} — {sim.most_likely_outcome?.probability_pct || '?'}%</span>
         </div>
 
         {/* Title */}
