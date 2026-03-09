@@ -415,6 +415,15 @@ export function ConflictSimulatorPanel() {
           </div>
         </div>
 
+        {/* Nuclear Escalation Ladder */}
+        {sim.escalation_phases?.length > 0 && (
+          <NuclearEscalationLadder
+            escalationPhases={sim.escalation_phases}
+            countryA={result.country_a}
+            countryB={result.country_b}
+          />
+        )}
+
         {/* Most Likely Outcome */}
         <div>
           <div className="flex items-center gap-1.5 pt-3 pl-2.5 mb-2">
