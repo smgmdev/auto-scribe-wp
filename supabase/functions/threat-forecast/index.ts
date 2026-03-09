@@ -287,15 +287,35 @@ Produce an intelligence-grade structured assessment following these guidelines:
 
     const forecast = JSON.parse(toolCall.function.arguments);
 
+    const dataPoints = {
+      scans_analyzed: scans?.length || 0,
+      alerts_analyzed: alerts?.length || 0,
+      affected_nations: affectedCountries.size,
+      severity_distribution: severityCounts,
+    };
+
+    // Get user_id from auth if available
+    let userId: string | null = null;
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
+      const { data: { user } } = await anonClient.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
+    // Save to history if user is authenticated
+    if (userId) {
+      await supabase.from("threat_forecasts").insert({
+        user_id: userId,
+        forecast,
+        data_points: dataPoints,
+      });
+    }
+
     return new Response(JSON.stringify({
       forecast,
       generated_at: new Date().toISOString(),
-      data_points: {
-        scans_analyzed: scans?.length || 0,
-        alerts_analyzed: alerts?.length || 0,
-        affected_nations: affectedCountries.size,
-        severity_distribution: severityCounts,
-      },
+      data_points: dataPoints,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
