@@ -494,8 +494,8 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
           </button>
         )}
 
-        {/* Heatmap Globe Toggle - only show when viewing an individual report */}
-        {data && ((!loading && activeTab === 'generate' && !selectedHistoryId) || (activeTab === 'history' && selectedHistoryId)) ? <HeatmapToggle /> : null}
+        {/* Heatmap Globe Toggle - only show when viewing a report in history */}
+        {data && activeTab === 'history' && selectedHistoryId ? <HeatmapToggle /> : null}
 
         {/* Generate Tab */}
         <TabsContent value="generate" className="flex-1 overflow-y-auto p-0 space-y-0 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent] m-0 mt-0 border-0">
@@ -519,13 +519,10 @@ export function ThreatForecastPanel({ onClose, hideHeader }: { onClose: () => vo
 
           {!loading && data && !selectedHistoryId && (
             <div className="flex flex-col items-center justify-center h-full gap-3 px-3">
-              <p className="text-sm text-gray-400 text-center">Assessment generated</p>
-              <p className="text-xs text-gray-600 text-center">Your latest forecast is available in History.</p>
-              <Button onClick={() => setActiveTab('history')} className="w-full mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
-                View in History
-              </Button>
-              <Button onClick={() => { setSelectedHistoryId(null); generateForecast(); }} variant="outline" className="w-full rounded-none border-white/10 text-gray-400 hover:text-white">
-                Generate New Assessment
+              <p className="text-sm text-gray-400 text-center">AI Threat Assessment</p>
+              <p className="text-xs text-gray-600 text-center max-w-xs">Produces a professional-grade intelligence assessment analyzing 7 days of surveillance data, active alerts, and escalation patterns with probability-scored predictions.</p>
+              <Button onClick={() => { setSelectedHistoryId(null); generateForecast(); }} className="w-full mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
+                Generate New Forecast
               </Button>
             </div>
           )}
