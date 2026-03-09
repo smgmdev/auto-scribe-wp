@@ -498,18 +498,18 @@ export function AlphaSignalsPanel() {
                         risk.probability_pct >= 10 ? "text-amber-400" : "text-gray-500"
                       )} />
                       <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-medium text-gray-200">{risk.scenario}</span>
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-[11px] font-medium text-gray-200 leading-snug">{risk.scenario}</span>
                           <span className={cn(
-                            "text-[10px] font-mono font-bold",
+                            "text-[10px] font-mono font-bold flex-shrink-0",
                             risk.probability_pct >= 20 ? "text-red-400" :
                             risk.probability_pct >= 10 ? "text-amber-400" : "text-gray-500"
                           )}>
                             {risk.probability_pct}%
                           </span>
                         </div>
-                        <p className="text-[10px] text-gray-400 leading-snug mt-0.5">{risk.market_impact}</p>
-                        <span className="text-[9px] text-gray-500 leading-snug">{risk.hedge}</span>
+                        <p className="text-[10px] text-gray-400 leading-snug">{risk.market_impact}</p>
+                        <span className="text-[9px] text-blue-300/70 leading-snug">{risk.hedge}</span>
                       </div>
                     </div>
                   </div>
