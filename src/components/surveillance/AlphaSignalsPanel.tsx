@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  TrendingUp, TrendingDown, Minus, Loader2, Zap, Shield, AlertTriangle, 
-  BarChart3, Target, Clock, DollarSign, Flame, Eye, ChevronRight, 
+  TrendingUp, TrendingDown, Minus, Loader2, Shield, AlertTriangle, 
+  Target, Clock, DollarSign, Flame, Eye, ChevronRight, 
   Trash2, History, ArrowUpRight, ArrowDownRight, Scale
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useAlphaStore } from '@/stores/alphaStore';
 
 interface AlphaSignal {
   asset: string;
