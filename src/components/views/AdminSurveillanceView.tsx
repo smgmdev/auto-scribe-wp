@@ -900,15 +900,8 @@ export function AdminSurveillanceView() {
                 <span className="text-[10px] text-gray-400">Seismic</span>
               </button>
               <span className="text-[10px] text-gray-600">({earthquakes.length})</span>
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 flex-shrink-0">
-              <button onClick={() => setShowHeatmap(!showHeatmap)} className={cn("flex items-center gap-1.5 transition-opacity", !showHeatmap && "opacity-30")}>
-                <Flame className="w-3 h-3 text-rose-400" />
-                <span className="text-[10px] text-gray-400">Heatmap</span>
-              </button>
-              <span className="text-[10px] text-gray-600">({forecastHotspots.length})</span>
             </div>
           </div>
-        </div>
         </div>
 
         {/* Main content */}
