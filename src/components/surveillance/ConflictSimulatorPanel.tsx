@@ -488,7 +488,6 @@ export function ConflictSimulatorPanel() {
       {/* Header */}
       <div className="p-3 border-b border-white/5">
         <div className="flex items-center gap-2 mb-2">
-          <Swords className="w-4 h-4 text-red-400" />
           <span className="text-[12px] font-bold text-white tracking-wide">CONFLICT SIMULATOR</span>
         </div>
         <p className="text-[10px] text-gray-500 leading-relaxed">
