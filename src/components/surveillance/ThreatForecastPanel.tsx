@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BrainCircuit, TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, Loader2, Shield, ShieldAlert, Flame, Scale, FileWarning, History, Trash2, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Clock, Target, Eye, AlertTriangle, Loader2, Shield, ShieldAlert, Flame, Scale, FileWarning, History, Trash2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -183,7 +183,6 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <BrainCircuit className="w-4 h-4 text-amber-400" />
           <span className="text-sm font-semibold text-white tracking-wide">AI THREAT FORECAST</span>
           {data && activeTab === 'generate' && (
             <Badge className={cn(
@@ -201,13 +200,11 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'generate' | 'history')} className="flex-1 flex flex-col min-h-0">
-        <TabsList className="w-full grid grid-cols-2 h-9 bg-white/5 rounded-none border-b border-white/10 p-0">
-          <TabsTrigger value="generate" className="text-[11px] text-white rounded-none h-full data-[state=active]:bg-white/10 data-[state=active]:shadow-none data-[state=active]:text-white border-0">
-            <BrainCircuit className="w-3 h-3 mr-1" />
+        <TabsList className="w-full grid grid-cols-2 h-9 bg-black rounded-none border-b border-white/10 p-0 gap-0">
+          <TabsTrigger value="generate" className="text-[11px] text-white/50 rounded-none h-full data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none border-0 transition-colors">
             Generate
           </TabsTrigger>
-          <TabsTrigger value="history" className="text-[11px] text-white rounded-none h-full data-[state=active]:bg-white/10 data-[state=active]:shadow-none data-[state=active]:text-white border-0">
-            <History className="w-3 h-3 mr-1" />
+          <TabsTrigger value="history" className="text-[11px] text-white/50 rounded-none h-full data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none border-0 transition-colors">
             History
           </TabsTrigger>
         </TabsList>
@@ -224,11 +221,9 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
           {!loading && !data && (
             <div className="flex flex-col items-center justify-center h-full gap-3">
-              <BrainCircuit className="w-10 h-10 text-gray-700" />
               <p className="text-sm text-gray-400 text-center">AI Threat Assessment</p>
               <p className="text-xs text-gray-600 text-center max-w-xs">Produces a professional-grade intelligence assessment analyzing 7 days of surveillance data, active alerts, and escalation patterns with probability-scored predictions.</p>
-              <Button onClick={generateForecast} className="mt-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30">
-                <BrainCircuit className="w-4 h-4 mr-2" />
+              <Button onClick={generateForecast} className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors">
                 Generate Assessment
               </Button>
             </div>
@@ -238,7 +233,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
             <>
               {/* Historical indicator */}
               {selectedHistoryId && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-300">
+                <div className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-300">
                   <History className="w-3.5 h-3.5" />
                   Viewing historical forecast from {formatDate(data.generated_at)}
                 </div>
@@ -246,7 +241,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
               {/* Threat Level Banner */}
               {tlConfig && (
-                <div className={cn("p-3 rounded border text-center", tlConfig.border, tlConfig.color)}>
+                <div className={cn("p-3 border text-center", tlConfig.border, tlConfig.color)}>
                   <div className="flex items-center justify-center gap-2">
                     <ShieldAlert className="w-4 h-4" />
                     <span className="text-xs font-bold tracking-widest">THREAT LEVEL: {data.forecast.threat_level_assessment}</span>
@@ -255,7 +250,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               )}
 
               {/* Executive Summary */}
-              <div className="p-3 rounded bg-white/[0.03] border border-white/[0.06]">
+              <div className="p-3 bg-white/[0.03] border border-white/[0.06]">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Shield className="w-3.5 h-3.5 text-blue-400" />
                   <span className="text-[11px] font-semibold text-gray-300 uppercase tracking-wider">Executive Summary</span>
@@ -303,7 +298,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1.5">
                     {data.forecast.escalation_drivers.map((d, i) => (
-                      <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                      <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[11px] font-medium text-white">{d.driver}</span>
                           <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4", severityColor(d.severity))}>
@@ -313,7 +308,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                         <p className="text-[10px] text-gray-400 leading-relaxed">{d.description}</p>
                         <div className="flex flex-wrap gap-1 mt-1.5">
                           {d.affected_regions.map((r, j) => (
-                            <span key={j} className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-gray-500">{r}</span>
+                            <span key={j} className="text-[9px] px-1.5 py-0.5 bg-white/5 text-gray-500">{r}</span>
                           ))}
                         </div>
                       </div>
@@ -331,7 +326,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1.5">
                     {data.forecast.hotspots.map((h, i) => (
-                      <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                      <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                         <div className="flex items-center gap-3">
                           <div className="flex-shrink-0 w-10 text-center">
                             <div className={cn("text-sm font-bold", h.risk_score >= 70 ? 'text-red-400' : h.risk_score >= 40 ? 'text-amber-400' : 'text-emerald-400')}>
@@ -375,7 +370,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1.5">
                     {data.forecast.predictions.map((p, i) => (
-                      <div key={i} className="p-2.5 rounded bg-white/[0.02] border border-white/[0.05]">
+                      <div key={i} className="p-2.5 bg-white/[0.02] border border-white/[0.05]">
                         <div className="flex items-center gap-2 mb-1">
                           <Badge variant="outline" className="text-[9px] bg-blue-500/10 text-blue-300 border-blue-500/20 px-1.5 py-0 h-4">
                             {p.timeframe}
@@ -410,7 +405,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1">
                     {data.forecast.stabilizing_factors.map((f, i) => (
-                      <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 rounded bg-emerald-500/[0.04] border border-emerald-500/10">
+                      <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 bg-emerald-500/[0.04] border border-emerald-500/10">
                         <span className="text-[10px] text-emerald-500 mt-0.5">◆</span>
                         <span className="text-[10px] text-gray-400 leading-relaxed">{f}</span>
                       </div>
@@ -428,7 +423,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div className="space-y-1">
                     {data.forecast.key_indicators.map((ind, i) => (
-                      <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 rounded bg-white/[0.02]">
+                      <div key={i} className="flex items-start gap-2 px-2.5 py-1.5 bg-white/[0.02]">
                         <span className="text-[10px] text-purple-400 mt-0.5">▸</span>
                         <span className="text-[10px] text-gray-400 leading-relaxed">{ind}</span>
                       </div>
@@ -439,7 +434,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
 
               {/* Analyst Notes */}
               {data.forecast.analyst_notes && (
-                <div className="p-3 rounded bg-white/[0.02] border border-white/[0.06] border-dashed">
+                <div className="p-3 bg-white/[0.02] border border-white/[0.06] border-dashed">
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <AlertTriangle className="w-3 h-3 text-gray-500" />
                     <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Analyst Notes</span>
@@ -453,9 +448,8 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                 <Button
                   size="sm"
                   onClick={generateForecast}
-                  className="h-7 text-[10px] bg-white/5 text-gray-500 border border-white/10 hover:bg-white/10"
+                  className="h-7 text-[10px] rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
                 >
-                  <BrainCircuit className="w-3 h-3 mr-1" />
                   Generate New Assessment
                 </Button>
               </div>
@@ -479,9 +473,8 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
               <Button
                 size="sm"
                 onClick={() => setActiveTab('generate')}
-                className="mt-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30"
+                className="mt-2 rounded-none bg-[#f2a547] text-black border border-[#f2a547] hover:bg-black hover:text-[#f2a547] transition-colors"
               >
-                <BrainCircuit className="w-4 h-4 mr-2" />
                 Generate First Forecast
               </Button>
             </div>
@@ -495,7 +488,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                   <div
                     key={f.id}
                     className={cn(
-                      "p-3 rounded border cursor-pointer transition-all hover:bg-white/[0.03]",
+                      "p-3 border cursor-pointer transition-all hover:bg-white/[0.03]",
                       selectedHistoryId === f.id ? "border-amber-500/40 bg-amber-500/5" : "border-white/[0.06] bg-white/[0.02]"
                     )}
                     onClick={() => viewHistoricalForecast(f)}
@@ -516,7 +509,7 @@ export function ThreatForecastPanel({ onClose }: { onClose: () => void }) {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={(e) => { e.stopPropagation(); deleteForecast(f.id); }}
-                          className="p-1 rounded hover:bg-red-500/20 text-gray-600 hover:text-red-400 transition-colors"
+                          className="p-1 hover:bg-red-500/20 text-gray-600 hover:text-red-400 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
