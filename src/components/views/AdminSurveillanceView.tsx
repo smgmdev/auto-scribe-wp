@@ -1001,7 +1001,7 @@ export function AdminSurveillanceView() {
 
             {mobileSliderTab === 'feed' ? (
               <div className="flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.08)_transparent]">
-                <div className="p-2.5 space-y-1.5">
+                <div className="p-0 space-y-0">
                   {feedEvents.map((event, i) => (
                     <div
                       key={i}
