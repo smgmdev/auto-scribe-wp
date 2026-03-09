@@ -88,9 +88,7 @@ const QUICK_SCENARIOS = [
 ];
 
 export function ConflictSimulatorPanel() {
-  const { loading, result, runId, setLoading, setResult, setRunId, clear } = useSimulatorStore();
-  const [countryA, setCountryA] = useState('');
-  const [countryB, setCountryB] = useState('');
+  const { loading, result, runId, countryA, countryB, startedAt, setLoading, setResult, setRunId, setCountryA, setCountryB, setStartedAt, clear } = useSimulatorStore();
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
   const [showDropdownA, setShowDropdownA] = useState(false);
