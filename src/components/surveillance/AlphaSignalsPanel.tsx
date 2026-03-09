@@ -383,7 +383,7 @@ export function AlphaSignalsPanel() {
                     >
                       {/* Compact row */}
                       <div className="px-3 py-2.5">
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-[18px] rounded-sm font-mono font-bold tracking-wider", dir.bg, dir.color)}>
                               <DirIcon className="w-2.5 h-2.5 mr-0.5" />
