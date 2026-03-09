@@ -903,7 +903,6 @@ export function AdminSurveillanceView() {
             </div>
           </div>
         </div>
-        </div>
 
         {/* Main content */}
         <div className="flex-1 flex overflow-hidden items-center justify-center">
