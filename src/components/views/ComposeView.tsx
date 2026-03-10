@@ -388,9 +388,7 @@ export function ComposeView() {
       !hasLocalSEO &&
       editingArticle?.wpPostId && 
       currentSite && 
-      currentSite.id === editingArticle.publishedTo &&
-      currentSite.username && 
-      currentSite.applicationPassword
+      currentSite.id === editingArticle.publishedTo
     ) {
       console.log('[ComposeView] Fetching SEO data for post:', editingArticle.wpPostId, 'from site:', currentSite.name);
       setIsLoadingSEO(true);
