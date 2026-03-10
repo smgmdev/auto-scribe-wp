@@ -207,6 +207,14 @@ export function PodcastStudio() {
     setDialogue([]);
     setCurrentTurnIndex(-1);
 
+    // Initialize AudioContext on user gesture to avoid suspension
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext();
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
+
     try {
       const script = await generateScript();
       if (!script || script.length === 0) {
