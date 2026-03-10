@@ -307,7 +307,7 @@ export function PodcastStudio() {
   return (
     <div className="max-w-6xl mx-auto">
       {/* Topic Input Bar */}
-      <div className="mb-8 flex gap-3">
+      <div className="mb-6 flex gap-3">
         <Input
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
