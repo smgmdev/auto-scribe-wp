@@ -53,50 +53,39 @@ function AvatarModel({ modelPath, isSpeaking, audioLevel, color, isActive }: Ava
     a.smoothAudio = THREE.MathUtils.lerp(a.smoothAudio, audioLevel, delta * 10);
     a.smoothGesture = THREE.MathUtils.lerp(a.smoothGesture, isSpeaking ? 1 : 0, delta * 4);
 
-    // Update phases
-    a.breathPhase += delta * 1.5;
-    a.swayPhase += delta * 0.7;
-    a.bobPhase += delta * (isSpeaking ? 3.0 + a.smoothAudio * 2 : 0.5);
-    a.tiltPhase += delta * (isSpeaking ? 2.0 + a.smoothAudio : 0.3);
-    a.gesturePhase += delta * (isSpeaking ? 2.5 : 0.2);
+    // Update phases — faster speeds for visible motion
+    a.breathPhase += delta * 2.0;
+    a.swayPhase += delta * 1.2;
+    a.bobPhase += delta * (isSpeaking ? 5.0 + a.smoothAudio * 4 : 1.0);
+    a.tiltPhase += delta * (isSpeaking ? 3.5 + a.smoothAudio * 2 : 0.6);
+    a.gesturePhase += delta * (isSpeaking ? 4.0 : 0.4);
 
     const g = groupRef.current;
 
-    // === IDLE: gentle breathing (scale Y) + sway ===
-    const breathScale = 1 + Math.sin(a.breathPhase) * 0.008;
-    const idleSwayZ = Math.sin(a.swayPhase) * 0.015;
+    // === IDLE: visible breathing + sway (10x amplified) ===
+    const breathScale = 1 + Math.sin(a.breathPhase) * 0.04;
+    const idleSwayZ = Math.sin(a.swayPhase) * 0.06;
+    const idleBobY = Math.sin(a.breathPhase * 0.8) * 0.03;
 
-    // === SPEAKING: energetic movement ===
-    const speakBobY = a.smoothGesture * Math.sin(a.bobPhase) * 0.04 * a.smoothAudio;
-    const speakSwayZ = a.smoothGesture * Math.sin(a.gesturePhase * 0.7) * 0.05 * a.smoothAudio;
-    const speakLeanX = a.smoothGesture * Math.sin(a.gesturePhase * 0.5) * 0.03 * a.smoothAudio;
-    const speakTurnY = a.smoothGesture * Math.sin(a.tiltPhase * 0.4) * 0.06 * a.smoothAudio;
+    // === SPEAKING: dramatic energetic movement ===
+    const speakBobY = a.smoothGesture * Math.sin(a.bobPhase) * 0.15 * Math.max(a.smoothAudio, 0.3);
+    const speakSwayZ = a.smoothGesture * Math.sin(a.gesturePhase * 0.7) * 0.2 * Math.max(a.smoothAudio, 0.2);
+    const speakLeanX = a.smoothGesture * Math.sin(a.gesturePhase * 0.5) * 0.12 * Math.max(a.smoothAudio, 0.2);
+    const speakTurnY = a.smoothGesture * Math.sin(a.tiltPhase * 0.4) * 0.25 * Math.max(a.smoothAudio, 0.2);
 
-    // Audio-reactive scale pulse
-    const audioPulse = isSpeaking ? 1 + a.smoothAudio * 0.03 : 1;
+    // Audio-reactive scale pulse (very visible)
+    const audioPulse = isSpeaking ? 1 + Math.max(a.smoothAudio, 0.2) * 0.08 : 1;
 
     // Apply transforms
-    g.position.y = speakBobY;
+    g.position.y = idleBobY + speakBobY;
     g.rotation.z = idleSwayZ + speakSwayZ;
-    g.rotation.x = speakLeanX;
+    g.rotation.x = speakLeanX + (isSpeaking ? 0 : Math.sin(a.swayPhase * 0.5) * 0.02);
     g.rotation.y = speakTurnY;
     g.scale.set(
       audioPulse,
       breathScale * audioPulse,
       audioPulse
     );
-
-    // Upper body (if we split the model, animate top half more)
-    if (upperRef.current) {
-      upperRef.current.rotation.x = a.smoothGesture * Math.sin(a.gesturePhase * 1.3) * 0.06 * a.smoothAudio;
-      upperRef.current.rotation.z = a.smoothGesture * Math.sin(a.gesturePhase * 0.9) * 0.04 * a.smoothAudio;
-    }
-
-    // Head extra movement
-    if (headRef.current) {
-      headRef.current.rotation.x = a.smoothGesture * Math.sin(a.bobPhase * 1.5) * 0.08 * a.smoothAudio;
-      headRef.current.rotation.z = a.smoothGesture * Math.sin(a.tiltPhase * 1.2) * 0.06 * a.smoothAudio;
-    }
   });
 
   return (
