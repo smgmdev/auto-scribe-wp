@@ -110,7 +110,7 @@ function SupportChatWindow({ ticket, onClose }: { ticket: { id: string; subject:
   const chatWindowRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFocusedRef = useRef(false);
   const hasPendingReadRef = useRef(false);
 

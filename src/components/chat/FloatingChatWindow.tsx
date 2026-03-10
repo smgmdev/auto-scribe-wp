@@ -503,7 +503,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const localPositionRef = useRef(localPosition);
   const chatWindowRef = useRef<HTMLDivElement>(null);
   
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);

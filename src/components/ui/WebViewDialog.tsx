@@ -28,7 +28,7 @@ export function WebViewDialog({ open, onOpenChange, url, title = 'Website', down
   const [status, setStatus] = useState<'loading' | 'loaded' | 'blocked'>('loading');
   const [viewportMode, setViewportMode] = useState<ViewportMode>('fullscreen');
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadedRef = useRef<boolean>(false);
 
   const normalizedUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
