@@ -160,36 +160,38 @@ export function PodcastStudio() {
   }, []);
 
   // Play a single audio blob
-  const playAudio = useCallback((blob: Blob, onEnd: () => void) => {
+  const playAudio = useCallback((blob: Blob) => {
     return new Promise<void>((resolve) => {
       const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
+      const audio = new Audio();
+      audio.crossOrigin = 'anonymous';
+      audio.preload = 'auto';
       audio.muted = muted;
+      audio.src = url;
       audioRef.current = audio;
 
-      let analyserStarted = false;
-
-      audio.onplay = () => {
-        if (!analyserStarted) {
-          startAnalyser(audio);
-          analyserStarted = true;
-        }
+      audio.oncanplaythrough = () => {
+        startAnalyser(audio);
+        audio.play().catch((err) => {
+          console.error('Audio play failed:', err);
+          stopAnalyser();
+          URL.revokeObjectURL(url);
+          resolve();
+        });
       };
 
       audio.onended = () => {
         stopAnalyser();
         URL.revokeObjectURL(url);
-        onEnd();
         resolve();
       };
 
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.error('Audio error:', e);
         stopAnalyser();
         URL.revokeObjectURL(url);
         resolve();
       };
-
-      audio.play().catch(() => resolve());
     });
   }, [muted, startAnalyser, stopAnalyser]);
 
