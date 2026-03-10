@@ -6,6 +6,9 @@ import type { Article, Headline, FeaturedImage, ArticleTone } from '@/types';
 
 const ARTICLES_PER_PAGE = 15;
 
+// Filter to exclude mace/telegram auto-generated articles while preserving NULL source_headline
+const SOURCE_HEADLINE_FILTER = 'source_headline.is.null,and(source_headline.not.cs.{"source":"mace"},source_headline.not.cs.{"source":"mace-telegram"})';
+
 interface DBArticle {
   id: string;
   user_id: string;
