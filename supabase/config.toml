@@ -219,3 +219,6 @@ verify_jwt = false
 
 [functions.alpha-signals]
 verify_jwt = false
+
+[functions.ai-podcast-conversation]
+verify_jwt = false
