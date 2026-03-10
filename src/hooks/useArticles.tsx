@@ -361,8 +361,7 @@ export function useArticles() {
       .from('articles')
       .select('*')
       .match({ ...baseFilter, status })
-      .not('source_headline', 'cs', '{"source":"mace"}')
-      .not('source_headline', 'cs', '{"source":"mace-telegram"}')
+      .or(SOURCE_HEADLINE_FILTER)
       .order('created_at', { ascending: false })
       .range(offset, offset + ARTICLES_PER_PAGE - 1);
 
