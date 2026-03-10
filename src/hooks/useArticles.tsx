@@ -117,8 +117,7 @@ export function useArticles() {
         .from('articles')
         .select('*')
         .match({ ...baseFilter, status: 'draft' })
-        .not('source_headline', 'cs', '{"source":"mace"}')
-        .not('source_headline', 'cs', '{"source":"mace-telegram"}')
+        .or(SOURCE_HEADLINE_FILTER)
         .order('created_at', { ascending: false })
         .range(0, ARTICLES_PER_PAGE - 1),
     ]);
