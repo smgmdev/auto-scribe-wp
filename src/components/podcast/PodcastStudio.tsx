@@ -28,6 +28,8 @@ export function PodcastStudio() {
   const [audioLevel, setAudioLevel] = useState(0);
   const [muted, setMuted] = useState(false);
   const [statusText, setStatusText] = useState('Ready to go live');
+  const [novaAvatar, setNovaAvatar] = useState<string | null>(null);
+  const [rexAvatar, setRexAvatar] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
