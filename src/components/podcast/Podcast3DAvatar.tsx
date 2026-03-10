@@ -86,6 +86,7 @@ function AvatarModel({ modelPath, isSpeaking, audioLevel, color, isActive }: Ava
       breathScale * audioPulse,
       audioPulse
     );
+  });
 
   return (
     <group ref={groupRef}>
