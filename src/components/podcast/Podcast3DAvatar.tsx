@@ -1,6 +1,6 @@
-import { useRef, useMemo, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, OrbitControls, Environment, ContactShadows } from '@react-three/drei';
+import { useRef, useMemo, Suspense } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useGLTF, Environment, ContactShadows, Center } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface AvatarModelProps {
@@ -14,173 +14,110 @@ interface AvatarModelProps {
 function AvatarModel({ modelPath, isSpeaking, audioLevel, color, isActive }: AvatarModelProps) {
   const { scene } = useGLTF(modelPath);
   const groupRef = useRef<THREE.Group>(null);
-  const clonedScene = useMemo(() => scene.clone(true), [scene]);
-  
-  // Store animation state
-  const animState = useRef({
-    headTilt: 0,
-    bodyLean: 0,
-    gesturePhase: 0,
-    breathPhase: 0,
-    idleSwayPhase: Math.random() * Math.PI * 2,
-    lastAudioLevel: 0,
-    smoothAudioLevel: 0,
-    gestureIntensity: 0,
-    neckBone: null as THREE.Bone | null,
-    spineBone: null as THREE.Bone | null,
-    leftArmBone: null as THREE.Bone | null,
-    rightArmBone: null as THREE.Bone | null,
-    headBone: null as THREE.Bone | null,
-    bonesFound: false,
+  const upperRef = useRef<THREE.Group>(null);
+  const headRef = useRef<THREE.Group>(null);
+
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone(true);
+    // Compute bounding box to normalize size
+    const box = new THREE.Box3().setFromObject(clone);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 2.2 / maxDim; // normalize to ~2.2 units tall
+    clone.scale.multiplyScalar(scale);
+    // Center horizontally, sit on ground
+    const scaledBox = new THREE.Box3().setFromObject(clone);
+    const center = scaledBox.getCenter(new THREE.Vector3());
+    clone.position.x -= center.x;
+    clone.position.z -= center.z;
+    clone.position.y -= scaledBox.min.y;
+    return clone;
+  }, [scene]);
+
+  // Animation state
+  const anim = useRef({
+    breathPhase: Math.random() * Math.PI * 2,
+    swayPhase: Math.random() * Math.PI * 2,
+    gesturePhase: Math.random() * Math.PI * 2,
+    smoothAudio: 0,
+    smoothGesture: 0,
+    bobPhase: 0,
+    tiltPhase: 0,
   });
-
-  // Find bones in the model
-  useEffect(() => {
-    const state = animState.current;
-    const boneNames = {
-      head: ['head', 'Head', 'mixamorigHead', 'Bip001_Head', 'J_Bip_C_Head'],
-      neck: ['neck', 'Neck', 'mixamorigNeck', 'Bip001_Neck', 'J_Bip_C_Neck'],
-      spine: ['spine', 'Spine', 'mixamorigSpine', 'Bip001_Spine', 'J_Bip_C_Spine', 'spine1', 'Spine1', 'mixamorigSpine1'],
-      leftArm: ['leftarm', 'LeftArm', 'mixamorigLeftArm', 'Bip001_L_UpperArm', 'J_Bip_L_UpperArm', 'Left arm', 'Left_arm'],
-      rightArm: ['rightarm', 'RightArm', 'mixamorigRightArm', 'Bip001_R_UpperArm', 'J_Bip_R_UpperArm', 'Right arm', 'Right_arm'],
-    };
-
-    const findBone = (names: string[]): THREE.Bone | null => {
-      let found: THREE.Bone | null = null;
-      clonedScene.traverse((child) => {
-        if (found) return;
-        if (child instanceof THREE.Bone) {
-          const childName = child.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-          for (const name of names) {
-            if (childName.includes(name.toLowerCase().replace(/[^a-z0-9]/g, ''))) {
-              found = child;
-              return;
-            }
-          }
-        }
-      });
-      return found;
-    };
-
-    state.headBone = findBone(boneNames.head);
-    state.neckBone = findBone(boneNames.neck);
-    state.spineBone = findBone(boneNames.spine);
-    state.leftArmBone = findBone(boneNames.leftArm);
-    state.rightArmBone = findBone(boneNames.rightArm);
-    state.bonesFound = !!(state.headBone || state.spineBone);
-  }, [clonedScene]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-    const s = animState.current;
-    const t = performance.now() / 1000;
+    const a = anim.current;
 
-    // Smooth audio level
-    s.smoothAudioLevel = THREE.MathUtils.lerp(s.smoothAudioLevel, audioLevel, delta * 8);
-    s.gestureIntensity = THREE.MathUtils.lerp(s.gestureIntensity, isSpeaking ? 1 : 0, delta * 3);
+    // Smooth audio
+    a.smoothAudio = THREE.MathUtils.lerp(a.smoothAudio, audioLevel, delta * 10);
+    a.smoothGesture = THREE.MathUtils.lerp(a.smoothGesture, isSpeaking ? 1 : 0, delta * 4);
 
-    // Phases
-    s.breathPhase += delta * 1.2;
-    s.idleSwayPhase += delta * 0.5;
-    s.gesturePhase += delta * (isSpeaking ? 2.5 + s.smoothAudioLevel * 2 : 0.3);
+    // Update phases
+    a.breathPhase += delta * 1.5;
+    a.swayPhase += delta * 0.7;
+    a.bobPhase += delta * (isSpeaking ? 3.0 + a.smoothAudio * 2 : 0.5);
+    a.tiltPhase += delta * (isSpeaking ? 2.0 + a.smoothAudio : 0.3);
+    a.gesturePhase += delta * (isSpeaking ? 2.5 : 0.2);
 
-    const group = groupRef.current;
+    const g = groupRef.current;
 
-    // === Whole body: idle breathing + sway ===
-    const breathY = Math.sin(s.breathPhase) * 0.005;
-    const idleSway = Math.sin(s.idleSwayPhase) * 0.008;
-    group.position.y = breathY;
-    
-    // Body lean when speaking
-    const speakLean = isSpeaking ? Math.sin(t * 1.5) * 0.03 * s.smoothAudioLevel : 0;
-    group.rotation.z = idleSway + speakLean;
-    
-    // Subtle forward lean when speaking
-    group.rotation.x = isSpeaking ? Math.sin(t * 0.8) * 0.02 * s.gestureIntensity : 0;
+    // === IDLE: gentle breathing (scale Y) + sway ===
+    const breathScale = 1 + Math.sin(a.breathPhase) * 0.008;
+    const idleSwayZ = Math.sin(a.swayPhase) * 0.015;
 
-    // === Bone-level animations ===
-    if (s.headBone) {
-      // Head nod/tilt when speaking
-      const headNodX = isSpeaking 
-        ? Math.sin(s.gesturePhase * 1.3) * 0.08 * s.smoothAudioLevel
-        : Math.sin(t * 0.7) * 0.02;
-      const headTiltZ = isSpeaking
-        ? Math.sin(s.gesturePhase * 0.7) * 0.06 * s.smoothAudioLevel
-        : Math.sin(t * 0.4) * 0.015;
-      const headTurnY = isSpeaking
-        ? Math.sin(s.gesturePhase * 0.5) * 0.05 * s.gestureIntensity
-        : 0;
+    // === SPEAKING: energetic movement ===
+    const speakBobY = a.smoothGesture * Math.sin(a.bobPhase) * 0.04 * a.smoothAudio;
+    const speakSwayZ = a.smoothGesture * Math.sin(a.gesturePhase * 0.7) * 0.05 * a.smoothAudio;
+    const speakLeanX = a.smoothGesture * Math.sin(a.gesturePhase * 0.5) * 0.03 * a.smoothAudio;
+    const speakTurnY = a.smoothGesture * Math.sin(a.tiltPhase * 0.4) * 0.06 * a.smoothAudio;
 
-      s.headBone.rotation.x = THREE.MathUtils.lerp(s.headBone.rotation.x, headNodX, delta * 6);
-      s.headBone.rotation.z = THREE.MathUtils.lerp(s.headBone.rotation.z, headTiltZ, delta * 5);
-      s.headBone.rotation.y = THREE.MathUtils.lerp(s.headBone.rotation.y, headTurnY, delta * 4);
+    // Audio-reactive scale pulse
+    const audioPulse = isSpeaking ? 1 + a.smoothAudio * 0.03 : 1;
+
+    // Apply transforms
+    g.position.y = speakBobY;
+    g.rotation.z = idleSwayZ + speakSwayZ;
+    g.rotation.x = speakLeanX;
+    g.rotation.y = speakTurnY;
+    g.scale.set(
+      audioPulse,
+      breathScale * audioPulse,
+      audioPulse
+    );
+
+    // Upper body (if we split the model, animate top half more)
+    if (upperRef.current) {
+      upperRef.current.rotation.x = a.smoothGesture * Math.sin(a.gesturePhase * 1.3) * 0.06 * a.smoothAudio;
+      upperRef.current.rotation.z = a.smoothGesture * Math.sin(a.gesturePhase * 0.9) * 0.04 * a.smoothAudio;
     }
 
-    if (s.neckBone) {
-      s.neckBone.rotation.x = isSpeaking
-        ? Math.sin(s.gesturePhase * 0.9) * 0.04 * s.smoothAudioLevel
-        : Math.sin(t * 0.5) * 0.01;
-    }
-
-    if (s.spineBone) {
-      // Spine sway for body language
-      s.spineBone.rotation.z = isSpeaking
-        ? Math.sin(s.gesturePhase * 0.6) * 0.04 * s.gestureIntensity
-        : Math.sin(t * 0.3) * 0.008;
-      s.spineBone.rotation.y = isSpeaking
-        ? Math.sin(s.gesturePhase * 0.4) * 0.03 * s.gestureIntensity
-        : 0;
-    }
-
-    // Arm gestures when speaking
-    if (s.leftArmBone && isSpeaking) {
-      s.leftArmBone.rotation.z = THREE.MathUtils.lerp(
-        s.leftArmBone.rotation.z,
-        Math.sin(s.gesturePhase * 1.2) * 0.15 * s.smoothAudioLevel,
-        delta * 4
-      );
-      s.leftArmBone.rotation.x = THREE.MathUtils.lerp(
-        s.leftArmBone.rotation.x,
-        Math.sin(s.gesturePhase * 0.8) * 0.1 * s.smoothAudioLevel,
-        delta * 3
-      );
-    }
-
-    if (s.rightArmBone && isSpeaking) {
-      s.rightArmBone.rotation.z = THREE.MathUtils.lerp(
-        s.rightArmBone.rotation.z,
-        Math.sin(s.gesturePhase * 1.1 + 1) * -0.15 * s.smoothAudioLevel,
-        delta * 4
-      );
-      s.rightArmBone.rotation.x = THREE.MathUtils.lerp(
-        s.rightArmBone.rotation.x,
-        Math.sin(s.gesturePhase * 0.9 + 0.5) * 0.1 * s.smoothAudioLevel,
-        delta * 3
-      );
-    }
-
-    // Scale pulse on strong audio
-    const scalePulse = isSpeaking ? 1 + s.smoothAudioLevel * 0.02 : 1;
-    group.scale.setScalar(THREE.MathUtils.lerp(group.scale.x, scalePulse, delta * 5));
-
-    // Opacity/visibility for inactive
-    if (!isActive) {
-      group.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          const mat = child.material as THREE.MeshStandardMaterial;
-          if (mat.opacity !== undefined) {
-            mat.transparent = true;
-            mat.opacity = THREE.MathUtils.lerp(mat.opacity, 0.5, delta * 3);
-          }
-        }
-      });
+    // Head extra movement
+    if (headRef.current) {
+      headRef.current.rotation.x = a.smoothGesture * Math.sin(a.bobPhase * 1.5) * 0.08 * a.smoothAudio;
+      headRef.current.rotation.z = a.smoothGesture * Math.sin(a.tiltPhase * 1.2) * 0.06 * a.smoothAudio;
     }
   });
 
   return (
     <group ref={groupRef}>
-      <primitive object={clonedScene} scale={1} />
+      <primitive object={clonedScene} />
     </group>
+  );
+}
+
+function LoadingPlaceholder({ color }: { color: string }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  useFrame((_, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += delta * 2;
+    }
+  });
+  return (
+    <mesh ref={meshRef} position={[0, 1, 0]}>
+      <octahedronGeometry args={[0.5, 0]} />
+      <meshStandardMaterial color={color} wireframe transparent opacity={0.5} />
+    </mesh>
   );
 }
 
@@ -205,39 +142,47 @@ export function Podcast3DAvatar({ name, modelPath, isSpeaking, isActive, audioLe
       />
 
       {/* 3D Canvas */}
-      <div className="relative w-[220px] h-[280px] rounded-2xl overflow-hidden" style={{
+      <div className="relative w-[220px] h-[300px] rounded-2xl overflow-hidden" style={{
         boxShadow: isSpeaking ? `0 0 40px ${color}40, 0 0 80px ${color}20` : 'none',
       }}>
         <Canvas
-          camera={{ position: [0, 1.2, 2.5], fov: 35 }}
+          camera={{ position: [0, 1.2, 3.5], fov: 30 }}
           gl={{ antialias: true, alpha: true }}
           style={{ background: 'transparent' }}
         >
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[3, 5, 3]} intensity={1} castShadow />
-          <directionalLight position={[-2, 3, -1]} intensity={0.3} color="#8b9cf6" />
+          <ambientLight intensity={0.7} />
+          <directionalLight position={[3, 5, 3]} intensity={1.2} />
+          <directionalLight position={[-2, 3, -1]} intensity={0.4} color="#a0a0ff" />
           
-          {/* Colored rim light based on speaker */}
+          {/* Colored accent light */}
           <pointLight
-            position={[0, 1.5, -1]}
-            intensity={isSpeaking ? 2 : 0.5}
+            position={[0, 2, -1.5]}
+            intensity={isSpeaking ? 3 : 0.8}
             color={color}
-            distance={5}
+            distance={6}
+          />
+          <pointLight
+            position={[-1.5, 1, 1]}
+            intensity={isSpeaking ? 1.5 : 0.3}
+            color={color}
+            distance={4}
           />
 
-          <AvatarModel
-            modelPath={modelPath}
-            isSpeaking={isSpeaking}
-            audioLevel={audioLevel}
-            color={color}
-            isActive={isActive}
-          />
+          <Suspense fallback={<LoadingPlaceholder color={color} />}>
+            <AvatarModel
+              modelPath={modelPath}
+              isSpeaking={isSpeaking}
+              audioLevel={audioLevel}
+              color={color}
+              isActive={isActive}
+            />
+          </Suspense>
 
           <ContactShadows
-            position={[0, -0.5, 0]}
-            opacity={0.4}
-            scale={4}
-            blur={2}
+            position={[0, 0, 0]}
+            opacity={0.35}
+            scale={5}
+            blur={2.5}
           />
 
           <Environment preset="city" />
@@ -245,7 +190,7 @@ export function Podcast3DAvatar({ name, modelPath, isSpeaking, isActive, audioLe
 
         {/* Speaking indicator overlay */}
         {isSpeaking && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
             {[0, 1, 2, 3, 4].map((i) => (
               <div
                 key={i}
@@ -277,6 +222,6 @@ export function Podcast3DAvatar({ name, modelPath, isSpeaking, isActive, audioLe
   );
 }
 
-// Preload models
+// Preload default models
 useGLTF.preload('/models/fox_girl.glb');
 useGLTF.preload('/models/dude.glb');
