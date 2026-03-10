@@ -74,7 +74,7 @@ export function ArticlesView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Article[] | null>(null);
   const [searching, setSearching] = useState(false);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [deletingTitle, setDeletingTitle] = useState<string>('');
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
