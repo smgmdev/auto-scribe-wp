@@ -262,7 +262,7 @@ export function FloatingChatWindow({ chat, onFocus }: FloatingChatWindowProps) {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [sendCooldown, setSendCooldown] = useState(0);
-  const cooldownRef = useRef<NodeJS.Timeout | null>(null);
+  const cooldownRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [replyToMessage, setReplyToMessage] = useState<ServiceMessage | null>(null);
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [senderId, setSenderId] = useState<string | null>(null);
