@@ -32,6 +32,19 @@ export function PodcastStudio() {
   const [statusText, setStatusText] = useState('Ready to go live');
   const [novaAvatar, setNovaAvatar] = useState<string | null>(null);
   const [rexAvatar, setRexAvatar] = useState<string | null>(null);
+  const [use3D, setUse3D] = useState(true);
+  const [novaModel, setNovaModel] = useState('/models/fox_girl.glb');
+  const [rexModel, setRexModel] = useState('/models/dude.glb');
+
+  const AVAILABLE_MODELS = [
+    { value: '/models/fox_girl.glb', label: 'Fox Girl' },
+    { value: '/models/dude.glb', label: 'Dude' },
+    { value: '/models/anime_girl.glb', label: 'Anime Girl' },
+    { value: '/models/spiderman.glb', label: 'Spiderman' },
+    { value: '/models/winged_angel.glb', label: 'Winged Angel' },
+    { value: '/models/ai.glb', label: 'AI' },
+    { value: '/models/xiexie_shanghai.glb', label: 'Xiexie Shanghai' },
+  ];
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
