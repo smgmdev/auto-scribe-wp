@@ -407,7 +407,7 @@ export function ComposeView() {
         setIsLoadingSEO(false);
       });
     }
-  }, [currentSite?.id, editingArticle?.wpPostId, editingArticle?.publishedTo, currentSite?.username, currentSite?.applicationPassword, editingArticle?.focusKeyword, editingArticle?.metaDescription]);
+  }, [currentSite?.id, editingArticle?.wpPostId, editingArticle?.publishedTo, editingArticle?.focusKeyword, editingArticle?.metaDescription]);
 
   // Don't clear editingArticle on unmount - it causes issues with remounting
   // The article should be cleared when user explicitly creates a new article
