@@ -394,8 +394,7 @@ export function useArticles() {
       .select('*')
       .ilike('title', `%${query}%`)
       .eq('status', status)
-      .not('source_headline', 'cs', '{"source":"mace"}')
-      .not('source_headline', 'cs', '{"source":"mace-telegram"}')
+      .or(SOURCE_HEADLINE_FILTER)
       .order('created_at', { ascending: false })
       .limit(50);
 
