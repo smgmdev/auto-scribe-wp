@@ -139,6 +139,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
               {isAdmin && (
                 <li><button onClick={() => navigate('/ai-influencer-podcast')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>AI Influencer Podcast</button></li>
               )}
+            </ul>
           </div>
           
           {/* For Business */}
