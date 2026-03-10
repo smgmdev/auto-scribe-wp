@@ -32,7 +32,7 @@ export default function AIInfluencerPodcast() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#1d1d1f]/95 backdrop-blur-xl border-b border-white/10">
         <div className="container mx-auto px-4 h-12 flex items-center">
-          <HeaderLogo />
+          <HeaderLogo src={amblack} invert />
         </div>
       </header>
 
