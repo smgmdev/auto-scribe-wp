@@ -79,8 +79,7 @@ export function useArticles() {
         .from('articles')
         .select('id', { count: 'exact', head: true })
         .match({ ...baseQuery, status: 'published' })
-        .not('source_headline', 'cs', '{"source":"mace"}')
-        .not('source_headline', 'cs', '{"source":"mace-telegram"}'),
+        .or(SOURCE_HEADLINE_FILTER),
       supabase
         .from('articles')
         .select('id', { count: 'exact', head: true })
