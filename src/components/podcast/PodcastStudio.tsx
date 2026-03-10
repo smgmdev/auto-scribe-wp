@@ -375,6 +375,9 @@ export function PodcastStudio() {
           audioLevel={currentSpeaker === 'Rex' ? audioLevel : 0}
           color={REX_COLOR}
           gender="male"
+          avatarUrl={rexAvatar}
+          onAvatarChange={setRexAvatar}
+          editable={state === 'idle'}
         />
       </div>
 
