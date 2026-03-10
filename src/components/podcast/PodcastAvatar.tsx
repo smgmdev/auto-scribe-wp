@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { Camera, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface PodcastAvatarProps {
   name: string;
@@ -7,6 +10,9 @@ interface PodcastAvatarProps {
   audioLevel: number; // 0-1
   color: string; // accent color hsl
   gender: 'female' | 'male';
+  avatarUrl?: string | null;
+  onAvatarChange?: (url: string | null) => void;
+  editable?: boolean;
 }
 
 export function PodcastAvatar({ name, isSpeaking, isActive, audioLevel, color, gender }: PodcastAvatarProps) {
