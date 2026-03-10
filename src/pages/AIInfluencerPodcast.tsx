@@ -27,7 +27,6 @@ export default function AIInfluencerPodcast() {
       <SEOHead
         title="AI Influencer Podcast | Arcana Mace"
         description="Live AI-powered podcast featuring two AI influencers in real-time conversation with animated avatars."
-        noIndex
       />
 
       {/* Header */}
