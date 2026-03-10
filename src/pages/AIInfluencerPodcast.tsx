@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Footer } from '@/components/layout/Footer';
 import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { Podcast } from 'lucide-react';
+import amblack from '@/assets/amblack.png';
 
 export default function AIInfluencerPodcast() {
   const { user, isAdmin, loading } = useAuth();
