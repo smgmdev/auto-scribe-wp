@@ -345,6 +345,9 @@ export function PodcastStudio() {
           audioLevel={currentSpeaker === 'Nova' ? audioLevel : 0}
           color={NOVA_COLOR}
           gender="female"
+          avatarUrl={novaAvatar}
+          onAvatarChange={setNovaAvatar}
+          editable={state === 'idle'}
         />
         
         {/* VS / Live indicator in center */}
