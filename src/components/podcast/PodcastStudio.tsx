@@ -230,7 +230,7 @@ export function PodcastStudio() {
         if (!audioBlob || abortRef.current) break;
 
         // Play audio
-        await playAudio(audioBlob, () => {});
+        await playAudio(audioBlob);
 
         // Brief pause between turns
         if (i < script.length - 1 && !abortRef.current) {
