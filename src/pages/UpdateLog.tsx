@@ -18,6 +18,15 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 
 const updates = [
   {
+    date: 'March 10, 2026',
+    title: 'Article Editor & Content Display Fixes',
+    changes: [
+      'Fixed an issue where articles with certain metadata configurations were not appearing in the Articles view after refresh',
+      'SEO settings, categories, and tags now load correctly for all connected sites when editing published articles — previously some sites failed to fetch due to unnecessary client-side credential checks',
+      'Improved article filtering logic to properly handle articles without source metadata, ensuring all user-created content is always visible',
+    ],
+  },
+  {
     date: 'March 9, 2026',
     title: 'Session Stability & Market Signals Refinements',
     changes: [
