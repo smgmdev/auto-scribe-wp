@@ -15,8 +15,45 @@ interface PodcastAvatarProps {
   editable?: boolean;
 }
 
-export function PodcastAvatar({ name, isSpeaking, isActive, audioLevel, color, gender }: PodcastAvatarProps) {
+export function PodcastAvatar({ name, isSpeaking, isActive, audioLevel, color, gender, avatarUrl, onAvatarChange, editable = false }: PodcastAvatarProps) {
   const [blinkOpen, setBlinkOpen] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${name.toLowerCase()}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('podcast-avatars').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('podcast-avatars').getPublicUrl(path);
+      onAvatarChange?.(publicUrl);
+      toast.success(`${name} avatar updated`);
+    } catch (err) {
+      console.error('Upload error:', err);
+      toast.error('Failed to upload avatar');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemove = () => {
+    onAvatarChange?.(null);
+    toast.success(`${name} avatar removed`);
+  };
 
   // Random blink effect
   useEffect(() => {
