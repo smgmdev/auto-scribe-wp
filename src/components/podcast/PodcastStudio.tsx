@@ -337,8 +337,61 @@ export function PodcastStudio() {
         )}
       </div>
 
+      {/* Avatar Mode & Model Selection */}
+      {state === 'idle' && (
+        <div className="mb-6 flex flex-wrap items-center gap-3 px-4">
+          <Button
+            size="sm"
+            variant={use3D ? 'default' : 'outline'}
+            onClick={() => setUse3D(true)}
+            className="gap-2 text-xs"
+          >
+            <Box className="w-3 h-3" /> 3D Models
+          </Button>
+          <Button
+            size="sm"
+            variant={!use3D ? 'default' : 'outline'}
+            onClick={() => setUse3D(false)}
+            className="gap-2 text-xs"
+          >
+            <User className="w-3 h-3" /> 2D Avatars
+          </Button>
+
+          {use3D && (
+            <>
+              <div className="flex items-center gap-2 ml-4">
+                <span className="text-xs text-white/40">Nova:</span>
+                <Select value={novaModel} onValueChange={setNovaModel}>
+                  <SelectTrigger className="w-[140px] h-8 text-xs bg-white/5 border-white/10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_MODELS.map(m => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/40">Rex:</span>
+                <Select value={rexModel} onValueChange={setRexModel}>
+                  <SelectTrigger className="w-[140px] h-8 text-xs bg-white/5 border-white/10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_MODELS.map(m => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Status bar */}
-      <div className="flex items-center justify-between mb-8 px-4">
+      <div className="flex items-center justify-between mb-6 px-4">
         <div className="flex items-center gap-3">
           {isLive && (
             <span className="flex items-center gap-2">
@@ -383,18 +436,29 @@ export function PodcastStudio() {
       </div>
 
       {/* Avatars Stage */}
-      <div className="flex items-center justify-center gap-16 md:gap-24 mb-10 min-h-[280px]">
-        <PodcastAvatar
-          name="Nova"
-          isSpeaking={currentSpeaker === 'Nova'}
-          isActive={isLive ? currentSpeaker === 'Nova' : state === 'idle'}
-          audioLevel={currentSpeaker === 'Nova' ? audioLevel : 0}
-          color={NOVA_COLOR}
-          gender="female"
-          avatarUrl={novaAvatar}
-          onAvatarChange={setNovaAvatar}
-          editable={state === 'idle'}
-        />
+      <div className="flex items-center justify-center gap-12 md:gap-20 mb-10 min-h-[320px]">
+        {use3D ? (
+          <Podcast3DAvatar
+            name="Nova"
+            modelPath={novaModel}
+            isSpeaking={currentSpeaker === 'Nova'}
+            isActive={isLive ? currentSpeaker === 'Nova' : state === 'idle'}
+            audioLevel={currentSpeaker === 'Nova' ? audioLevel : 0}
+            color={NOVA_COLOR}
+          />
+        ) : (
+          <PodcastAvatar
+            name="Nova"
+            isSpeaking={currentSpeaker === 'Nova'}
+            isActive={isLive ? currentSpeaker === 'Nova' : state === 'idle'}
+            audioLevel={currentSpeaker === 'Nova' ? audioLevel : 0}
+            color={NOVA_COLOR}
+            gender="female"
+            avatarUrl={novaAvatar}
+            onAvatarChange={setNovaAvatar}
+            editable={state === 'idle'}
+          />
+        )}
         
         {/* VS / Live indicator in center */}
         <div className="flex flex-col items-center gap-2">
@@ -414,17 +478,28 @@ export function PodcastStudio() {
           <span className="text-[10px] text-white/30 uppercase tracking-widest">Arcana Pulse</span>
         </div>
 
-        <PodcastAvatar
-          name="Rex"
-          isSpeaking={currentSpeaker === 'Rex'}
-          isActive={isLive ? currentSpeaker === 'Rex' : state === 'idle'}
-          audioLevel={currentSpeaker === 'Rex' ? audioLevel : 0}
-          color={REX_COLOR}
-          gender="male"
-          avatarUrl={rexAvatar}
-          onAvatarChange={setRexAvatar}
-          editable={state === 'idle'}
-        />
+        {use3D ? (
+          <Podcast3DAvatar
+            name="Rex"
+            modelPath={rexModel}
+            isSpeaking={currentSpeaker === 'Rex'}
+            isActive={isLive ? currentSpeaker === 'Rex' : state === 'idle'}
+            audioLevel={currentSpeaker === 'Rex' ? audioLevel : 0}
+            color={REX_COLOR}
+          />
+        ) : (
+          <PodcastAvatar
+            name="Rex"
+            isSpeaking={currentSpeaker === 'Rex'}
+            isActive={isLive ? currentSpeaker === 'Rex' : state === 'idle'}
+            audioLevel={currentSpeaker === 'Rex' ? audioLevel : 0}
+            color={REX_COLOR}
+            gender="male"
+            avatarUrl={rexAvatar}
+            onAvatarChange={setRexAvatar}
+            editable={state === 'idle'}
+          />
+        )}
       </div>
 
       {/* Transcript */}
