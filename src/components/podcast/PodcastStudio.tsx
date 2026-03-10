@@ -43,6 +43,8 @@ export function PodcastStudio() {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [currentTurnIndex]);
 
+  const sourceMapRef = useRef<WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>>(new WeakMap());
+
   // Audio level analyzer
   const startAnalyser = useCallback((audio: HTMLAudioElement) => {
     try {
@@ -50,7 +52,18 @@ export function PodcastStudio() {
         audioContextRef.current = new AudioContext();
       }
       const ctx = audioContextRef.current;
-      const source = ctx.createMediaElementSource(audio);
+      // Resume context if suspended (browser autoplay policy)
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      // createMediaElementSource can only be called once per element
+      let source = sourceMapRef.current.get(audio);
+      if (!source) {
+        source = ctx.createMediaElementSource(audio);
+        sourceMapRef.current.set(audio, source);
+      }
+
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
       source.connect(analyser);
@@ -67,6 +80,14 @@ export function PodcastStudio() {
       tick();
     } catch (e) {
       console.warn('Audio analyser not available:', e);
+      // Fallback: simulate audio level with a timer
+      const tick = () => {
+        if (audio && !audio.paused) {
+          setAudioLevel(0.3 + Math.random() * 0.5);
+          animFrameRef.current = requestAnimationFrame(tick);
+        }
+      };
+      tick();
     }
   }, []);
 
