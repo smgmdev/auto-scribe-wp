@@ -28,6 +28,8 @@ export function PodcastStudio() {
   const [audioLevel, setAudioLevel] = useState(0);
   const [muted, setMuted] = useState(false);
   const [statusText, setStatusText] = useState('Ready to go live');
+  const [novaAvatar, setNovaAvatar] = useState<string | null>(null);
+  const [rexAvatar, setRexAvatar] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -343,6 +345,9 @@ export function PodcastStudio() {
           audioLevel={currentSpeaker === 'Nova' ? audioLevel : 0}
           color={NOVA_COLOR}
           gender="female"
+          avatarUrl={novaAvatar}
+          onAvatarChange={setNovaAvatar}
+          editable={state === 'idle'}
         />
         
         {/* VS / Live indicator in center */}
@@ -370,6 +375,9 @@ export function PodcastStudio() {
           audioLevel={currentSpeaker === 'Rex' ? audioLevel : 0}
           color={REX_COLOR}
           gender="male"
+          avatarUrl={rexAvatar}
+          onAvatarChange={setRexAvatar}
+          editable={state === 'idle'}
         />
       </div>
 
