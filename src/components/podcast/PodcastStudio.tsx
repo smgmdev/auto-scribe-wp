@@ -1,11 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Play, Square, Loader2, Radio, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { Play, Square, Loader2, Radio, SkipForward, Volume2, VolumeX, Box, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { PodcastAvatar } from './PodcastAvatar';
+import { Podcast3DAvatar } from './Podcast3DAvatar';
 
 interface DialogueLine {
   speaker: 'Nova' | 'Rex';
