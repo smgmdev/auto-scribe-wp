@@ -43,6 +43,8 @@ export function PodcastStudio() {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [currentTurnIndex]);
 
+  const sourceMapRef = useRef<WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>>(new WeakMap());
+
   // Audio level analyzer
   const startAnalyser = useCallback((audio: HTMLAudioElement) => {
     try {
@@ -50,7 +52,18 @@ export function PodcastStudio() {
         audioContextRef.current = new AudioContext();
       }
       const ctx = audioContextRef.current;
-      const source = ctx.createMediaElementSource(audio);
+      // Resume context if suspended (browser autoplay policy)
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      // createMediaElementSource can only be called once per element
+      let source = sourceMapRef.current.get(audio);
+      if (!source) {
+        source = ctx.createMediaElementSource(audio);
+        sourceMapRef.current.set(audio, source);
+      }
+
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
       source.connect(analyser);
@@ -67,6 +80,14 @@ export function PodcastStudio() {
       tick();
     } catch (e) {
       console.warn('Audio analyser not available:', e);
+      // Fallback: simulate audio level with a timer
+      const tick = () => {
+        if (audio && !audio.paused) {
+          setAudioLevel(0.3 + Math.random() * 0.5);
+          animFrameRef.current = requestAnimationFrame(tick);
+        }
+      };
+      tick();
     }
   }, []);
 
@@ -139,36 +160,38 @@ export function PodcastStudio() {
   }, []);
 
   // Play a single audio blob
-  const playAudio = useCallback((blob: Blob, onEnd: () => void) => {
+  const playAudio = useCallback((blob: Blob) => {
     return new Promise<void>((resolve) => {
       const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
+      const audio = new Audio();
+      audio.crossOrigin = 'anonymous';
+      audio.preload = 'auto';
       audio.muted = muted;
+      audio.src = url;
       audioRef.current = audio;
 
-      let analyserStarted = false;
-
-      audio.onplay = () => {
-        if (!analyserStarted) {
-          startAnalyser(audio);
-          analyserStarted = true;
-        }
+      audio.oncanplaythrough = () => {
+        startAnalyser(audio);
+        audio.play().catch((err) => {
+          console.error('Audio play failed:', err);
+          stopAnalyser();
+          URL.revokeObjectURL(url);
+          resolve();
+        });
       };
 
       audio.onended = () => {
         stopAnalyser();
         URL.revokeObjectURL(url);
-        onEnd();
         resolve();
       };
 
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.error('Audio error:', e);
         stopAnalyser();
         URL.revokeObjectURL(url);
         resolve();
       };
-
-      audio.play().catch(() => resolve());
     });
   }, [muted, startAnalyser, stopAnalyser]);
 
@@ -183,6 +206,14 @@ export function PodcastStudio() {
     setState('generating');
     setDialogue([]);
     setCurrentTurnIndex(-1);
+
+    // Initialize AudioContext on user gesture to avoid suspension
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext();
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
 
     try {
       const script = await generateScript();
@@ -207,7 +238,7 @@ export function PodcastStudio() {
         if (!audioBlob || abortRef.current) break;
 
         // Play audio
-        await playAudio(audioBlob, () => {});
+        await playAudio(audioBlob);
 
         // Brief pause between turns
         if (i < script.length - 1 && !abortRef.current) {
