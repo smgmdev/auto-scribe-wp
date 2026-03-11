@@ -378,8 +378,7 @@ export function AdminSystemView() {
     } finally {
       setProcessing(false);
       addLine('info', '');
-      addLine('info', 'Enter 0 to go back to send menu.');
-      setTerminalMode('send-confirm-test');
+      showSendMenu();
     }
   };
 
