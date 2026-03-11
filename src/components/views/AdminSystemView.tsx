@@ -1050,6 +1050,14 @@ export function AdminSystemView() {
       return;
     }
 
+    if (terminalMode === 'continue-campaign') {
+      if (trimmed === '0') { showGeneratePreviewMenu(); return; }
+      if (trimmed === '1') { await executeContinueCampaign('marketing_people'); return; }
+      if (trimmed === '2') { await executeContinueCampaign('agencies'); return; }
+      addLine('error', 'Invalid option. Enter 1, 2, or 0 to go back.');
+      return;
+    }
+
     // Send email sub-modes
     if (terminalMode === 'send-confirm-test') {
       if (trimmed === '0') { showSendMenu(); return; }
