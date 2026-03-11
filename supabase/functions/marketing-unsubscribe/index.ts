@@ -71,10 +71,10 @@ serve(async (req) => {
 
     console.log(`[marketing-unsubscribe] Unsubscribed: ${email}, deleted: ${count}`);
 
-    return new Response(
-      renderPage("You have been successfully unsubscribed from our mailing list.", true),
-      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
-    );
+    return new Response("Unsubscribed successfully.", {
+      status: 200,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   } catch (error: any) {
     console.error("[marketing-unsubscribe] ERROR:", error.message);
     return new Response(
