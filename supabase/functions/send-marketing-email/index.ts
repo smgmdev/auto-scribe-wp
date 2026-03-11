@@ -180,7 +180,7 @@ serve(async (req) => {
           },
         });
         sent++;
-
+        sentEmails.push(recipient);
         // Rate limit: small delay between sends
         if (recipients.length > 1) {
           await new Promise((r) => setTimeout(r, 200));
