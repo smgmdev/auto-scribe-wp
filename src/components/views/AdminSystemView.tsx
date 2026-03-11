@@ -90,6 +90,25 @@ export function AdminSystemView() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const activeCampaignIdRef = useRef<string | null>(null);
+  const pausedRef = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+
+  const togglePause = () => {
+    pausedRef.current = !pausedRef.current;
+    setIsPaused(pausedRef.current);
+    if (pausedRef.current) {
+      addLine('info', '⏸️  Sending paused by admin. Press Resume to continue.');
+    } else {
+      addLine('info', '▶️  Sending resumed.');
+    }
+  };
+
+  const waitWhilePaused = async () => {
+    while (pausedRef.current) {
+      await new Promise(r => setTimeout(r, 500));
+    }
+  };
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
@@ -736,7 +755,12 @@ export function AdminSystemView() {
       let totalFailed = 0;
       const MAX_RETRIES = 3;
 
+      setIsSending(true);
+      pausedRef.current = false;
+      setIsPaused(false);
+
       for (let i = 0; i < recipients.length; i += 50) {
+        await waitWhilePaused();
         const batch = recipients.slice(i, i + 50);
         const batchNum = Math.floor(i / 50) + 1;
         addLine('info', `  Batch ${batchNum}: sending ${batch.length} emails...`);
@@ -795,6 +819,7 @@ export function AdminSystemView() {
       addLine('error', `✗ Error: ${err.message}`);
     } finally {
       setProcessing(false);
+      setIsSending(false);
       addLine('info', '');
       showSendMenu();
     }
@@ -918,7 +943,12 @@ export function AdminSystemView() {
       let totalFailed = 0;
       const MAX_RETRIES = 3;
 
+      setIsSending(true);
+      pausedRef.current = false;
+      setIsPaused(false);
+
       for (let i = 0; i < recipients.length; i += 50) {
+        await waitWhilePaused();
         const batch = recipients.slice(i, i + 50);
         const batchNum = Math.floor(i / 50) + 1;
         addLine('info', `  Batch ${batchNum}: sending ${batch.length} emails...`);
@@ -982,12 +1012,14 @@ export function AdminSystemView() {
       addLine('output', `  Total: ${recipients.length}`);
       addLine('output', `  Campaign ID: ${campaignId}`);
       activeCampaignIdRef.current = null;
+      setIsSending(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
       addLine('info', `  Campaign ID: ${campaignId} — you can resume this send.`);
     } finally {
       setProcessing(false);
+      setIsSending(false);
       addLine('info', '');
       addLine('info', 'Enter 0 to go back to send menu.');
       setTerminalMode('send-confirm-test');
@@ -1501,6 +1533,18 @@ export function AdminSystemView() {
         />
         {processing && (
           <span className="text-green-400 animate-pulse ml-2 mt-1">●</span>
+        )}
+        {isSending && (
+          <button
+            onClick={togglePause}
+            className={`ml-2 mt-0.5 px-3 py-0.5 text-xs font-mono rounded shrink-0 ${
+              isPaused
+                ? 'bg-green-600 hover:bg-green-500 text-white'
+                : 'bg-yellow-600 hover:bg-yellow-500 text-black'
+            }`}
+          >
+            {isPaused ? '▶ Resume' : '⏸ Pause'}
+          </button>
         )}
       </div>
     </div>
