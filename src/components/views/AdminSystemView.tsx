@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { calculateTotalBalance, calculateWithdrawals, calculateAvailableCredits } from '@/lib/credit-calculations';
 import { Terminal } from 'lucide-react';
 
+// --- Types ---
 interface UserRecord {
   id: string;
   email: string | null;
@@ -37,14 +38,27 @@ interface TransactionRecord {
 
 interface TerminalLine {
   id: number;
-  type: 'input' | 'output' | 'error' | 'info' | 'table';
+  type: 'input' | 'output' | 'error' | 'info' | 'table' | 'html-preview';
   content: string;
   data?: UserRecord[];
 }
 
 let lineId = Date.now();
 
-type TerminalMode = 'default' | 'marketing' | 'marketing-categories' | 'marketing-list' | 'marketing-import-category' | 'marketing-import';
+type TerminalMode =
+  | 'default'
+  | 'marketing'
+  | 'marketing-categories'
+  | 'marketing-list'
+  | 'marketing-import-category'
+  | 'marketing-import'
+  | 'send-menu'
+  | 'send-confirm-test'
+  | 'send-confirm-bulk'
+  | 'generate-prompt'
+  | 'generate-subject'
+  | 'generate-preview'
+  | 'generate-edit';
 
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
@@ -60,6 +74,13 @@ export function AdminSystemView() {
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
   const [terminalMode, setTerminalMode] = useState<TerminalMode>('default');
   const [marketingCategory, setMarketingCategory] = useState<string>('marketing_people');
+
+  // Email compose state
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailHtml, setEmailHtml] = useState('');
+  const [emailPrompt, setEmailPrompt] = useState('');
+  const [bulkTarget, setBulkTarget] = useState<'marketing_people' | 'agencies' | ''>('');
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -78,14 +99,17 @@ export function AdminSystemView() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fetchAllRows = async (table: string, selectStr: string, orderCol?: string, filterFn?: (q: any) => any): Promise<any[]> => {
     const pageSize = 1000;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allData: any[] = [];
     let from = 0;
     let hasMore = true;
     while (hasMore) {
       // @ts-ignore - dynamic table access
       let query = supabase.from(table).select(selectStr).range(from, from + pageSize - 1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (orderCol) query = (query as any).order(orderCol, { ascending: false });
       if (filterFn) query = filterFn(query);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (query as any);
       if (error) throw error;
       allData.push(...(data || []));
@@ -95,37 +119,43 @@ export function AdminSystemView() {
     return allData;
   };
 
+  // --- /db command ---
   const fetchUsers = async () => {
     addLine('info', 'Fetching user database...');
     setProcessing(true);
 
     try {
       const profiles = await fetchAllRows('profiles', '*', 'created_at');
-
       addLine('info', `Loaded ${profiles.length} profiles, fetching related data...`);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const [roles, credits, orders, transactions, activeOrders, pendingRequests, serviceMessages] = await Promise.all([
         fetchAllRows('user_roles', 'user_id, role'),
         fetchAllRows('user_credits', 'user_id, credits'),
         fetchAllRows('orders', 'id, user_id, order_number, status, amount_cents, created_at, media_site_id', 'created_at'),
         fetchAllRows('credit_transactions', 'id, user_id, amount, type, description, created_at', 'created_at'),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fetchAllRows('orders', 'user_id, media_site_id, media_sites(price)', undefined, (q: any) => q.in('status', ['pending_payment', 'paid', 'accepted'])),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fetchAllRows('service_requests', 'id, user_id, media_site_id, media_sites(price)', undefined, (q: any) => q.in('status', ['pending', 'active'])),
         fetchAllRows('service_messages', 'request_id, message'),
       ]);
 
       const requestsWithOrderMsg = new Set<string>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       serviceMessages.forEach((m: any) => {
         if (m.message === 'CLIENT_ORDER_REQUEST') requestsWithOrderMsg.add(m.request_id);
       });
 
       const lockedFromOrdersMap = new Map<string, number>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       activeOrders.forEach((o: any) => {
         const price = o.media_sites?.price || 0;
         lockedFromOrdersMap.set(o.user_id, (lockedFromOrdersMap.get(o.user_id) || 0) + price);
       });
 
       const lockedFromRequestsMap = new Map<string, number>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pendingRequests.forEach((r: any) => {
         if (requestsWithOrderMsg.has(r.id)) {
           const price = r.media_sites?.price || 0;
@@ -133,6 +163,7 @@ export function AdminSystemView() {
         }
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mediaSiteIds = [...new Set(orders.map((o: any) => o.media_site_id))];
       let mediaSiteMap: Record<string, string> = {};
       if (mediaSiteIds.length > 0) {
@@ -141,9 +172,11 @@ export function AdminSystemView() {
       }
 
       const rolesMap = new Map<string, string>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       roles.forEach((r: any) => rolesMap.set(r.user_id, r.role));
 
       const ordersMap = new Map<string, OrderRecord[]>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       orders.forEach((o: any) => {
         const list = ordersMap.get(o.user_id) || [];
         list.push({ id: o.id, order_number: o.order_number, status: o.status, amount_cents: o.amount_cents, created_at: o.created_at, media_site_name: mediaSiteMap[o.media_site_id] || 'Unknown' });
@@ -151,12 +184,14 @@ export function AdminSystemView() {
       });
 
       const txMap = new Map<string, TransactionRecord[]>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       transactions.forEach((t: any) => {
         const list = txMap.get(t.user_id) || [];
         list.push({ id: t.id, amount: t.amount, type: t.type, description: t.description, created_at: t.created_at });
         txMap.set(t.user_id, list);
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const userRecords: UserRecord[] = profiles.map((p: any) => {
         const userTxs = txMap.get(p.id) || [];
         const totalBalance = calculateTotalBalance(userTxs);
@@ -177,6 +212,7 @@ export function AdminSystemView() {
 
       addLine('output', `✓ Fetched ${userRecords.length} users from database`);
       addLine('table', '', userRecords);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addLine('error', `✗ Error: ${error.message}`);
     } finally {
@@ -184,6 +220,7 @@ export function AdminSystemView() {
     }
   };
 
+  // --- Marketing menu ---
   const showMarketingMenu = () => {
     setTerminalMode('marketing');
     addLine('info', '');
@@ -199,6 +236,7 @@ export function AdminSystemView() {
       const total = totalErr ? '?' : (totalCount ?? 0);
       addLine('output', `  1. View email marketing list [${total} emails]`);
       addLine('output', '  2. Add new emails from Google Sheet');
+      addLine('output', '  3. Send emails');
       addLine('info', '');
       addLine('info', 'Enter option number (0 to exit):');
     })();
@@ -247,12 +285,14 @@ export function AdminSystemView() {
       } else {
         addLine('info', '');
         addLine('info', `── ${categoryLabel} (${data.length}) ──`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data.forEach((row: any, i: number) => {
           addLine('output', `  ${i + 1}. ${row.email}`);
         });
       }
       addLine('info', '');
       addLine('info', 'Enter 0 to go back.');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
       addLine('info', 'Enter 0 to go back.');
@@ -282,6 +322,7 @@ export function AdminSystemView() {
         addLine('output', `  New added: ${data.added}`);
         addLine('output', `  Duplicates skipped: ${data.skipped}`);
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
     } finally {
@@ -292,6 +333,215 @@ export function AdminSystemView() {
     }
   };
 
+  // --- Send emails ---
+  const showSendMenu = () => {
+    setTerminalMode('send-menu');
+    setEmailSubject('');
+    setEmailHtml('');
+    setEmailPrompt('');
+    setBulkTarget('');
+    addLine('info', '');
+    addLine('info', '── SEND EMAILS ──');
+    addLine('info', '');
+    addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
+    addLine('output', '  2. Send bulk to Marketing People List');
+    addLine('output', '  3. Send bulk to Agencies');
+    addLine('output', '  4. Generate email with AI');
+    addLine('info', '');
+    addLine('info', 'Enter option number (0 to go back):');
+  };
+
+  const handleSendTest = async () => {
+    if (!emailHtml || !emailSubject) {
+      addLine('error', 'No email composed yet. Use option 4 to generate an email first.');
+      addLine('info', '');
+      showSendMenu();
+      return;
+    }
+    setProcessing(true);
+    addLine('info', '⏳ Sending test email to business@stankeviciusmgm.com...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-marketing-email', {
+        body: {
+          recipients: ['business@stankeviciusmgm.com'],
+          subject: emailSubject,
+          html_body: emailHtml,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      addLine('output', `✓ Test email sent! (${data.sent} delivered)`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
+      addLine('info', '');
+      addLine('info', 'Enter 0 to go back to send menu.');
+      setTerminalMode('send-confirm-test');
+    }
+  };
+
+  const handleBulkSend = async (category: 'marketing_people' | 'agencies') => {
+    if (!emailHtml || !emailSubject) {
+      addLine('error', 'No email composed yet. Use option 4 to generate an email first.');
+      addLine('info', '');
+      showSendMenu();
+      return;
+    }
+
+    const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
+    setBulkTarget(category);
+    setTerminalMode('send-confirm-bulk');
+    addLine('info', '');
+    addLine('info', `⚠️  You are about to send a bulk email to ALL recipients in "${categoryLabel}".`);
+    addLine('info', `    Subject: ${emailSubject}`);
+    addLine('info', '');
+    addLine('info', 'Type "confirm" to proceed, or 0 to cancel:');
+  };
+
+  const executeBulkSend = async (category: string) => {
+    setProcessing(true);
+    const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
+    addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
+
+    try {
+      const { data: emails, error: fetchErr } = await supabase
+        .from('marketing_emails')
+        .select('email')
+        .eq('category', category);
+
+      if (fetchErr) throw fetchErr;
+      if (!emails || emails.length === 0) {
+        addLine('error', `No emails found in ${categoryLabel}.`);
+        setTerminalMode('send-menu');
+        return;
+      }
+
+      const recipients = emails.map(e => e.email);
+      addLine('info', `Sending to ${recipients.length} recipients...`);
+
+      // Send in batches of 50
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      for (let i = 0; i < recipients.length; i += 50) {
+        const batch = recipients.slice(i, i + 50);
+        addLine('info', `  Batch ${Math.floor(i / 50) + 1}: sending ${batch.length} emails...`);
+
+        const { data, error } = await supabase.functions.invoke('send-marketing-email', {
+          body: {
+            recipients: batch,
+            subject: emailSubject,
+            html_body: emailHtml,
+          },
+        });
+
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+
+        totalSent += data.sent || 0;
+        totalFailed += data.failed || 0;
+
+        // Small delay between batches
+        if (i + 50 < recipients.length) {
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+
+      addLine('output', `✓ Bulk send complete!`);
+      addLine('output', `  Sent: ${totalSent}`);
+      addLine('output', `  Failed: ${totalFailed}`);
+      addLine('output', `  Total: ${recipients.length}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
+      addLine('info', '');
+      addLine('info', 'Enter 0 to go back to send menu.');
+      setTerminalMode('send-confirm-test');
+    }
+  };
+
+  const handleGenerateEmail = async (prompt: string, subject: string) => {
+    setProcessing(true);
+    addLine('info', '⏳ AI is generating your email...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-marketing-email', {
+        body: { prompt, subject_line: subject },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setEmailHtml(data.html_body);
+      setEmailSubject(subject);
+
+      addLine('output', '✓ Email generated!');
+      addLine('info', `  Subject: ${subject}`);
+      addLine('info', '');
+      addLine('html-preview', data.html_body);
+      addLine('info', '');
+      addLine('info', '── What would you like to do? ──');
+      addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
+      addLine('output', '  2. Send bulk to Marketing People List');
+      addLine('output', '  3. Send bulk to Agencies');
+      addLine('output', '  4. Edit email (provide instructions)');
+      addLine('output', '  5. Regenerate email');
+      addLine('info', '');
+      addLine('info', 'Enter option number (0 to go back to send menu):');
+      setTerminalMode('generate-preview');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+      addLine('info', 'Enter 0 to go back.');
+      setTerminalMode('send-menu');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleEditEmail = async (instructions: string) => {
+    setProcessing(true);
+    addLine('info', '⏳ AI is editing your email...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-marketing-email', {
+        body: { edit_instructions: instructions, previous_html: emailHtml, subject_line: emailSubject },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setEmailHtml(data.html_body);
+
+      addLine('output', '✓ Email updated!');
+      addLine('info', '');
+      addLine('html-preview', data.html_body);
+      addLine('info', '');
+      addLine('info', '── What would you like to do? ──');
+      addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
+      addLine('output', '  2. Send bulk to Marketing People List');
+      addLine('output', '  3. Send bulk to Agencies');
+      addLine('output', '  4. Edit email (provide instructions)');
+      addLine('output', '  5. Regenerate email');
+      addLine('info', '');
+      addLine('info', 'Enter option number (0 to go back to send menu):');
+      setTerminalMode('generate-preview');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+      addLine('info', 'Enter 0 to go back.');
+      setTerminalMode('generate-preview');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // --- Command handler ---
   const handleCommand = async (cmd: string) => {
     const trimmed = cmd.trim();
     if (!trimmed) return;
@@ -301,40 +551,24 @@ export function AdminSystemView() {
     setHistoryIndex(-1);
     setInput('');
 
-    // Handle sub-modes first
+    // --- Sub-modes ---
+
     if (terminalMode === 'marketing-list') {
-      if (trimmed === '0') {
-        showCategoryMenu('view');
-        return;
-      }
+      if (trimmed === '0') { showCategoryMenu('view'); return; }
       addLine('error', 'Enter 0 to go back.');
       return;
     }
 
     if (terminalMode === 'marketing-categories') {
-      if (trimmed === '0') {
-        showMarketingMenu();
-        return;
-      }
-      if (trimmed === '1') {
-        setMarketingCategory('marketing_people');
-        await handleMarketingList('marketing_people');
-        return;
-      }
-      if (trimmed === '2') {
-        setMarketingCategory('agencies');
-        await handleMarketingList('agencies');
-        return;
-      }
+      if (trimmed === '0') { showMarketingMenu(); return; }
+      if (trimmed === '1') { setMarketingCategory('marketing_people'); await handleMarketingList('marketing_people'); return; }
+      if (trimmed === '2') { setMarketingCategory('agencies'); await handleMarketingList('agencies'); return; }
       addLine('error', 'Invalid option. Enter 1, 2, or 0 to go back.');
       return;
     }
 
     if (terminalMode === 'marketing-import-category') {
-      if (trimmed === '0') {
-        showMarketingMenu();
-        return;
-      }
+      if (trimmed === '0') { showMarketingMenu(); return; }
       if (trimmed === '1') {
         setMarketingCategory('marketing_people');
         setTerminalMode('marketing-import');
@@ -356,10 +590,7 @@ export function AdminSystemView() {
     }
 
     if (terminalMode === 'marketing-import') {
-      if (trimmed === '0') {
-        showMarketingMenu();
-        return;
-      }
+      if (trimmed === '0') { showMarketingMenu(); return; }
       if (trimmed.includes('docs.google.com/spreadsheets') || trimmed.includes('sheets.google.com')) {
         await handleMarketingImport(trimmed, marketingCategory);
         return;
@@ -368,24 +599,107 @@ export function AdminSystemView() {
       return;
     }
 
+    // Send email sub-modes
+    if (terminalMode === 'send-confirm-test') {
+      if (trimmed === '0') { showSendMenu(); return; }
+      addLine('error', 'Enter 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'send-confirm-bulk') {
+      if (trimmed === '0') { showSendMenu(); return; }
+      if (trimmed.toLowerCase() === 'confirm' && bulkTarget) {
+        await executeBulkSend(bulkTarget);
+        return;
+      }
+      addLine('error', 'Type "confirm" to proceed or 0 to cancel.');
+      return;
+    }
+
+    if (terminalMode === 'generate-prompt') {
+      if (trimmed === '0') { showSendMenu(); return; }
+      setEmailPrompt(trimmed);
+      setTerminalMode('generate-subject');
+      addLine('info', '');
+      addLine('info', 'Enter subject line for the email:');
+      return;
+    }
+
+    if (terminalMode === 'generate-subject') {
+      if (trimmed === '0') { showSendMenu(); return; }
+      setEmailSubject(trimmed);
+      await handleGenerateEmail(emailPrompt, trimmed);
+      return;
+    }
+
+    if (terminalMode === 'generate-edit') {
+      if (trimmed === '0') {
+        // Show preview menu again
+        addLine('info', '');
+        addLine('info', '── What would you like to do? ──');
+        addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
+        addLine('output', '  2. Send bulk to Marketing People List');
+        addLine('output', '  3. Send bulk to Agencies');
+        addLine('output', '  4. Edit email (provide instructions)');
+        addLine('output', '  5. Regenerate email');
+        addLine('info', '');
+        addLine('info', 'Enter option number (0 to go back to send menu):');
+        setTerminalMode('generate-preview');
+        return;
+      }
+      await handleEditEmail(trimmed);
+      return;
+    }
+
+    if (terminalMode === 'generate-preview') {
+      if (trimmed === '0') { showSendMenu(); return; }
+      if (trimmed === '1') { await handleSendTest(); return; }
+      if (trimmed === '2') { await handleBulkSend('marketing_people'); return; }
+      if (trimmed === '3') { await handleBulkSend('agencies'); return; }
+      if (trimmed === '4') {
+        setTerminalMode('generate-edit');
+        addLine('info', '');
+        addLine('info', 'Enter edit instructions (e.g. "make the CTA button bigger", "change tone to casual"):');
+        return;
+      }
+      if (trimmed === '5') {
+        await handleGenerateEmail(emailPrompt, emailSubject);
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1-5, or 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'send-menu') {
+      if (trimmed === '0') { showMarketingMenu(); return; }
+      if (trimmed === '1') { await handleSendTest(); return; }
+      if (trimmed === '2') { await handleBulkSend('marketing_people'); return; }
+      if (trimmed === '3') { await handleBulkSend('agencies'); return; }
+      if (trimmed === '4') {
+        setTerminalMode('generate-prompt');
+        addLine('info', '');
+        addLine('info', 'Describe the email you want to create:');
+        addLine('info', '(e.g. "Announce our new PR distribution service with special launch pricing")');
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1-4, or 0 to go back.');
+      return;
+    }
+
     if (terminalMode === 'marketing') {
-      if (trimmed === '1') {
-        showCategoryMenu('view');
-        return;
-      }
-      if (trimmed === '2') {
-        showCategoryMenu('import');
-        return;
-      }
+      if (trimmed === '1') { showCategoryMenu('view'); return; }
+      if (trimmed === '2') { showCategoryMenu('import'); return; }
+      if (trimmed === '3') { showSendMenu(); return; }
       if (trimmed === '0') {
         setTerminalMode('default');
         addLine('info', 'Exited /marketing.');
         return;
       }
-      addLine('error', 'Invalid option. Enter 1, 2, or 0 to exit.');
+      addLine('error', 'Invalid option. Enter 1, 2, 3, or 0 to exit.');
       return;
     }
 
+    // --- Default commands ---
     switch (trimmed.toLowerCase()) {
       case '/db':
         await fetchUsers();
@@ -523,6 +837,18 @@ export function AdminSystemView() {
           {lines.map(line => {
             if (line.type === 'table' && line.data) {
               return <div key={line.id}>{renderUserTable(line.data)}</div>;
+            }
+
+            if (line.type === 'html-preview') {
+              return (
+                <div key={line.id} className="my-2 border border-white/20 rounded overflow-hidden">
+                  <div className="bg-white/10 px-3 py-1 text-[10px] text-white/40 uppercase tracking-wider">Email Preview</div>
+                  <div
+                    className="bg-white text-black p-4 max-h-[400px] overflow-y-auto text-xs"
+                    dangerouslySetInnerHTML={{ __html: line.content }}
+                  />
+                </div>
+              );
             }
 
             let colorClass = 'text-white/60';
