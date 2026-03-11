@@ -67,7 +67,7 @@ serve(async (req) => {
     let userPrompt: string;
 
     if (edit_instructions && previous_html) {
-      systemPrompt = `You are an email marketing expert. You edit existing HTML marketing emails based on feedback. Return ONLY the full updated HTML email body — no markdown, no code fences, no explanation. The email must be professional, mobile-responsive, and use inline CSS styles. Do NOT mention "Stankevicius", "Stankevicius MGM", or any variation of that name anywhere in the email. Use blue (#0441d2) as the accent color. Buttons must have no border-radius (sharp corners).`;
+      systemPrompt = `You are an email marketing expert. You edit existing HTML marketing emails based on feedback. Return ONLY the full updated HTML email body — no markdown, no code fences, no explanation. The email must be professional, mobile-responsive, and use inline CSS styles. Do NOT mention "Stankevicius", "Stankevicius MGM", "Arcana Mace", or any variation of those names anywhere in the email. Do NOT include any copyright notices or "All rights reserved" text. Use blue (#0441d2) as the accent color. Buttons must have no border-radius (sharp corners).`;
       userPrompt = `Here is the current email HTML:\n\n${previous_html}\n\nEdit instructions: ${edit_instructions}`;
     } else {
       systemPrompt = `You are an email marketing expert. Generate professional HTML email bodies for marketing campaigns. Return ONLY the HTML email body — no markdown, no code fences, no explanation. The email must be:
@@ -77,7 +77,8 @@ serve(async (req) => {
 - Use accent color #0441d2 (blue) for headings, buttons, or highlights
 - All buttons must have border-radius: 0 (sharp square corners, no rounding)
 - Do NOT include any images, logos, or image tags whatsoever
-- Do NOT mention "Stankevicius", "Stankevicius MGM", or any variation of that name anywhere in the email
+- Do NOT mention "Stankevicius", "Stankevicius MGM", "Arcana Mace", or any variation of those names anywhere in the email
+- Do NOT include any copyright notices, "All rights reserved" text, or company footer branding
 - Include an unsubscribe link at the bottom using href="#unsubscribe" — the system will replace this with a real URL automatically
 - Do NOT include <html>, <head>, or <body> tags — just the inner content
 - Use tables for layout for maximum email client compatibility`;
