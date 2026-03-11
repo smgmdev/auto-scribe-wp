@@ -575,7 +575,7 @@ export function AdminSystemView() {
 
   const handleCampaignSent = async () => {
     setProcessing(true);
-    addLine('info', '⏳ Fetching sent campaigns...');
+    addLine('info', 'Fetching sent campaigns...');
     try {
       // Get distinct campaigns with counts
       const { data: sends, error } = await supabase
