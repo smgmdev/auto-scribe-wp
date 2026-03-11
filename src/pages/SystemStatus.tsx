@@ -238,8 +238,7 @@ export default function SystemStatus() {
   const groupedServices = serviceCategories.map((cat) => ({
     title: cat.title,
     services: cat.names
-      .map((name) => services.find((s) => s.name === name))
-      .filter(Boolean) as ServiceStatus[],
+      .map((name) => services.find((s) => s.name === name) || { name, status: 'available' as const })
   }));
 
   const { user } = useAuth();
