@@ -44,7 +44,7 @@ interface TerminalLine {
 
 let lineId = Date.now();
 
-type TerminalMode = 'default' | 'marketing' | 'marketing-list' | 'marketing-import';
+type TerminalMode = 'default' | 'marketing' | 'marketing-categories' | 'marketing-list' | 'marketing-import-category' | 'marketing-import';
 
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([

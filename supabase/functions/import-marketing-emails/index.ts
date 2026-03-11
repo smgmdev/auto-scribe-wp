@@ -123,6 +123,7 @@ serve(async (req) => {
       const batch = uniqueEmails.slice(i, i + batchSize).map(email => ({
         email,
         source_sheet_url: sheet_url,
+        category: selectedCategory,
       }));
 
       const { data, error } = await supabaseAdmin
