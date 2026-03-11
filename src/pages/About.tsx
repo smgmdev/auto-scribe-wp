@@ -91,6 +91,7 @@ export default function About() {
   const lastScrollY = useRef(0);
   const [totalChannels, setTotalChannels] = useState(0);
   const [channelsLoading, setChannelsLoading] = useState(true);
+  const [distributionImgLoaded, setDistributionImgLoaded] = useState(false);
 
   useEffect(() => {
     async function fetchChannelCount() {
@@ -392,11 +393,17 @@ export default function About() {
 
 
       {/* Control Your Distribution Section */}
-      <section className="relative overflow-hidden min-h-screen flex items-center justify-center">
+      <section className="relative overflow-hidden min-h-screen flex items-center justify-center bg-black">
+        {!distributionImgLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-white/50" />
+          </div>
+        )}
         <img 
           src={aboutDistributionBg} 
           alt="Control your distribution" 
-          className="absolute inset-0 w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${distributionImgLoaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setDistributionImgLoaded(true)}
         />
         <div className="absolute inset-0 bg-black/30" />
         <AnimatedSection>
