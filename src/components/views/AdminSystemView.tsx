@@ -81,7 +81,7 @@ export function AdminSystemView() {
     let from = 0;
     let hasMore = true;
     while (hasMore) {
-      let query = supabase.from(table).select(selectStr).range(from, from + pageSize - 1);
+      let query = (supabase.from(table) as any).select(selectStr).range(from, from + pageSize - 1);
       if (orderCol) query = query.order(orderCol, { ascending: false });
       if (filterFn) query = filterFn(query);
       const { data, error } = await query;
