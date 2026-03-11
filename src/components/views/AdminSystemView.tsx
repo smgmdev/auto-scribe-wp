@@ -431,12 +431,12 @@ export function AdminSystemView() {
 
   return (
     <div
-      className="animate-fade-in bg-black min-h-[calc(100vh-56px)] lg:min-h-screen -m-4 lg:-m-8 p-0 flex flex-col cursor-text"
+      className="animate-fade-in bg-black h-[calc(100vh-56px)] lg:h-screen -m-4 lg:-m-8 p-0 flex flex-col cursor-text overflow-hidden"
       onClick={() => inputRef.current?.focus()}
     >
       {/* Terminal Output */}
-      <div className="flex-1 overflow-auto p-4 pt-2 font-mono text-sm flex flex-col justify-end" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div>
+      <div className="flex-1 overflow-y-auto p-4 pt-2 font-mono text-sm min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex flex-col justify-end min-h-full">
           {lines.map(line => {
             if (line.type === 'table' && line.data) {
               return <div key={line.id}>{renderUserTable(line.data)}</div>;
