@@ -71,10 +71,10 @@ serve(async (req) => {
 
     console.log(`[marketing-unsubscribe] Unsubscribed: ${email}, deleted: ${count}`);
 
-    return new Response(
-      renderPage("You have been successfully unsubscribed from our mailing list.", true),
-      { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } }
-    );
+    return new Response("Unsubscribed successfully.", {
+      status: 200,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   } catch (error: any) {
     console.error("[marketing-unsubscribe] ERROR:", error.message);
     return new Response(
@@ -84,43 +84,6 @@ serve(async (req) => {
   }
 });
 
-function renderPage(message: string, success: boolean): string {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${success ? "Unsubscribed" : "Error"} — Stankevicius</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0a0a;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    .card {
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 12px;
-      padding: 48px;
-      max-width: 480px;
-      text-align: center;
-    }
-    .icon { font-size: 48px; margin-bottom: 16px; }
-    h1 { font-size: 20px; margin-bottom: 12px; color: ${success ? "#c4a44a" : "#ef4444"}; }
-    p { font-size: 14px; color: #888; line-height: 1.6; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="icon">${success ? "✓" : "✕"}</div>
-    <h1>${success ? "Unsubscribed" : "Error"}</h1>
-    <p>${message}</p>
-  </div>
-</body>
-</html>`;
+function renderPage(message: string, _success: boolean): string {
+  return message;
 }
