@@ -175,6 +175,15 @@ export function AdminSystemView() {
     }
   };
 
+  const refreshSending = async () => {
+    addLine('info', 'Refreshing session and restarting send loop...');
+    await setPauseState(true);
+    await supabase.auth.refreshSession();
+    await new Promise(r => setTimeout(r, 500));
+    await setPauseState(false);
+    addLine('info', 'Session refreshed. Sending resumed.');
+  };
+
   const checkDbPaused = async (): Promise<boolean> => {
     const { data } = await supabase
       .from('marketing_send_control' as any)
@@ -1725,16 +1734,24 @@ export function AdminSystemView() {
           <span className="text-green-400 animate-pulse ml-2 mt-1">●</span>
         )}
         {isSending && (
-          <button
-            onClick={togglePause}
-            className={`ml-2 mt-0.5 px-3 py-0.5 text-xs font-mono rounded shrink-0 ${
-              isPaused
-                ? 'bg-green-600 hover:bg-green-500 text-white'
-                : 'bg-yellow-600 hover:bg-yellow-500 text-black'
-            }`}
-          >
-            {isPaused ? '▶ Resume' : '⏸ Pause'}
-          </button>
+          <>
+            <button
+              onClick={togglePause}
+              className={`ml-2 mt-0.5 px-3 py-0.5 text-xs font-mono rounded shrink-0 ${
+                isPaused
+                  ? 'bg-green-600 hover:bg-green-500 text-white'
+                  : 'bg-yellow-600 hover:bg-yellow-500 text-black'
+              }`}
+            >
+              {isPaused ? '▶ Resume' : '⏸ Pause'}
+            </button>
+            <button
+              onClick={refreshSending}
+              className="ml-1 mt-0.5 px-3 py-0.5 text-xs font-mono rounded shrink-0 bg-blue-600 hover:bg-blue-500 text-white"
+            >
+              ↻ Refresh
+            </button>
+          </>
         )}
       </div>
     </div>
