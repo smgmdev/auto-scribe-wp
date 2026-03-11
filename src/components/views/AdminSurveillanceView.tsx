@@ -437,7 +437,7 @@ export function AdminSurveillanceView() {
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
     if (data) setHbombTrajectories(data.filter(d => !isAnalyticalTitle(d.title)));
-  }, [hbombTimeFilter]);
+  }, [hbombTimeFilter, isAnalyticalTitle]);
 
   const fetchTrades = useCallback(async () => {
     const hours = parseFloat(tradeTimeFilter);
