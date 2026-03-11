@@ -75,49 +75,63 @@ export function AdminSystemView() {
     setLines(prev => [...prev, { id: lineId++, type, content, data }]);
   };
 
+  const fetchAllRows = async (table: string, selectStr: string, orderCol?: string, filterFn?: (q: any) => any) => {
+    const pageSize = 1000;
+    let allData: any[] = [];
+    let from = 0;
+    let hasMore = true;
+    while (hasMore) {
+      let query = supabase.from(table).select(selectStr).range(from, from + pageSize - 1);
+      if (orderCol) query = query.order(orderCol, { ascending: false });
+      if (filterFn) query = filterFn(query);
+      const { data, error } = await query;
+      if (error) throw error;
+      allData = allData.concat(data || []);
+      hasMore = (data?.length || 0) === pageSize;
+      from += pageSize;
+    }
+    return allData;
+  };
+
   const fetchUsers = async () => {
     addLine('info', 'Fetching user database...');
     setProcessing(true);
 
     try {
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const profiles = await fetchAllRows('profiles', '*', 'created_at');
 
-      console.log('Profiles query result:', { profiles, profilesError });
-      if (profilesError) throw profilesError;
+      addLine('info', `Loaded ${profiles.length} profiles, fetching related data...`);
 
-      const [rolesRes, creditsRes, ordersRes, transactionsRes, activeOrdersRes, pendingRequestsRes, serviceMessagesRes] = await Promise.all([
-        supabase.from('user_roles').select('user_id, role'),
-        supabase.from('user_credits').select('user_id, credits'),
-        supabase.from('orders').select('id, user_id, order_number, status, amount_cents, created_at, media_site_id').order('created_at', { ascending: false }),
-        supabase.from('credit_transactions').select('id, user_id, amount, type, description, created_at').order('created_at', { ascending: false }),
-        supabase.from('orders').select('user_id, media_site_id, media_sites(price)').in('status', ['pending_payment', 'paid', 'accepted']),
-        supabase.from('service_requests').select('id, user_id, media_site_id, media_sites(price)').in('status', ['pending', 'active']),
-        supabase.from('service_messages').select('request_id, message'),
+      const [roles, credits, orders, transactions, activeOrders, pendingRequests, serviceMessages] = await Promise.all([
+        fetchAllRows('user_roles', 'user_id, role'),
+        fetchAllRows('user_credits', 'user_id, credits'),
+        fetchAllRows('orders', 'id, user_id, order_number, status, amount_cents, created_at, media_site_id', 'created_at'),
+        fetchAllRows('credit_transactions', 'id, user_id, amount, type, description, created_at', 'created_at'),
+        fetchAllRows('orders', 'user_id, media_site_id, media_sites(price)', undefined, (q: any) => q.in('status', ['pending_payment', 'paid', 'accepted'])),
+        fetchAllRows('service_requests', 'id, user_id, media_site_id, media_sites(price)', undefined, (q: any) => q.in('status', ['pending', 'active'])),
+        fetchAllRows('service_messages', 'request_id, message'),
       ]);
 
       const requestsWithOrderMsg = new Set<string>();
-      (serviceMessagesRes.data || []).forEach((m: any) => {
+      serviceMessages.forEach((m: any) => {
         if (m.message === 'CLIENT_ORDER_REQUEST') requestsWithOrderMsg.add(m.request_id);
       });
 
       const lockedFromOrdersMap = new Map<string, number>();
-      (activeOrdersRes.data || []).forEach((o: any) => {
+      activeOrders.forEach((o: any) => {
         const price = o.media_sites?.price || 0;
         lockedFromOrdersMap.set(o.user_id, (lockedFromOrdersMap.get(o.user_id) || 0) + price);
       });
 
       const lockedFromRequestsMap = new Map<string, number>();
-      (pendingRequestsRes.data || []).forEach((r: any) => {
+      pendingRequests.forEach((r: any) => {
         if (requestsWithOrderMsg.has(r.id)) {
           const price = r.media_sites?.price || 0;
           lockedFromRequestsMap.set(r.user_id, (lockedFromRequestsMap.get(r.user_id) || 0) + price);
         }
       });
 
-      const mediaSiteIds = [...new Set((ordersRes.data || []).map(o => o.media_site_id))];
+      const mediaSiteIds = [...new Set(orders.map((o: any) => o.media_site_id))];
       let mediaSiteMap: Record<string, string> = {};
       if (mediaSiteIds.length > 0) {
         const { data: sites } = await supabase.from('media_sites').select('id, name').in('id', mediaSiteIds);
@@ -125,23 +139,23 @@ export function AdminSystemView() {
       }
 
       const rolesMap = new Map<string, string>();
-      (rolesRes.data || []).forEach(r => rolesMap.set(r.user_id, r.role));
+      roles.forEach((r: any) => rolesMap.set(r.user_id, r.role));
 
       const ordersMap = new Map<string, OrderRecord[]>();
-      (ordersRes.data || []).forEach(o => {
+      orders.forEach((o: any) => {
         const list = ordersMap.get(o.user_id) || [];
         list.push({ id: o.id, order_number: o.order_number, status: o.status, amount_cents: o.amount_cents, created_at: o.created_at, media_site_name: mediaSiteMap[o.media_site_id] || 'Unknown' });
         ordersMap.set(o.user_id, list);
       });
 
       const txMap = new Map<string, TransactionRecord[]>();
-      (transactionsRes.data || []).forEach(t => {
+      transactions.forEach((t: any) => {
         const list = txMap.get(t.user_id) || [];
         list.push({ id: t.id, amount: t.amount, type: t.type, description: t.description, created_at: t.created_at });
         txMap.set(t.user_id, list);
       });
 
-      const userRecords: UserRecord[] = (profiles || []).map(p => {
+      const userRecords: UserRecord[] = profiles.map((p: any) => {
         const userTxs = txMap.get(p.id) || [];
         const totalBalance = calculateTotalBalance(userTxs);
         const withdrawalInfo = calculateWithdrawals(userTxs);
