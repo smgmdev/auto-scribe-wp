@@ -927,6 +927,7 @@ export function AdminSystemView() {
       if (recipients.length === 0) {
         addLine('output', `✓ All emails in ${categoryLabel} have already been sent.`);
         activeCampaignIdRef.current = null;
+        sendingLockRef.current = false;
         setProcessing(false);
         showSendMenu();
         return;
