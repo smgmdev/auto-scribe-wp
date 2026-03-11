@@ -733,7 +733,7 @@ export function AdminSystemView() {
 
   const showContinueCampaignMenu = async () => {
     setProcessing(true);
-    addLine('info', '⏳ Checking unsent recipients...');
+    addLine('info', 'Checking unsent recipients...');
     try {
       // Get all sent emails across all campaigns
       let allSentEmails = new Set<string>();
