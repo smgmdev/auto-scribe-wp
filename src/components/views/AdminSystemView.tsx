@@ -950,7 +950,7 @@ export function AdminSystemView() {
       return;
     }
     setProcessing(true);
-    addLine('info', '⏳ Sending test email to business@stankeviciusmgm.com...');
+    addLine('info', 'Sending test email to business@stankeviciusmgm.com...');
 
     try {
       const { data, error } = await supabase.functions.invoke('send-marketing-email', {
