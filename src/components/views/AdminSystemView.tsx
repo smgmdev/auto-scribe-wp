@@ -102,6 +102,7 @@ export function AdminSystemView() {
   const sendingCategoryRef = useRef<string | null>(null);
   const emailSubjectRef = useRef('');
   const emailHtmlRef = useRef('');
+  const sendingLockRef = useRef(false);
 
   // On mount: restore email template + auto-resume if a send was in progress
   useEffect(() => {
@@ -854,6 +855,11 @@ export function AdminSystemView() {
   };
 
   const executeContinueCampaign = async (category: string) => {
+    // Prevent concurrent executions
+    if (sendingLockRef.current) {
+      addLine('info', 'Send loop already running. Skipping duplicate invocation.');
+      return;
+    }
     const subj = emailSubjectRef.current || emailSubject;
     const html = emailHtmlRef.current || emailHtml;
     if (!html || !subj) {
@@ -861,6 +867,7 @@ export function AdminSystemView() {
       showGeneratePreviewMenu();
       return;
     }
+    sendingLockRef.current = true;
     sendingCategoryRef.current = category;
     // Use a deterministic campaign ID for tracking new sends
     const campaignId = `${subj.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
@@ -889,6 +896,7 @@ export function AdminSystemView() {
 
       if (allEmails.length === 0) {
         addLine('error', `No emails found in ${categoryLabel}.`);
+        sendingLockRef.current = false;
         setProcessing(false);
         showSendMenu();
         return;
@@ -919,6 +927,7 @@ export function AdminSystemView() {
       if (recipients.length === 0) {
         addLine('output', `✓ All emails in ${categoryLabel} have already been sent.`);
         activeCampaignIdRef.current = null;
+        sendingLockRef.current = false;
         setProcessing(false);
         showSendMenu();
         return;
@@ -1007,6 +1016,7 @@ export function AdminSystemView() {
       setProcessing(false);
       setIsSending(false);
       sendingCategoryRef.current = null;
+      sendingLockRef.current = false;
       await setSendingActive(false);
       addLine('info', '');
       showSendMenu();
