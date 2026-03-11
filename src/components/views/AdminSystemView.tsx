@@ -153,7 +153,7 @@ export function AdminSystemView() {
   }, [lines, scrollToBottom]);
 
   const addLine = (type: TerminalLine['type'], content: string, data?: UserRecord[]) => {
-    setLines(prev => [...prev, { id: lineId++, type, content, data }]);
+    setLines(prev => [...prev, { id: lineId++, type, content, data, timestamp: now() }]);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
