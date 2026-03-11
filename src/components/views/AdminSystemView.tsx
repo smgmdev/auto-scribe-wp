@@ -800,7 +800,7 @@ export function AdminSystemView() {
 
     setProcessing(true);
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
-    addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
+    addLine('info', `Fetching ${categoryLabel} recipients...`);
 
     try {
       // Fetch ALL emails with pagination
