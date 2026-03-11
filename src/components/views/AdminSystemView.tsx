@@ -482,7 +482,7 @@ export function AdminSystemView() {
 
   const handleAddSingleEmail = async (email: string, category: string) => {
     setProcessing(true);
-    addLine('info', `⏳ Adding ${email}...`);
+    addLine('info', `Adding ${email}...`);
 
     try {
       const { error } = await supabase
