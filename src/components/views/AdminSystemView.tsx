@@ -893,6 +893,7 @@ export function AdminSystemView() {
       addLine('output', '  3. Send bulk to Agencies');
       addLine('output', '  4. Edit email (provide instructions)');
       addLine('output', '  5. Regenerate email');
+      addLine('output', '  6. Continue campaign (send to unsent only)');
       addLine('info', '');
       addLine('info', 'Enter option number (0 to go back to send menu):');
       setTerminalMode('generate-preview');
