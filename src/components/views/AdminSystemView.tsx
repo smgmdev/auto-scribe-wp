@@ -169,9 +169,9 @@ export function AdminSystemView() {
     const newState = !pausedRef.current;
     await setPauseState(newState);
     if (newState) {
-      addLine('info', '⏸️  Sending paused by admin. Press Resume to continue.');
+      addLine('info', 'Sending paused by admin. Press Resume to continue.');
     } else {
-      addLine('info', '▶️  Sending resumed.');
+      addLine('info', 'Sending resumed.');
     }
   };
 
