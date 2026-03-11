@@ -1150,25 +1150,16 @@ export function AdminSystemView() {
     setHistoryIndex(-1);
     setInput('');
 
-    // --- Global pause/resume commands (work from any mode) ---
+    // --- Global pause/resume commands (work from any mode, persisted to DB) ---
     if (trimmed.toLowerCase() === 'pause') {
-      if (!pausedRef.current) {
-        pausedRef.current = true;
-        setIsPaused(true);
-        addLine('info', '⏸️  Sending paused by admin. Type "resume" to continue.');
-      } else {
-        addLine('info', '⏸️  Already paused. Type "resume" to continue.');
-      }
+      await setPauseState(true);
+      addLine('info', '⏸️  Sending paused by admin. This applies across all tabs/sessions.');
+      addLine('info', '  Type "resume" to continue.');
       return;
     }
     if (trimmed.toLowerCase() === 'resume') {
-      if (pausedRef.current) {
-        pausedRef.current = false;
-        setIsPaused(false);
-        addLine('info', '▶️  Sending resumed.');
-      } else {
-        addLine('info', '▶️  Not currently paused.');
-      }
+      await setPauseState(false);
+      addLine('info', '▶️  Sending resumed across all tabs/sessions.');
       return;
     }
 
