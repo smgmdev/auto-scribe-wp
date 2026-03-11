@@ -96,6 +96,45 @@ export function AdminSystemView() {
   const [isPaused, setIsPaused] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
+  // On mount: check if a send operation was in progress (survives refresh)
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('marketing_send_control' as any)
+        .select('sending_active, sending_category, sending_started_at, paused')
+        .eq('id', 'global')
+        .single();
+      if ((data as any)?.sending_active) {
+        const cat = (data as any)?.sending_category || 'unknown';
+        const startedAt = (data as any)?.sending_started_at;
+        const startedStr = startedAt ? new Date(startedAt).toLocaleTimeString('en-GB') : '?';
+        const categoryLabel = cat === 'marketing_people' ? 'Marketing People' : cat === 'agencies' ? 'Agencies' : cat;
+        addLine('info', '');
+        addLine('info', `⚠️  A bulk send to "${categoryLabel}" was started at ${startedStr} and appears to still be in progress.`);
+        addLine('info', '   If the tab was closed, the send was interrupted. Use /marketing → Send → Continue campaign to resume.');
+        if ((data as any)?.paused) {
+          addLine('info', '   Status: PAUSED. Type "resume" to continue.');
+          setIsPaused(true);
+          pausedRef.current = true;
+        }
+        addLine('info', '');
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const setSendingActive = async (active: boolean, category?: string) => {
+    await supabase
+      .from('marketing_send_control' as any)
+      .update({
+        sending_active: active,
+        sending_category: active ? (category || null) : null,
+        sending_started_at: active ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', 'global');
+  };
+
   const setPauseState = async (paused: boolean) => {
     pausedRef.current = paused;
     setIsPaused(paused);
