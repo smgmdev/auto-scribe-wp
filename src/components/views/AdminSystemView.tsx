@@ -1043,7 +1043,7 @@ export function AdminSystemView() {
       const recipients = allEmails.map(e => e.email).filter(e => !alreadySent.has(e));
 
       if (alreadySent.size > 0) {
-        addLine('info', `⏩ Skipping ${alreadySent.size} already-sent emails.`);
+        addLine('info', `Skipping ${alreadySent.size} already-sent emails.`);
       }
 
       if (recipients.length === 0) {
