@@ -392,12 +392,25 @@ export default function About() {
 
 
       {/* Control Your Distribution Section */}
-      <section className="relative overflow-hidden min-h-screen flex items-center justify-center">
-        <img 
-          src={aboutDistributionBg} 
-          alt="Control your distribution" 
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+      <section className="relative overflow-hidden min-h-screen flex items-center justify-center bg-black">
+        {(() => {
+          const [imgLoaded, setImgLoaded] = React.useState(false);
+          return (
+            <>
+              {!imgLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-white/50" />
+                </div>
+              )}
+              <img 
+                src={aboutDistributionBg} 
+                alt="Control your distribution" 
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                onLoad={() => setImgLoaded(true)}
+              />
+            </>
+          );
+        })()}
         <div className="absolute inset-0 bg-black/30" />
         <AnimatedSection>
           <h2 className="relative z-10 text-4xl md:text-6xl lg:text-7xl font-semibold text-white tracking-tight text-center">
