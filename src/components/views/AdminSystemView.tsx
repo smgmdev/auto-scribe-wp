@@ -96,6 +96,45 @@ export function AdminSystemView() {
   const [isPaused, setIsPaused] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
+  // On mount: check if a send operation was in progress (survives refresh)
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('marketing_send_control' as any)
+        .select('sending_active, sending_category, sending_started_at, paused')
+        .eq('id', 'global')
+        .single();
+      if ((data as any)?.sending_active) {
+        const cat = (data as any)?.sending_category || 'unknown';
+        const startedAt = (data as any)?.sending_started_at;
+        const startedStr = startedAt ? new Date(startedAt).toLocaleTimeString('en-GB') : '?';
+        const categoryLabel = cat === 'marketing_people' ? 'Marketing People' : cat === 'agencies' ? 'Agencies' : cat;
+        addLine('info', '');
+        addLine('info', `⚠️  A bulk send to "${categoryLabel}" was started at ${startedStr} and appears to still be in progress.`);
+        addLine('info', '   If the tab was closed, the send was interrupted. Use /marketing → Send → Continue campaign to resume.');
+        if ((data as any)?.paused) {
+          addLine('info', '   Status: PAUSED. Type "resume" to continue.');
+          setIsPaused(true);
+          pausedRef.current = true;
+        }
+        addLine('info', '');
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const setSendingActive = async (active: boolean, category?: string) => {
+    await supabase
+      .from('marketing_send_control' as any)
+      .update({
+        sending_active: active,
+        sending_category: active ? (category || null) : null,
+        sending_started_at: active ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', 'global');
+  };
+
   const setPauseState = async (paused: boolean) => {
     pausedRef.current = paused;
     setIsPaused(paused);
@@ -610,14 +649,25 @@ export function AdminSystemView() {
       }
 
       addLine('info', '');
-      addLine('info', '── UNSENT EMAILS ──');
+      addLine('info', `── UNSENT EMAILS ── (checked at ${now()})`);
       addLine('output', `  Marketing People: ${mpUnsent} unsent / ${mpTotal ?? 0} total`);
       addLine('output', `  Agencies: ${agUnsent} unsent / ${agTotal ?? 0} total`);
       addLine('output', `  Total unsent: ${mpUnsent + agUnsent}`);
       addLine('output', `  Total sent (all campaigns): ${allSentEmails.size}`);
-      if (isSending) {
+
+      // Check if sending is active (from DB, survives refresh)
+      const { data: sendCtrl } = await supabase
+        .from('marketing_send_control' as any)
+        .select('sending_active, sending_category, sending_started_at, paused')
+        .eq('id', 'global')
+        .single();
+      const ctrl = sendCtrl as any;
+      if (ctrl?.sending_active || isSending) {
+        const catLabel = ctrl?.sending_category === 'marketing_people' ? 'Marketing People' : ctrl?.sending_category === 'agencies' ? 'Agencies' : ctrl?.sending_category || '?';
+        const startedStr = ctrl?.sending_started_at ? new Date(ctrl.sending_started_at).toLocaleTimeString('en-GB') : '?';
         addLine('info', '');
-        addLine('output', `  Type "pause" to pause the current send operation.`);
+        addLine('output', `  🔄 SENDING IN PROGRESS → "${catLabel}" (started ${startedStr})${ctrl?.paused ? ' [PAUSED]' : ''}`);
+        addLine('output', `  Type "pause" / "resume" to control the operation.`);
       }
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
@@ -794,6 +844,7 @@ export function AdminSystemView() {
       const MAX_RETRIES = 3;
 
       setIsSending(true);
+      await setSendingActive(true, category);
       await setPauseState(false);
 
       for (let i = 0; i < recipients.length; i += 50) {
@@ -865,6 +916,7 @@ export function AdminSystemView() {
     } finally {
       setProcessing(false);
       setIsSending(false);
+      await setSendingActive(false);
       addLine('info', '');
       showSendMenu();
     }
@@ -989,6 +1041,7 @@ export function AdminSystemView() {
       const MAX_RETRIES = 3;
 
       setIsSending(true);
+      await setSendingActive(true, category);
       await setPauseState(false);
 
       for (let i = 0; i < recipients.length; i += 50) {
@@ -1065,13 +1118,14 @@ export function AdminSystemView() {
       addLine('output', `  Campaign ID: ${campaignId}`);
       activeCampaignIdRef.current = null;
       setIsSending(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await setSendingActive(false);
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
       addLine('info', `  Campaign ID: ${campaignId} — you can resume this send.`);
     } finally {
       setProcessing(false);
       setIsSending(false);
+      await setSendingActive(false);
       addLine('info', '');
       addLine('info', 'Enter 0 to go back to send menu.');
       setTerminalMode('send-confirm-test');
@@ -1575,8 +1629,8 @@ export function AdminSystemView() {
 
             return (
               <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words flex`}>
-                <span className="text-white/20 shrink-0 mr-2 select-none">{line.timestamp}</span>
                 <span className="flex-1">{prefix}{line.content}</span>
+                <span className="text-white/15 shrink-0 ml-3 select-none text-[10px] leading-6 tabular-nums">{line.timestamp}</span>
               </div>
             );
           })}

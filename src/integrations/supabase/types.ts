@@ -1158,6 +1158,9 @@ export type Database = {
           paused: boolean
           paused_at: string | null
           paused_by: string | null
+          sending_active: boolean
+          sending_category: string | null
+          sending_started_at: string | null
           updated_at: string
         }
         Insert: {
@@ -1165,6 +1168,9 @@ export type Database = {
           paused?: boolean
           paused_at?: string | null
           paused_by?: string | null
+          sending_active?: boolean
+          sending_category?: string | null
+          sending_started_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -1172,6 +1178,9 @@ export type Database = {
           paused?: boolean
           paused_at?: string | null
           paused_by?: string | null
+          sending_active?: boolean
+          sending_category?: string | null
+          sending_started_at?: string | null
           updated_at?: string
         }
         Relationships: []
