@@ -83,11 +83,15 @@ export function AdminSystemView() {
   const [marketingCategory, setMarketingCategory] = useState<string>('marketing_people');
 
   // Email compose state
-  const [emailSubject, setEmailSubject] = useState('');
-  const [emailHtml, setEmailHtml] = useState('');
+  const [emailSubject, setEmailSubjectState] = useState('');
+  const [emailHtml, setEmailHtmlState] = useState('');
   const [marketingListOffset, setMarketingListOffset] = useState(-1);
   const [emailPrompt, setEmailPrompt] = useState('');
   const [bulkTarget, setBulkTarget] = useState<'marketing_people' | 'agencies' | ''>('');
+
+  // Wrapper setters that keep refs in sync
+  const setEmailSubject = useCallback((v: string) => { emailSubjectRef.current = v; setEmailSubjectState(v); }, []);
+  const setEmailHtml = useCallback((v: string) => { emailHtmlRef.current = v; setEmailHtmlState(v); }, []);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
