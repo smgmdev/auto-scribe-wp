@@ -661,8 +661,7 @@ export function AdminSystemView() {
     }
   };
 
-
-    if (!emailHtml || !emailSubject) {
+  const handleSendTest = async () => {
       addLine('error', 'No email composed yet. Use option 4 to generate an email first.');
       addLine('info', '');
       showSendMenu();
