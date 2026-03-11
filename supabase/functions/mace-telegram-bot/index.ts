@@ -2035,29 +2035,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
       const wpAuthHeader = `Basic ${credentials}`;
       const baseUrl = matchedSite.url.replace(/\/+$/, '');
 
-      // Determine category based on Mace settings: image → has_image=true category, no image → has_image=false category
-      const hasImage = !!session.photoFileId;
-      let resolvedCategories: number[] = [];
-      try {
-        const { data: catRows } = await supabase
-          .from('mace_site_categories')
-          .select('category_id')
-          .eq('site_id', matchedSite.id)
-          .eq('has_image', hasImage);
-        if (catRows && catRows.length > 0) {
-          resolvedCategories = catRows.map((r: any) => r.category_id);
-        }
-      } catch (_) {}
-
-      const postBody: Record<string, unknown> = {
-        title: articleTitle,
-        content: htmlContent,
-        status: 'publish',
-        categories: resolvedCategories,
-        featured_media: 0,
-      };
-
-      // Upload photo as featured image if we have one
+      // Upload photo as featured image if we have one (BEFORE determining category)
       let featuredMediaId = 0;
       if (session.photoFileId) {
         try {
@@ -2082,7 +2060,28 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         }
       }
 
-      postBody.featured_media = featuredMediaId;
+      // Determine category based on Mace settings AFTER image upload attempt
+      // Use actual upload success (featuredMediaId > 0), not just photoFileId presence
+      const hasImage = featuredMediaId > 0;
+      let resolvedCategories: number[] = [];
+      try {
+        const { data: catRows } = await supabase
+          .from('mace_site_categories')
+          .select('category_id')
+          .eq('site_id', matchedSite.id)
+          .eq('has_image', hasImage);
+        if (catRows && catRows.length > 0) {
+          resolvedCategories = catRows.map((r: any) => r.category_id);
+        }
+      } catch (_) {}
+
+      const postBody: Record<string, unknown> = {
+        title: articleTitle,
+        content: htmlContent,
+        status: 'publish',
+        categories: resolvedCategories,
+        featured_media: featuredMediaId,
+      };
 
       const wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
         method: 'POST',
