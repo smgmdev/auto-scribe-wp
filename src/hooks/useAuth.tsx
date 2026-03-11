@@ -102,6 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Mutex to prevent concurrent refreshSession() calls — the second call would
   // get "Refresh Token Not Found" because the first already consumed the token.
   const refreshLockRef = useRef<Promise<{ success: boolean; session: Session | null }> | null>(null);
+  // Cooldown: minimum time between successive refresh calls to prevent token rotation storms
+  const lastRefreshAtRef = useRef<number>(0);
+  const REFRESH_COOLDOWN_MS = 10000; // 10 seconds between refreshes
 
   const safeRefreshSession = async (): Promise<{ success: boolean; session: Session | null }> => {
     // If a refresh is already in flight, wait for it instead of starting another
@@ -110,8 +113,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return refreshLockRef.current;
     }
 
+    // Enforce cooldown to prevent rapid token rotation storms
+    const timeSinceLastRefresh = Date.now() - lastRefreshAtRef.current;
+    if (timeSinceLastRefresh < REFRESH_COOLDOWN_MS) {
+      console.log('[Auth] safeRefreshSession: cooldown active, skipping (last refresh', Math.round(timeSinceLastRefresh / 1000), 's ago)');
+      // Return the current session instead of refreshing
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (currentSession) return { success: true, session: currentSession };
+      } catch {}
+      return { success: false, session: null };
+    }
+
     const refreshPromise = (async () => {
       try {
+        lastRefreshAtRef.current = Date.now();
         const { data, error } = await supabase.auth.refreshSession();
         if (error || !data?.session) {
           console.warn('[Auth] safeRefreshSession failed:', error?.message);
@@ -123,8 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('[Auth] safeRefreshSession error:', err);
         return { success: false, session: null };
       } finally {
-        // Clear the lock after a short delay to debounce rapid-fire calls
-        setTimeout(() => { refreshLockRef.current = null; }, 500);
+        // Clear the lock after a longer delay to prevent rapid-fire refresh storms
+        setTimeout(() => { refreshLockRef.current = null; }, 3000);
       }
     })();
 
@@ -979,6 +995,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             supabase.realtime.setAuth(refreshResult.session.access_token);
           }
           return;
+        }
+
+        // Validate token integrity: check for 'sub' claim to catch corrupted JWTs
+        // that would cause "missing sub claim" 403 errors on all API calls
+        try {
+          const tokenParts = currentSession.access_token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            if (!payload.sub) {
+              console.error('[Auth] Token health check: JWT missing sub claim! Forcing refresh...');
+              // Force a refresh by clearing cooldown
+              lastRefreshAtRef.current = 0;
+              const refreshResult = await safeRefreshSession();
+              if (refreshResult.success && refreshResult.session && tokenHealthMounted) {
+                console.log('[Auth] Token health check: recovered from corrupted JWT');
+                accessTokenRef.current = refreshResult.session.access_token;
+                setSession(refreshResult.session);
+                setUser(refreshResult.session.user);
+                supabase.realtime.setAuth(refreshResult.session.access_token);
+              } else if (tokenHealthMounted) {
+                console.error('[Auth] Token health check: cannot recover corrupted JWT');
+                toast.error('Your session encountered an error. Please log in again.', {
+                  id: 'session-corrupted',
+                  duration: 6000,
+                });
+                userInitiatedSignOutRef.current = true;
+                resetAuthState();
+                try { await supabase.auth.signOut({ scope: 'local' }); } catch {}
+              }
+              return;
+            }
+          }
+        } catch (parseErr) {
+          console.warn('[Auth] Token parse check failed:', parseErr);
         }
 
         // Session exists — check if the token is about to expire (within 2 minutes)
