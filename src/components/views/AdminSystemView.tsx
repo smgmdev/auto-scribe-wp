@@ -581,6 +581,10 @@ export function AdminSystemView() {
       addLine('output', `  Agencies: ${agUnsent} unsent / ${agTotal ?? 0} total`);
       addLine('output', `  Total unsent: ${mpUnsent + agUnsent}`);
       addLine('output', `  Total sent (all campaigns): ${allSentEmails.size}`);
+      if (isSending) {
+        addLine('info', '');
+        addLine('output', `  Type "pause" to pause the current send operation.`);
+      }
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
     } finally {
