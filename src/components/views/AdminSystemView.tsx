@@ -1166,6 +1166,7 @@ export function AdminSystemView() {
 
       setEmailHtml(data.html_body);
       setEmailSubject(subject);
+      await saveEmailTemplate(subject, data.html_body, emailPrompt);
 
       addLine('output', '✓ Email generated!');
       addLine('info', `  Subject: ${subject}`);
