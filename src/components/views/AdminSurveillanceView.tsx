@@ -451,7 +451,7 @@ export function AdminSurveillanceView() {
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
     if (data) setTradeTrajectories(data.filter(d => !isAnalyticalTitle(d.title)));
-  }, [tradeTimeFilter]);
+  }, [tradeTimeFilter, isAnalyticalTitle]);
 
   const fetchSatellites = useCallback(async () => {
     try {
