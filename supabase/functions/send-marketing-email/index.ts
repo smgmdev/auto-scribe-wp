@@ -72,7 +72,7 @@ serve(async (req) => {
       });
     }
 
-    const userId = user.id;
+    // userId already set above
 
     // Verify admin role
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
