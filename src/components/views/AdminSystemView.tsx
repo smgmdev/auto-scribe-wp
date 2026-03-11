@@ -1206,6 +1206,7 @@ export function AdminSystemView() {
       if (data?.error) throw new Error(data.error);
 
       setEmailHtml(data.html_body);
+      await saveEmailTemplate(emailSubject, data.html_body, emailPrompt);
 
       addLine('output', '✓ Email updated!');
       addLine('info', '');
