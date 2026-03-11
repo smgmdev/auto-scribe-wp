@@ -896,6 +896,7 @@ export function AdminSystemView() {
 
       if (allEmails.length === 0) {
         addLine('error', `No emails found in ${categoryLabel}.`);
+        sendingLockRef.current = false;
         setProcessing(false);
         showSendMenu();
         return;
