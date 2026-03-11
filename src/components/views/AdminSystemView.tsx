@@ -80,6 +80,7 @@ export function AdminSystemView() {
   // Email compose state
   const [emailSubject, setEmailSubject] = useState('');
   const [emailHtml, setEmailHtml] = useState('');
+  const [marketingListOffset, setMarketingListOffset] = useState(-1);
   const [emailPrompt, setEmailPrompt] = useState('');
   const [bulkTarget, setBulkTarget] = useState<'marketing_people' | 'agencies' | ''>('');
 
@@ -267,33 +268,61 @@ export function AdminSystemView() {
     })();
   };
 
-  const handleMarketingList = async (category: string) => {
+  const handleMarketingList = async (category: string, offset = 0) => {
     setTerminalMode('marketing-list');
     setProcessing(true);
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
-    addLine('info', `Fetching ${categoryLabel}...`);
+    const pageSize = 1000;
+
+    if (offset === 0) {
+      addLine('info', `Fetching ${categoryLabel}...`);
+    }
 
     try {
+      // Get total count
+      const { count: totalCount } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', category);
+
+      const total = totalCount ?? 0;
+
       const { data, error } = await supabase
         .from('marketing_emails')
         .select('email, created_at')
         .eq('category', category)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .range(offset, offset + pageSize - 1);
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        addLine('info', `No emails in ${categoryLabel}.`);
+        if (offset === 0) {
+          addLine('info', `No emails in ${categoryLabel}.`);
+        } else {
+          addLine('info', 'No more emails.');
+        }
       } else {
-        addLine('info', '');
-        addLine('info', `── ${categoryLabel} (${data.length}) ──`);
+        if (offset === 0) {
+          addLine('info', '');
+          addLine('info', `── ${categoryLabel} (${total}) ──`);
+        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data.forEach((row: any, i: number) => {
-          addLine('output', `  ${i + 1}. ${row.email}`);
+          addLine('output', `  ${offset + i + 1}. ${row.email}`);
         });
+
+        const loaded = offset + data.length;
+        if (loaded < total) {
+          setMarketingListOffset(loaded);
+          addLine('info', '');
+          addLine('info', `Showing ${loaded} of ${total}. Enter "more" to load next ${Math.min(pageSize, total - loaded)}, or 0 to go back.`);
+        } else {
+          setMarketingListOffset(-1);
+          addLine('info', '');
+          addLine('info', `All ${total} emails loaded. Enter 0 to go back.`);
+        }
       }
-      addLine('info', '');
-      addLine('info', 'Enter 0 to go back.');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
@@ -582,8 +611,16 @@ export function AdminSystemView() {
     // --- Sub-modes ---
 
     if (terminalMode === 'marketing-list') {
-      if (trimmed === '0') { showCategoryMenu('view'); return; }
-      addLine('error', 'Enter 0 to go back.');
+      if (trimmed === '0') { setMarketingListOffset(-1); showCategoryMenu('view'); return; }
+      if (trimmed.toLowerCase() === 'more' && marketingListOffset > 0) {
+        await handleMarketingList(marketingCategory, marketingListOffset);
+        return;
+      }
+      if (marketingListOffset > 0) {
+        addLine('error', 'Enter "more" to load next page, or 0 to go back.');
+      } else {
+        addLine('error', 'Enter 0 to go back.');
+      }
       return;
     }
 
