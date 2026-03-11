@@ -444,13 +444,13 @@ export function AdminSurveillanceView() {
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
     const { data } = await supabase
       .from('missile_alerts')
-      .select('id, origin_country_code, destination_country_code')
+      .select('id, title, origin_country_code, destination_country_code')
       .eq('active', true)
       .eq('severity', 'trade')
       .gte('published_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
-    if (data) setTradeTrajectories(data);
+    if (data) setTradeTrajectories(data.filter(d => !isAnalyticalTitle(d.title)));
   }, [tradeTimeFilter]);
 
   const fetchSatellites = useCallback(async () => {
