@@ -149,7 +149,7 @@ serve(async (req) => {
     for (const recipient of recipients) {
       try {
         const unsubToken = await generateUnsubToken(recipient);
-        const unsubUrl = `${supabaseUrl}/functions/v1/marketing-unsubscribe?email=${encodeURIComponent(recipient)}&token=${unsubToken}`;
+        const unsubUrl = `https://stankevicius.co.uk/unsubscribe?email=${encodeURIComponent(recipient)}&token=${unsubToken}`;
 
         // Inject unsubscribe link into HTML body
         let finalHtml = html_body;
