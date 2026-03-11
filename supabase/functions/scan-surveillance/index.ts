@@ -1160,7 +1160,7 @@ Deno.serve(async (req) => {
     const { data: roleData } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('role', 'admin')
       .maybeSingle();
     
@@ -1168,7 +1168,7 @@ Deno.serve(async (req) => {
     const { data: profileData } = await supabase
       .from('profiles')
       .select('precision_enabled')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
     
     const isAdmin = !!roleData;
