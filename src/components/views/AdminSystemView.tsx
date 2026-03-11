@@ -833,6 +833,7 @@ export function AdminSystemView() {
       const MAX_RETRIES = 3;
 
       setIsSending(true);
+      await setSendingActive(true, category);
       await setPauseState(false);
 
       for (let i = 0; i < recipients.length; i += 50) {
