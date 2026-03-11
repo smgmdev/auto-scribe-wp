@@ -1060,6 +1060,7 @@ export function AdminSystemView() {
   };
 
   const executeBulkSend = async (category: string) => {
+    sendingCategoryRef.current = category;
     setProcessing(true);
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
     addLine('info', `Fetching ${categoryLabel} recipients...`);
