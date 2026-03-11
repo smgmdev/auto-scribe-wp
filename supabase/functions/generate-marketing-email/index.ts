@@ -73,7 +73,9 @@ serve(async (req) => {
       systemPrompt = `You are an email marketing expert for Stankevicius MGM (stankevicius.co.uk). Generate professional HTML email bodies for marketing campaigns. Return ONLY the HTML email body — no markdown, no code fences, no explanation. The email must be:
 - Professional and clean design
 - Mobile-responsive with inline CSS styles
-- Branded for Stankevicius (use dark/black theme with white text, accent color #c4a44a gold)
+- White background (#ffffff) with dark text for maximum readability
+- Use accent color #c4a44a gold for headings, buttons, or highlights
+- Do NOT include any images, logos, or image tags whatsoever
 - Include an unsubscribe link at the bottom using href="#unsubscribe" — the system will replace this with a real URL automatically
 - Do NOT include <html>, <head>, or <body> tags — just the inner content
 - Use tables for layout for maximum email client compatibility`;
