@@ -34,13 +34,14 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
-    // Verify the caller's JWT
+    // Verify the caller's JWT using getClaims
     const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: authError } = await supabaseAuth.auth.getClaims(token);
 
-    if (authError || !user) {
+    if (authError || !claimsData?.claims) {
       logStep("Auth failed", { error: authError?.message });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -48,14 +49,16 @@ serve(async (req) => {
       });
     }
 
+    const userId = claimsData.claims.sub as string;
+
     // Verify admin role
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
-      _user_id: user.id,
+      _user_id: userId,
       _role: "admin",
     });
 
     if (!isAdmin) {
-      logStep("Non-admin attempt", { userId: user.id });
+      logStep("Non-admin attempt", { userId });
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
