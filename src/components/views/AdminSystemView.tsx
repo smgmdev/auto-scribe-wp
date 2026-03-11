@@ -1107,7 +1107,7 @@ export function AdminSystemView() {
       addLine('output', `  Campaign ID: ${campaignId}`);
       activeCampaignIdRef.current = null;
       setIsSending(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await setSendingActive(false);
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
       addLine('info', `  Campaign ID: ${campaignId} — you can resume this send.`);
