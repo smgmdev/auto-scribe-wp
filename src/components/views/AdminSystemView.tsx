@@ -905,6 +905,7 @@ export function AdminSystemView() {
     } finally {
       setProcessing(false);
       setIsSending(false);
+      await setSendingActive(false);
       addLine('info', '');
       showSendMenu();
     }
