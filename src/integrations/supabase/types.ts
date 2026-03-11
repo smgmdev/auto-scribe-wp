@@ -1152,6 +1152,30 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_send_control: {
+        Row: {
+          id: string
+          paused: boolean
+          paused_at: string | null
+          paused_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          paused?: boolean
+          paused_at?: string | null
+          paused_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          paused?: boolean
+          paused_at?: string | null
+          paused_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       media_site_submissions: {
         Row: {
           admin_notes: string | null

@@ -65,6 +65,21 @@ serve(async (req) => {
       });
     }
 
+    // Check if sending is paused in DB
+    const { data: controlRow } = await supabaseAdmin
+      .from("marketing_send_control")
+      .select("paused")
+      .eq("id", "global")
+      .single();
+
+    if (controlRow?.paused) {
+      logStep("Sending is paused - rejecting request");
+      return new Response(JSON.stringify({ error: "Sending is paused", paused: true }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { recipients, subject, html_body, from_name } = await req.json();
 
     // Validate inputs
