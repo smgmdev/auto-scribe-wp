@@ -1062,7 +1062,8 @@ export function AdminSystemView() {
         addLine('info', '(e.g. "Announce our new PR distribution service with special launch pricing")');
         return;
       }
-      if (trimmed === '5' && emailHtml && emailSubject) {
+      if (trimmed === '5') { showCampaignMenu(); return; }
+      if (trimmed === '6' && emailHtml && emailSubject) {
         setEmailSubject('');
         setEmailHtml('');
         setEmailPrompt('');
@@ -1070,7 +1071,7 @@ export function AdminSystemView() {
         showSendMenu(true);
         return;
       }
-      addLine('error', `Invalid option. Enter 1-${emailHtml && emailSubject ? '5' : '4'}, or 0 to go back.`);
+      addLine('error', `Invalid option. Enter 1-${emailHtml && emailSubject ? '6' : '5'}, or 0 to go back.`);
       return;
     }
 
