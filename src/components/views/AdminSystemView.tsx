@@ -950,8 +950,8 @@ export function AdminSystemView() {
           try {
             const { data, error } = await invokeSendMarketingEmail({
               recipients: batch,
-              subject: emailSubject,
-              html_body: emailHtml,
+              subject: subj,
+              html_body: html,
               campaign_id: campaignId,
             });
 
