@@ -987,12 +987,10 @@ export function AdminSystemView() {
     addLine('info', 'Sending test email to business@stankeviciusmgm.com...');
 
     try {
-      const { data, error } = await supabase.functions.invoke('send-marketing-email', {
-        body: {
-          recipients: ['business@stankeviciusmgm.com'],
-          subject: emailSubject,
-          html_body: emailHtml,
-        },
+      const { data, error } = await invokeSendMarketingEmail({
+        recipients: ['business@stankeviciusmgm.com'],
+        subject: emailSubject,
+        html_body: emailHtml,
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
