@@ -1575,8 +1575,8 @@ export function AdminSystemView() {
 
             return (
               <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words flex`}>
-                <span className="text-white/20 shrink-0 mr-2 select-none">{line.timestamp}</span>
                 <span className="flex-1">{prefix}{line.content}</span>
+                <span className="text-white/15 shrink-0 ml-3 select-none text-[10px] leading-6 tabular-nums">{line.timestamp}</span>
               </div>
             );
           })}
