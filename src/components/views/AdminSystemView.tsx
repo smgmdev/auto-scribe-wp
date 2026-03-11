@@ -1006,6 +1006,7 @@ export function AdminSystemView() {
     } finally {
       setProcessing(false);
       setIsSending(false);
+      sendingCategoryRef.current = null;
       await setSendingActive(false);
       addLine('info', '');
       showSendMenu();
