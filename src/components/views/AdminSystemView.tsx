@@ -727,7 +727,7 @@ export function AdminSystemView() {
         const catLabel = ctrl?.sending_category === 'marketing_people' ? 'Marketing People' : ctrl?.sending_category === 'agencies' ? 'Agencies' : ctrl?.sending_category || '?';
         const startedStr = ctrl?.sending_started_at ? new Date(ctrl.sending_started_at).toLocaleTimeString('en-GB') : '?';
         addLine('info', '');
-        addLine('output', `  🔄 SENDING IN PROGRESS → "${catLabel}" (started ${startedStr})${ctrl?.paused ? ' [PAUSED]' : ''}`);
+        addLine('output', `  SENDING IN PROGRESS — "${catLabel}" (started ${startedStr})${ctrl?.paused ? ' [PAUSED]' : ''}`);
         addLine('output', `  Type "pause" / "resume" to control the operation.`);
       }
     } catch (err: any) {
