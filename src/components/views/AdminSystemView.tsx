@@ -451,7 +451,7 @@ export function AdminSystemView() {
   const handleMarketingImport = async (sheetUrl: string, category: string) => {
     setProcessing(true);
     addLine('info', '');
-    addLine('info', '⏳ Importing emails from Google Sheet...');
+    addLine('info', 'Importing emails from Google Sheet...');
 
     try {
       const { data, error } = await supabase.functions.invoke('import-marketing-emails', {
