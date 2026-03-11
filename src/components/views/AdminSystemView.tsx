@@ -1013,6 +1013,7 @@ export function AdminSystemView() {
       addLine('info', `  Campaign ID: ${campaignId} — you can resume this send.`);
     } finally {
       setProcessing(false);
+      setIsSending(false);
       addLine('info', '');
       addLine('info', 'Enter 0 to go back to send menu.');
       setTerminalMode('send-confirm-test');
