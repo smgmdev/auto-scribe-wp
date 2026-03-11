@@ -1734,16 +1734,24 @@ export function AdminSystemView() {
           <span className="text-green-400 animate-pulse ml-2 mt-1">●</span>
         )}
         {isSending && (
-          <button
-            onClick={togglePause}
-            className={`ml-2 mt-0.5 px-3 py-0.5 text-xs font-mono rounded shrink-0 ${
-              isPaused
-                ? 'bg-green-600 hover:bg-green-500 text-white'
-                : 'bg-yellow-600 hover:bg-yellow-500 text-black'
-            }`}
-          >
-            {isPaused ? '▶ Resume' : '⏸ Pause'}
-          </button>
+          <>
+            <button
+              onClick={togglePause}
+              className={`ml-2 mt-0.5 px-3 py-0.5 text-xs font-mono rounded shrink-0 ${
+                isPaused
+                  ? 'bg-green-600 hover:bg-green-500 text-white'
+                  : 'bg-yellow-600 hover:bg-yellow-500 text-black'
+              }`}
+            >
+              {isPaused ? '▶ Resume' : '⏸ Pause'}
+            </button>
+            <button
+              onClick={refreshSending}
+              className="ml-1 mt-0.5 px-3 py-0.5 text-xs font-mono rounded shrink-0 bg-blue-600 hover:bg-blue-500 text-white"
+            >
+              ↻ Refresh
+            </button>
+          </>
         )}
       </div>
     </div>
