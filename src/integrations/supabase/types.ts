@@ -1103,18 +1103,21 @@ export type Database = {
       }
       marketing_emails: {
         Row: {
+          category: string
           created_at: string
           email: string
           id: string
           source_sheet_url: string | null
         }
         Insert: {
+          category?: string
           created_at?: string
           email: string
           id?: string
           source_sheet_url?: string | null
         }
         Update: {
+          category?: string
           created_at?: string
           email?: string
           id?: string

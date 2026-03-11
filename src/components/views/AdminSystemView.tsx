@@ -44,7 +44,7 @@ interface TerminalLine {
 
 let lineId = Date.now();
 
-type TerminalMode = 'default' | 'marketing' | 'marketing-list' | 'marketing-import';
+type TerminalMode = 'default' | 'marketing' | 'marketing-categories' | 'marketing-list' | 'marketing-import-category' | 'marketing-import';
 
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
@@ -59,6 +59,7 @@ export function AdminSystemView() {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
   const [terminalMode, setTerminalMode] = useState<TerminalMode>('default');
+  const [marketingCategory, setMarketingCategory] = useState<string>('marketing_people');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -175,37 +176,61 @@ export function AdminSystemView() {
     addLine('info', '═══════════════════════════════════════');
     addLine('info', '');
 
-    // Fetch count
     (async () => {
-      const { count, error } = await supabase
+      const { count: totalCount, error: totalErr } = await supabase
         .from('marketing_emails')
         .select('*', { count: 'exact', head: true });
-      const total = error ? '?' : (count ?? 0);
+      const total = totalErr ? '?' : (totalCount ?? 0);
       addLine('output', `  1. View email marketing list [${total} emails]`);
       addLine('output', '  2. Add new emails from Google Sheet');
       addLine('info', '');
-      addLine('info', 'Enter option number:');
+      addLine('info', 'Enter option number (0 to exit):');
     })();
   };
 
-  const handleMarketingList = async () => {
+  const showCategoryMenu = (action: 'view' | 'import') => {
+    const mode = action === 'view' ? 'marketing-categories' : 'marketing-import-category';
+    setTerminalMode(mode);
+    addLine('info', '');
+    addLine('info', 'Select category:');
+    addLine('info', '');
+
+    (async () => {
+      const { count: mpCount } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', 'marketing_people');
+      const { count: agCount } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', 'agencies');
+      addLine('output', `  1. Marketing People List [${mpCount ?? 0} emails]`);
+      addLine('output', `  2. Agencies [${agCount ?? 0} emails]`);
+      addLine('info', '');
+      addLine('info', 'Enter option number (0 to go back):');
+    })();
+  };
+
+  const handleMarketingList = async (category: string) => {
     setTerminalMode('marketing-list');
     setProcessing(true);
-    addLine('info', 'Fetching marketing email list...');
+    const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
+    addLine('info', `Fetching ${categoryLabel}...`);
 
     try {
       const { data, error } = await supabase
         .from('marketing_emails')
         .select('email, created_at')
+        .eq('category', category)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        addLine('info', 'No emails in marketing list.');
+        addLine('info', `No emails in ${categoryLabel}.`);
       } else {
         addLine('info', '');
-        addLine('info', `── Marketing Emails (${data.length}) ──`);
+        addLine('info', `── ${categoryLabel} (${data.length}) ──`);
         data.forEach((row: any, i: number) => {
           addLine('output', `  ${i + 1}. ${row.email}`);
         });
@@ -220,14 +245,14 @@ export function AdminSystemView() {
     }
   };
 
-  const handleMarketingImport = async (sheetUrl: string) => {
+  const handleMarketingImport = async (sheetUrl: string, category: string) => {
     setProcessing(true);
     addLine('info', '');
     addLine('info', '⏳ Importing emails from Google Sheet...');
 
     try {
       const { data, error } = await supabase.functions.invoke('import-marketing-emails', {
-        body: { sheet_url: sheetUrl },
+        body: { sheet_url: sheetUrl, category },
       });
 
       if (error) throw error;
@@ -235,7 +260,8 @@ export function AdminSystemView() {
       if (data?.error) {
         addLine('error', `✗ ${data.error}`);
       } else {
-        addLine('output', `✓ Import complete!`);
+        const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
+        addLine('output', `✓ Import complete! (${categoryLabel})`);
         addLine('output', `  Total found: ${data.total_found}`);
         addLine('output', `  New added: ${data.added}`);
         addLine('output', `  Duplicates skipped: ${data.skipped}`);
@@ -262,10 +288,54 @@ export function AdminSystemView() {
     // Handle sub-modes first
     if (terminalMode === 'marketing-list') {
       if (trimmed === '0') {
-        showMarketingMenu();
+        showCategoryMenu('view');
         return;
       }
       addLine('error', 'Enter 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'marketing-categories') {
+      if (trimmed === '0') {
+        showMarketingMenu();
+        return;
+      }
+      if (trimmed === '1') {
+        setMarketingCategory('marketing_people');
+        await handleMarketingList('marketing_people');
+        return;
+      }
+      if (trimmed === '2') {
+        setMarketingCategory('agencies');
+        await handleMarketingList('agencies');
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1, 2, or 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'marketing-import-category') {
+      if (trimmed === '0') {
+        showMarketingMenu();
+        return;
+      }
+      if (trimmed === '1') {
+        setMarketingCategory('marketing_people');
+        setTerminalMode('marketing-import');
+        addLine('info', '');
+        addLine('info', 'Importing to: Marketing People List');
+        addLine('info', 'Paste Google Sheet URL:');
+        return;
+      }
+      if (trimmed === '2') {
+        setMarketingCategory('agencies');
+        setTerminalMode('marketing-import');
+        addLine('info', '');
+        addLine('info', 'Importing to: Agencies');
+        addLine('info', 'Paste Google Sheet URL:');
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1, 2, or 0 to go back.');
       return;
     }
 
@@ -274,9 +344,8 @@ export function AdminSystemView() {
         showMarketingMenu();
         return;
       }
-      // Expecting a Google Sheets URL
       if (trimmed.includes('docs.google.com/spreadsheets') || trimmed.includes('sheets.google.com')) {
-        await handleMarketingImport(trimmed);
+        await handleMarketingImport(trimmed, marketingCategory);
         return;
       }
       addLine('error', 'Please paste a valid Google Sheets URL, or enter 0 to go back.');
@@ -285,13 +354,11 @@ export function AdminSystemView() {
 
     if (terminalMode === 'marketing') {
       if (trimmed === '1') {
-        await handleMarketingList();
+        showCategoryMenu('view');
         return;
       }
       if (trimmed === '2') {
-        setTerminalMode('marketing-import');
-        addLine('info', '');
-        addLine('info', 'Paste Google Sheet URL:');
+        showCategoryMenu('import');
         return;
       }
       if (trimmed === '0') {

@@ -58,7 +58,7 @@ serve(async (req) => {
       });
     }
 
-    const { sheet_url } = await req.json();
+    const { sheet_url, category } = await req.json();
 
     if (!sheet_url || typeof sheet_url !== "string") {
       return new Response(JSON.stringify({ error: "sheet_url is required" }), {
@@ -66,6 +66,9 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const validCategories = ["marketing_people", "agencies"];
+    const selectedCategory = validCategories.includes(category) ? category : "marketing_people";
 
     // Convert Google Sheets URL to CSV export URL
     // Support formats:
@@ -120,6 +123,7 @@ serve(async (req) => {
       const batch = uniqueEmails.slice(i, i + batchSize).map(email => ({
         email,
         source_sheet_url: sheet_url,
+        category: selectedCategory,
       }));
 
       const { data, error } = await supabaseAdmin

@@ -1,0 +1,1 @@
+ALTER TABLE public.marketing_emails ADD COLUMN category text NOT NULL DEFAULT 'marketing_people';
