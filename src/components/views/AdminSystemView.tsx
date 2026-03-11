@@ -859,7 +859,7 @@ export function AdminSystemView() {
             else if (line.type === 'info') { colorClass = 'text-white/40'; }
 
             return (
-              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre`}>
+              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words`}>
                 {prefix}{line.content}
               </div>
             );
