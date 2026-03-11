@@ -102,6 +102,7 @@ export function AdminSystemView() {
   const sendingCategoryRef = useRef<string | null>(null);
   const emailSubjectRef = useRef('');
   const emailHtmlRef = useRef('');
+  const sendingLockRef = useRef(false);
 
   // On mount: restore email template + auto-resume if a send was in progress
   useEffect(() => {
