@@ -1423,7 +1423,7 @@ export function AdminSystemView() {
         showMarketingMenu();
         break;
       case '/clear':
-        setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.' }]);
+        setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.', timestamp: now() }]);
         setExpandedUsers(new Set());
         setTerminalMode('default');
         break;
