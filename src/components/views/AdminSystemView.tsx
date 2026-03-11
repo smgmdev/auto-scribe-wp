@@ -962,6 +962,23 @@ export function AdminSystemView() {
       return;
     }
 
+    // Campaign sub-modes
+    if (terminalMode === 'campaign-menu') {
+      if (trimmed === '0') { showSendMenu(); return; }
+      if (trimmed === '1') { await handleCampaignLists(); return; }
+      if (trimmed === '2') { await handleCampaignSent(); return; }
+      if (trimmed === '3') { await handleCampaignUnsent(); return; }
+      if (trimmed === '4') { handleCampaignTemplate(); return; }
+      addLine('error', 'Invalid option. Enter 1-4, or 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'campaign-result') {
+      if (trimmed === '0') { showCampaignMenu(); return; }
+      addLine('error', 'Enter 0 to go back.');
+      return;
+    }
+
     // Send email sub-modes
     if (terminalMode === 'send-confirm-test') {
       if (trimmed === '0') { showSendMenu(); return; }
