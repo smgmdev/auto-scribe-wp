@@ -354,7 +354,7 @@ export function AdminSurveillanceView() {
     })();
   }, [hasLoaded, fetchLatestScan, runScan]);
 
-  // Shared filter: skip analytical/commentary headlines that aren't real attacks
+  // Shared filter: skip analytical/commentary and human-interest headlines that aren't real attacks
   const isAnalyticalTitle = useCallback((title: string) => {
     const t = title.toLowerCase();
     const patterns = [
@@ -372,6 +372,7 @@ export function AdminSurveillanceView() {
       'how to', 'what we know', 'explained', 'here\'s what', 'here is what',
       'takeaways', 'key points', 'in focus', 'in review', 'assessment',
       'superiority', 'deterrence', 'intercept rate', 'capability gap',
+      'stuck in', 'find a way back', 'way back to', 'describes life under', 'describes life in', 'american stuck',
     ];
     if (t.includes('?')) return true;
     return patterns.some(p => t.includes(p));
