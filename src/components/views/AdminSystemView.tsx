@@ -62,7 +62,8 @@ type TerminalMode =
   | 'generate-preview'
   | 'generate-edit'
   | 'campaign-menu'
-  | 'campaign-result';
+  | 'campaign-result'
+  | 'continue-campaign';
 
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
@@ -589,6 +590,89 @@ export function AdminSystemView() {
     setTerminalMode('campaign-result');
   };
 
+  const showGeneratePreviewMenu = () => {
+    addLine('info', '');
+    addLine('info', '── What would you like to do? ──');
+    addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
+    addLine('output', '  2. Send bulk to Marketing People List');
+    addLine('output', '  3. Send bulk to Agencies');
+    addLine('output', '  4. Edit email (provide instructions)');
+    addLine('output', '  5. Regenerate email');
+    addLine('output', '  6. Continue campaign (send to unsent only)');
+    addLine('info', '');
+    addLine('info', 'Enter option number (0 to go back to send menu):');
+    setTerminalMode('generate-preview');
+  };
+
+  const showContinueCampaignMenu = async () => {
+    setProcessing(true);
+    addLine('info', '⏳ Checking unsent recipients...');
+    try {
+      // Get all sent emails across all campaigns
+      let allSentEmails = new Set<string>();
+      let sentOffset = 0;
+      while (true) {
+        const { data: sentBatch } = await supabase
+          .from('marketing_email_sends')
+          .select('email')
+          .range(sentOffset, sentOffset + 999);
+        if (!sentBatch || sentBatch.length === 0) break;
+        sentBatch.forEach(s => allSentEmails.add(s.email));
+        if (sentBatch.length < 1000) break;
+        sentOffset += 1000;
+      }
+
+      // Count unsent per category
+      let mpUnsent = 0;
+      let agUnsent = 0;
+      let offset = 0;
+      while (true) {
+        const { data: batch } = await supabase
+          .from('marketing_emails')
+          .select('email, category')
+          .range(offset, offset + 999);
+        if (!batch || batch.length === 0) break;
+        for (const row of batch) {
+          if (!allSentEmails.has(row.email)) {
+            if (row.category === 'marketing_people') mpUnsent++;
+            else if (row.category === 'agencies') agUnsent++;
+          }
+        }
+        if (batch.length < 1000) break;
+        offset += 1000;
+      }
+
+      addLine('info', '');
+      addLine('info', '── CONTINUE CAMPAIGN (unsent only) ──');
+      addLine('output', `  1. Marketing People (${mpUnsent} unsent)`);
+      addLine('output', `  2. Agencies (${agUnsent} unsent)`);
+      if (mpUnsent === 0 && agUnsent === 0) {
+        addLine('info', '');
+        addLine('output', '  ✓ All emails have been sent across all campaigns!');
+      }
+      addLine('info', '');
+      addLine('info', 'Enter option number (0 to go back):');
+      setTerminalMode('continue-campaign');
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+      showGeneratePreviewMenu();
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const executeContinueCampaign = async (category: string) => {
+    if (!emailHtml || !emailSubject) {
+      addLine('error', 'No email composed yet. Use option 4 to generate an email first.');
+      showGeneratePreviewMenu();
+      return;
+    }
+    // Use a deterministic campaign ID based on subject (not timestamp) so dedup works across sessions
+    const campaignId = activeCampaignIdRef.current || `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
+    activeCampaignIdRef.current = campaignId;
+    await executeBulkSend(category);
+  };
+
   const handleSendTest = async () => {
     if (!emailHtml || !emailSubject) {
       addLine('error', 'No email composed yet. Use option 4 to generate an email first.');
@@ -809,6 +893,7 @@ export function AdminSystemView() {
       addLine('output', '  3. Send bulk to Agencies');
       addLine('output', '  4. Edit email (provide instructions)');
       addLine('output', '  5. Regenerate email');
+      addLine('output', '  6. Continue campaign (send to unsent only)');
       addLine('info', '');
       addLine('info', 'Enter option number (0 to go back to send menu):');
       setTerminalMode('generate-preview');
@@ -846,6 +931,7 @@ export function AdminSystemView() {
       addLine('output', '  3. Send bulk to Agencies');
       addLine('output', '  4. Edit email (provide instructions)');
       addLine('output', '  5. Regenerate email');
+      addLine('output', '  6. Continue campaign (send to unsent only)');
       addLine('info', '');
       addLine('info', 'Enter option number (0 to go back to send menu):');
       setTerminalMode('generate-preview');
@@ -979,6 +1065,14 @@ export function AdminSystemView() {
       return;
     }
 
+    if (terminalMode === 'continue-campaign') {
+      if (trimmed === '0') { showGeneratePreviewMenu(); return; }
+      if (trimmed === '1') { await executeContinueCampaign('marketing_people'); return; }
+      if (trimmed === '2') { await executeContinueCampaign('agencies'); return; }
+      addLine('error', 'Invalid option. Enter 1, 2, or 0 to go back.');
+      return;
+    }
+
     // Send email sub-modes
     if (terminalMode === 'send-confirm-test') {
       if (trimmed === '0') { showSendMenu(); return; }
@@ -1015,16 +1109,7 @@ export function AdminSystemView() {
     if (terminalMode === 'generate-edit') {
       if (trimmed === '0') {
         // Show preview menu again
-        addLine('info', '');
-        addLine('info', '── What would you like to do? ──');
-        addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
-        addLine('output', '  2. Send bulk to Marketing People List');
-        addLine('output', '  3. Send bulk to Agencies');
-        addLine('output', '  4. Edit email (provide instructions)');
-        addLine('output', '  5. Regenerate email');
-        addLine('info', '');
-        addLine('info', 'Enter option number (0 to go back to send menu):');
-        setTerminalMode('generate-preview');
+        showGeneratePreviewMenu();
         return;
       }
       await handleEditEmail(trimmed);
@@ -1046,7 +1131,11 @@ export function AdminSystemView() {
         await handleGenerateEmail(emailPrompt, emailSubject);
         return;
       }
-      addLine('error', 'Invalid option. Enter 1-5, or 0 to go back.');
+      if (trimmed === '6') {
+        showContinueCampaignMenu();
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1-6, or 0 to go back.');
       return;
     }
 
