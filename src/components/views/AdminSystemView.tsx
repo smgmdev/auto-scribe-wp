@@ -792,7 +792,15 @@ export function AdminSystemView() {
         addLine('info', '(e.g. "Announce our new PR distribution service with special launch pricing")');
         return;
       }
-      addLine('error', 'Invalid option. Enter 1-4, or 0 to go back.');
+      if (trimmed === '5' && emailHtml && emailSubject) {
+        setEmailSubject('');
+        setEmailHtml('');
+        setEmailPrompt('');
+        addLine('output', '✓ Saved email cleared.');
+        showSendMenu(true);
+        return;
+      }
+      addLine('error', `Invalid option. Enter 1-${emailHtml && emailSubject ? '5' : '4'}, or 0 to go back.`);
       return;
     }
 
