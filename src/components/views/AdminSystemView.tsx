@@ -490,7 +490,6 @@ export function AdminSystemView() {
       }
       const emails = allEmails;
 
-      if (fetchErr) throw fetchErr;
       if (!emails || emails.length === 0) {
         addLine('error', `No emails found in ${categoryLabel}.`);
         setTerminalMode('send-menu');
