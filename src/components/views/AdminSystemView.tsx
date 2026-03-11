@@ -855,6 +855,11 @@ export function AdminSystemView() {
   };
 
   const executeContinueCampaign = async (category: string) => {
+    // Prevent concurrent executions
+    if (sendingLockRef.current) {
+      addLine('info', 'Send loop already running. Skipping duplicate invocation.');
+      return;
+    }
     const subj = emailSubjectRef.current || emailSubject;
     const html = emailHtmlRef.current || emailHtml;
     if (!html || !subj) {
@@ -862,6 +867,7 @@ export function AdminSystemView() {
       showGeneratePreviewMenu();
       return;
     }
+    sendingLockRef.current = true;
     sendingCategoryRef.current = category;
     // Use a deterministic campaign ID for tracking new sends
     const campaignId = `${subj.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
