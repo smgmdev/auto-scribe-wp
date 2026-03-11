@@ -1173,7 +1173,20 @@ export function AdminSystemView() {
     }
     if (trimmed.toLowerCase() === 'resume') {
       await setPauseState(false);
-      addLine('info', '▶️  Sending resumed across all tabs/sessions.');
+      if (isSending) {
+        addLine('info', '▶️  Sending resumed — active loop will continue.');
+      } else if (emailHtml && emailSubject) {
+        addLine('info', '▶️  Sending resumed. Starting send to unsent recipients...');
+        // Auto-start continue campaign for both categories
+        const autoResume = async () => {
+          for (const cat of ['marketing_people', 'agencies'] as const) {
+            await executeContinueCampaign(cat);
+          }
+        };
+        autoResume();
+      } else {
+        addLine('info', '▶️  Pause cleared. No email template loaded — go to /marketing and set up a campaign first.');
+      }
       return;
     }
 
