@@ -175,6 +175,15 @@ export function AdminSystemView() {
     }
   };
 
+  const refreshSending = async () => {
+    addLine('info', 'Refreshing session and restarting send loop...');
+    await setPauseState(true);
+    await supabase.auth.refreshSession();
+    await new Promise(r => setTimeout(r, 500));
+    await setPauseState(false);
+    addLine('info', 'Session refreshed. Sending resumed.');
+  };
+
   const checkDbPaused = async (): Promise<boolean> => {
     const { data } = await supabase
       .from('marketing_send_control' as any)
