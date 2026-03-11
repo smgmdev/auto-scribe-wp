@@ -95,6 +95,9 @@ export function AdminSystemView() {
   const pausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const sendingCategoryRef = useRef<string | null>(null);
+  const emailSubjectRef = useRef('');
+  const emailHtmlRef = useRef('');
 
   // On mount: restore email template + check if a send was in progress
   useEffect(() => {
