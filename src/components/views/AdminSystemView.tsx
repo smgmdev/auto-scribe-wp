@@ -83,11 +83,15 @@ export function AdminSystemView() {
   const [marketingCategory, setMarketingCategory] = useState<string>('marketing_people');
 
   // Email compose state
-  const [emailSubject, setEmailSubject] = useState('');
-  const [emailHtml, setEmailHtml] = useState('');
+  const [emailSubject, setEmailSubjectState] = useState('');
+  const [emailHtml, setEmailHtmlState] = useState('');
   const [marketingListOffset, setMarketingListOffset] = useState(-1);
   const [emailPrompt, setEmailPrompt] = useState('');
   const [bulkTarget, setBulkTarget] = useState<'marketing_people' | 'agencies' | ''>('');
+
+  // Wrapper setters that keep refs in sync
+  const setEmailSubject = useCallback((v: string) => { emailSubjectRef.current = v; setEmailSubjectState(v); }, []);
+  const setEmailHtml = useCallback((v: string) => { emailHtmlRef.current = v; setEmailHtmlState(v); }, []);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -95,39 +99,54 @@ export function AdminSystemView() {
   const pausedRef = useRef(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const sendingCategoryRef = useRef<string | null>(null);
+  const emailSubjectRef = useRef('');
+  const emailHtmlRef = useRef('');
 
-  // On mount: restore email template + check if a send was in progress
+  // On mount: restore email template + auto-resume if a send was in progress
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       const { data } = await supabase
         .from('marketing_send_control' as any)
         .select('sending_active, sending_category, sending_started_at, paused, email_subject, email_html, email_prompt')
         .eq('id', 'global')
         .single();
+      if (cancelled) return;
       const d = data as any;
       // Restore saved email template
       if (d?.email_subject) setEmailSubject(d.email_subject);
       if (d?.email_html) setEmailHtml(d.email_html);
       if (d?.email_prompt) setEmailPrompt(d.email_prompt);
       if (d?.email_subject || d?.email_html) {
-        addLine('info', `✉ Restored saved email template: "${d.email_subject || '(no subject)'}"`);
+        addLine('info', `Restored saved email template: "${d.email_subject || '(no subject)'}"`);
       }
-      if (d?.sending_active) {
-        const cat = d?.sending_category || 'unknown';
+      if (d?.sending_active && d?.email_subject && d?.email_html) {
+        const cat = d?.sending_category || 'marketing_people';
         const startedAt = d?.sending_started_at;
         const startedStr = startedAt ? new Date(startedAt).toLocaleTimeString('en-GB') : '?';
         const categoryLabel = cat === 'marketing_people' ? 'Marketing People' : cat === 'agencies' ? 'Agencies' : cat;
-        addLine('info', '');
-        addLine('info', `⚠️  A bulk send to "${categoryLabel}" was started at ${startedStr} and appears to still be in progress.`);
-        addLine('info', '   If the tab was closed, the send was interrupted. Use /marketing → Send → Continue campaign to resume.');
+        sendingCategoryRef.current = cat;
         if (d?.paused) {
-          addLine('info', '   Status: PAUSED. Type "resume" to continue.');
+          addLine('info', '');
+          addLine('info', `Send to "${categoryLabel}" was started at ${startedStr} and is PAUSED.`);
+          addLine('info', '  Type "resume" to continue.');
+          addLine('info', '');
           setIsPaused(true);
           pausedRef.current = true;
+        } else {
+          // Auto-resume: the send was active and not paused, so pick up where we left off
+          addLine('info', '');
+          addLine('info', `Resuming active send to "${categoryLabel}" (started ${startedStr})...`);
+          // Small delay to let UI render
+          await new Promise(r => setTimeout(r, 500));
+          if (!cancelled) {
+            executeContinueCampaign(cat);
+          }
         }
-        addLine('info', '');
       }
     })();
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -182,6 +201,11 @@ export function AdminSystemView() {
     await new Promise(r => setTimeout(r, 500));
     await setPauseState(false);
     addLine('info', 'Session refreshed. Sending resumed.');
+    // Auto-restart sending for the active category
+    const cat = sendingCategoryRef.current;
+    if (cat && emailSubjectRef.current && emailHtmlRef.current) {
+      executeContinueCampaign(cat);
+    }
   };
 
   const checkDbPaused = async (): Promise<boolean> => {
@@ -830,13 +854,16 @@ export function AdminSystemView() {
   };
 
   const executeContinueCampaign = async (category: string) => {
-    if (!emailHtml || !emailSubject) {
+    const subj = emailSubjectRef.current || emailSubject;
+    const html = emailHtmlRef.current || emailHtml;
+    if (!html || !subj) {
       addLine('error', 'No email composed yet. Use option 4 to generate an email first.');
       showGeneratePreviewMenu();
       return;
     }
+    sendingCategoryRef.current = category;
     // Use a deterministic campaign ID for tracking new sends
-    const campaignId = `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
+    const campaignId = `${subj.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
     activeCampaignIdRef.current = campaignId;
 
     setProcessing(true);
@@ -923,8 +950,8 @@ export function AdminSystemView() {
           try {
             const { data, error } = await invokeSendMarketingEmail({
               recipients: batch,
-              subject: emailSubject,
-              html_body: emailHtml,
+              subject: subj,
+              html_body: html,
               campaign_id: campaignId,
             });
 
@@ -979,6 +1006,7 @@ export function AdminSystemView() {
     } finally {
       setProcessing(false);
       setIsSending(false);
+      sendingCategoryRef.current = null;
       await setSendingActive(false);
       addLine('info', '');
       showSendMenu();
@@ -1033,6 +1061,7 @@ export function AdminSystemView() {
   };
 
   const executeBulkSend = async (category: string) => {
+    sendingCategoryRef.current = category;
     setProcessing(true);
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
     addLine('info', `Fetching ${categoryLabel} recipients...`);
@@ -1181,6 +1210,7 @@ export function AdminSystemView() {
       addLine('output', `  Campaign ID: ${campaignId}`);
       activeCampaignIdRef.current = null;
       setIsSending(false);
+      sendingCategoryRef.current = null;
       await setSendingActive(false);
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
@@ -1188,6 +1218,7 @@ export function AdminSystemView() {
     } finally {
       setProcessing(false);
       setIsSending(false);
+      sendingCategoryRef.current = null;
       await setSendingActive(false);
       addLine('info', '');
       addLine('info', 'Enter 0 to go back to send menu.');
