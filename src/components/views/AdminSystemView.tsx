@@ -854,11 +854,14 @@ export function AdminSystemView() {
   };
 
   const executeContinueCampaign = async (category: string) => {
-    if (!emailHtml || !emailSubject) {
+    const subj = emailSubjectRef.current || emailSubject;
+    const html = emailHtmlRef.current || emailHtml;
+    if (!html || !subj) {
       addLine('error', 'No email composed yet. Use option 4 to generate an email first.');
       showGeneratePreviewMenu();
       return;
     }
+    sendingCategoryRef.current = category;
     // Use a deterministic campaign ID for tracking new sends
     const campaignId = `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
     activeCampaignIdRef.current = campaignId;
