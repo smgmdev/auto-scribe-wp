@@ -67,9 +67,10 @@ type TerminalMode =
   | 'continue-campaign';
 
 export function AdminSystemView() {
+  const now = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const [lines, setLines] = useState<TerminalLine[]>([
-    { id: lineId++, type: 'info', content: 'System Terminal v1.0' },
-    { id: lineId++, type: 'info', content: '' },
+    { id: lineId++, type: 'info', content: 'System Terminal v1.0', timestamp: now() },
+    { id: lineId++, type: 'info', content: '', timestamp: now() },
   ]);
   const [input, setInput] = useState('');
   const [processing, setProcessing] = useState(false);
