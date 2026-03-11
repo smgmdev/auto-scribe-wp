@@ -1210,6 +1210,7 @@ export function AdminSystemView() {
       addLine('output', `  Campaign ID: ${campaignId}`);
       activeCampaignIdRef.current = null;
       setIsSending(false);
+      sendingCategoryRef.current = null;
       await setSendingActive(false);
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
