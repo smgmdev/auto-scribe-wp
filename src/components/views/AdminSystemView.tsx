@@ -44,6 +44,8 @@ interface TerminalLine {
 
 let lineId = Date.now();
 
+type TerminalMode = 'default' | 'marketing' | 'marketing-list' | 'marketing-import';
+
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
     { id: lineId++, type: 'info', content: 'System Terminal v1.0' },
@@ -56,6 +58,7 @@ export function AdminSystemView() {
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
+  const [terminalMode, setTerminalMode] = useState<TerminalMode>('default');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -164,6 +167,89 @@ export function AdminSystemView() {
     }
   };
 
+  const showMarketingMenu = () => {
+    setTerminalMode('marketing');
+    addLine('info', '');
+    addLine('info', '═══════════════════════════════════════');
+    addLine('info', '  EMAIL MARKETING – stankevicius.co.uk');
+    addLine('info', '═══════════════════════════════════════');
+    addLine('info', '');
+
+    // Fetch count
+    (async () => {
+      const { count, error } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true });
+      const total = error ? '?' : (count ?? 0);
+      addLine('output', `  1. View email marketing list [${total} emails]`);
+      addLine('output', '  2. Add new emails from Google Sheet');
+      addLine('info', '');
+      addLine('info', 'Enter option number:');
+    })();
+  };
+
+  const handleMarketingList = async () => {
+    setTerminalMode('marketing-list');
+    setProcessing(true);
+    addLine('info', 'Fetching marketing email list...');
+
+    try {
+      const { data, error } = await supabase
+        .from('marketing_emails')
+        .select('email, created_at')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        addLine('info', 'No emails in marketing list.');
+      } else {
+        addLine('info', '');
+        addLine('info', `── Marketing Emails (${data.length}) ──`);
+        data.forEach((row: any, i: number) => {
+          addLine('output', `  ${i + 1}. ${row.email}`);
+        });
+      }
+      addLine('info', '');
+      addLine('info', 'Enter 0 to go back.');
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+      addLine('info', 'Enter 0 to go back.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleMarketingImport = async (sheetUrl: string) => {
+    setProcessing(true);
+    addLine('info', '');
+    addLine('info', '⏳ Importing emails from Google Sheet...');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('import-marketing-emails', {
+        body: { sheet_url: sheetUrl },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        addLine('error', `✗ ${data.error}`);
+      } else {
+        addLine('output', `✓ Import complete!`);
+        addLine('output', `  Total found: ${data.total_found}`);
+        addLine('output', `  New added: ${data.added}`);
+        addLine('output', `  Duplicates skipped: ${data.skipped}`);
+      }
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
+      addLine('info', '');
+      addLine('info', 'Enter 0 to go back.');
+      setTerminalMode('marketing-import');
+    }
+  };
+
   const handleCommand = async (cmd: string) => {
     const trimmed = cmd.trim();
     if (!trimmed) return;
@@ -173,13 +259,61 @@ export function AdminSystemView() {
     setHistoryIndex(-1);
     setInput('');
 
+    // Handle sub-modes first
+    if (terminalMode === 'marketing-list') {
+      if (trimmed === '0') {
+        showMarketingMenu();
+        return;
+      }
+      addLine('error', 'Enter 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'marketing-import') {
+      if (trimmed === '0') {
+        showMarketingMenu();
+        return;
+      }
+      // Expecting a Google Sheets URL
+      if (trimmed.includes('docs.google.com/spreadsheets') || trimmed.includes('sheets.google.com')) {
+        await handleMarketingImport(trimmed);
+        return;
+      }
+      addLine('error', 'Please paste a valid Google Sheets URL, or enter 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'marketing') {
+      if (trimmed === '1') {
+        await handleMarketingList();
+        return;
+      }
+      if (trimmed === '2') {
+        setTerminalMode('marketing-import');
+        addLine('info', '');
+        addLine('info', 'Paste Google Sheet URL:');
+        return;
+      }
+      if (trimmed === '0') {
+        setTerminalMode('default');
+        addLine('info', 'Exited /marketing.');
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1, 2, or 0 to exit.');
+      return;
+    }
+
     switch (trimmed.toLowerCase()) {
       case '/db':
         await fetchUsers();
         break;
+      case '/marketing':
+        showMarketingMenu();
+        break;
       case '/clear':
         setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.' }]);
         setExpandedUsers(new Set());
+        setTerminalMode('default');
         break;
       default:
         addLine('error', `Unknown command: ${trimmed}`);

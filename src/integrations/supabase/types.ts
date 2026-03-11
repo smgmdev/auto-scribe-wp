@@ -1101,6 +1101,27 @@ export type Database = {
           },
         ]
       }
+      marketing_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source_sheet_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source_sheet_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source_sheet_url?: string | null
+        }
+        Relationships: []
+      }
       media_site_submissions: {
         Row: {
           admin_notes: string | null
