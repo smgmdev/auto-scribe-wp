@@ -622,7 +622,7 @@ export function AdminSystemView() {
 
   const handleCampaignUnsent = async () => {
     setProcessing(true);
-    addLine('info', '⏳ Calculating unsent emails...');
+    addLine('info', 'Calculating unsent emails...');
     try {
       // Get total emails per category
       const { count: mpTotal } = await supabase
