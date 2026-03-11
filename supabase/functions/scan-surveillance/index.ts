@@ -353,7 +353,7 @@ function isAnalyticalTitle(text: string): boolean {
     'cost of', 'costs of', 'price of', 'spending on', 'budget for',
     'impact on', 'effect on', 'effects of', 'consequences of', 'toll of',
     'analysis:', 'opinion:', 'editorial:', 'commentary:', 'perspective:',
-    'how the', 'why the', 'what the', 'lessons from', 'lessons of',
+    'how the', 'why the', 'what the', 'lessons from', 'lessons of', 'learns a', 'learned a', 'lesson on', 'lesson in', 'lesson from', 'tough lesson', 'hard lesson',
     'strategy behind', 'implications of', 'aftermath of',
     'warns about', 'warns of', 'warning about',
     'prepares for', 'preparing for', 'braces for',
