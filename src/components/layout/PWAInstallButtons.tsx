@@ -72,7 +72,7 @@ export function PWAInstallButtons({ fullWidth = false }: { fullWidth?: boolean }
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="flex-1 min-w-0 bg-black text-white border border-black px-4 py-3 rounded-none text-sm placeholder:text-gray-500 focus:outline-none focus:border-[#f2a547] focus:bg-[#f2a547] focus:text-black focus:placeholder:text-black/50"
+              className="flex-1 min-w-0 bg-black text-white border border-black px-4 py-3 rounded-none text-xs md:text-sm placeholder:text-gray-500 focus:outline-none focus:border-[#f2a547] focus:bg-[#f2a547] focus:text-black focus:placeholder:text-black/50"
             />
             <button
               type="submit"
