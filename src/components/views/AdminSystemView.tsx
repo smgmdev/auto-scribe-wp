@@ -649,14 +649,25 @@ export function AdminSystemView() {
       }
 
       addLine('info', '');
-      addLine('info', '── UNSENT EMAILS ──');
+      addLine('info', `── UNSENT EMAILS ── (checked at ${now()})`);
       addLine('output', `  Marketing People: ${mpUnsent} unsent / ${mpTotal ?? 0} total`);
       addLine('output', `  Agencies: ${agUnsent} unsent / ${agTotal ?? 0} total`);
       addLine('output', `  Total unsent: ${mpUnsent + agUnsent}`);
       addLine('output', `  Total sent (all campaigns): ${allSentEmails.size}`);
-      if (isSending) {
+
+      // Check if sending is active (from DB, survives refresh)
+      const { data: sendCtrl } = await supabase
+        .from('marketing_send_control' as any)
+        .select('sending_active, sending_category, sending_started_at, paused')
+        .eq('id', 'global')
+        .single();
+      const ctrl = sendCtrl as any;
+      if (ctrl?.sending_active || isSending) {
+        const catLabel = ctrl?.sending_category === 'marketing_people' ? 'Marketing People' : ctrl?.sending_category === 'agencies' ? 'Agencies' : ctrl?.sending_category || '?';
+        const startedStr = ctrl?.sending_started_at ? new Date(ctrl.sending_started_at).toLocaleTimeString('en-GB') : '?';
         addLine('info', '');
-        addLine('output', `  Type "pause" to pause the current send operation.`);
+        addLine('output', `  🔄 SENDING IN PROGRESS → "${catLabel}" (started ${startedStr})${ctrl?.paused ? ' [PAUSED]' : ''}`);
+        addLine('output', `  Type "pause" / "resume" to control the operation.`);
       }
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
