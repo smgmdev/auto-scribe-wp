@@ -1224,6 +1224,18 @@ export function AdminSystemView() {
 
     if (terminalMode === 'campaign-result') {
       if (trimmed === '0') { showCampaignMenu(); return; }
+      if (trimmed.toLowerCase() === 'pause' && isSending) {
+        pausedRef.current = true;
+        setIsPaused(true);
+        addLine('info', '⏸️  Sending paused by admin. Type "resume" to continue or use the Resume button.');
+        return;
+      }
+      if (trimmed.toLowerCase() === 'resume' && isSending && isPaused) {
+        pausedRef.current = false;
+        setIsPaused(false);
+        addLine('info', '▶️  Sending resumed.');
+        return;
+      }
       addLine('error', 'Enter 0 to go back.');
       return;
     }
