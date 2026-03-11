@@ -471,6 +471,9 @@ export function AdminSystemView() {
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
     addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
 
+    // Generate a campaign ID based on subject + timestamp
+    const campaignId = `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
+
     try {
       // Fetch ALL emails with pagination (Supabase default limit is 1000)
       let allEmails: { email: string }[] = [];
@@ -488,15 +491,41 @@ export function AdminSystemView() {
         if (batch.length < fetchBatchSize) break;
         fetchOffset += fetchBatchSize;
       }
-      const emails = allEmails;
 
-      if (!emails || emails.length === 0) {
+      if (!allEmails || allEmails.length === 0) {
         addLine('error', `No emails found in ${categoryLabel}.`);
         setTerminalMode('send-menu');
         return;
       }
 
-      const recipients = emails.map(e => e.email);
+      // Check for already-sent emails in this campaign (for resume capability)
+      let alreadySent = new Set<string>();
+      let sentOffset = 0;
+      while (true) {
+        const { data: sentBatch, error: sentErr } = await supabase
+          .from('marketing_email_sends')
+          .select('email')
+          .eq('campaign_id', campaignId)
+          .range(sentOffset, sentOffset + 1000 - 1);
+        if (sentErr) break;
+        if (!sentBatch || sentBatch.length === 0) break;
+        sentBatch.forEach(s => alreadySent.add(s.email));
+        if (sentBatch.length < 1000) break;
+        sentOffset += 1000;
+      }
+
+      const recipients = allEmails.map(e => e.email).filter(e => !alreadySent.has(e));
+
+      if (alreadySent.size > 0) {
+        addLine('info', `⏩ Skipping ${alreadySent.size} already-sent emails.`);
+      }
+
+      if (recipients.length === 0) {
+        addLine('output', `✓ All emails in ${categoryLabel} have already been sent for this campaign.`);
+        setTerminalMode('send-menu');
+        return;
+      }
+
       addLine('info', `Sending to ${recipients.length} recipients...`);
 
       // Send in batches of 50
@@ -512,6 +541,7 @@ export function AdminSystemView() {
             recipients: batch,
             subject: emailSubject,
             html_body: emailHtml,
+            campaign_id: campaignId,
           },
         });
 
@@ -520,6 +550,20 @@ export function AdminSystemView() {
 
         totalSent += data.sent || 0;
         totalFailed += data.failed || 0;
+
+        // Log successfully sent emails to tracking table
+        const sentEmails = (data.sent_emails as string[] | undefined) || batch.filter((_: string, idx: number) => {
+          const errList = data.errors as Array<{ email: string }> | undefined;
+          return !errList?.some((e) => e.email === batch[idx]);
+        });
+        if (sentEmails.length > 0) {
+          const rows = sentEmails.map((email: string) => ({
+            campaign_id: campaignId,
+            email,
+            category,
+          }));
+          await supabase.from('marketing_email_sends').upsert(rows, { onConflict: 'campaign_id,email', ignoreDuplicates: true });
+        }
 
         // Small delay between batches
         if (i + 50 < recipients.length) {
@@ -531,9 +575,11 @@ export function AdminSystemView() {
       addLine('output', `  Sent: ${totalSent}`);
       addLine('output', `  Failed: ${totalFailed}`);
       addLine('output', `  Total: ${recipients.length}`);
+      addLine('output', `  Campaign ID: ${campaignId}`);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
+      addLine('info', `  Campaign ID: ${campaignId} — you can resume this send.`);
     } finally {
       setProcessing(false);
       addLine('info', '');
