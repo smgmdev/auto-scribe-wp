@@ -1574,8 +1574,9 @@ export function AdminSystemView() {
             else if (line.type === 'info') { colorClass = 'text-white/40'; }
 
             return (
-              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words`}>
-                {prefix}{line.content}
+              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words flex`}>
+                <span className="text-white/20 shrink-0 mr-2 select-none">{line.timestamp}</span>
+                <span className="flex-1">{prefix}{line.content}</span>
               </div>
             );
           })}
