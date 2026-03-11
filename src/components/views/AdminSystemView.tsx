@@ -912,13 +912,11 @@ export function AdminSystemView() {
         let success = false;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
           try {
-            const { data, error } = await supabase.functions.invoke('send-marketing-email', {
-              body: {
-                recipients: batch,
-                subject: emailSubject,
-                html_body: emailHtml,
-                campaign_id: campaignId,
-              },
+            const { data, error } = await invokeSendMarketingEmail({
+              recipients: batch,
+              subject: emailSubject,
+              html_body: emailHtml,
+              campaign_id: campaignId,
             });
 
             if (error) throw error;
