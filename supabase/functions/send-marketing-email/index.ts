@@ -113,6 +113,28 @@ serve(async (req) => {
     const senderName = from_name || "Stankevicius";
     const senderEmail = "noreply@stankevicius.co.uk";
 
+    // Generate HMAC-based unsubscribe tokens
+    const encoder = new TextEncoder();
+    const hmacKey = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(serviceKey),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const generateUnsubToken = async (email: string): Promise<string> => {
+      const sig = await crypto.subtle.sign(
+        "HMAC",
+        hmacKey,
+        encoder.encode(email.toLowerCase())
+      );
+      return Array.from(new Uint8Array(sig))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("")
+        .slice(0, 32);
+    };
+
     logStep("Sending marketing emails", {
       recipientCount: recipients.length,
       subject,
@@ -126,15 +148,34 @@ serve(async (req) => {
     // Send emails individually for better deliverability and tracking
     for (const recipient of recipients) {
       try {
+        const unsubToken = await generateUnsubToken(recipient);
+        const unsubUrl = `${supabaseUrl}/functions/v1/marketing-unsubscribe?email=${encodeURIComponent(recipient)}&token=${unsubToken}`;
+
+        // Inject unsubscribe link into HTML body
+        let finalHtml = html_body;
+        // Replace placeholder unsubscribe links
+        finalHtml = finalHtml.replace(
+          /href=["']#unsubscribe["']/gi,
+          `href="${unsubUrl}"`
+        );
+        finalHtml = finalHtml.replace(
+          /href=["']mailto:unsubscribe@stankevicius\.co\.uk["']/gi,
+          `href="${unsubUrl}"`
+        );
+        // If no placeholder found, append unsubscribe footer
+        if (!finalHtml.includes(unsubUrl)) {
+          finalHtml += `<div style="text-align:center;margin-top:32px;padding-top:16px;border-top:1px solid #333;"><a href="${unsubUrl}" style="color:#888;font-size:12px;text-decoration:underline;">Unsubscribe</a></div>`;
+        }
+
         await resend.emails.send({
           from: `${senderName} <${senderEmail}>`,
           to: [recipient],
           subject,
-          html: html_body,
+          html: finalHtml,
           headers: {
             "X-Entity-Ref-ID": crypto.randomUUID(),
             "X-Mailer": "Stankevicius/1.0",
-            "List-Unsubscribe": `<mailto:unsubscribe@stankevicius.co.uk>`,
+            "List-Unsubscribe": `<${unsubUrl}>`,
           },
         });
         sent++;
