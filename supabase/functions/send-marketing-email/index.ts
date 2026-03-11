@@ -53,12 +53,12 @@ serve(async (req) => {
 
     // Verify admin role
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {
-      _user_id: user.id,
+      _user_id: userId,
       _role: "admin",
     });
 
     if (!isAdmin) {
-      logStep("Non-admin attempt", { userId: user.id });
+      logStep("Non-admin attempt", { userId });
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
