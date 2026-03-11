@@ -52,6 +52,8 @@ type TerminalMode =
   | 'marketing-list'
   | 'marketing-import-category'
   | 'marketing-import'
+  | 'marketing-import-sheet'
+  | 'marketing-import-single'
   | 'send-menu'
   | 'send-confirm-test'
   | 'send-confirm-bulk'
