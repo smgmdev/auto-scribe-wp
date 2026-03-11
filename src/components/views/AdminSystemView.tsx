@@ -94,19 +94,51 @@ export function AdminSystemView() {
   const [isPaused, setIsPaused] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
-  const togglePause = () => {
-    pausedRef.current = !pausedRef.current;
-    setIsPaused(pausedRef.current);
-    if (pausedRef.current) {
+  const setPauseState = async (paused: boolean) => {
+    pausedRef.current = paused;
+    setIsPaused(paused);
+    // Persist to DB so other tabs/sessions see it
+    await supabase
+      .from('marketing_send_control' as any)
+      .update({ paused, paused_at: paused ? new Date().toISOString() : null, updated_at: new Date().toISOString() } as any)
+      .eq('id', 'global');
+  };
+
+  const togglePause = async () => {
+    const newState = !pausedRef.current;
+    await setPauseState(newState);
+    if (newState) {
       addLine('info', '⏸️  Sending paused by admin. Press Resume to continue.');
     } else {
       addLine('info', '▶️  Sending resumed.');
     }
   };
 
+  const checkDbPaused = async (): Promise<boolean> => {
+    const { data } = await supabase
+      .from('marketing_send_control' as any)
+      .select('paused')
+      .eq('id', 'global')
+      .single();
+    return !!(data as any)?.paused;
+  };
+
   const waitWhilePaused = async () => {
-    while (pausedRef.current) {
-      await new Promise(r => setTimeout(r, 500));
+    // Check DB state, not just local ref
+    let dbPaused = await checkDbPaused();
+    if (dbPaused) {
+      pausedRef.current = true;
+      setIsPaused(true);
+    }
+    while (dbPaused || pausedRef.current) {
+      await new Promise(r => setTimeout(r, 2000));
+      dbPaused = await checkDbPaused();
+      if (!dbPaused && !pausedRef.current) break;
+      if (!dbPaused) {
+        pausedRef.current = false;
+        setIsPaused(false);
+        break;
+      }
     }
   };
 
