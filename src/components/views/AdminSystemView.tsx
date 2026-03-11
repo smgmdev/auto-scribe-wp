@@ -96,23 +96,31 @@ export function AdminSystemView() {
   const [isPaused, setIsPaused] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
-  // On mount: check if a send operation was in progress (survives refresh)
+  // On mount: restore email template + check if a send was in progress
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from('marketing_send_control' as any)
-        .select('sending_active, sending_category, sending_started_at, paused')
+        .select('sending_active, sending_category, sending_started_at, paused, email_subject, email_html, email_prompt')
         .eq('id', 'global')
         .single();
-      if ((data as any)?.sending_active) {
-        const cat = (data as any)?.sending_category || 'unknown';
-        const startedAt = (data as any)?.sending_started_at;
+      const d = data as any;
+      // Restore saved email template
+      if (d?.email_subject) setEmailSubject(d.email_subject);
+      if (d?.email_html) setEmailHtml(d.email_html);
+      if (d?.email_prompt) setEmailPrompt(d.email_prompt);
+      if (d?.email_subject || d?.email_html) {
+        addLine('info', `✉ Restored saved email template: "${d.email_subject || '(no subject)'}"`);
+      }
+      if (d?.sending_active) {
+        const cat = d?.sending_category || 'unknown';
+        const startedAt = d?.sending_started_at;
         const startedStr = startedAt ? new Date(startedAt).toLocaleTimeString('en-GB') : '?';
         const categoryLabel = cat === 'marketing_people' ? 'Marketing People' : cat === 'agencies' ? 'Agencies' : cat;
         addLine('info', '');
         addLine('info', `⚠️  A bulk send to "${categoryLabel}" was started at ${startedStr} and appears to still be in progress.`);
         addLine('info', '   If the tab was closed, the send was interrupted. Use /marketing → Send → Continue campaign to resume.');
-        if ((data as any)?.paused) {
+        if (d?.paused) {
           addLine('info', '   Status: PAUSED. Type "resume" to continue.');
           setIsPaused(true);
           pausedRef.current = true;
@@ -122,6 +130,18 @@ export function AdminSystemView() {
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const saveEmailTemplate = async (subject: string, html: string, prompt: string) => {
+    await supabase
+      .from('marketing_send_control' as any)
+      .update({
+        email_subject: subject || null,
+        email_html: html || null,
+        email_prompt: prompt || null,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', 'global');
+  };
 
   const setSendingActive = async (active: boolean, category?: string) => {
     await supabase
@@ -1146,6 +1166,7 @@ export function AdminSystemView() {
 
       setEmailHtml(data.html_body);
       setEmailSubject(subject);
+      await saveEmailTemplate(subject, data.html_body, emailPrompt);
 
       addLine('output', '✓ Email generated!');
       addLine('info', `  Subject: ${subject}`);
@@ -1185,6 +1206,7 @@ export function AdminSystemView() {
       if (data?.error) throw new Error(data.error);
 
       setEmailHtml(data.html_body);
+      await saveEmailTemplate(emailSubject, data.html_body, emailPrompt);
 
       addLine('output', '✓ Email updated!');
       addLine('info', '');
@@ -1447,6 +1469,7 @@ export function AdminSystemView() {
         setEmailSubject('');
         setEmailHtml('');
         setEmailPrompt('');
+        await saveEmailTemplate('', '', '');
         addLine('output', '✓ Saved email cleared.');
         showSendMenu(true);
         return;

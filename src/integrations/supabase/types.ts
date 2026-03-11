@@ -1154,6 +1154,9 @@ export type Database = {
       }
       marketing_send_control: {
         Row: {
+          email_html: string | null
+          email_prompt: string | null
+          email_subject: string | null
           id: string
           paused: boolean
           paused_at: string | null
@@ -1164,6 +1167,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          email_html?: string | null
+          email_prompt?: string | null
+          email_subject?: string | null
           id?: string
           paused?: boolean
           paused_at?: string | null
@@ -1174,6 +1180,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          email_html?: string | null
+          email_prompt?: string | null
+          email_subject?: string | null
           id?: string
           paused?: boolean
           paused_at?: string | null
