@@ -223,6 +223,7 @@ const ScrollColorSection = ({
     container.scrollTo({ top: offset, behavior: 'smooth' });
   };
   const [wpSites, setWpSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
+  const [wpSitesLocalLoading, setWpSitesLocalLoading] = useState(true);
   const [mediaSites, setMediaSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
 
   // Fetch WordPress sites with favicons
@@ -235,6 +236,7 @@ const ScrollColorSection = ({
           .slice(0, 5);
         setWpSites(sitesWithFavicons);
       }
+      setWpSitesLocalLoading(false);
     };
     fetchSites();
   }, []);
