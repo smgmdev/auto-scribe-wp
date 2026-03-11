@@ -74,7 +74,7 @@ serve(async (req) => {
 - Professional and clean design
 - Mobile-responsive with inline CSS styles
 - White background (#ffffff) with dark text for maximum readability
-- Use accent color #4772d9 (blue) for headings, buttons, or highlights
+- Use accent color #0441d2 (blue) for headings, buttons, or highlights
 - All buttons must have border-radius: 0 (sharp square corners, no rounding)
 - Do NOT include any images, logos, or image tags whatsoever
 - Do NOT mention "Stankevicius", "Stankevicius MGM", or any variation of that name anywhere in the email
