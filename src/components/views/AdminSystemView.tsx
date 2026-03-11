@@ -75,18 +75,20 @@ export function AdminSystemView() {
     setLines(prev => [...prev, { id: lineId++, type, content, data }]);
   };
 
-  const fetchAllRows = async (table: string, selectStr: string, orderCol?: string, filterFn?: (q: any) => any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fetchAllRows = async (table: string, selectStr: string, orderCol?: string, filterFn?: (q: any) => any): Promise<any[]> => {
     const pageSize = 1000;
-    let allData: any[] = [];
+    const allData: any[] = [];
     let from = 0;
     let hasMore = true;
     while (hasMore) {
-      let query = (supabase.from(table) as any).select(selectStr).range(from, from + pageSize - 1);
-      if (orderCol) query = query.order(orderCol, { ascending: false });
+      // @ts-ignore - dynamic table access
+      let query = supabase.from(table).select(selectStr).range(from, from + pageSize - 1);
+      if (orderCol) query = (query as any).order(orderCol, { ascending: false });
       if (filterFn) query = filterFn(query);
-      const { data, error } = await query;
+      const { data, error } = await (query as any);
       if (error) throw error;
-      allData = allData.concat(data || []);
+      allData.push(...(data || []));
       hasMore = (data?.length || 0) === pageSize;
       from += pageSize;
     }
