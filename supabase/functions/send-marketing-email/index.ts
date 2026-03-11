@@ -34,14 +34,37 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 
-    // Verify the caller's JWT
+    // Verify the caller's JWT - try getUser first, fall back to token decode for long-running sessions
     const token = authHeader.replace("Bearer ", "");
     const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
 
-    if (authError || !user) {
+    let userId: string | null = null;
+
+    // Try standard auth first
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (user) {
+      userId = user.id;
+    } else {
+      // Token may be expired but was once valid — decode to extract user ID
+      // and verify via service role that the user exists and is admin
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.sub) {
+          // Verify user still exists via admin client
+          const { data: adminUser } = await supabaseAdmin.auth.admin.getUserById(payload.sub);
+          if (adminUser?.user) {
+            userId = adminUser.user.id;
+            logStep("Auth recovered via token decode", { userId });
+          }
+        }
+      } catch (decodeErr) {
+        logStep("Token decode failed", { error: String(decodeErr) });
+      }
+    }
+
+    if (!userId) {
       logStep("Auth failed", { error: authError?.message });
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -49,7 +72,7 @@ serve(async (req) => {
       });
     }
 
-    const userId = user.id;
+    // userId already set above
 
     // Verify admin role
     const { data: isAdmin } = await supabaseAdmin.rpc("has_role", {

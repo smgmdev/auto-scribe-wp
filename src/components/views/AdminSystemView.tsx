@@ -869,6 +869,10 @@ export function AdminSystemView() {
 
       for (let i = 0; i < recipients.length; i += 50) {
         await waitWhilePaused();
+        // Proactively refresh session token to prevent expiry during long campaigns
+        if (i > 0 && i % 500 === 0) {
+          await supabase.auth.refreshSession();
+        }
         const batch = recipients.slice(i, i + 50);
         const batchNum = Math.floor(i / 50) + 1;
         addLine('info', `  Batch ${batchNum}: sending ${batch.length} emails...`);
@@ -1066,6 +1070,10 @@ export function AdminSystemView() {
 
       for (let i = 0; i < recipients.length; i += 50) {
         await waitWhilePaused();
+        // Proactively refresh session token to prevent expiry during long campaigns
+        if (i > 0 && i % 500 === 0) {
+          await supabase.auth.refreshSession();
+        }
         const batch = recipients.slice(i, i + 50);
         const batchNum = Math.floor(i / 50) + 1;
         addLine('info', `  Batch ${batchNum}: sending ${batch.length} emails...`);
