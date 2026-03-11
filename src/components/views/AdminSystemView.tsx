@@ -859,7 +859,7 @@ export function AdminSystemView() {
             else if (line.type === 'info') { colorClass = 'text-white/40'; }
 
             return (
-              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre`}>
+              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words`}>
                 {prefix}{line.content}
               </div>
             );
@@ -869,21 +869,33 @@ export function AdminSystemView() {
       </div>
 
       {/* Input Line - at bottom */}
-      <div className="flex items-center px-4 py-3 font-mono text-sm border-t border-white/10">
-        <Terminal className="h-4 w-4 text-green-400 mr-2 shrink-0" />
-        <input
-          ref={inputRef}
+      <div className="flex items-start px-4 py-3 font-mono text-sm border-t border-white/10">
+        <Terminal className="h-4 w-4 text-green-400 mr-2 shrink-0 mt-1" />
+        <textarea
+          ref={inputRef as any}
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleKeyDown(e as any);
+            }
+          }}
           disabled={processing}
           placeholder={processing ? 'Processing...' : 'Enter command...'}
-          className="flex-1 bg-transparent text-white outline-none placeholder:text-white/20 caret-green-400"
+          className="flex-1 bg-transparent text-white outline-none placeholder:text-white/20 caret-green-400 resize-none overflow-hidden break-words"
           autoFocus
           spellCheck={false}
+          rows={1}
+          style={{ minHeight: '20px', maxHeight: '120px' }}
+          onInput={e => {
+            const el = e.target as HTMLTextAreaElement;
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+          }}
         />
         {processing && (
-          <span className="text-green-400 animate-pulse ml-2">●</span>
+          <span className="text-green-400 animate-pulse ml-2 mt-1">●</span>
         )}
       </div>
     </div>
