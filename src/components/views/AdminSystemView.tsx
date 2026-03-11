@@ -203,7 +203,41 @@ export function AdminSystemView() {
     }
   };
 
+  const getSessionAccessToken = async (): Promise<string> => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const currentToken = sessionData.session?.access_token;
+    if (currentToken) return currentToken;
+
+    const { data: refreshedData, error: refreshError } = await supabase.auth.refreshSession();
+    const refreshedToken = refreshedData.session?.access_token;
+    if (refreshedToken) return refreshedToken;
+
+    if (refreshError) {
+      throw new Error(`Session expired: ${refreshError.message}`);
+    }
+
+    throw new Error('Session expired. Please sign in again and retry.');
+  };
+
+  const invokeSendMarketingEmail = async (body: {
+    recipients: string[];
+    subject: string;
+    html_body: string;
+    campaign_id?: string;
+  }) => {
+    const accessToken = await getSessionAccessToken();
+
+    return supabase.functions.invoke('send-marketing-email', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body,
+    });
+  };
+
   const scrollToBottom = useCallback(() => {
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  }, []);
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
   }, []);
 
