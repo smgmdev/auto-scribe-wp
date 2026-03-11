@@ -423,7 +423,7 @@ export function AdminSurveillanceView() {
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
     if (data) setNukeTrajectories(data.filter(d => !isAnalyticalTitle(d.title)));
-  }, [nukeTimeFilter]);
+  }, [nukeTimeFilter, isAnalyticalTitle]);
 
   const fetchHbombs = useCallback(async () => {
     const hours = parseFloat(hbombTimeFilter);
