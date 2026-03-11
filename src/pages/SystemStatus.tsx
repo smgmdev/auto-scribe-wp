@@ -215,7 +215,7 @@ export default function SystemStatus() {
   const serviceCategories: { title: string; names: string[] }[] = [
     {
       title: 'System & Security',
-      names: ['API Server', 'Database', 'Authentication', 'Edge Functions', 'File Storage', 'Real-time Messaging', 'Email Notifications'],
+      names: ['API Server', 'Database', 'Authentication', 'Edge Functions', 'File Storage', 'Real-time Messaging', 'Email Notifications', 'Terminal'],
     },
     {
       title: 'Media',
