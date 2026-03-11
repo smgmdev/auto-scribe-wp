@@ -1015,16 +1015,7 @@ export function AdminSystemView() {
     if (terminalMode === 'generate-edit') {
       if (trimmed === '0') {
         // Show preview menu again
-        addLine('info', '');
-        addLine('info', '── What would you like to do? ──');
-        addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
-        addLine('output', '  2. Send bulk to Marketing People List');
-        addLine('output', '  3. Send bulk to Agencies');
-        addLine('output', '  4. Edit email (provide instructions)');
-        addLine('output', '  5. Regenerate email');
-        addLine('info', '');
-        addLine('info', 'Enter option number (0 to go back to send menu):');
-        setTerminalMode('generate-preview');
+        showGeneratePreviewMenu();
         return;
       }
       await handleEditEmail(trimmed);
@@ -1046,7 +1037,11 @@ export function AdminSystemView() {
         await handleGenerateEmail(emailPrompt, emailSubject);
         return;
       }
-      addLine('error', 'Invalid option. Enter 1-5, or 0 to go back.');
+      if (trimmed === '6') {
+        showContinueCampaignMenu();
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1-6, or 0 to go back.');
       return;
     }
 
