@@ -1217,6 +1217,7 @@ export function AdminSystemView() {
     } finally {
       setProcessing(false);
       setIsSending(false);
+      sendingCategoryRef.current = null;
       await setSendingActive(false);
       addLine('info', '');
       addLine('info', 'Enter 0 to go back to send menu.');
