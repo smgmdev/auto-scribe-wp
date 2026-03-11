@@ -1469,6 +1469,7 @@ export function AdminSystemView() {
         setEmailSubject('');
         setEmailHtml('');
         setEmailPrompt('');
+        await saveEmailTemplate('', '', '');
         addLine('output', '✓ Saved email cleared.');
         showSendMenu(true);
         return;
