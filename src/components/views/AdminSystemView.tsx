@@ -260,12 +260,26 @@ export function AdminSystemView() {
     setInput('');
 
     // Handle sub-modes first
-    if (terminalMode === 'marketing-list' || terminalMode === 'marketing-import') {
+    if (terminalMode === 'marketing-list') {
       if (trimmed === '0') {
         showMarketingMenu();
         return;
       }
       addLine('error', 'Enter 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'marketing-import') {
+      if (trimmed === '0') {
+        showMarketingMenu();
+        return;
+      }
+      // Expecting a Google Sheets URL
+      if (trimmed.includes('docs.google.com/spreadsheets') || trimmed.includes('sheets.google.com')) {
+        await handleMarketingImport(trimmed);
+        return;
+      }
+      addLine('error', 'Please paste a valid Google Sheets URL, or enter 0 to go back.');
       return;
     }
 
@@ -285,19 +299,7 @@ export function AdminSystemView() {
         addLine('info', 'Exited /marketing.');
         return;
       }
-      // Check if it's a URL (user pasted sheet link while in marketing mode option 2 wasn't selected yet)
       addLine('error', 'Invalid option. Enter 1, 2, or 0 to exit.');
-      return;
-    }
-
-    // marketing-import mode: expecting a URL
-    if (terminalMode === 'marketing-import' && trimmed !== '0') {
-      // Check if this looks like a google sheets URL
-      if (trimmed.includes('docs.google.com/spreadsheets') || trimmed.includes('sheets.google.com')) {
-        await handleMarketingImport(trimmed);
-        return;
-      }
-      addLine('error', 'Please paste a valid Google Sheets URL, or enter 0 to go back.');
       return;
     }
 
