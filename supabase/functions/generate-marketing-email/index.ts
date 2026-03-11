@@ -74,7 +74,7 @@ serve(async (req) => {
 - Professional and clean design
 - Mobile-responsive with inline CSS styles
 - Branded for Stankevicius (use dark/black theme with white text, accent color #c4a44a gold)
-- Include an unsubscribe footer text
+- Include an unsubscribe link at the bottom using href="#unsubscribe" — the system will replace this with a real URL automatically
 - Do NOT include <html>, <head>, or <body> tags — just the inner content
 - Use tables for layout for maximum email client compatibility`;
       userPrompt = `Create a marketing email with the following details:\n\nSubject line: ${subject_line || 'Not specified'}\nContent/purpose: ${prompt}`;
