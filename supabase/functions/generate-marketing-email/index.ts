@@ -67,7 +67,7 @@ serve(async (req) => {
     let userPrompt: string;
 
     if (edit_instructions && previous_html) {
-      systemPrompt = `You are an email marketing expert. You edit existing HTML marketing emails based on feedback. Return ONLY the full updated HTML email body — no markdown, no code fences, no explanation. The email must be professional, mobile-responsive, and use inline CSS styles. Do NOT mention "Stankevicius", "Stankevicius MGM", or any variation of that name anywhere in the email. Use light blue (#4A9FD9) as the accent color. Buttons must have no border-radius (sharp corners).`;
+      systemPrompt = `You are an email marketing expert. You edit existing HTML marketing emails based on feedback. Return ONLY the full updated HTML email body — no markdown, no code fences, no explanation. The email must be professional, mobile-responsive, and use inline CSS styles. Do NOT mention "Stankevicius", "Stankevicius MGM", or any variation of that name anywhere in the email. Use blue (#4772d9) as the accent color. Buttons must have no border-radius (sharp corners).`;
       userPrompt = `Here is the current email HTML:\n\n${previous_html}\n\nEdit instructions: ${edit_instructions}`;
     } else {
       systemPrompt = `You are an email marketing expert. Generate professional HTML email bodies for marketing campaigns. Return ONLY the HTML email body — no markdown, no code fences, no explanation. The email must be:
