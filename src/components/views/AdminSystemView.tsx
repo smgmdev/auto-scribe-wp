@@ -86,6 +86,7 @@ export function AdminSystemView() {
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const activeCampaignIdRef = useRef<string | null>(null);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
@@ -471,8 +472,9 @@ export function AdminSystemView() {
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
     addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
 
-    // Generate a campaign ID based on subject + timestamp
-    const campaignId = `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
+    // Deterministic campaign ID so resume works across retries
+    const campaignId = activeCampaignIdRef.current || `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
+    activeCampaignIdRef.current = campaignId;
 
     try {
       // Fetch ALL emails with pagination (Supabase default limit is 1000)
@@ -522,51 +524,72 @@ export function AdminSystemView() {
 
       if (recipients.length === 0) {
         addLine('output', `✓ All emails in ${categoryLabel} have already been sent for this campaign.`);
+        activeCampaignIdRef.current = null;
         setTerminalMode('send-menu');
         return;
       }
 
       addLine('info', `Sending to ${recipients.length} recipients...`);
 
-      // Send in batches of 50
+      // Send in batches of 50 with auto-retry on failure
       let totalSent = 0;
       let totalFailed = 0;
+      const MAX_RETRIES = 3;
 
       for (let i = 0; i < recipients.length; i += 50) {
         const batch = recipients.slice(i, i + 50);
-        addLine('info', `  Batch ${Math.floor(i / 50) + 1}: sending ${batch.length} emails...`);
+        const batchNum = Math.floor(i / 50) + 1;
+        addLine('info', `  Batch ${batchNum}: sending ${batch.length} emails...`);
 
-        const { data, error } = await supabase.functions.invoke('send-marketing-email', {
-          body: {
-            recipients: batch,
-            subject: emailSubject,
-            html_body: emailHtml,
-            campaign_id: campaignId,
-          },
-        });
+        let success = false;
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            const { data, error } = await supabase.functions.invoke('send-marketing-email', {
+              body: {
+                recipients: batch,
+                subject: emailSubject,
+                html_body: emailHtml,
+                campaign_id: campaignId,
+              },
+            });
 
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
 
-        totalSent += data.sent || 0;
-        totalFailed += data.failed || 0;
+            totalSent += data.sent || 0;
+            totalFailed += data.failed || 0;
 
-        // Log successfully sent emails to tracking table
-        const sentEmails = (data.sent_emails as string[] | undefined) || batch.filter((_: string, idx: number) => {
-          const errList = data.errors as Array<{ email: string }> | undefined;
-          return !errList?.some((e) => e.email === batch[idx]);
-        });
-        if (sentEmails.length > 0) {
-          const rows = sentEmails.map((email: string) => ({
-            campaign_id: campaignId,
-            email,
-            category,
-          }));
-          await supabase.from('marketing_email_sends').upsert(rows, { onConflict: 'campaign_id,email', ignoreDuplicates: true });
+            // Log successfully sent emails to tracking table
+            const sentEmails = (data.sent_emails as string[] | undefined) || batch.filter((_: string, idx: number) => {
+              const errList = data.errors as Array<{ email: string }> | undefined;
+              return !errList?.some((e) => e.email === batch[idx]);
+            });
+            if (sentEmails.length > 0) {
+              const rows = sentEmails.map((email: string) => ({
+                campaign_id: campaignId,
+                email,
+                category,
+              }));
+              await supabase.from('marketing_email_sends').upsert(rows, { onConflict: 'campaign_id,email', ignoreDuplicates: true });
+            }
+
+            success = true;
+            break;
+          } catch (retryErr: any) {
+            if (attempt < MAX_RETRIES) {
+              const waitSec = attempt * 3;
+              addLine('info', `  ⚠ Batch ${batchNum} failed (attempt ${attempt}/${MAX_RETRIES}), retrying in ${waitSec}s...`);
+              await new Promise(r => setTimeout(r, waitSec * 1000));
+            } else {
+              addLine('error', `  ✗ Batch ${batchNum} failed after ${MAX_RETRIES} attempts: ${retryErr.message}`);
+              addLine('info', `  ${batch.length} emails skipped. Campaign can be resumed.`);
+              totalFailed += batch.length;
+            }
+          }
         }
 
-        // Small delay between batches
-        if (i + 50 < recipients.length) {
+        // Delay between batches
+        if (success && i + 50 < recipients.length) {
           await new Promise(r => setTimeout(r, 1000));
         }
       }
@@ -576,6 +599,7 @@ export function AdminSystemView() {
       addLine('output', `  Failed: ${totalFailed}`);
       addLine('output', `  Total: ${recipients.length}`);
       addLine('output', `  Campaign ID: ${campaignId}`);
+      activeCampaignIdRef.current = null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
