@@ -451,7 +451,7 @@ export function AdminSystemView() {
   const handleMarketingImport = async (sheetUrl: string, category: string) => {
     setProcessing(true);
     addLine('info', '');
-    addLine('info', '⏳ Importing emails from Google Sheet...');
+    addLine('info', 'Importing emails from Google Sheet...');
 
     try {
       const { data, error } = await supabase.functions.invoke('import-marketing-emails', {
@@ -482,7 +482,7 @@ export function AdminSystemView() {
 
   const handleAddSingleEmail = async (email: string, category: string) => {
     setProcessing(true);
-    addLine('info', `⏳ Adding ${email}...`);
+    addLine('info', `Adding ${email}...`);
 
     try {
       const { error } = await supabase
@@ -548,7 +548,7 @@ export function AdminSystemView() {
 
   const handleCampaignLists = async () => {
     setProcessing(true);
-    addLine('info', '⏳ Fetching list counts...');
+    addLine('info', 'Fetching list counts...');
     try {
       const { count: mpCount } = await supabase
         .from('marketing_emails')
@@ -575,7 +575,7 @@ export function AdminSystemView() {
 
   const handleCampaignSent = async () => {
     setProcessing(true);
-    addLine('info', '⏳ Fetching sent campaigns...');
+    addLine('info', 'Fetching sent campaigns...');
     try {
       // Get distinct campaigns with counts
       const { data: sends, error } = await supabase
@@ -622,7 +622,7 @@ export function AdminSystemView() {
 
   const handleCampaignUnsent = async () => {
     setProcessing(true);
-    addLine('info', '⏳ Calculating unsent emails...');
+    addLine('info', 'Calculating unsent emails...');
     try {
       // Get total emails per category
       const { count: mpTotal } = await supabase
@@ -800,7 +800,7 @@ export function AdminSystemView() {
 
     setProcessing(true);
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
-    addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
+    addLine('info', `Fetching ${categoryLabel} recipients...`);
 
     try {
       // Fetch ALL emails with pagination
@@ -845,7 +845,7 @@ export function AdminSystemView() {
       const recipients = allEmails.map(e => e.email).filter(e => !alreadySent.has(e));
 
       if (alreadySent.size > 0) {
-        addLine('info', `⏩ Skipping ${alreadySent.size} already-sent emails (across all campaigns).`);
+        addLine('info', `Skipping ${alreadySent.size} already-sent emails (across all campaigns).`);
       }
 
       if (recipients.length === 0) {
@@ -950,7 +950,7 @@ export function AdminSystemView() {
       return;
     }
     setProcessing(true);
-    addLine('info', '⏳ Sending test email to business@stankeviciusmgm.com...');
+    addLine('info', 'Sending test email to business@stankeviciusmgm.com...');
 
     try {
       const { data, error } = await supabase.functions.invoke('send-marketing-email', {
@@ -994,7 +994,7 @@ export function AdminSystemView() {
   const executeBulkSend = async (category: string) => {
     setProcessing(true);
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
-    addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
+    addLine('info', `Fetching ${categoryLabel} recipients...`);
 
     // Deterministic campaign ID so resume works across retries
     const campaignId = activeCampaignIdRef.current || `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
@@ -1043,7 +1043,7 @@ export function AdminSystemView() {
       const recipients = allEmails.map(e => e.email).filter(e => !alreadySent.has(e));
 
       if (alreadySent.size > 0) {
-        addLine('info', `⏩ Skipping ${alreadySent.size} already-sent emails.`);
+        addLine('info', `Skipping ${alreadySent.size} already-sent emails.`);
       }
 
       if (recipients.length === 0) {
@@ -1195,7 +1195,7 @@ export function AdminSystemView() {
 
   const handleEditEmail = async (instructions: string) => {
     setProcessing(true);
-    addLine('info', '⏳ AI is editing your email...');
+    addLine('info', 'AI is editing your email...');
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-marketing-email', {
