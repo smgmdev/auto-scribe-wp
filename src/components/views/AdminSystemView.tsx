@@ -863,7 +863,7 @@ export function AdminSystemView() {
     }
     sendingCategoryRef.current = category;
     // Use a deterministic campaign ID for tracking new sends
-    const campaignId = `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
+    const campaignId = `${subj.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_continue`;
     activeCampaignIdRef.current = campaignId;
 
     setProcessing(true);
