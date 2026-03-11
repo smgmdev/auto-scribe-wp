@@ -223,6 +223,7 @@ const ScrollColorSection = ({
     container.scrollTo({ top: offset, behavior: 'smooth' });
   };
   const [wpSites, setWpSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
+  const [wpSitesLocalLoading, setWpSitesLocalLoading] = useState(true);
   const [mediaSites, setMediaSites] = useState<{ id: string; name: string; favicon: string | null }[]>([]);
 
   // Fetch WordPress sites with favicons
@@ -235,6 +236,7 @@ const ScrollColorSection = ({
           .slice(0, 5);
         setWpSites(sitesWithFavicons);
       }
+      setWpSitesLocalLoading(false);
     };
     fetchSites();
   }, []);
@@ -329,7 +331,11 @@ const ScrollColorSection = ({
             <div className="hidden md:block absolute right-0 top-0 bottom-0 w-28 bg-gradient-to-l from-black via-black/70 to-transparent z-20 pointer-events-none" />
             
             <div className="flex justify-center items-center gap-2 md:gap-4 px-2">
-              {wpSites.length > 0 ? (
+              {wpSitesLocalLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-white/50" />
+                </div>
+              ) : wpSites.length > 0 ? (
                 wpSites.map((site, index) => {
                   const isCenter = index === 2;
                   const isEdge = index === 0 || index === 4;
