@@ -90,6 +90,25 @@ export function AdminSystemView() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const activeCampaignIdRef = useRef<string | null>(null);
+  const pausedRef = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+
+  const togglePause = () => {
+    pausedRef.current = !pausedRef.current;
+    setIsPaused(pausedRef.current);
+    if (pausedRef.current) {
+      addLine('info', '⏸️  Sending paused by admin. Press Resume to continue.');
+    } else {
+      addLine('info', '▶️  Sending resumed.');
+    }
+  };
+
+  const waitWhilePaused = async () => {
+    while (pausedRef.current) {
+      await new Promise(r => setTimeout(r, 500));
+    }
+  };
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
