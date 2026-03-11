@@ -997,6 +997,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        // Validate token integrity: check for 'sub' claim to catch corrupted JWTs
+        // that would cause "missing sub claim" 403 errors on all API calls
+        try {
+          const tokenParts = currentSession.access_token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            if (!payload.sub) {
+              console.error('[Auth] Token health check: JWT missing sub claim! Forcing refresh...');
+              // Force a refresh by clearing cooldown
+              lastRefreshAtRef.current = 0;
+              const refreshResult = await safeRefreshSession();
+              if (refreshResult.success && refreshResult.session && tokenHealthMounted) {
+                console.log('[Auth] Token health check: recovered from corrupted JWT');
+                accessTokenRef.current = refreshResult.session.access_token;
+                setSession(refreshResult.session);
+                setUser(refreshResult.session.user);
+                supabase.realtime.setAuth(refreshResult.session.access_token);
+              } else if (tokenHealthMounted) {
+                console.error('[Auth] Token health check: cannot recover corrupted JWT');
+                toast.error('Your session encountered an error. Please log in again.', {
+                  id: 'session-corrupted',
+                  duration: 6000,
+                });
+                userInitiatedSignOutRef.current = true;
+                resetAuthState();
+                try { await supabase.auth.signOut({ scope: 'local' }); } catch {}
+              }
+              return;
+            }
+          }
+        } catch (parseErr) {
+          console.warn('[Auth] Token parse check failed:', parseErr);
+        }
+
         // Session exists — check if the token is about to expire (within 2 minutes)
         const expiresAt = currentSession.expires_at;
         if (expiresAt) {
