@@ -411,11 +411,180 @@ export function AdminSystemView() {
     addLine('output', '  2. Send bulk to Marketing People List');
     addLine('output', '  3. Send bulk to Agencies');
     addLine('output', '  4. Generate email with AI');
+    addLine('output', '  5. Campaign overview');
     if (emailHtml && emailSubject && !clearEmail) {
-      addLine('output', '  5. Clear saved email');
+      addLine('output', '  6. Clear saved email');
     }
     addLine('info', '');
     addLine('info', 'Enter option number (0 to go back):');
+  };
+
+  const showCampaignMenu = () => {
+    setTerminalMode('campaign-menu');
+    addLine('info', '');
+    addLine('info', '── CAMPAIGN OVERVIEW ──');
+    addLine('output', '  1. View lists (recipient counts)');
+    addLine('output', '  2. View already sent');
+    addLine('output', '  3. View unsent');
+    addLine('output', '  4. View email template');
+    addLine('info', '');
+    addLine('info', 'Enter option number (0 to go back):');
+  };
+
+  const handleCampaignLists = async () => {
+    setProcessing(true);
+    addLine('info', '⏳ Fetching list counts...');
+    try {
+      const { count: mpCount } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', 'marketing_people');
+      const { count: agCount } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', 'agencies');
+      addLine('info', '');
+      addLine('info', '── RECIPIENT LISTS ──');
+      addLine('output', `  Marketing People: ${mpCount ?? 0} emails`);
+      addLine('output', `  Agencies: ${agCount ?? 0} emails`);
+      addLine('output', `  Total: ${(mpCount ?? 0) + (agCount ?? 0)} emails`);
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
+      addLine('info', '');
+      addLine('info', 'Enter 0 to go back.');
+      setTerminalMode('campaign-result');
+    }
+  };
+
+  const handleCampaignSent = async () => {
+    setProcessing(true);
+    addLine('info', '⏳ Fetching sent campaigns...');
+    try {
+      // Get distinct campaigns with counts
+      const { data: sends, error } = await supabase
+        .from('marketing_email_sends')
+        .select('campaign_id, email, sent_at')
+        .order('sent_at', { ascending: false })
+        .limit(1000);
+      if (error) throw error;
+
+      if (!sends || sends.length === 0) {
+        addLine('info', '');
+        addLine('output', '  No emails have been sent yet.');
+      } else {
+        // Group by campaign
+        const campaigns = new Map<string, { count: number; lastSent: string }>();
+        for (const s of sends) {
+          const existing = campaigns.get(s.campaign_id);
+          if (existing) {
+            existing.count++;
+            if (s.sent_at > existing.lastSent) existing.lastSent = s.sent_at;
+          } else {
+            campaigns.set(s.campaign_id, { count: 1, lastSent: s.sent_at });
+          }
+        }
+        addLine('info', '');
+        addLine('info', '── ALREADY SENT ──');
+        for (const [cid, info] of campaigns) {
+          const date = new Date(info.lastSent).toLocaleString();
+          addLine('output', `  Campaign: ${cid}`);
+          addLine('output', `    Sent: ${info.count} emails | Last: ${date}`);
+          addLine('info', '');
+        }
+        addLine('output', `  Total tracked sends: ${sends.length}`);
+      }
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
+      addLine('info', '');
+      addLine('info', 'Enter 0 to go back.');
+      setTerminalMode('campaign-result');
+    }
+  };
+
+  const handleCampaignUnsent = async () => {
+    setProcessing(true);
+    addLine('info', '⏳ Calculating unsent emails...');
+    try {
+      // Get total emails per category
+      const { count: mpTotal } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', 'marketing_people');
+      const { count: agTotal } = await supabase
+        .from('marketing_emails')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', 'agencies');
+
+      // Get all sent emails
+      let allSentEmails = new Set<string>();
+      let sentOffset = 0;
+      while (true) {
+        const { data: sentBatch } = await supabase
+          .from('marketing_email_sends')
+          .select('email')
+          .range(sentOffset, sentOffset + 999);
+        if (!sentBatch || sentBatch.length === 0) break;
+        sentBatch.forEach(s => allSentEmails.add(s.email));
+        if (sentBatch.length < 1000) break;
+        sentOffset += 1000;
+      }
+
+      // Get emails per category and check against sent
+      let mpUnsent = 0;
+      let agUnsent = 0;
+      let offset = 0;
+      while (true) {
+        const { data: batch } = await supabase
+          .from('marketing_emails')
+          .select('email, category')
+          .range(offset, offset + 999);
+        if (!batch || batch.length === 0) break;
+        for (const row of batch) {
+          if (!allSentEmails.has(row.email)) {
+            if (row.category === 'marketing_people') mpUnsent++;
+            else if (row.category === 'agencies') agUnsent++;
+          }
+        }
+        if (batch.length < 1000) break;
+        offset += 1000;
+      }
+
+      addLine('info', '');
+      addLine('info', '── UNSENT EMAILS ──');
+      addLine('output', `  Marketing People: ${mpUnsent} unsent / ${mpTotal ?? 0} total`);
+      addLine('output', `  Agencies: ${agUnsent} unsent / ${agTotal ?? 0} total`);
+      addLine('output', `  Total unsent: ${mpUnsent + agUnsent}`);
+      addLine('output', `  Total sent (all campaigns): ${allSentEmails.size}`);
+    } catch (err: any) {
+      addLine('error', `✗ Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
+      addLine('info', '');
+      addLine('info', 'Enter 0 to go back.');
+      setTerminalMode('campaign-result');
+    }
+  };
+
+  const handleCampaignTemplate = () => {
+    addLine('info', '');
+    addLine('info', '── EMAIL TEMPLATE ──');
+    if (!emailSubject && !emailHtml) {
+      addLine('error', '  No email template loaded. Use "Generate email with AI" first.');
+    } else {
+      addLine('output', `  Subject: ${emailSubject}`);
+      addLine('info', '');
+      addLine('output', '  ── HTML Preview ──');
+      // Show first 500 chars of HTML
+      const preview = emailHtml.length > 500 ? emailHtml.slice(0, 500) + '...' : emailHtml;
+      addLine('output', `  ${preview}`);
+    }
+    addLine('info', '');
+    addLine('info', 'Enter 0 to go back.');
+    setTerminalMode('campaign-result');
   };
 
   const handleSendTest = async () => {
