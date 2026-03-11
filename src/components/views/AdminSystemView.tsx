@@ -169,9 +169,9 @@ export function AdminSystemView() {
     const newState = !pausedRef.current;
     await setPauseState(newState);
     if (newState) {
-      addLine('info', '⏸️  Sending paused by admin. Press Resume to continue.');
+      addLine('info', 'Sending paused by admin. Press Resume to continue.');
     } else {
-      addLine('info', '▶️  Sending resumed.');
+      addLine('info', 'Sending resumed.');
     }
   };
 
@@ -930,7 +930,7 @@ export function AdminSystemView() {
 
             if (error) throw error;
             if (data?.paused) {
-              addLine('info', '⏸️  Sending paused (detected from server). Waiting for resume...');
+              addLine('info', 'Sending paused (detected from server). Waiting for resume...');
               pausedRef.current = true;
               setIsPaused(true);
               await waitWhilePaused();
@@ -1127,7 +1127,7 @@ export function AdminSystemView() {
 
             if (error) throw error;
             if (data?.paused) {
-              addLine('info', '⏸️  Sending paused (detected from server). Waiting for resume...');
+              addLine('info', 'Sending paused (detected from server). Waiting for resume...');
               pausedRef.current = true;
               setIsPaused(true);
               await waitWhilePaused();
@@ -1288,16 +1288,16 @@ export function AdminSystemView() {
     // --- Global pause/resume commands (work from any mode, persisted to DB) ---
     if (trimmed.toLowerCase() === 'pause') {
       await setPauseState(true);
-      addLine('info', '⏸️  Sending paused by admin. This applies across all tabs/sessions.');
+      addLine('info', 'Sending paused by admin. This applies across all tabs/sessions.');
       addLine('info', '  Type "resume" to continue.');
       return;
     }
     if (trimmed.toLowerCase() === 'resume') {
       await setPauseState(false);
       if (isSending) {
-        addLine('info', '▶️  Sending resumed — active loop will continue.');
+        addLine('info', 'Sending resumed — active loop will continue.');
       } else if (emailHtml && emailSubject) {
-        addLine('info', '▶️  Sending resumed. Starting send to unsent recipients...');
+        addLine('info', 'Sending resumed. Starting send to unsent recipients...');
         // Auto-start continue campaign for both categories
         const autoResume = async () => {
           for (const cat of ['marketing_people', 'agencies'] as const) {
@@ -1306,8 +1306,12 @@ export function AdminSystemView() {
         };
         autoResume();
       } else {
-        addLine('info', '▶️  Pause cleared. No email template loaded — go to /marketing and set up a campaign first.');
+        addLine('info', 'Pause cleared. No email template loaded — go to /marketing and set up a campaign first.');
       }
+      return;
+    }
+    if (trimmed.toLowerCase() === 'refresh') {
+      await refreshSending();
       return;
     }
 
