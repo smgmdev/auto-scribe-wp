@@ -60,7 +60,9 @@ type TerminalMode =
   | 'generate-prompt'
   | 'generate-subject'
   | 'generate-preview'
-  | 'generate-edit';
+  | 'generate-edit'
+  | 'campaign-menu'
+  | 'campaign-result';
 
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
