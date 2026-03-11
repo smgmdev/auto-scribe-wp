@@ -59,6 +59,7 @@ export function AdminSystemView() {
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
   const [terminalMode, setTerminalMode] = useState<TerminalMode>('default');
+  const [marketingCategory, setMarketingCategory] = useState<string>('marketing_people');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
