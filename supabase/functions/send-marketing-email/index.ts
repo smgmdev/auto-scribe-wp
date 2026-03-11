@@ -200,6 +200,7 @@ serve(async (req) => {
         sent,
         failed,
         total: recipients.length,
+        sent_emails: sentEmails,
         errors: errors.length > 0 ? errors : undefined,
       }),
       {
