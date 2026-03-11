@@ -77,7 +77,8 @@ serve(async (req) => {
 - Use accent color #0441d2 (blue) for headings, buttons, or highlights
 - All buttons must have border-radius: 0 (sharp square corners, no rounding)
 - Do NOT include any images, logos, or image tags whatsoever
-- Do NOT mention "Stankevicius", "Stankevicius MGM", or any variation of that name anywhere in the email
+- Do NOT mention "Stankevicius", "Stankevicius MGM", "Arcana Mace", or any variation of those names anywhere in the email
+- Do NOT include any copyright notices, "All rights reserved" text, or company footer branding
 - Include an unsubscribe link at the bottom using href="#unsubscribe" — the system will replace this with a real URL automatically
 - Do NOT include <html>, <head>, or <body> tags — just the inner content
 - Use tables for layout for maximum email client compatibility`;
