@@ -201,6 +201,11 @@ export function AdminSystemView() {
     await new Promise(r => setTimeout(r, 500));
     await setPauseState(false);
     addLine('info', 'Session refreshed. Sending resumed.');
+    // Auto-restart sending for the active category
+    const cat = sendingCategoryRef.current;
+    if (cat && emailSubjectRef.current && emailHtmlRef.current) {
+      executeContinueCampaign(cat);
+    }
   };
 
   const checkDbPaused = async (): Promise<boolean> => {
