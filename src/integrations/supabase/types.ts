@@ -1101,6 +1101,33 @@ export type Database = {
           },
         ]
       }
+      marketing_email_sends: {
+        Row: {
+          campaign_id: string
+          category: string
+          email: string
+          id: string
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          campaign_id: string
+          category?: string
+          email: string
+          id?: string
+          sent_at?: string
+          status?: string
+        }
+        Update: {
+          campaign_id?: string
+          category?: string
+          email?: string
+          id?: string
+          sent_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       marketing_emails: {
         Row: {
           category: string

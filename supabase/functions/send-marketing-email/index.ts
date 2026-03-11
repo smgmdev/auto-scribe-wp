@@ -144,6 +144,7 @@ serve(async (req) => {
     let sent = 0;
     let failed = 0;
     const errors: Array<{ email: string; error: string }> = [];
+    const sentEmails: string[] = [];
 
     // Send emails individually for better deliverability and tracking
     for (const recipient of recipients) {
@@ -179,7 +180,7 @@ serve(async (req) => {
           },
         });
         sent++;
-
+        sentEmails.push(recipient);
         // Rate limit: small delay between sends
         if (recipients.length > 1) {
           await new Promise((r) => setTimeout(r, 200));
@@ -199,6 +200,7 @@ serve(async (req) => {
         sent,
         failed,
         total: recipients.length,
+        sent_emails: sentEmails,
         errors: errors.length > 0 ? errors : undefined,
       }),
       {
