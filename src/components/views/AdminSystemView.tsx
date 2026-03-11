@@ -1118,6 +1118,28 @@ export function AdminSystemView() {
     setHistoryIndex(-1);
     setInput('');
 
+    // --- Global pause/resume commands (work from any mode) ---
+    if (trimmed.toLowerCase() === 'pause') {
+      if (!pausedRef.current) {
+        pausedRef.current = true;
+        setIsPaused(true);
+        addLine('info', '⏸️  Sending paused by admin. Type "resume" to continue.');
+      } else {
+        addLine('info', '⏸️  Already paused. Type "resume" to continue.');
+      }
+      return;
+    }
+    if (trimmed.toLowerCase() === 'resume') {
+      if (pausedRef.current) {
+        pausedRef.current = false;
+        setIsPaused(false);
+        addLine('info', '▶️  Sending resumed.');
+      } else {
+        addLine('info', '▶️  Not currently paused.');
+      }
+      return;
+    }
+
     // --- Sub-modes ---
 
     if (terminalMode === 'marketing-list') {
@@ -1224,18 +1246,6 @@ export function AdminSystemView() {
 
     if (terminalMode === 'campaign-result') {
       if (trimmed === '0') { showCampaignMenu(); return; }
-      if (trimmed.toLowerCase() === 'pause' && isSending) {
-        pausedRef.current = true;
-        setIsPaused(true);
-        addLine('info', '⏸️  Sending paused by admin. Type "resume" to continue or use the Resume button.');
-        return;
-      }
-      if (trimmed.toLowerCase() === 'resume' && isSending && isPaused) {
-        pausedRef.current = false;
-        setIsPaused(false);
-        addLine('info', '▶️  Sending resumed.');
-        return;
-      }
       addLine('error', 'Enter 0 to go back.');
       return;
     }
