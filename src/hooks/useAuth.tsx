@@ -102,6 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Mutex to prevent concurrent refreshSession() calls — the second call would
   // get "Refresh Token Not Found" because the first already consumed the token.
   const refreshLockRef = useRef<Promise<{ success: boolean; session: Session | null }> | null>(null);
+  // Cooldown: minimum time between successive refresh calls to prevent token rotation storms
+  const lastRefreshAtRef = useRef<number>(0);
+  const REFRESH_COOLDOWN_MS = 10000; // 10 seconds between refreshes
 
   const safeRefreshSession = async (): Promise<{ success: boolean; session: Session | null }> => {
     // If a refresh is already in flight, wait for it instead of starting another
@@ -110,8 +113,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return refreshLockRef.current;
     }
 
+    // Enforce cooldown to prevent rapid token rotation storms
+    const timeSinceLastRefresh = Date.now() - lastRefreshAtRef.current;
+    if (timeSinceLastRefresh < REFRESH_COOLDOWN_MS) {
+      console.log('[Auth] safeRefreshSession: cooldown active, skipping (last refresh', Math.round(timeSinceLastRefresh / 1000), 's ago)');
+      // Return the current session instead of refreshing
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (currentSession) return { success: true, session: currentSession };
+      } catch {}
+      return { success: false, session: null };
+    }
+
     const refreshPromise = (async () => {
       try {
+        lastRefreshAtRef.current = Date.now();
         const { data, error } = await supabase.auth.refreshSession();
         if (error || !data?.session) {
           console.warn('[Auth] safeRefreshSession failed:', error?.message);
@@ -123,8 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('[Auth] safeRefreshSession error:', err);
         return { success: false, session: null };
       } finally {
-        // Clear the lock after a short delay to debounce rapid-fire calls
-        setTimeout(() => { refreshLockRef.current = null; }, 500);
+        // Clear the lock after a longer delay to prevent rapid-fire refresh storms
+        setTimeout(() => { refreshLockRef.current = null; }, 3000);
       }
     })();
 
