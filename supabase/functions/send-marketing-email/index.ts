@@ -144,6 +144,7 @@ serve(async (req) => {
     let sent = 0;
     let failed = 0;
     const errors: Array<{ email: string; error: string }> = [];
+    const sentEmails: string[] = [];
 
     // Send emails individually for better deliverability and tracking
     for (const recipient of recipients) {
