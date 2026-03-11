@@ -1006,6 +1006,7 @@ export function AdminSystemView() {
       addLine('output', `  Total: ${recipients.length}`);
       addLine('output', `  Campaign ID: ${campaignId}`);
       activeCampaignIdRef.current = null;
+      setIsSending(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
