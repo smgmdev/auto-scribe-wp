@@ -422,6 +422,8 @@ function isPersonalOrLifestyleTitle(text: string): boolean {
     'shares real-time', 'shares real - time', 'shares update', 'returns to',
     'techie', 'employee', 'traveler', 'traveller', 'tourist', 'passenger',
     'stranded', 'evacuated safely', 'personal account', 'eyewitness account',
+    'stuck in', 'find a way back', 'way back to', 'trying to get back', 'trying to find a way back',
+    'describes life under', 'describes life in', 'american stuck',
     'via muscat', 'via dubai', 'via doha', 'via istanbul',
     'bengaluru', 'bangalore', 'hyderabad', 'pune', 'chennai', 'kolkata',
     'delhi news', 'times of india', 'hindustan times lifestyle',
