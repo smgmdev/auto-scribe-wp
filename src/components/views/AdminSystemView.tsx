@@ -80,6 +80,7 @@ export function AdminSystemView() {
   // Email compose state
   const [emailSubject, setEmailSubject] = useState('');
   const [emailHtml, setEmailHtml] = useState('');
+  const [marketingListOffset, setMarketingListOffset] = useState(-1);
   const [emailPrompt, setEmailPrompt] = useState('');
   const [bulkTarget, setBulkTarget] = useState<'marketing_people' | 'agencies' | ''>('');
 
