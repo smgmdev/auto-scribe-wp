@@ -819,6 +819,7 @@ export function AdminSystemView() {
       addLine('error', `✗ Error: ${err.message}`);
     } finally {
       setProcessing(false);
+      setIsSending(false);
       addLine('info', '');
       showSendMenu();
     }
