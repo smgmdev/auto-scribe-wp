@@ -792,8 +792,7 @@ export function AdminSystemView() {
       const MAX_RETRIES = 3;
 
       setIsSending(true);
-      pausedRef.current = false;
-      setIsPaused(false);
+      await setPauseState(false);
 
       for (let i = 0; i < recipients.length; i += 50) {
         await waitWhilePaused();
