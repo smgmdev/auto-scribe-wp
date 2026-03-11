@@ -994,7 +994,7 @@ export function AdminSystemView() {
   const executeBulkSend = async (category: string) => {
     setProcessing(true);
     const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
-    addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
+    addLine('info', `Fetching ${categoryLabel} recipients...`);
 
     // Deterministic campaign ID so resume works across retries
     const campaignId = activeCampaignIdRef.current || `${emailSubject.slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}`;
