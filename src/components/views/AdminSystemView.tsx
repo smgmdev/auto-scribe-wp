@@ -581,6 +581,10 @@ export function AdminSystemView() {
       addLine('output', `  Agencies: ${agUnsent} unsent / ${agTotal ?? 0} total`);
       addLine('output', `  Total unsent: ${mpUnsent + agUnsent}`);
       addLine('output', `  Total sent (all campaigns): ${allSentEmails.size}`);
+      if (isSending) {
+        addLine('info', '');
+        addLine('output', `  Type "pause" to pause the current send operation.`);
+      }
     } catch (err: any) {
       addLine('error', `✗ Error: ${err.message}`);
     } finally {
@@ -1220,6 +1224,18 @@ export function AdminSystemView() {
 
     if (terminalMode === 'campaign-result') {
       if (trimmed === '0') { showCampaignMenu(); return; }
+      if (trimmed.toLowerCase() === 'pause' && isSending) {
+        pausedRef.current = true;
+        setIsPaused(true);
+        addLine('info', '⏸️  Sending paused by admin. Type "resume" to continue or use the Resume button.');
+        return;
+      }
+      if (trimmed.toLowerCase() === 'resume' && isSending && isPaused) {
+        pausedRef.current = false;
+        setIsPaused(false);
+        addLine('info', '▶️  Sending resumed.');
+        return;
+      }
       addLine('error', 'Enter 0 to go back.');
       return;
     }
