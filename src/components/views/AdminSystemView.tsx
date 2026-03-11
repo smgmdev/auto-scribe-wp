@@ -335,7 +335,34 @@ export function AdminSystemView() {
     }
   };
 
-  // --- Send emails ---
+  const handleAddSingleEmail = async (email: string, category: string) => {
+    setProcessing(true);
+    addLine('info', `⏳ Adding ${email}...`);
+
+    try {
+      const { error } = await supabase
+        .from('marketing_emails')
+        .upsert({ email, category }, { onConflict: 'email', ignoreDuplicates: true });
+
+      if (error) throw error;
+
+      const categoryLabel = category === 'marketing_people' ? 'Marketing People List' : 'Agencies';
+      addLine('output', `✓ Added ${email} to ${categoryLabel}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      if (err.message?.includes('duplicate') || err.code === '23505') {
+        addLine('info', `ℹ ${email} already exists in the list.`);
+      } else {
+        addLine('error', `✗ Error: ${err.message}`);
+      }
+    } finally {
+      setProcessing(false);
+      addLine('info', '');
+      addLine('info', 'Enter another email, or 0 to go back.');
+    }
+  };
+
+
   const showSendMenu = () => {
     setTerminalMode('send-menu');
     setEmailSubject('');
