@@ -1195,7 +1195,7 @@ export function AdminSystemView() {
 
   const handleEditEmail = async (instructions: string) => {
     setProcessing(true);
-    addLine('info', '⏳ AI is editing your email...');
+    addLine('info', 'AI is editing your email...');
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-marketing-email', {
