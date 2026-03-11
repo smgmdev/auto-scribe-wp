@@ -548,7 +548,7 @@ export function AdminSystemView() {
 
   const handleCampaignLists = async () => {
     setProcessing(true);
-    addLine('info', '⏳ Fetching list counts...');
+    addLine('info', 'Fetching list counts...');
     try {
       const { count: mpCount } = await supabase
         .from('marketing_emails')
