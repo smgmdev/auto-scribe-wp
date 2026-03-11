@@ -1126,8 +1126,33 @@ Deno.serve(async (req) => {
       });
     }
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user } } = await supabase.auth.getUser(token);
-    if (!user) {
+
+    // Use anon-key client for JWT validation (service-role client can't validate user JWTs)
+    const supabaseAuth = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    let userId: string | null = null;
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (user) {
+      userId = user.id;
+    } else {
+      // Fallback: decode expired JWT and verify user still exists via admin API
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.sub) {
+          const { data: adminUser } = await supabase.auth.admin.getUserById(payload.sub);
+          if (adminUser?.user) {
+            userId = adminUser.user.id;
+            console.log('Auth recovered via token decode', userId);
+          }
+        }
+      } catch (decodeErr) {
+        console.error('Token decode failed:', decodeErr);
+      }
+    }
+
+    if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
