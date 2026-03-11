@@ -755,7 +755,12 @@ export function AdminSystemView() {
       let totalFailed = 0;
       const MAX_RETRIES = 3;
 
+      setIsSending(true);
+      pausedRef.current = false;
+      setIsPaused(false);
+
       for (let i = 0; i < recipients.length; i += 50) {
+        await waitWhilePaused();
         const batch = recipients.slice(i, i + 50);
         const batchNum = Math.floor(i / 50) + 1;
         addLine('info', `  Batch ${batchNum}: sending ${batch.length} emails...`);
