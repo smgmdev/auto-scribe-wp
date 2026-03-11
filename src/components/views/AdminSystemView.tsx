@@ -611,8 +611,16 @@ export function AdminSystemView() {
     // --- Sub-modes ---
 
     if (terminalMode === 'marketing-list') {
-      if (trimmed === '0') { showCategoryMenu('view'); return; }
-      addLine('error', 'Enter 0 to go back.');
+      if (trimmed === '0') { setMarketingListOffset(-1); showCategoryMenu('view'); return; }
+      if (trimmed.toLowerCase() === 'more' && marketingListOffset > 0) {
+        await handleMarketingList(marketingCategory, marketingListOffset);
+        return;
+      }
+      if (marketingListOffset > 0) {
+        addLine('error', 'Enter "more" to load next page, or 0 to go back.');
+      } else {
+        addLine('error', 'Enter 0 to go back.');
+      }
       return;
     }
 
