@@ -238,8 +238,6 @@ export function AdminSystemView() {
   const scrollToBottom = useCallback(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
   }, []);
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-  }, []);
 
   useEffect(() => {
     scrollToBottom();
