@@ -392,19 +392,27 @@ export function AdminSystemView() {
   };
 
 
-  const showSendMenu = () => {
+  const showSendMenu = (clearEmail = false) => {
     setTerminalMode('send-menu');
-    setEmailSubject('');
-    setEmailHtml('');
-    setEmailPrompt('');
+    if (clearEmail) {
+      setEmailSubject('');
+      setEmailHtml('');
+      setEmailPrompt('');
+    }
     setBulkTarget('');
     addLine('info', '');
     addLine('info', '── SEND EMAILS ──');
-    addLine('info', '');
+    if (emailHtml && emailSubject && !clearEmail) {
+      addLine('output', `  ✉ Last email ready: "${emailSubject}"`);
+      addLine('info', '');
+    }
     addLine('output', '  1. Send test email to business@stankeviciusmgm.com');
     addLine('output', '  2. Send bulk to Marketing People List');
     addLine('output', '  3. Send bulk to Agencies');
     addLine('output', '  4. Generate email with AI');
+    if (emailHtml && emailSubject && !clearEmail) {
+      addLine('output', '  5. Clear saved email');
+    }
     addLine('info', '');
     addLine('info', 'Enter option number (0 to go back):');
   };
@@ -784,7 +792,15 @@ export function AdminSystemView() {
         addLine('info', '(e.g. "Announce our new PR distribution service with special launch pricing")');
         return;
       }
-      addLine('error', 'Invalid option. Enter 1-4, or 0 to go back.');
+      if (trimmed === '5' && emailHtml && emailSubject) {
+        setEmailSubject('');
+        setEmailHtml('');
+        setEmailPrompt('');
+        addLine('output', '✓ Saved email cleared.');
+        showSendMenu(true);
+        return;
+      }
+      addLine('error', `Invalid option. Enter 1-${emailHtml && emailSubject ? '5' : '4'}, or 0 to go back.`);
       return;
     }
 
