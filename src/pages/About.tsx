@@ -91,6 +91,7 @@ export default function About() {
   const lastScrollY = useRef(0);
   const [totalChannels, setTotalChannels] = useState(0);
   const [channelsLoading, setChannelsLoading] = useState(true);
+  const [distributionImgLoaded, setDistributionImgLoaded] = useState(false);
 
   useEffect(() => {
     async function fetchChannelCount() {
