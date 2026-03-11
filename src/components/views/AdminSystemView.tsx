@@ -41,6 +41,7 @@ interface TerminalLine {
   type: 'input' | 'output' | 'error' | 'info' | 'table' | 'html-preview';
   content: string;
   data?: UserRecord[];
+  timestamp: string;
 }
 
 let lineId = Date.now();
@@ -66,9 +67,10 @@ type TerminalMode =
   | 'continue-campaign';
 
 export function AdminSystemView() {
+  const now = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const [lines, setLines] = useState<TerminalLine[]>([
-    { id: lineId++, type: 'info', content: 'System Terminal v1.0' },
-    { id: lineId++, type: 'info', content: '' },
+    { id: lineId++, type: 'info', content: 'System Terminal v1.0', timestamp: now() },
+    { id: lineId++, type: 'info', content: '', timestamp: now() },
   ]);
   const [input, setInput] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -151,7 +153,7 @@ export function AdminSystemView() {
   }, [lines, scrollToBottom]);
 
   const addLine = (type: TerminalLine['type'], content: string, data?: UserRecord[]) => {
-    setLines(prev => [...prev, { id: lineId++, type, content, data }]);
+    setLines(prev => [...prev, { id: lineId++, type, content, data, timestamp: now() }]);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1421,7 +1423,7 @@ export function AdminSystemView() {
         showMarketingMenu();
         break;
       case '/clear':
-        setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.' }]);
+        setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.', timestamp: now() }]);
         setExpandedUsers(new Set());
         setTerminalMode('default');
         break;
@@ -1572,8 +1574,9 @@ export function AdminSystemView() {
             else if (line.type === 'info') { colorClass = 'text-white/40'; }
 
             return (
-              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words`}>
-                {prefix}{line.content}
+              <div key={line.id} className={`${colorClass} leading-6 whitespace-pre-wrap break-words flex`}>
+                <span className="text-white/20 shrink-0 mr-2 select-none">{line.timestamp}</span>
+                <span className="flex-1">{prefix}{line.content}</span>
               </div>
             );
           })}
