@@ -472,12 +472,24 @@ export function AdminSystemView() {
     addLine('info', `⏳ Fetching ${categoryLabel} recipients...`);
 
     try {
-      const { data: emails, error: fetchErr } = await supabase
-        .from('marketing_emails')
-        .select('email')
-        .eq('category', category);
+      // Fetch ALL emails with pagination (Supabase default limit is 1000)
+      let allEmails: { email: string }[] = [];
+      let fetchOffset = 0;
+      const fetchBatchSize = 1000;
+      while (true) {
+        const { data: batch, error: fetchErr } = await supabase
+          .from('marketing_emails')
+          .select('email')
+          .eq('category', category)
+          .range(fetchOffset, fetchOffset + fetchBatchSize - 1);
+        if (fetchErr) throw fetchErr;
+        if (!batch || batch.length === 0) break;
+        allEmails = allEmails.concat(batch);
+        if (batch.length < fetchBatchSize) break;
+        fetchOffset += fetchBatchSize;
+      }
+      const emails = allEmails;
 
-      if (fetchErr) throw fetchErr;
       if (!emails || emails.length === 0) {
         addLine('error', `No emails found in ${categoryLabel}.`);
         setTerminalMode('send-menu');
