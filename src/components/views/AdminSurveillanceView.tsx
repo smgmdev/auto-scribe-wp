@@ -409,7 +409,7 @@ export function AdminSurveillanceView() {
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
     if (data) setDroneTrajectories(data.filter(d => !isAnalyticalTitle(d.title)));
-  }, [droneTimeFilter]);
+  }, [droneTimeFilter, isAnalyticalTitle]);
 
   const fetchNukes = useCallback(async () => {
     const hours = parseFloat(nukeTimeFilter);
