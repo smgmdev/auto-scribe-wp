@@ -44,6 +44,8 @@ interface TerminalLine {
 
 let lineId = Date.now();
 
+type TerminalMode = 'default' | 'marketing' | 'marketing-list' | 'marketing-import';
+
 export function AdminSystemView() {
   const [lines, setLines] = useState<TerminalLine[]>([
     { id: lineId++, type: 'info', content: 'System Terminal v1.0' },
@@ -56,6 +58,7 @@ export function AdminSystemView() {
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const [expandedTransactions, setExpandedTransactions] = useState<Set<string>>(new Set());
+  const [terminalMode, setTerminalMode] = useState<TerminalMode>('default');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
