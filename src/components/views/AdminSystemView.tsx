@@ -930,7 +930,7 @@ export function AdminSystemView() {
 
             if (error) throw error;
             if (data?.paused) {
-              addLine('info', '⏸️  Sending paused (detected from server). Waiting for resume...');
+              addLine('info', 'Sending paused (detected from server). Waiting for resume...');
               pausedRef.current = true;
               setIsPaused(true);
               await waitWhilePaused();
