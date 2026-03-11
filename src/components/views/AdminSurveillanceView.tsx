@@ -354,13 +354,36 @@ export function AdminSurveillanceView() {
     })();
   }, [hasLoaded, fetchLatestScan, runScan]);
 
+  // Shared filter: skip analytical/commentary headlines that aren't real attacks
+  const isAnalyticalTitle = useCallback((title: string) => {
+    const t = title.toLowerCase();
+    const patterns = [
+      'depletes', 'depleted', 'reserves', 'stockpile', 'running out', 'running low',
+      'cost of', 'costs of', 'spending on', 'impact on', 'effect on', 'consequences of',
+      'toll of', 'analysis:', 'opinion:', 'editorial:', 'commentary:',
+      'lessons from', 'lessons of', 'learns a', 'learned a', 'lesson on', 'lesson in',
+      'lesson from', 'tough lesson', 'hard lesson',
+      'warns about', 'warns of', 'prepares for', 'plans to', 'threatens to',
+      'vows to', 'vows no', 'vows not', 'vows never', 'vows revenge', 'vows retaliation', 'vowed',
+      'pledges to', 'pledged to', 'promises to', 'promised to',
+      'arms race', 'war economy', 'war fatigue', 'no retreat', 'will not back down',
+      'doubles down', 'stands firm', 'reaffirms', 'signals intent',
+      'could face', 'could see', 'may face', 'might face', 'what if',
+      'how to', 'what we know', 'explained', 'here\'s what', 'here is what',
+      'takeaways', 'key points', 'in focus', 'in review', 'assessment',
+      'superiority', 'deterrence', 'intercept rate', 'capability gap',
+    ];
+    if (t.includes('?')) return true;
+    return patterns.some(p => t.includes(p));
+  }, []);
+
   // Fetch active missile alerts for trajectory arcs (exclude drones and nukes)
   const fetchMissiles = useCallback(async () => {
     const hours = parseFloat(missileTimeFilter);
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
     const { data } = await supabase
       .from('missile_alerts')
-      .select('id, origin_country_code, destination_country_code')
+      .select('id, title, origin_country_code, destination_country_code')
       .eq('active', true)
       .not('severity', 'eq', 'drone')
       .not('severity', 'eq', 'nuke')
@@ -369,8 +392,8 @@ export function AdminSurveillanceView() {
       .gte('published_at', cutoff)
       .not('origin_country_code', 'is', null)
       .not('destination_country_code', 'is', null);
-    if (data) setMissileTrajectories(data);
-  }, [missileTimeFilter]);
+    if (data) setMissileTrajectories(data.filter(d => !isAnalyticalTitle(d.title)));
+  }, [missileTimeFilter, isAnalyticalTitle]);
 
   // Fetch drone alerts (reusing missile_alerts table with title filter or separate — using same table for now)
   const fetchDrones = useCallback(async () => {
