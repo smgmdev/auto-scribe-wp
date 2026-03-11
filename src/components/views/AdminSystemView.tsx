@@ -41,6 +41,7 @@ interface TerminalLine {
   type: 'input' | 'output' | 'error' | 'info' | 'table' | 'html-preview';
   content: string;
   data?: UserRecord[];
+  timestamp: string;
 }
 
 let lineId = Date.now();
