@@ -813,6 +813,14 @@ export function AdminSystemView() {
             });
 
             if (error) throw error;
+            if (data?.paused) {
+              addLine('info', '⏸️  Sending paused (detected from server). Waiting for resume...');
+              pausedRef.current = true;
+              setIsPaused(true);
+              await waitWhilePaused();
+              attempt--; // Retry this batch after resume
+              continue;
+            }
             if (data?.error) throw new Error(data.error);
 
             totalSent += data.sent || 0;
