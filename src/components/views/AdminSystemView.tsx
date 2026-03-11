@@ -573,7 +573,11 @@ export function AdminSystemView() {
         setTerminalMode('marketing-import');
         addLine('info', '');
         addLine('info', 'Importing to: Marketing People List');
-        addLine('info', 'Paste Google Sheet URL:');
+        addLine('info', '');
+        addLine('output', '  1. Paste Google Sheet URL');
+        addLine('output', '  2. Add individual email');
+        addLine('info', '');
+        addLine('info', 'Enter option number (0 to go back):');
         return;
       }
       if (trimmed === '2') {
@@ -581,7 +585,11 @@ export function AdminSystemView() {
         setTerminalMode('marketing-import');
         addLine('info', '');
         addLine('info', 'Importing to: Agencies');
-        addLine('info', 'Paste Google Sheet URL:');
+        addLine('info', '');
+        addLine('output', '  1. Paste Google Sheet URL');
+        addLine('output', '  2. Add individual email');
+        addLine('info', '');
+        addLine('info', 'Enter option number (0 to go back):');
         return;
       }
       addLine('error', 'Invalid option. Enter 1, 2, or 0 to go back.');
@@ -590,11 +598,40 @@ export function AdminSystemView() {
 
     if (terminalMode === 'marketing-import') {
       if (trimmed === '0') { showMarketingMenu(); return; }
+      if (trimmed === '1') {
+        setTerminalMode('marketing-import-sheet');
+        addLine('info', '');
+        addLine('info', 'Paste Google Sheet URL:');
+        return;
+      }
+      if (trimmed === '2') {
+        setTerminalMode('marketing-import-single');
+        addLine('info', '');
+        addLine('info', 'Enter email address:');
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1, 2, or 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'marketing-import-sheet') {
+      if (trimmed === '0') { showMarketingMenu(); return; }
       if (trimmed.includes('docs.google.com/spreadsheets') || trimmed.includes('sheets.google.com')) {
         await handleMarketingImport(trimmed, marketingCategory);
         return;
       }
       addLine('error', 'Please paste a valid Google Sheets URL, or enter 0 to go back.');
+      return;
+    }
+
+    if (terminalMode === 'marketing-import-single') {
+      if (trimmed === '0') { showMarketingMenu(); return; }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(trimmed)) {
+        await handleAddSingleEmail(trimmed.toLowerCase(), marketingCategory);
+        return;
+      }
+      addLine('error', 'Please enter a valid email address, or enter 0 to go back.');
       return;
     }
 
