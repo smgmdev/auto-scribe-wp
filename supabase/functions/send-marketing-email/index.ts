@@ -111,7 +111,7 @@ serve(async (req) => {
 
     const resend = new Resend(RESEND_API_KEY);
     const senderName = from_name || "Stankevicius";
-    const senderEmail = `${senderName.toLowerCase().replace(/\s+/g, "")}@stankevicius.co.uk`;
+    const senderEmail = "noreply@stankevicius.co.uk";
 
     logStep("Sending marketing emails", {
       recipientCount: recipients.length,
