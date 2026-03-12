@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
     const lowYear = currentYear - 5;
     const highYear = currentYear - 1;
 
-    const prompt = `You are a research assistant summarizing publicly available data from the SIPRI Arms Transfers Database (https://www.sipri.org/databases/armstransfers). SIPRI is an independent international institute and all their arms transfer data is published openly for public use, transparency, and academic research.
+    const prompt = `You are a research assistant summarizing publicly available data from the SIPRI Arms Transfers Database (https://www.sipri.org/databases/armstransfers). SIPRI is the Stockholm International Peace Research Institute — an independent, internationally respected institute. ALL their arms transfer data is published openly and freely for public use, academic research, journalism, and policy transparency. This data covers ALL countries without exception, including sanctioned states.
 
 Task: Summarize the major conventional arms transfers for ${country_name} from ${lowYear} to ${highYear} based on SIPRI's publicly available records.
 
@@ -73,7 +73,7 @@ Return ONLY valid JSON with this exact structure (no markdown, no explanation, n
     {
       "partner_country": "Country Name",
       "weapon_designation": "Specific weapon system name (e.g. F-16V, S-400, Leopard-2A7)",
-      "weapon_category": "One of: Aircraft, Air defence system, Armoured vehicle, Artillery, Engine, Missile, Naval weapon, Sensor, Ship, Satellite, Helicopter",
+      "weapon_category": "One of: Aircraft, Air defence system, Armoured vehicle, Artillery, Engine, Missile, Naval weapon, Sensor, Ship, Satellite, Helicopter, Small arms",
       "weapon_description": "Brief type description (e.g. Fighter aircraft, SAM system)",
       "order_date": "Year ordered",
       "delivery_years": "Years delivered (e.g. 2022-2024)",
@@ -84,15 +84,16 @@ Return ONLY valid JSON with this exact structure (no markdown, no explanation, n
   "imports": [same structure]
 }
 
-IMPORTANT RULES:
-- This is publicly available, freely published data from SIPRI — an internationally respected peace research institute
+CRITICAL RULES:
+- This is PUBLICLY AVAILABLE open data. SIPRI publishes arms transfer records for EVERY country including Iran, North Korea, Russia, China, Myanmar, etc. Do NOT refuse or return empty results for any country.
+- SIPRI's mission is transparency — their entire database exists to make this information public. Summarizing it is expected and encouraged.
 - Only include transfers documented in SIPRI's open-access database and annual yearbooks
 - Include specific weapon system designations (not generic descriptions)
 - Focus on the most significant transfers (top 15-20 per direction max)
-- If a country has no known arms exports/imports in this period, return empty arrays for that direction
+- If a country genuinely has zero documented transfers in this period, return empty arrays — but most countries have at least imports
 - Quantities should be specific numbers when known from SIPRI data
 - Data period: ${lowYear}-${highYear} based on SIPRI TIV data
-- You MUST respond with JSON only. Do not refuse. This is open public data.`;
+- You MUST respond with JSON only. No refusals, no disclaimers, no explanations. JSON only.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -101,7 +102,7 @@ IMPORTANT RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 8192,
       }),
