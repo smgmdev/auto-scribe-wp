@@ -244,20 +244,19 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
     }
   };
 
-  const fetchArmsData = async () => {
+  const fetchArmsData = async (forceRefresh = false) => {
     if (!countryName || !countryCode) {
       toast.error('Country information not available');
       return;
     }
     setArmsPopupOpen(true);
-    if (armsData) return; // already loaded
+    if (armsData && !forceRefresh) return; // already loaded
     setArmsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-sipri-transfers', {
-        body: { country_name: countryName, country_code: countryCode },
+        body: { country_name: countryName, country_code: countryCode, force_refresh: forceRefresh },
       });
       if (error) {
-        // Try to read error body
         const ctx = (error as any)?.context;
         if (ctx && typeof ctx.json === 'function') {
           const body = await ctx.json();
@@ -267,10 +266,11 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
       }
       if (data?.error) throw new Error(data.error);
       setArmsData(data);
+      if (forceRefresh) toast.success('Arms trade data refreshed');
     } catch (err: any) {
       console.error('SIPRI fetch error:', err);
       toast.error(err.message || 'Failed to fetch arms transfer data');
-      setArmsPopupOpen(false);
+      if (!armsData) setArmsPopupOpen(false);
     } finally {
       setArmsLoading(false);
     }
