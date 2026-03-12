@@ -1325,12 +1325,9 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Increment nuke code usage
-        if (session.nukeCodeId) {
-          const { data: codeData } = await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single();
-          if (codeData) {
-            await supabase.from('nuke_codes').update({ usage_count: (codeData.usage_count || 0) + 1 }).eq('id', session.nukeCodeId);
-          }
+        // Mark nuke code as used (only after successful publish)
+        if (session.nukeCodeId && successCount > 0) {
+          await supabase.from('nuke_codes').update({ used: true, usage_count: ((await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single()).data?.usage_count || 0) + 1 }).eq('id', session.nukeCodeId);
         }
 
         // Summary
