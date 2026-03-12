@@ -353,7 +353,7 @@ function isAnalyticalTitle(text: string): boolean {
     'cost of', 'costs of', 'price of', 'spending on', 'budget for',
     'impact on', 'effect on', 'effects of', 'consequences of', 'toll of',
     'analysis:', 'opinion:', 'editorial:', 'commentary:', 'perspective:',
-    'how the', 'why the', 'what the', 'lessons from', 'lessons of', 'learns a', 'learned a', 'lesson on', 'lesson in', 'lesson from', 'tough lesson', 'hard lesson',
+    'how the', 'how the war', 'how iran', 'how russia', 'how israel', 'is unfolding', 'war is unfolding', 'on day ', 'and more ...', 'and more…', 'what we know', 'what happened', 'here\'s what', 'everything we know', 'wrap up', 'roundup', 'round-up', 'recap', 'in summary', 'day-by-day', 'timeline of', 'why the', 'what the', 'lessons from', 'lessons of', 'learns a', 'learned a', 'lesson on', 'lesson in', 'lesson from', 'tough lesson', 'hard lesson',
     'strategy behind', 'implications of', 'aftermath of',
     'warns about', 'warns of', 'warning about',
     'prepares for', 'preparing for', 'braces for',
