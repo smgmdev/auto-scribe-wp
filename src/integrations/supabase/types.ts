@@ -1386,6 +1386,33 @@ export type Database = {
         }
         Relationships: []
       }
+      nuke_code_attempts: {
+        Row: {
+          attempted_at: string
+          attempted_code: string
+          id: string
+          success: boolean
+          telegram_chat_id: number
+          user_id: string | null
+        }
+        Insert: {
+          attempted_at?: string
+          attempted_code: string
+          id?: string
+          success?: boolean
+          telegram_chat_id: number
+          user_id?: string | null
+        }
+        Update: {
+          attempted_at?: string
+          attempted_code?: string
+          id?: string
+          success?: boolean
+          telegram_chat_id?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       nuke_codes: {
         Row: {
           code: string
