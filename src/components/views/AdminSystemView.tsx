@@ -67,7 +67,8 @@ type TerminalMode =
   | 'continue-campaign'
   | 'nuke-menu'
   | 'nuke-create'
-  | 'nuke-list';
+  | 'nuke-list'
+  | 'nuke-action';
 
 export function AdminSystemView() {
   const now = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
