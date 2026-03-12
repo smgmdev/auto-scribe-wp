@@ -92,6 +92,8 @@ export function AdminSystemView() {
   const [marketingListOffset, setMarketingListOffset] = useState(-1);
   const [emailPrompt, setEmailPrompt] = useState('');
   const [bulkTarget, setBulkTarget] = useState<'marketing_people' | 'agencies' | ''>('');
+  const [selectedNukeCode, setSelectedNukeCode] = useState<{ id: string; code: string; used: boolean } | null>(null);
+  const [nukeCodes, setNukeCodes] = useState<any[]>([]);
 
   // Wrapper setters that keep refs in sync
   const setEmailSubject = useCallback((v: string) => { emailSubjectRef.current = v; setEmailSubjectState(v); }, []);
