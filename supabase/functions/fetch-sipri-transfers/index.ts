@@ -90,9 +90,12 @@ IMPORTANT RULES:
 - Quantities should be specific numbers when known from SIPRI data
 - This data is for ${lowYear}-${highYear} based on SIPRI TIV data`;
 
-    const aiResponse = await fetch(gatewayUrl, {
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [{ role: 'user', content: prompt }],
