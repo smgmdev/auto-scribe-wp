@@ -1288,14 +1288,10 @@ Deno.serve(async (req) => {
 
         // Increment nuke code usage
         if (session.nukeCodeId) {
-          await supabase.rpc('increment_nuke_usage', { _code_id: session.nukeCodeId }).catch(() => {
-            // Fallback: manual increment
-            supabase.from('nuke_codes').select('usage_count').eq('id', session!.nukeCodeId!).single().then(({ data }) => {
-              if (data) {
-                supabase.from('nuke_codes').update({ usage_count: (data.usage_count || 0) + 1 }).eq('id', session!.nukeCodeId!);
-              }
-            });
-          });
+          const { data: codeData } = await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single();
+          if (codeData) {
+            await supabase.from('nuke_codes').update({ usage_count: (codeData.usage_count || 0) + 1 }).eq('id', session.nukeCodeId);
+          }
         }
 
         // Summary
