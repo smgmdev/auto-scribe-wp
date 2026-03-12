@@ -343,6 +343,36 @@ function isSpeculativeTitle(text: string): boolean {
   return speculativePhrases.some(p => lower.includes(p));
 }
 
+// Headlines about diplomacy, coordination, visits, meetings — NOT attacks
+function isDiplomaticOrCoordinationTitle(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const diplomaticPhrases = [
+    'delegation', 'delegations', 'diplomatic', 'diplomacy', 'diplomat', 'diplomats',
+    'coordination', 'coordinating', 'coordinate', 'coordinates',
+    'visit', 'visits', 'visiting', 'visited',
+    'meet', 'meets', 'meeting', 'met with',
+    'discuss', 'discusses', 'discussing', 'discussed', 'discussion', 'discussions',
+    'talk', 'talks', 'bilateral talks', 'multilateral',
+    'agreement', 'signed agreement', 'memorandum', 'mou',
+    'summit', 'conference', 'forum',
+    'cooperation', 'cooperating', 'partnership',
+    'ally', 'allies', 'alliance',
+    'envoy', 'envoys', 'ambassador', 'ambassadors',
+    'consulate', 'embassy',
+    'joint statement', 'communique', 'joint communique',
+    'hosts', 'hosting', 'hosted',
+    'welcomes', 'welcomed', 'welcoming',
+    'strengthening ties', 'deepening ties', 'boosting ties',
+    'bilateral', 'trilateral', 'quadrilateral',
+  ];
+  const hasDiplomatic = diplomaticPhrases.some(p => lower.includes(p));
+  if (!hasDiplomatic) return false;
+  // Make sure there's no actual attack described
+  const directAttackPhrases = ['struck by', 'hit by', 'destroyed by', 'killed in', 'casualties from', 'explosion at', 'detonated'];
+  const hasDirectAttack = directAttackPhrases.some(p => lower.includes(p));
+  return !hasDirectAttack;
+}
+
 // Headlines about policy, analysis, reserves, costs, or consequences — NOT actual kinetic attacks
 function isAnalyticalTitle(text: string): boolean {
   const lower = text.toLowerCase().trim();
@@ -545,11 +575,66 @@ function extractReporterCountry(title: string): string | null {
   return null;
 }
 
+// Validate that a title explicitly confirms an attack FROM origin TO destination
+// This is used to re-validate Perplexity-provided trajectories AND locally inferred ones
+function validateTrajectoryConfirmed(title: string, originCode: string | null, destCode: string | null): boolean {
+  if (!originCode || !destCode) return false;
+  const lower = title.toLowerCase().trim();
+  
+  // Must NOT be diplomatic/coordination/speculative/analytical
+  if (isDiplomaticOrCoordinationTitle(lower)) return false;
+  if (isSpeculativeTitle(lower)) return false;
+  if (isAnalyticalTitle(lower)) return false;
+  if (isPoliticalTitle(lower)) return false;
+  if (isPersonalOrLifestyleTitle(lower)) return false;
+  if (isAftermathOrFollowUpTitle(lower)) return false;
+  if (isMilitaryTestingOrDrill(lower)) return false;
+  
+  // Must contain at least one ATTACK verb or confirmed kinetic phrase in the title itself
+  const kineticIndicators = [
+    'strikes', 'strike', 'attacks', 'attack', 'hits', 'hit', 'bombs', 'bomb',
+    'shells', 'shell', 'fires', 'fire', 'launches', 'launch',
+    'destroys', 'destroy', 'raids', 'raid', 'blasts', 'blast',
+    'pounds', 'pound', 'bombards', 'bombard', 'pummels', 'pummel',
+    'struck', 'attacked', 'bombed', 'shelled', 'targeted', 'fired', 'launched',
+    'destroyed', 'raided', 'blasted', 'pounded', 'bombarded',
+    'shot down', 'shoots down', 'intercepts', 'intercepted',
+    'hit by', 'struck by', 'killed in', 'casualties',
+    'airstrike', 'airstrikes', 'air strike', 'air strikes',
+    'shelling', 'barrage', 'bombardment',
+  ];
+  const hasKinetic = kineticIndicators.some(p => {
+    const idx = lower.indexOf(p);
+    if (idx < 0) return false;
+    // Word boundary check
+    if (idx > 0 && /[a-z]/.test(lower[idx - 1])) return false;
+    const end = idx + p.length;
+    if (end < lower.length && /[a-z]/.test(lower[end])) return false;
+    return true;
+  });
+  
+  if (!hasKinetic) return false;
+  
+  // Both countries must be mentioned or inferable from the title
+  const titleMentions = findCountryMentions(lower);
+  const titleCodes = new Set(titleMentions.map(m => m.code));
+  
+  // The origin AND destination should both be present (or mapped via groups like Houthis→YE)
+  if (!titleCodes.has(originCode) && !titleCodes.has(destCode)) return false;
+  
+  return true;
+}
+
 function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
   const text = `${title} ${description}`.toLowerCase();
   
   // Skip political/legislative titles — they discuss policy, not actual attacks
   if (isPoliticalTitle(text)) {
+    return { origin: null, destination: null };
+  }
+  
+  // Skip diplomatic/coordination/visit headlines — not attacks
+  if (isDiplomaticOrCoordinationTitle(text)) {
     return { origin: null, destination: null };
   }
   
@@ -997,6 +1082,8 @@ RULES:
 3. A country where explosions/attacks happen is the TARGET, not the attacker.
 4. A geographic location (strait, sea, coast, gulf, channel) where an attack occurs does NOT identify the attacker. Never infer the attacker from the location of the incident.
 5. The NATIONALITY of a ship/aircraft/vehicle that was attacked identifies the TARGET country, NOT the origin. The attacker must be explicitly named.
+6. DIPLOMACY & COORDINATION ARE NOT ATTACKS: If a headline describes delegations, visits, coordination, meetings, discussions, talks, or cooperation between countries, set origin and destination to null. Example: "Ukrainian delegation visits Qatar for coordination with Iran" — Qatar and Iran are NOT attacking each other. This is diplomacy.
+7. Two countries being MENTIONED together does NOT mean one is attacking the other. Only explicit attack language ("X strikes Y", "X bombs Y", "X fires missiles at Y") confirms an attack trajectory.
 
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
@@ -1308,25 +1395,45 @@ Deno.serve(async (req) => {
       reliefData,
     );
 
-    // ── Auto-infer trajectory data for events missing origin/destination ──
-    // Also strip trajectory from speculative/question headlines even if Perplexity provided it
+    // ── Validate & infer trajectory data for ALL events ──
+    // Strip trajectory from non-kinetic headlines even if Perplexity provided it
+    // Re-validate Perplexity-provided trajectories against title text
     for (const ev of mergedEvents) {
       const evText = `${ev.title || ''} ${ev.description || ''}`;
-      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText) || isAftermathOrFollowUpTitle(evText) || isMilitaryTestingOrDrill(evText)) {
-        // Speculative/analytical headlines should never have attack trajectories
+      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText) || isAftermathOrFollowUpTitle(evText) || isMilitaryTestingOrDrill(evText) || isDiplomaticOrCoordinationTitle(evText)) {
+        // Non-kinetic headlines should never have attack trajectories
         ev.origin_country_code = null;
         ev.origin_country_name = null;
         ev.destination_country_code = null;
         ev.destination_country_name = null;
         continue;
       }
+      
+      // If Perplexity provided trajectory data, RE-VALIDATE it against the title
+      // This catches false positives like "Qatar coordination with Iran" getting QA→IR trajectory
+      if (ev.origin_country_code && ev.destination_country_code) {
+        const isConfirmed = validateTrajectoryConfirmed(ev.title || '', ev.origin_country_code, ev.destination_country_code);
+        if (!isConfirmed) {
+          console.log(`Stripped unconfirmed trajectory ${ev.origin_country_code}→${ev.destination_country_code} from: "${ev.title}"`);
+          ev.origin_country_code = null;
+          ev.origin_country_name = null;
+          ev.destination_country_code = null;
+          ev.destination_country_name = null;
+        }
+      }
+      
+      // If still missing trajectory, try to infer from text
       if (!ev.origin_country_code || !ev.destination_country_code) {
         const inferred = inferTrajectory(ev.title || '', ev.description || '', ev.country_code || null);
         if (inferred.origin && inferred.destination) {
-          ev.origin_country_code = ev.origin_country_code || inferred.origin;
-          ev.origin_country_name = ev.origin_country_name || null;
-          ev.destination_country_code = ev.destination_country_code || inferred.destination;
-          ev.destination_country_name = ev.destination_country_name || null;
+          // Validate the inferred trajectory too
+          const isConfirmed = validateTrajectoryConfirmed(ev.title || '', inferred.origin, inferred.destination);
+          if (isConfirmed) {
+            ev.origin_country_code = ev.origin_country_code || inferred.origin;
+            ev.origin_country_name = ev.origin_country_name || null;
+            ev.destination_country_code = ev.destination_country_code || inferred.destination;
+            ev.destination_country_name = ev.destination_country_name || null;
+          }
         }
       }
     }
@@ -1423,6 +1530,8 @@ Deno.serve(async (req) => {
       // Skip personal/travel/lifestyle stories — not military events
       if (isPersonalOrLifestyleTitle(text)) return null;
       // Skip aftermath/follow-up reporting — not new active attacks
+      // Skip diplomatic/coordination/visit headlines — not attacks
+      if (isDiplomaticOrCoordinationTitle(text)) return null;
       if (isAftermathOrFollowUpTitle(text)) return null;
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
