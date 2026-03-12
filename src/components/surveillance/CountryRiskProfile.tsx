@@ -276,7 +276,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
         throw error;
       }
       if (data?.error) throw new Error(data.error);
-      console.log('SIPRI data received:', JSON.stringify({ exports: data?.exports?.length, imports: data?.imports?.length, keys: Object.keys(data || {}) }));
+      
       // Normalize: ensure exports/imports are arrays
       const normalized: ArmsTradeData = {
         exports: Array.isArray(data?.exports) ? data.exports : [],
