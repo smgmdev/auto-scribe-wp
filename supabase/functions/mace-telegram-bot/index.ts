@@ -1181,8 +1181,8 @@ Deno.serve(async (req) => {
 
       await sendTelegramMessage(botToken, chatId,
         `✅ <b>Code accepted!</b> ☢️ Nuke mode activated.\n\n` +
-        `Now send me the article content (text, photo, document, or link) and it will be published to <b>ALL</b> available sites.\n\n` +
-        `💡 The normal article flow applies — once you approve, I'll publish everywhere.`
+        `Now send me the article content (text, photo, document, or link) and it will be published to <b>ALL</b> available sites at <b>no credit cost</b>.\n\n` +
+        `💡 Once you approve, I'll publish everywhere for free.`
       );
       return new Response('OK', { status: 200 });
     }
