@@ -1,0 +1,1 @@
+UPDATE missile_alerts SET origin_country_code = NULL, origin_country_name = NULL, destination_country_code = NULL, destination_country_name = NULL WHERE id = '7600c182-7562-4297-bacd-fb804a65776b';
