@@ -1149,7 +1149,7 @@ Deno.serve(async (req) => {
       // Validate code against DB
       const { data: codeRow } = await supabase
         .from('nuke_codes')
-        .select('id, code')
+        .select('id, code, used')
         .eq('code', answer)
         .maybeSingle();
 
@@ -1158,13 +1158,19 @@ Deno.serve(async (req) => {
         await supabase.from('nuke_code_attempts').insert({
           telegram_chat_id: chatId,
           user_id: supabaseUserId || null,
-          attempted_code: '***REDACTED***',
+          attempted_code: answer,
           success: false,
         });
-        const remaining = 4 - (recentAttempts?.length || 0);
-        await sendTelegramMessage(botToken, chatId, `❌ Invalid code. ${remaining > 0 ? `${remaining} attempts remaining.` : 'Last attempt before lockout.'} Reply <b>Cancel</b> to exit.`);
+        await sendTelegramMessage(botToken, chatId, `❌ Invalid code. Try again or type <b>cancel</b>.`);
         return new Response('OK', { status: 200 });
       }
+
+      // Check if code has already been used
+      if (codeRow.used) {
+        await sendTelegramMessage(botToken, chatId, `❌ This code has already been used. Request a new code from admin.`);
+        return new Response('OK', { status: 200 });
+      }
+
 
       // Log successful attempt
       await supabase.from('nuke_code_attempts').insert({
@@ -1319,12 +1325,9 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Increment nuke code usage
-        if (session.nukeCodeId) {
-          const { data: codeData } = await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single();
-          if (codeData) {
-            await supabase.from('nuke_codes').update({ usage_count: (codeData.usage_count || 0) + 1 }).eq('id', session.nukeCodeId);
-          }
+        // Mark nuke code as used (only after successful publish)
+        if (session.nukeCodeId && successCount > 0) {
+          await supabase.from('nuke_codes').update({ used: true, usage_count: ((await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single()).data?.usage_count || 0) + 1 }).eq('id', session.nukeCodeId);
         }
 
         // Summary

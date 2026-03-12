@@ -67,7 +67,8 @@ type TerminalMode =
   | 'continue-campaign'
   | 'nuke-menu'
   | 'nuke-create'
-  | 'nuke-list';
+  | 'nuke-list'
+  | 'nuke-action';
 
 export function AdminSystemView() {
   const now = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -91,6 +92,8 @@ export function AdminSystemView() {
   const [marketingListOffset, setMarketingListOffset] = useState(-1);
   const [emailPrompt, setEmailPrompt] = useState('');
   const [bulkTarget, setBulkTarget] = useState<'marketing_people' | 'agencies' | ''>('');
+  const [selectedNukeCode, setSelectedNukeCode] = useState<{ id: string; code: string; used: boolean } | null>(null);
+  const [nukeCodes, setNukeCodes] = useState<any[]>([]);
 
   // Wrapper setters that keep refs in sync
   const setEmailSubject = useCallback((v: string) => { emailSubjectRef.current = v; setEmailSubjectState(v); }, []);
@@ -1611,18 +1614,22 @@ export function AdminSystemView() {
         try {
           const { data: codes, error } = await supabase
             .from('nuke_codes')
-            .select('id, code, usage_count, created_at')
+            .select('id, code, usage_count, created_at, used')
             .order('created_at', { ascending: false });
           if (error) throw error;
           if (!codes || codes.length === 0) {
+            setNukeCodes([]);
             addLine('output', 'No nuke codes found.');
           } else {
+            setNukeCodes(codes);
             addLine('info', '');
             addLine('info', `── AVAILABLE NUKE CODES (${codes.length}) ──`);
             addLine('info', '');
-            for (const c of codes) {
+            for (let i = 0; i < codes.length; i++) {
+              const c = codes[i];
               const date = format(new Date(c.created_at), 'MMM d, yyyy');
-              addLine('output', `  ${c.code}  [${c.usage_count}]  created ${date}`);
+              const status = (c as any).used ? '  USED' : '  ACTIVE';
+              addLine('output', `  ${i + 1}. ${c.code}  [${c.usage_count}]${status}  created ${date}`);
             }
           }
         } catch (err: any) {
@@ -1630,7 +1637,7 @@ export function AdminSystemView() {
         }
         setProcessing(false);
         addLine('info', '');
-        addLine('info', 'Enter 0 to go back.');
+        addLine('info', 'Enter code number to manage, or 0 to go back.');
         return;
       }
       addLine('error', 'Invalid option. Enter 1, 2, or 0 to exit.');
@@ -1671,7 +1678,59 @@ export function AdminSystemView() {
 
     if (terminalMode === 'nuke-list') {
       if (trimmed === '0') { showNukeMenu(); return; }
-      addLine('error', 'Enter 0 to go back.');
+      const idx = parseInt(trimmed) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= nukeCodes.length) {
+        addLine('error', 'Invalid selection. Enter a code number or 0 to go back.');
+        return;
+      }
+      const selected = nukeCodes[idx];
+      setSelectedNukeCode({ id: selected.id, code: selected.code, used: selected.used });
+      setTerminalMode('nuke-action');
+      addLine('info', '');
+      addLine('info', `── CODE: ${selected.code} ──`);
+      addLine('info', `Status: ${selected.used ? 'USED' : 'ACTIVE'}`);
+      addLine('info', '');
+      addLine('output', '  1. Delete code');
+      if (selected.used) {
+        addLine('output', '  2. Reset code (allow reuse)');
+      }
+      addLine('info', '');
+      addLine('info', 'Enter option number (0 to go back):');
+      return;
+    }
+
+    if (terminalMode === 'nuke-action') {
+      if (trimmed === '0') { showNukeMenu(); return; }
+      if (!selectedNukeCode) { showNukeMenu(); return; }
+      if (trimmed === '1') {
+        setProcessing(true);
+        try {
+          const { error } = await supabase.from('nuke_codes').delete().eq('id', selectedNukeCode.id);
+          if (error) throw error;
+          addLine('output', `Code "${selectedNukeCode.code}" deleted.`);
+        } catch (err: any) {
+          addLine('error', `Failed to delete: ${err.message}`);
+        }
+        setProcessing(false);
+        setSelectedNukeCode(null);
+        showNukeMenu();
+        return;
+      }
+      if (trimmed === '2' && selectedNukeCode.used) {
+        setProcessing(true);
+        try {
+          const { error } = await supabase.from('nuke_codes').update({ used: false }).eq('id', selectedNukeCode.id);
+          if (error) throw error;
+          addLine('output', `Code "${selectedNukeCode.code}" reset. Can be used again.`);
+        } catch (err: any) {
+          addLine('error', `Failed to reset: ${err.message}`);
+        }
+        setProcessing(false);
+        setSelectedNukeCode(null);
+        showNukeMenu();
+        return;
+      }
+      addLine('error', 'Invalid option.');
       return;
     }
 

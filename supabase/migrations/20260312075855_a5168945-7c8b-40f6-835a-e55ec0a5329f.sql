@@ -1,0 +1,1 @@
+ALTER TABLE public.nuke_codes ADD COLUMN used boolean NOT NULL DEFAULT false;

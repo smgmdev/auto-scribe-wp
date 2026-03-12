@@ -1420,6 +1420,7 @@ export type Database = {
           created_by: string
           id: string
           usage_count: number
+          used: boolean
         }
         Insert: {
           code: string
@@ -1427,6 +1428,7 @@ export type Database = {
           created_by: string
           id?: string
           usage_count?: number
+          used?: boolean
         }
         Update: {
           code?: string
@@ -1434,6 +1436,7 @@ export type Database = {
           created_by?: string
           id?: string
           usage_count?: number
+          used?: boolean
         }
         Relationships: []
       }
