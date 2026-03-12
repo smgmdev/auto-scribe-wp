@@ -296,7 +296,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
           )}
         </button>
         <button
-          onClick={fetchArmsData}
+          onClick={() => fetchArmsData()}
           disabled={armsLoading}
           className="w-full py-2 text-[10px] font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
         >
