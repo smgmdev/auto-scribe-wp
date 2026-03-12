@@ -265,8 +265,16 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
         throw error;
       }
       if (data?.error) throw new Error(data.error);
-      setArmsData(data);
-      if (forceRefresh) toast.success('Arms trade data refreshed');
+      console.log('SIPRI data received:', JSON.stringify({ exports: data?.exports?.length, imports: data?.imports?.length, keys: Object.keys(data || {}) }));
+      // Normalize: ensure exports/imports are arrays
+      const normalized: ArmsTradeData = {
+        exports: Array.isArray(data?.exports) ? data.exports : [],
+        imports: Array.isArray(data?.imports) ? data.imports : [],
+        data_years: data?.data_years || '',
+        source: data?.source || '',
+      };
+      setArmsData(normalized);
+      if (forceRefresh) toast.success(`Arms trade data refreshed (${normalized.exports.length} exports, ${normalized.imports.length} imports)`);
     } catch (err: any) {
       console.error('SIPRI fetch error:', err);
       toast.error(err.message || 'Failed to fetch arms transfer data');
