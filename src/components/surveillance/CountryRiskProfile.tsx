@@ -288,6 +288,9 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
           const ctx = (error as any)?.context;
           if (ctx && typeof ctx.json === 'function') {
             const body = await ctx.json();
+            if (body?.error === 'Unauthorized' || body?.error === 'Forbidden') {
+              throw new Error('Please log in to access Arms Trade data');
+            }
             throw new Error(body?.error || 'Edge function error');
           }
           throw error;
