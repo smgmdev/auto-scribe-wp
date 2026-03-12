@@ -485,7 +485,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
         maxHeight="90vh"
         zIndex={300}
         className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
-        headerClassName="!bg-[#0d1220] !border-white/5"
+        headerClassName="!bg-[#2a2a2a] !border-white/5"
         bodyClassName="!p-0"
         headerContent={
           <div className="flex items-center gap-2 pl-2">
