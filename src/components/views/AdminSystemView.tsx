@@ -64,7 +64,10 @@ type TerminalMode =
   | 'generate-edit'
   | 'campaign-menu'
   | 'campaign-result'
-  | 'continue-campaign';
+  | 'continue-campaign'
+  | 'nuke-menu'
+  | 'nuke-create'
+  | 'nuke-list';
 
 export function AdminSystemView() {
   const now = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
