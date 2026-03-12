@@ -519,7 +519,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
           <div className="flex items-center gap-2 pl-2 flex-1">
             <span className="text-sm font-bold text-white">Arms Trade — {countryName}</span>
             <button
-              onClick={() => { setArmsData(null); fetchArmsData(true); }}
+              onClick={() => fetchArmsData(true)}
               disabled={armsLoading}
               className="ml-auto mr-1 p-1 text-gray-400 hover:text-white transition-colors disabled:opacity-40"
               title="Refresh data"
