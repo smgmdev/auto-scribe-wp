@@ -369,12 +369,16 @@ export function AdminSurveillanceView() {
       'arms race', 'war economy', 'war fatigue', 'no retreat', 'will not back down',
       'doubles down', 'stands firm', 'reaffirms', 'signals intent',
       'could face', 'could see', 'may face', 'might face', 'what if',
-      'how to', 'what we know', 'explained', 'here\'s what', 'here is what',
+      'how to', 'how the', 'how iran', 'how russia', 'how israel',
+      'what we know', 'what happened', 'explained', 'here\'s what', 'here is what',
       'takeaways', 'key points', 'in focus', 'in review', 'assessment',
       'superiority', 'deterrence', 'intercept rate', 'capability gap',
+      'is unfolding', 'war is unfolding', 'on day ', 'and more ...', 'and more…',
+      'everything we know', 'wrap up', 'roundup', 'round-up', 'recap', 'in summary', 'day-by-day', 'timeline of',
       'stuck in', 'find a way back', 'way back to', 'describes life under', 'describes life in', 'american stuck',
     ];
     if (t.includes('?')) return true;
+    if (t.includes(';') && ['and more', 'unfolding', 'day '].some(p => t.includes(p))) return true;
     return patterns.some(p => t.includes(p));
   }, []);
 
