@@ -1181,8 +1181,8 @@ Deno.serve(async (req) => {
 
       await sendTelegramMessage(botToken, chatId,
         `✅ <b>Code accepted!</b> ☢️ Nuke mode activated.\n\n` +
-        `Now send me the article content (text, photo, document, or link) and it will be published to <b>ALL</b> available sites.\n\n` +
-        `💡 The normal article flow applies — once you approve, I'll publish everywhere.`
+        `Now send me the article content (text, photo, document, or link) and it will be published to <b>ALL</b> available sites at <b>no credit cost</b>.\n\n` +
+        `💡 Once you approve, I'll publish everywhere for free.`
       );
       return new Response('OK', { status: 200 });
     }
@@ -1336,6 +1336,7 @@ Deno.serve(async (req) => {
           `☢️ <b>NUKE COMPLETE</b>\n\n` +
           `✅ Success: ${successCount} sites\n` +
           `${failCount > 0 ? `❌ Failed: ${failCount} sites\n` : ''}` +
+          `💰 Credits used: 0 (free)` +
           linksText
         );
 
@@ -2010,7 +2011,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
           await sendTelegramMessage(botToken, chatId,
             `${imageMsg}\n\n` +
             `☢️ <b>NUKE CONFIRMATION</b>\n\n` +
-            `Your article will be published to <b>ALL ${siteCount} sites</b>:\n${siteList}\n\n` +
+            `Your article will be published to <b>ALL ${siteCount} sites</b> at <b>no credit cost</b>:\n${siteList}\n\n` +
             `Reply <b>Confirm</b> to proceed or <b>Cancel</b> to abort.`
           );
         } else {
