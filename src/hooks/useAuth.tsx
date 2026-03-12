@@ -349,27 +349,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
+  // Consecutive mismatch counter — require 3 consecutive mismatches before kicking
+  // to avoid false positives from transient DB states, heartbeat timing, etc.
+  const consecutiveMismatchRef = useRef(0);
+  const KICK_THRESHOLD = 3; // need 3 consecutive mismatches (≈15s at 5s poll)
+
   // Single-session enforcement: watch for active_session_id changes (skip in shadow mode)
   useEffect(() => {
     if (!user || shadowModeRef.current) {
-      // Don't reset sessionKickedRef here — handleSessionKicked sets user to null
-      // which would immediately clear the guard and allow duplicate toasts.
-      // It's reset on SIGNED_IN instead.
-      // Shadow mode: skip session guard entirely
+      consecutiveMismatchRef.current = 0;
       return;
     }
 
-    // Skip session guard on reset-password page — the recovery session is
-    // temporary and was intentionally not registered as an active session.
-    // Running the guard here would kick the user out before they can update
-    // their password (causing "Auth session missing" errors).
+    // Skip session guard on reset-password page
     if (window.location.pathname === '/reset-password') {
       return;
     }
 
     const checkSessionValidity = async () => {
       if (sessionKickedRef.current) return;
-      if (Date.now() < sessionGraceUntilRef.current) return;
+      if (Date.now() < sessionGraceUntilRef.current) {
+        consecutiveMismatchRef.current = 0;
+        return;
+      }
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -377,57 +379,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('id', user.id)
           .maybeSingle();
         
-        // If the query fails (network issue, RLS, etc.), just skip this cycle.
-        // Query failures do NOT mean the session is invalid — they typically mean
-        // the network is busy (e.g. during voice AI / TTS / edge function calls).
-        // Only an active_session_id mismatch is evidence of another device taking over.
         if (error || data === null) {
           console.warn('[Auth] Session check query failed, skipping cycle:', error?.message);
-          return;
+          return; // Don't increment mismatch on query failure
         }
         
         const currentActive = (data as any)?.active_session_id;
         if (currentActive && currentActive !== localSessionIdRef.current) {
-          // Before kicking, try to re-verify — the DB value might be from our own
-          // session that was re-registered during a page reload. Double-check by
-          // fetching once more after a short delay.
-          console.warn('[Auth] Session mismatch detected! DB:', currentActive, 'Local:', localSessionIdRef.current, '— verifying...');
-          await new Promise(r => setTimeout(r, 1500));
+          consecutiveMismatchRef.current += 1;
+          console.warn(`[Auth] Session mismatch #${consecutiveMismatchRef.current}/${KICK_THRESHOLD}. DB: ${currentActive}, Local: ${localSessionIdRef.current}`);
           
-          // Re-fetch to confirm it wasn't a transient issue
-          const { data: recheck } = await supabase
-            .from('profiles')
-            .select('active_session_id')
-            .eq('id', user.id)
-            .maybeSingle();
-          const recheckActive = (recheck as any)?.active_session_id;
-          
-          if (recheckActive && recheckActive !== localSessionIdRef.current) {
-            console.error('[Auth] Session mismatch confirmed after re-check. DB:', recheckActive, 'Local:', localSessionIdRef.current);
-            handleSessionKicked();
-          } else {
-            console.log('[Auth] Session mismatch resolved on re-check, skipping kick');
+          if (consecutiveMismatchRef.current >= KICK_THRESHOLD) {
+            // Final confirmation fetch before kicking
+            await new Promise(r => setTimeout(r, 2000));
+            const { data: recheck } = await supabase
+              .from('profiles')
+              .select('active_session_id')
+              .eq('id', user.id)
+              .maybeSingle();
+            const recheckActive = (recheck as any)?.active_session_id;
+            
+            if (recheckActive && recheckActive !== localSessionIdRef.current) {
+              console.error('[Auth] Session mismatch confirmed after', KICK_THRESHOLD, 'consecutive checks. Kicking.');
+              consecutiveMismatchRef.current = 0;
+              handleSessionKicked();
+            } else {
+              console.log('[Auth] Session mismatch resolved on final check, resetting counter');
+              consecutiveMismatchRef.current = 0;
+            }
           }
+        } else {
+          // Session matches or is null — reset counter
+          if (consecutiveMismatchRef.current > 0) {
+            console.log('[Auth] Session match restored, resetting mismatch counter');
+          }
+          consecutiveMismatchRef.current = 0;
         }
       } catch {
         // ignore transient fetch errors
       }
     };
 
-    // Poll every 5 seconds (reduced from 2s for resilience during heavy network usage)
-    const pollInterval = setInterval(checkSessionValidity, 5000);
+    // Poll every 8 seconds (increased from 5s for more resilience)
+    const pollInterval = setInterval(checkSessionValidity, 8000);
 
-    // Also check when the page regains focus (critical for mobile browsers
-    // that suspend JS when backgrounded/tab-switched)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('[Auth] Page became visible, checking session validity');
-        checkSessionValidity();
+        // On tab focus, re-register session first before checking validity
+        // This prevents false kicks when the tab was backgrounded and the
+        // session ID in DB was cleared by stale cleanup
+        console.log('[Auth] Page became visible, re-registering session');
+        sessionGraceUntilRef.current = Date.now() + 10000;
+        consecutiveMismatchRef.current = 0;
+        registerActiveSession(user.id).then(() => {
+          sessionGraceUntilRef.current = Date.now() + 5000;
+        });
       }
     };
     const handleFocus = () => {
-      console.log('[Auth] Window focused, checking session validity');
-      checkSessionValidity();
+      // Same as visibility change — re-register before checking
+      sessionGraceUntilRef.current = Date.now() + 8000;
+      consecutiveMismatchRef.current = 0;
+      registerActiveSession(user.id).then(() => {
+        sessionGraceUntilRef.current = Date.now() + 5000;
+      });
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
@@ -445,13 +460,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         (payload) => {
           const newSessionId = (payload.new as any)?.active_session_id;
           if (newSessionId && newSessionId !== localSessionIdRef.current) {
-            // Skip if we're within the grace period (just registered our own session)
             if (Date.now() < sessionGraceUntilRef.current) {
               console.log('[Auth] Ignoring session change during grace period');
               return;
             }
-            // Another device/browser has taken over
-            handleSessionKicked();
+            // Don't kick immediately from realtime — let the poll counter handle it
+            // This prevents false kicks from transient realtime events
+            consecutiveMismatchRef.current += 1;
+            console.warn(`[Auth] Realtime session mismatch #${consecutiveMismatchRef.current}/${KICK_THRESHOLD}`);
+            if (consecutiveMismatchRef.current >= KICK_THRESHOLD) {
+              handleSessionKicked();
+            }
+          } else {
+            consecutiveMismatchRef.current = 0;
           }
         }
       )
@@ -459,6 +480,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       clearInterval(pollInterval);
+      consecutiveMismatchRef.current = 0;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
       supabase.removeChannel(channel);
