@@ -516,19 +516,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
             <span className="text-[10px] text-gray-400">Fetching SIPRI arms transfer records...</span>
           </div>
         )}
-        {armsData && (
-          <>
-            <ArmsTradeContent data={armsData} />
-            <button
-              onClick={() => { setArmsData(null); fetchArmsData(true); }}
-              disabled={armsLoading}
-              className="w-full py-1.5 text-[9px] text-gray-600 hover:text-gray-400 transition-colors flex items-center justify-center gap-1.5"
-            >
-              <RefreshCw className="w-3 h-3" />
-              Refresh Data
-            </button>
-          </>
-        )}
+        {armsData && <ArmsTradeContent data={armsData} />}
       </DraggablePopup>
     </>
   );
