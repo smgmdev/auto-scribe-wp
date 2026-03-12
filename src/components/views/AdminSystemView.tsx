@@ -1582,6 +1582,85 @@ export function AdminSystemView() {
       return;
     }
 
+    // --- Nuke sub-modes ---
+    if (terminalMode === 'nuke-menu') {
+      if (trimmed === '0') { setTerminalMode('default'); addLine('info', 'Exited /nuke.'); return; }
+      if (trimmed === '1') {
+        setTerminalMode('nuke-create');
+        addLine('info', '');
+        addLine('info', 'Enter the new nuke code:');
+        return;
+      }
+      if (trimmed === '2') {
+        setTerminalMode('nuke-list');
+        setProcessing(true);
+        try {
+          const { data: codes, error } = await supabase
+            .from('nuke_codes')
+            .select('id, code, usage_count, created_at')
+            .order('created_at', { ascending: false });
+          if (error) throw error;
+          if (!codes || codes.length === 0) {
+            addLine('output', 'No nuke codes found.');
+          } else {
+            addLine('info', '');
+            addLine('info', `── AVAILABLE NUKE CODES (${codes.length}) ──`);
+            addLine('info', '');
+            for (const c of codes) {
+              const date = format(new Date(c.created_at), 'MMM d, yyyy');
+              addLine('output', `  ${c.code}  [${c.usage_count}]  created ${date}`);
+            }
+          }
+        } catch (err: any) {
+          addLine('error', `Failed to fetch codes: ${err.message}`);
+        }
+        setProcessing(false);
+        addLine('info', '');
+        addLine('info', 'Enter 0 to go back.');
+        return;
+      }
+      addLine('error', 'Invalid option. Enter 1, 2, or 0 to exit.');
+      return;
+    }
+
+    if (terminalMode === 'nuke-create') {
+      if (trimmed === '0') { showNukeMenu(); return; }
+      const newCode = trimmed;
+      if (newCode.length < 3) {
+        addLine('error', 'Code must be at least 3 characters.');
+        return;
+      }
+      setProcessing(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+        const { error } = await supabase.from('nuke_codes').insert({
+          code: newCode,
+          created_by: user.id,
+        });
+        if (error) {
+          if (error.message.includes('duplicate') || error.message.includes('unique')) {
+            addLine('error', `Code "${newCode}" already exists.`);
+          } else {
+            throw error;
+          }
+        } else {
+          addLine('output', `Code "${newCode}" created successfully.`);
+        }
+      } catch (err: any) {
+        addLine('error', `Failed to create code: ${err.message}`);
+      }
+      setProcessing(false);
+      showNukeMenu();
+      return;
+    }
+
+    if (terminalMode === 'nuke-list') {
+      if (trimmed === '0') { showNukeMenu(); return; }
+      addLine('error', 'Enter 0 to go back.');
+      return;
+    }
+
     // --- Default commands ---
     switch (trimmed.toLowerCase()) {
       case '/db':
@@ -1589,6 +1668,9 @@ export function AdminSystemView() {
         break;
       case '/marketing':
         showMarketingMenu();
+        break;
+      case '/nuke':
+        showNukeMenu();
         break;
       case '/clear':
         setLines([{ id: lineId++, type: 'info', content: 'Terminal cleared.', timestamp: now() }]);
