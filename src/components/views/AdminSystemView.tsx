@@ -125,7 +125,7 @@ export function AdminSystemView() {
       if (d?.email_subject) setEmailSubject(d.email_subject);
       if (d?.email_html) setEmailHtml(d.email_html);
       if (d?.email_prompt) setEmailPrompt(d.email_prompt);
-      if (d?.email_subject || d?.email_html) {
+      if ((d?.email_subject || d?.email_html) && d?.sending_active) {
         addLine('info', `Restored saved email template: "${d.email_subject || '(no subject)'}"`);
       }
       if (d?.sending_active && d?.email_subject && d?.email_html) {
