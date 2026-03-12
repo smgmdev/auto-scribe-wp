@@ -1614,7 +1614,7 @@ export function AdminSystemView() {
         try {
           const { data: codes, error } = await supabase
             .from('nuke_codes')
-            .select('id, code, usage_count, created_at, used')
+            .select('id, code, usage_count, created_at, used' as any)
             .order('created_at', { ascending: false });
           if (error) throw error;
           if (!codes || codes.length === 0) {
