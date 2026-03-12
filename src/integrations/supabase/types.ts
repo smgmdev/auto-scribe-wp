@@ -1877,6 +1877,63 @@ export type Database = {
         }
         Relationships: []
       }
+      sipri_arms_transfers: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          data_year_from: number
+          data_year_to: number
+          delivery_years: string | null
+          direction: string
+          fetched_at: string
+          id: string
+          order_date: string | null
+          partner_country: string
+          quantity: string | null
+          status: string | null
+          weapon_category: string | null
+          weapon_description: string | null
+          weapon_designation: string | null
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          data_year_from: number
+          data_year_to: number
+          delivery_years?: string | null
+          direction: string
+          fetched_at?: string
+          id?: string
+          order_date?: string | null
+          partner_country: string
+          quantity?: string | null
+          status?: string | null
+          weapon_category?: string | null
+          weapon_description?: string | null
+          weapon_designation?: string | null
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          data_year_from?: number
+          data_year_to?: number
+          delivery_years?: string | null
+          direction?: string
+          fetched_at?: string
+          id?: string
+          order_date?: string | null
+          partner_country?: string
+          quantity?: string | null
+          status?: string | null
+          weapon_category?: string | null
+          weapon_description?: string | null
+          weapon_designation?: string | null
+        }
+        Relationships: []
+      }
       site_credits: {
         Row: {
           created_at: string
