@@ -163,6 +163,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     previousUserIdRef.current = null;
   };
 
+  // Track when OUR session was registered — used to determine if a DB mismatch
+  // is from a genuinely newer login or just a stale/transient value
+  const ourSessionRegisteredAtRef = useRef<number>(0);
+
   // Grace period: ignore realtime kicks briefly after registering our own session
   const sessionGraceUntilRef = useRef<number>(0);
 
