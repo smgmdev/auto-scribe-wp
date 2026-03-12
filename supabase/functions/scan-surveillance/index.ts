@@ -343,6 +343,36 @@ function isSpeculativeTitle(text: string): boolean {
   return speculativePhrases.some(p => lower.includes(p));
 }
 
+// Headlines about diplomacy, coordination, visits, meetings — NOT attacks
+function isDiplomaticOrCoordinationTitle(text: string): boolean {
+  const lower = text.toLowerCase().trim();
+  const diplomaticPhrases = [
+    'delegation', 'delegations', 'diplomatic', 'diplomacy', 'diplomat', 'diplomats',
+    'coordination', 'coordinating', 'coordinate', 'coordinates',
+    'visit', 'visits', 'visiting', 'visited',
+    'meet', 'meets', 'meeting', 'met with',
+    'discuss', 'discusses', 'discussing', 'discussed', 'discussion', 'discussions',
+    'talk', 'talks', 'bilateral talks', 'multilateral',
+    'agreement', 'signed agreement', 'memorandum', 'mou',
+    'summit', 'conference', 'forum',
+    'cooperation', 'cooperating', 'partnership',
+    'ally', 'allies', 'alliance',
+    'envoy', 'envoys', 'ambassador', 'ambassadors',
+    'consulate', 'embassy',
+    'joint statement', 'communique', 'joint communique',
+    'hosts', 'hosting', 'hosted',
+    'welcomes', 'welcomed', 'welcoming',
+    'strengthening ties', 'deepening ties', 'boosting ties',
+    'bilateral', 'trilateral', 'quadrilateral',
+  ];
+  const hasDiplomatic = diplomaticPhrases.some(p => lower.includes(p));
+  if (!hasDiplomatic) return false;
+  // Make sure there's no actual attack described
+  const directAttackPhrases = ['struck by', 'hit by', 'destroyed by', 'killed in', 'casualties from', 'explosion at', 'detonated'];
+  const hasDirectAttack = directAttackPhrases.some(p => lower.includes(p));
+  return !hasDirectAttack;
+}
+
 // Headlines about policy, analysis, reserves, costs, or consequences — NOT actual kinetic attacks
 function isAnalyticalTitle(text: string): boolean {
   const lower = text.toLowerCase().trim();
