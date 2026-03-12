@@ -568,6 +568,23 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
             </>
           )}
         </button>
+        <button
+          onClick={fetchTradeOverview}
+          disabled={tradeLoading}
+          className="w-full py-2 text-[10px] font-bold tracking-wider uppercase bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+        >
+          {tradeLoading ? (
+            <>
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Fetching...
+            </>
+          ) : (
+            <>
+              <TrendingUp className="w-3 h-3" />
+              Trade Overview (Exports & Imports)
+            </>
+          )}
+        </button>
       </div>
 
       {/* Risk Profile Popup */}
