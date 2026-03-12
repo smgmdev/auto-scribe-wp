@@ -1618,8 +1618,10 @@ export function AdminSystemView() {
             .order('created_at', { ascending: false });
           if (error) throw error;
           if (!codes || codes.length === 0) {
+            setNukeCodes([]);
             addLine('output', 'No nuke codes found.');
           } else {
+            setNukeCodes(codes);
             addLine('info', '');
             addLine('info', `── AVAILABLE NUKE CODES (${codes.length}) ──`);
             addLine('info', '');
