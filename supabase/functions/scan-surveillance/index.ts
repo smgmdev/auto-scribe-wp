@@ -563,6 +563,11 @@ function inferTrajectory(title: string, description: string, countryCode: string
     return { origin: null, destination: null };
   }
   
+  // Skip compound/roundup headlines with semicolons listing multiple locations — these are summaries
+  if (lower.includes(';') && ['and more', 'unfolding', 'day '].some(p => lower.includes(p))) {
+    return { origin: null, destination: null };
+  }
+
   // Skip personal/travel/lifestyle stories — not military events
   if (isPersonalOrLifestyleTitle(text)) {
     return { origin: null, destination: null };
