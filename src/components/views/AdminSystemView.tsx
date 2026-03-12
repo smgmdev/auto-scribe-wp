@@ -1723,7 +1723,7 @@ export function AdminSystemView() {
       if (trimmed === '2' && selectedNukeCode.used) {
         setProcessing(true);
         try {
-          const { error } = await supabase.from('nuke_codes').update({ used: false } as any).eq('id', selectedNukeCode.id);
+          const { error } = await supabase.from('nuke_codes').update({ used: false, expired_at: null } as any).eq('id', selectedNukeCode.id);
           if (error) throw error;
           addLine('output', `Code "${selectedNukeCode.code}" reset. Can be used again.`);
         } catch (err: any) {
