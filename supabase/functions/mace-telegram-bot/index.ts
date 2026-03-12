@@ -1963,22 +1963,47 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
 
     // ── User sending featured image ──
     if (session.step === 'awaiting_photo') {
+      // Helper: transition to site selection or nuke confirmation
+      const transitionToSiteOrNuke = async (imageMsg: string) => {
+        if (session!.nukeMode) {
+          // Nuke mode: skip site selection, go to confirmation
+          const { data: allSites } = await supabase
+            .from('wordpress_sites')
+            .select('name')
+            .eq('connected', true)
+            .order('created_at', { ascending: true });
+          const siteCount = (allSites || []).length;
+          const siteList = (allSites || []).map((s: any) => s.name).join(', ');
+
+          session!.step = 'nuke_confirm_publish';
+          await saveSession(supabase, chatId, session!);
+
+          await sendTelegramMessage(botToken, chatId,
+            `${imageMsg}\n\n` +
+            `☢️ <b>NUKE CONFIRMATION</b>\n\n` +
+            `Your article will be published to <b>ALL ${siteCount} sites</b>:\n${siteList}\n\n` +
+            `Reply <b>Confirm</b> to proceed or <b>Cancel</b> to abort.`
+          );
+        } else {
+          session!.step = 'awaiting_site';
+          const { data: wpSites } = await supabase
+            .from('wordpress_sites')
+            .select('name')
+            .eq('connected', true)
+            .order('created_at', { ascending: true });
+          const siteNames = (wpSites || []).map((s: any) => s.name);
+
+          await sendTelegramMessage(botToken, chatId,
+            `${imageMsg}\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
+          );
+          await saveSession(supabase, chatId, session!);
+        }
+      };
+
       // Skip option
       if (text?.toLowerCase().trim() === 'skip') {
         session.photoFileId = undefined;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true)
-          .order('created_at', { ascending: true });
-        const siteNames = (wpSites || []).map((s: any) => s.name);
-
-        await sendTelegramMessage(botToken, chatId,
-          `👍 No image — got it.\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
-        );
-        await saveSession(supabase, chatId, session);
+        await transitionToSiteOrNuke('👍 No image — got it.');
         return new Response('OK', { status: 200 });
       }
 
@@ -1994,19 +2019,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
           return new Response('OK', { status: 200 });
         }
         session.photoFileId = largestPhoto.file_id;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true)
-          .order('created_at', { ascending: true });
-        const siteNames = (wpSites || []).map((s: any) => s.name);
-
-        await sendTelegramMessage(botToken, chatId,
-          `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
-        );
-        await saveSession(supabase, chatId, session);
+        await transitionToSiteOrNuke('📸 Got your image!');
         return new Response('OK', { status: 200 });
       }
 
@@ -2035,19 +2048,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         }
 
         session.photoFileId = message.document.file_id;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true)
-          .order('created_at', { ascending: true });
-        const siteNames = (wpSites || []).map((s: any) => s.name);
-
-        await sendTelegramMessage(botToken, chatId,
-          `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
-        );
-        await saveSession(supabase, chatId, session);
+        await transitionToSiteOrNuke('📸 Got your image!');
         return new Response('OK', { status: 200 });
       }
 
