@@ -101,8 +101,9 @@ IMPORTANT RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-5',
+        model: 'google/gemini-2.5-flash',
         messages: [{ role: 'user', content: prompt }],
+        max_tokens: 8192,
       }),
     });
 
@@ -211,8 +212,26 @@ IMPORTANT RULES:
         if (insertError) console.error('Insert error:', insertError);
       }
     } else {
-      // New data is sparser — keep existing cache, but still return new data to the user
+      // New data is sparser — keep existing cache AND return the richer cached data instead
       console.log(`Keeping existing cache (${existingCount} rows) over new fetch (${allRecords.length} rows)`);
+      const { data: cachedRows } = await supabase
+        .from('sipri_arms_transfers')
+        .select('*')
+        .eq('country_code', upperCode)
+        .limit(500);
+      if (cachedRows && cachedRows.length > 0) {
+        const cachedExports = cachedRows.filter((r: any) => r.direction === 'export');
+        const cachedImports = cachedRows.filter((r: any) => r.direction === 'import');
+        return new Response(JSON.stringify({
+          exports: cachedExports,
+          imports: cachedImports,
+          cached: true,
+          data_years: `${cachedRows[0].data_year_from}-${cachedRows[0].data_year_to}`,
+          source: 'SIPRI Arms Transfers Database (Annual)',
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     const exportRecords = allRecords.filter(r => r.direction === 'export');

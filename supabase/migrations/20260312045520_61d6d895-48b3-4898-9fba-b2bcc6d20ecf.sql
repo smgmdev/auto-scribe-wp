@@ -1,0 +1,1 @@
+DELETE FROM public.sipri_arms_transfers WHERE country_code = 'RU';
