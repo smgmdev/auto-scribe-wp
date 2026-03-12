@@ -1528,6 +1528,8 @@ Deno.serve(async (req) => {
       // Skip personal/travel/lifestyle stories — not military events
       if (isPersonalOrLifestyleTitle(text)) return null;
       // Skip aftermath/follow-up reporting — not new active attacks
+      // Skip diplomatic/coordination/visit headlines — not attacks
+      if (isDiplomaticOrCoordinationTitle(text)) return null;
       if (isAftermathOrFollowUpTitle(text)) return null;
       // H-bomb takes highest priority — confirmed hydrogen/thermonuclear detonations
       if (HBOMB_LAUNCH_PHRASES.some((kw: string) => text.includes(kw))) return 'hbomb';
