@@ -388,81 +388,107 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
             </div>
 
             {/* Alliance Network */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <Handshake className="w-3 h-3 text-blue-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Alliance Network</span>
-              <span className="text-[9px] text-gray-600 ml-auto">{profile.alliance_network.length} pacts</span>
-            </div>
-            <div className="space-y-0">
-              {profile.alliance_network.map((a, i) => (
-                <div key={i} className="flex items-center gap-2 p-1.5 border-t border-white/[0.03]">
-                  <span className="text-[10px] text-white flex-1">{a.name}</span>
-                  <Badge variant="outline" className={cn("text-[7px] px-1 py-0 h-3", allianceTypeColors[a.type])}>
-                    {a.type.toUpperCase()}
-                  </Badge>
-                  <span className={cn("text-[8px]", strengthColors[a.strength])}>●</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Historical Conflicts */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <Clock className="w-3 h-3 text-amber-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Historical Conflicts</span>
-            </div>
-            <div className="space-y-0">
-              {profile.historical_conflicts.map((c, i) => (
-                <div key={i} className="p-1.5 border-t border-white/[0.03]">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-white flex-1">{c.name}</span>
-                    <Badge variant="outline" className="text-[7px] px-1 py-0 h-3 bg-white/5 text-gray-500 border-white/10">
-                      {conflictTypeLabels[c.type] || c.type}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <Handshake className="w-3 h-3 text-blue-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Alliance Network</span>
+                <span className="text-[9px] text-gray-600 ml-auto">{profile.alliance_network.length} pacts</span>
+              </div>
+              <div className="space-y-0">
+                {profile.alliance_network.map((a, i) => (
+                  <div key={i} className="flex items-center gap-2 p-1.5 border-t border-white/[0.03]">
+                    <span className="text-[10px] text-white flex-1">{a.name}</span>
+                    <Badge variant="outline" className={cn("text-[7px] px-1 py-0 h-3", allianceTypeColors[a.type])}>
+                      {a.type.toUpperCase()}
                     </Badge>
-                    <span className="text-[9px] text-gray-600">{c.year}</span>
+                    <span className={cn("text-[8px]", strengthColors[a.strength])}>●</span>
                   </div>
-                  <p className="text-[9px] text-gray-500 mt-0.5">{c.outcome}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Vulnerabilities & Advantages */}
-          <div className="grid grid-cols-2 gap-px">
-            <div className="border border-white/[0.05]">
-              <div className="p-1.5 bg-red-500/[0.03]">
-                <span className="text-[9px] font-semibold text-red-400 uppercase tracking-wider">Vulnerabilities</span>
+                ))}
               </div>
-              {profile.risk_assessment.key_vulnerabilities.map((v, i) => (
-                <div key={i} className="p-1.5 border-t border-white/[0.03]">
-                  <p className="text-[9px] text-red-300/70">• {v}</p>
-                </div>
-              ))}
             </div>
-            <div className="border border-white/[0.05]">
-              <div className="p-1.5 bg-emerald-500/[0.03]">
-                <span className="text-[9px] font-semibold text-emerald-400 uppercase tracking-wider">Advantages</span>
-              </div>
-              {profile.risk_assessment.strategic_advantages.map((a, i) => (
-                <div key={i} className="p-1.5 border-t border-white/[0.03]">
-                  <p className="text-[9px] text-emerald-300/70">• {a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Regenerate */}
-          <button
-            onClick={generateProfile}
-            disabled={loading}
-            className="w-full py-1.5 text-[9px] text-gray-600 hover:text-gray-400 transition-colors"
-          >
-            Regenerate Profile
-          </button>
-        </div>
-      )}
-    </div>
+            {/* Historical Conflicts */}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <Clock className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Historical Conflicts</span>
+              </div>
+              <div className="space-y-0">
+                {profile.historical_conflicts.map((c, i) => (
+                  <div key={i} className="p-1.5 border-t border-white/[0.03]">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-white flex-1">{c.name}</span>
+                      <Badge variant="outline" className="text-[7px] px-1 py-0 h-3 bg-white/5 text-gray-500 border-white/10">
+                        {conflictTypeLabels[c.type] || c.type}
+                      </Badge>
+                      <span className="text-[9px] text-gray-600">{c.year}</span>
+                    </div>
+                    <p className="text-[9px] text-gray-500 mt-0.5">{c.outcome}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Vulnerabilities & Advantages */}
+            <div className="grid grid-cols-2 gap-px">
+              <div className="border border-white/[0.05]">
+                <div className="p-1.5 bg-red-500/[0.03]">
+                  <span className="text-[9px] font-semibold text-red-400 uppercase tracking-wider">Vulnerabilities</span>
+                </div>
+                {profile.risk_assessment.key_vulnerabilities.map((v, i) => (
+                  <div key={i} className="p-1.5 border-t border-white/[0.03]">
+                    <p className="text-[9px] text-red-300/70">• {v}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="border border-white/[0.05]">
+                <div className="p-1.5 bg-emerald-500/[0.03]">
+                  <span className="text-[9px] font-semibold text-emerald-400 uppercase tracking-wider">Advantages</span>
+                </div>
+                {profile.risk_assessment.strategic_advantages.map((a, i) => (
+                  <div key={i} className="p-1.5 border-t border-white/[0.03]">
+                    <p className="text-[9px] text-emerald-300/70">• {a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Regenerate */}
+            <button
+              onClick={() => { setProfile(null); generateProfile(); }}
+              disabled={loading}
+              className="w-full py-1.5 text-[9px] text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              Regenerate Profile
+            </button>
+          </div>
+        )}
+      </DraggablePopup>
+
+      {/* Arms Trade Popup */}
+      <DraggablePopup
+        open={armsPopupOpen}
+        onOpenChange={setArmsPopupOpen}
+        width={520}
+        maxHeight="90vh"
+        zIndex={300}
+        className="bg-[#0a0f1a] text-white border-white/10"
+        headerClassName="bg-[#0d1220]"
+        headerContent={
+          <div className="flex items-center gap-2 px-2">
+            <ArrowRightLeft className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[11px] font-bold tracking-wide">ARMS TRADE — {countryName}</span>
+          </div>
+        }
+      >
+        {armsLoading && (
+          <div className="flex items-center justify-center gap-2 py-8">
+            <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+            <span className="text-[10px] text-gray-400">Fetching SIPRI arms transfer records...</span>
+          </div>
+        )}
+        {armsData && <ArmsTradeContent data={armsData} />}
+      </DraggablePopup>
+    </>
   );
 }
