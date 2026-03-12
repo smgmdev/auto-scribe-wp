@@ -791,6 +791,32 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
         )}
         {armsData && <ArmsTradeContent data={armsData} />}
       </DraggablePopup>
+
+      {/* Trade Overview Popup */}
+      <DraggablePopup
+        open={tradePopupOpen}
+        onOpenChange={setTradePopupOpen}
+        width={520}
+        maxHeight="90vh"
+        zIndex={300}
+        className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3 max-md:!h-[100dvh] max-md:!max-h-[100dvh]"
+        headerClassName="!bg-[#2a2a2a] !border-white/5"
+        bodyClassName="!p-0"
+        headerContent={
+          <div className="flex items-center gap-2 pl-2 flex-1">
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-sm font-bold text-white">Trade Overview — {countryName}</span>
+          </div>
+        }
+      >
+        {tradeLoading && (
+          <div className="flex items-center justify-center gap-2 py-8">
+            <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+            <span className="text-[10px] text-gray-400">Fetching trade data...</span>
+          </div>
+        )}
+        {tradeData && <TradeOverviewContent data={tradeData} />}
+      </DraggablePopup>
     </>
   );
 }
