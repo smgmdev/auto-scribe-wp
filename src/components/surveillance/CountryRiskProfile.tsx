@@ -123,7 +123,18 @@ const weaponCategoryIcons: Record<string, string> = {
 };
 
 function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
-  const [showTab, setShowTab] = useState<'export' | 'import'>('export');
+  const [showTab, setShowTab] = useState<'export' | 'import'>(
+    data.exports.length === 0 && data.imports.length > 0 ? 'import' : 'export'
+  );
+
+  useEffect(() => {
+    if (data.exports.length === 0 && data.imports.length > 0) {
+      setShowTab('import');
+    } else if (data.imports.length === 0 && data.exports.length > 0) {
+      setShowTab('export');
+    }
+  }, [data.exports.length, data.imports.length]);
+
   const items = showTab === 'export' ? data.exports : data.imports;
 
   const partnerSummary = new Map<string, { count: number; categories: Set<string> }>();
