@@ -1612,10 +1612,10 @@ export function AdminSystemView() {
         setTerminalMode('nuke-list');
         setProcessing(true);
         try {
-          const { data: codes, error } = await supabase
+          const { data: codes, error } = await (supabase
             .from('nuke_codes')
-            .select('id, code, usage_count, created_at, used' as any)
-            .order('created_at', { ascending: false });
+            .select('id, code, usage_count, created_at, used')
+            .order('created_at', { ascending: false }) as any);
           if (error) throw error;
           if (!codes || codes.length === 0) {
             setNukeCodes([]);
