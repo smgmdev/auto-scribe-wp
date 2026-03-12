@@ -283,7 +283,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
               Generating...
             </>
           ) : (
-            'AI Risk Profile'
+            'Country Intelligence'
           )}
         </button>
         <button
