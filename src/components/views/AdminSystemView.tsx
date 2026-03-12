@@ -1676,7 +1676,59 @@ export function AdminSystemView() {
 
     if (terminalMode === 'nuke-list') {
       if (trimmed === '0') { showNukeMenu(); return; }
-      addLine('error', 'Enter 0 to go back.');
+      const idx = parseInt(trimmed) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= nukeCodes.length) {
+        addLine('error', 'Invalid selection. Enter a code number or 0 to go back.');
+        return;
+      }
+      const selected = nukeCodes[idx];
+      setSelectedNukeCode({ id: selected.id, code: selected.code, used: selected.used });
+      setTerminalMode('nuke-action');
+      addLine('info', '');
+      addLine('info', `── CODE: ${selected.code} ──`);
+      addLine('info', `Status: ${selected.used ? 'USED' : 'ACTIVE'}`);
+      addLine('info', '');
+      addLine('output', '  1. Delete code');
+      if (selected.used) {
+        addLine('output', '  2. Reset code (allow reuse)');
+      }
+      addLine('info', '');
+      addLine('info', 'Enter option number (0 to go back):');
+      return;
+    }
+
+    if (terminalMode === 'nuke-action') {
+      if (trimmed === '0') { showNukeMenu(); return; }
+      if (!selectedNukeCode) { showNukeMenu(); return; }
+      if (trimmed === '1') {
+        setProcessing(true);
+        try {
+          const { error } = await supabase.from('nuke_codes').delete().eq('id', selectedNukeCode.id);
+          if (error) throw error;
+          addLine('output', `Code "${selectedNukeCode.code}" deleted.`);
+        } catch (err: any) {
+          addLine('error', `Failed to delete: ${err.message}`);
+        }
+        setProcessing(false);
+        setSelectedNukeCode(null);
+        showNukeMenu();
+        return;
+      }
+      if (trimmed === '2' && selectedNukeCode.used) {
+        setProcessing(true);
+        try {
+          const { error } = await supabase.from('nuke_codes').update({ used: false }).eq('id', selectedNukeCode.id);
+          if (error) throw error;
+          addLine('output', `Code "${selectedNukeCode.code}" reset. Can be used again.`);
+        } catch (err: any) {
+          addLine('error', `Failed to reset: ${err.message}`);
+        }
+        setProcessing(false);
+        setSelectedNukeCode(null);
+        showNukeMenu();
+        return;
+      }
+      addLine('error', 'Invalid option.');
       return;
     }
 
