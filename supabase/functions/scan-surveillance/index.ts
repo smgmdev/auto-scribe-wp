@@ -633,6 +633,11 @@ function inferTrajectory(title: string, description: string, countryCode: string
     return { origin: null, destination: null };
   }
   
+  // Skip diplomatic/coordination/visit headlines — not attacks
+  if (isDiplomaticOrCoordinationTitle(text)) {
+    return { origin: null, destination: null };
+  }
+  
   // Skip speculative/question headlines — they are analysis, not confirmed attacks
   if (isSpeculativeTitle(text)) {
     return { origin: null, destination: null };
