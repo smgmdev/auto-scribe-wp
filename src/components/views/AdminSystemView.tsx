@@ -1612,10 +1612,10 @@ export function AdminSystemView() {
         setTerminalMode('nuke-list');
         setProcessing(true);
         try {
-          const { data: codes, error } = await supabase
+          const { data: codes, error } = await (supabase
             .from('nuke_codes')
             .select('id, code, usage_count, created_at, used')
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false }) as any);
           if (error) throw error;
           if (!codes || codes.length === 0) {
             setNukeCodes([]);
@@ -1719,7 +1719,7 @@ export function AdminSystemView() {
       if (trimmed === '2' && selectedNukeCode.used) {
         setProcessing(true);
         try {
-          const { error } = await supabase.from('nuke_codes').update({ used: false }).eq('id', selectedNukeCode.id);
+          const { error } = await supabase.from('nuke_codes').update({ used: false } as any).eq('id', selectedNukeCode.id);
           if (error) throw error;
           addLine('output', `Code "${selectedNukeCode.code}" reset. Can be used again.`);
         } catch (err: any) {
