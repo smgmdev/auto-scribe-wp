@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { country_name, country_code } = await req.json();
+    const { country_name, country_code, force_refresh } = await req.json();
     if (!country_name || !country_code) {
       return new Response(JSON.stringify({ error: 'country_name and country_code required' }), {
         status: 400,
