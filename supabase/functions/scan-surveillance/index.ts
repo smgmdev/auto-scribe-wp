@@ -575,6 +575,56 @@ function extractReporterCountry(title: string): string | null {
   return null;
 }
 
+// Validate that a title explicitly confirms an attack FROM origin TO destination
+// This is used to re-validate Perplexity-provided trajectories AND locally inferred ones
+function validateTrajectoryConfirmed(title: string, originCode: string | null, destCode: string | null): boolean {
+  if (!originCode || !destCode) return false;
+  const lower = title.toLowerCase().trim();
+  
+  // Must NOT be diplomatic/coordination/speculative/analytical
+  if (isDiplomaticOrCoordinationTitle(lower)) return false;
+  if (isSpeculativeTitle(lower)) return false;
+  if (isAnalyticalTitle(lower)) return false;
+  if (isPoliticalTitle(lower)) return false;
+  if (isPersonalOrLifestyleTitle(lower)) return false;
+  if (isAftermathOrFollowUpTitle(lower)) return false;
+  if (isMilitaryTestingOrDrill(lower)) return false;
+  
+  // Must contain at least one ATTACK verb or confirmed kinetic phrase in the title itself
+  const kineticIndicators = [
+    'strikes', 'strike', 'attacks', 'attack', 'hits', 'hit', 'bombs', 'bomb',
+    'shells', 'shell', 'fires', 'fire', 'launches', 'launch',
+    'destroys', 'destroy', 'raids', 'raid', 'blasts', 'blast',
+    'pounds', 'pound', 'bombards', 'bombard', 'pummels', 'pummel',
+    'struck', 'attacked', 'bombed', 'shelled', 'targeted', 'fired', 'launched',
+    'destroyed', 'raided', 'blasted', 'pounded', 'bombarded',
+    'shot down', 'shoots down', 'intercepts', 'intercepted',
+    'hit by', 'struck by', 'killed in', 'casualties',
+    'airstrike', 'airstrikes', 'air strike', 'air strikes',
+    'shelling', 'barrage', 'bombardment',
+  ];
+  const hasKinetic = kineticIndicators.some(p => {
+    const idx = lower.indexOf(p);
+    if (idx < 0) return false;
+    // Word boundary check
+    if (idx > 0 && /[a-z]/.test(lower[idx - 1])) return false;
+    const end = idx + p.length;
+    if (end < lower.length && /[a-z]/.test(lower[end])) return false;
+    return true;
+  });
+  
+  if (!hasKinetic) return false;
+  
+  // Both countries must be mentioned or inferable from the title
+  const titleMentions = findCountryMentions(lower);
+  const titleCodes = new Set(titleMentions.map(m => m.code));
+  
+  // The origin AND destination should both be present (or mapped via groups like Houthis→YE)
+  if (!titleCodes.has(originCode) && !titleCodes.has(destCode)) return false;
+  
+  return true;
+}
+
 function inferTrajectory(title: string, description: string, countryCode: string | null): { origin: string | null; destination: string | null } {
   const text = `${title} ${description}`.toLowerCase();
   
