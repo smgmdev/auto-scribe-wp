@@ -501,6 +501,37 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
     setArmsLoading(false);
   };
 
+  const fetchTradeOverview = async () => {
+    if (!countryName || !countryCode) {
+      toast.error('Country information not available');
+      return;
+    }
+    setTradePopupOpen(true);
+    if (tradeData) return;
+    setTradeLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-trade-overview', {
+        body: { country_name: countryName, country_code: countryCode },
+      });
+      if (error) {
+        const ctx = (error as any)?.context;
+        if (ctx && typeof ctx.json === 'function') {
+          const body = await ctx.json();
+          throw new Error(body?.error || 'Failed to fetch trade overview');
+        }
+        throw error;
+      }
+      if (data?.error) throw new Error(data.error);
+      setTradeData(data.overview);
+    } catch (err: any) {
+      console.error('trade-overview error:', err);
+      toast.error(err.message || 'Failed to fetch trade overview');
+      if (!tradeData) setTradePopupOpen(false);
+    } finally {
+      setTradeLoading(false);
+    }
+  };
+
   const tc = profile ? (threatColors[profile.risk_assessment.overall_threat_rating] || threatColors.MODERATE) : threatColors.MODERATE;
 
   return (
