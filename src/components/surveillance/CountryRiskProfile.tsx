@@ -247,6 +247,152 @@ function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
   );
 }
 
+const tradeCategoryColors: Record<string, string> = {
+  Energy: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  Technology: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  Manufacturing: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  Agriculture: 'bg-green-500/10 text-green-400 border-green-500/20',
+  Mining: 'bg-stone-500/10 text-stone-400 border-stone-500/20',
+  Chemicals: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  Textiles: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+  Services: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+  Metals: 'bg-zinc-500/10 text-zinc-300 border-zinc-500/20',
+  Food: 'bg-lime-500/10 text-lime-400 border-lime-500/20',
+};
+
+function TradeOverviewContent({ data }: { data: TradeOverview }) {
+  const [showTab, setShowTab] = useState<'products' | 'partners'>('products');
+  const [direction, setDirection] = useState<'export' | 'import'>('export');
+
+  const products = direction === 'export' ? data.top_exports : data.top_imports;
+  const partners = direction === 'export' ? data.top_export_partners : data.top_import_partners;
+
+  return (
+    <div className="h-full flex flex-col">
+      {/* Summary bar */}
+      <div className="grid grid-cols-3 gap-px bg-white/[0.03] shrink-0">
+        {[
+          ['GDP', data.gdp_usd],
+          ['Trade Balance', data.trade_balance_usd],
+          ['Trade/GDP', data.trade_to_gdp_ratio],
+        ].map(([label, value]) => (
+          <div key={label} className="p-2 bg-[#0d1220]">
+            <span className="text-[8px] text-gray-600 block uppercase tracking-wider">{label}</span>
+            <span className="text-[10px] text-white font-semibold">{value}</span>
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-px bg-white/[0.03] shrink-0">
+        {[
+          ['Total Exports', data.total_exports_usd, 'text-emerald-400'],
+          ['Total Imports', data.total_imports_usd, 'text-orange-400'],
+        ].map(([label, value, color]) => (
+          <div key={label} className="p-2 bg-[#0d1220]">
+            <span className="text-[8px] text-gray-600 block uppercase tracking-wider">{label}</span>
+            <span className={cn("text-[10px] font-semibold", color)}>{value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Direction toggle */}
+      <div className="flex border-b border-white/5 shrink-0">
+        <button
+          onClick={() => setDirection('export')}
+          className={cn(
+            "flex-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
+            direction === 'export' ? 'text-emerald-400 bg-emerald-500/10 border-b border-emerald-400' : 'text-gray-600 hover:text-gray-400'
+          )}
+        >
+          Exports
+        </button>
+        <button
+          onClick={() => setDirection('import')}
+          className={cn(
+            "flex-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
+            direction === 'import' ? 'text-orange-400 bg-orange-500/10 border-b border-orange-400' : 'text-gray-600 hover:text-gray-400'
+          )}
+        >
+          Imports
+        </button>
+      </div>
+
+      {/* Products / Partners toggle */}
+      <div className="flex border-b border-white/5 shrink-0">
+        <button
+          onClick={() => setShowTab('products')}
+          className={cn(
+            "flex-1 py-1 text-[8px] font-bold uppercase tracking-wider transition-colors",
+            showTab === 'products' ? 'text-white bg-white/5' : 'text-gray-600 hover:text-gray-400'
+          )}
+        >
+          <Package className="w-2.5 h-2.5 inline mr-1" />Products
+        </button>
+        <button
+          onClick={() => setShowTab('partners')}
+          className={cn(
+            "flex-1 py-1 text-[8px] font-bold uppercase tracking-wider transition-colors",
+            showTab === 'partners' ? 'text-white bg-white/5' : 'text-gray-600 hover:text-gray-400'
+          )}
+        >
+          <Globe className="w-2.5 h-2.5 inline mr-1" />Partners
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {showTab === 'products' ? (
+          products.map((p, i) => (
+            <div key={i} className="p-1.5 border-t border-white/[0.03] hover:bg-white/[0.02] flex items-center gap-2">
+              <Badge variant="outline" className={cn("text-[7px] px-1 py-0 h-3.5 shrink-0", tradeCategoryColors[p.category] || 'bg-gray-500/10 text-gray-400 border-gray-500/20')}>
+                {p.category}
+              </Badge>
+              <span className="text-[10px] text-white font-medium flex-1 truncate">{p.product}</span>
+              <span className="text-[9px] text-gray-400 shrink-0">{p.value_usd}</span>
+              <span className="text-[8px] text-gray-600 shrink-0 w-10 text-right">{p.share_pct}</span>
+            </div>
+          ))
+        ) : (
+          partners.map((p, i) => (
+            <div key={i} className="p-1.5 border-t border-white/[0.03] hover:bg-white/[0.02] flex items-center gap-2">
+              <span className="text-[10px] text-white font-medium flex-1">{p.country}</span>
+              <span className="text-[9px] text-gray-400 shrink-0">{p.value_usd}</span>
+              <span className="text-[8px] text-gray-600 shrink-0 w-10 text-right">{p.share_pct}</span>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Trade agreements */}
+      {data.trade_agreements.length > 0 && (
+        <div className="p-1.5 border-t border-white/5 shrink-0">
+          <span className="text-[8px] text-gray-600 uppercase tracking-wider block mb-1">Trade Agreements</span>
+          <div className="flex flex-wrap gap-1">
+            {data.trade_agreements.map((a, i) => (
+              <Badge key={i} variant="outline" className="text-[7px] px-1.5 py-0 h-4 bg-white/5 text-gray-300 border-white/10">
+                {a}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Insights */}
+      {data.key_insights.length > 0 && (
+        <div className="p-1.5 border-t border-white/5 shrink-0">
+          <span className="text-[8px] text-gray-600 uppercase tracking-wider block mb-1">Key Insights</span>
+          {data.key_insights.map((insight, i) => (
+            <p key={i} className="text-[9px] text-gray-400 leading-relaxed">{insight}</p>
+          ))}
+        </div>
+      )}
+
+      <div className="p-1 bg-white/[0.01] border-t border-white/[0.03] shrink-0">
+        <span className="text-[7px] text-gray-700">Source: UN Comtrade / World Bank / OEC · {data.data_year} · {data.currency}</span>
+      </div>
+    </div>
+  );
+}
+
 export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProfileProps) {
   const [profile, setProfile] = useState<RiskProfile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -254,6 +400,9 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
   const [armsData, setArmsData] = useState<ArmsTradeData | null>(null);
   const [armsLoading, setArmsLoading] = useState(false);
   const [armsPopupOpen, setArmsPopupOpen] = useState(false);
+  const [tradeData, setTradeData] = useState<TradeOverview | null>(null);
+  const [tradeLoading, setTradeLoading] = useState(false);
+  const [tradePopupOpen, setTradePopupOpen] = useState(false);
 
   // Reset cached data when country changes
   useEffect(() => {
