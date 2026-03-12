@@ -147,13 +147,13 @@ function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
   const sortedPartners = [...partnerSummary.entries()].sort((a, b) => b[1].count - a[1].count);
 
   return (
-    <div className="space-y-0">
+    <div className="h-full flex flex-col">
       <div className="flex items-center gap-1.5 p-2 bg-cyan-500/[0.03]">
         <ArrowRightLeft className="w-3 h-3 text-cyan-400" />
         <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Arms Transfers</span>
         <span className="text-[8px] text-gray-600 ml-auto">{data.data_years} · SIPRI Annual</span>
       </div>
-      <div className="flex border-b border-white/5">
+      <div className="flex border-b border-white/5 shrink-0">
         <button
           onClick={() => setShowTab('export')}
           className={cn(
@@ -174,12 +174,12 @@ function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
         </button>
       </div>
       {items.length === 0 ? (
-        <div className="p-3 text-center">
+        <div className="flex-1 min-h-0 p-3 text-center">
           <span className="text-[10px] text-gray-600">No {showTab} records found in this period</span>
         </div>
       ) : (
-        <>
-          <div className="p-1.5 bg-white/[0.01]">
+        <div className="flex-1 min-h-0 flex flex-col">
+          <div className="p-1.5 bg-white/[0.01] shrink-0">
             <div className="text-[8px] text-gray-600 mb-1 uppercase tracking-wider">
               {showTab === 'export' ? 'Recipient Countries' : 'Supplier Countries'}
             </div>
@@ -192,7 +192,7 @@ function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
               {sortedPartners.length > 12 && <span className="text-[8px] text-gray-600">+{sortedPartners.length - 12} more</span>}
             </div>
           </div>
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             {items.map((item, i) => (
               <div key={item.id || i} className="p-1.5 border-t border-white/[0.03] hover:bg-white/[0.02]">
                 <div className="flex items-center gap-1.5">
@@ -209,9 +209,9 @@ function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
-      <div className="p-1 bg-white/[0.01] border-t border-white/[0.03]">
+      <div className="p-1 bg-white/[0.01] border-t border-white/[0.03] shrink-0">
         <span className="text-[7px] text-gray-700">Source: {data.source}</span>
       </div>
     </div>
