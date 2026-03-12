@@ -1129,6 +1129,23 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
+      // Rate limit: max 5 failed attempts in 15 minutes
+      const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+      const { data: recentAttempts } = await supabase
+        .from('nuke_code_attempts')
+        .select('id')
+        .eq('telegram_chat_id', chatId)
+        .eq('success', false)
+        .gte('attempted_at', fifteenMinAgo);
+
+      if (recentAttempts && recentAttempts.length >= 5) {
+        await sendTelegramMessage(botToken, chatId, `🚫 Too many failed attempts. Nuke access locked for 15 minutes.`);
+        session.step = 'idle';
+        session.nukeMode = false;
+        await saveSession(supabase, chatId, session);
+        return new Response('OK', { status: 200 });
+      }
+
       // Validate code against DB
       const { data: codeRow } = await supabase
         .from('nuke_codes')
@@ -1137,9 +1154,25 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (!codeRow) {
-        await sendTelegramMessage(botToken, chatId, `❌ Invalid code. Please try again or reply <b>Cancel</b>.`);
+        // Log failed attempt
+        await supabase.from('nuke_code_attempts').insert({
+          telegram_chat_id: chatId,
+          user_id: supabaseUserId || null,
+          attempted_code: '***REDACTED***',
+          success: false,
+        });
+        const remaining = 4 - (recentAttempts?.length || 0);
+        await sendTelegramMessage(botToken, chatId, `❌ Invalid code. ${remaining > 0 ? `${remaining} attempts remaining.` : 'Last attempt before lockout.'} Reply <b>Cancel</b> to exit.`);
         return new Response('OK', { status: 200 });
       }
+
+      // Log successful attempt
+      await supabase.from('nuke_code_attempts').insert({
+        telegram_chat_id: chatId,
+        user_id: supabaseUserId || null,
+        attempted_code: '***REDACTED***',
+        success: true,
+      });
 
       session.nukeCodeId = codeRow.id;
       session.step = 'idle';
