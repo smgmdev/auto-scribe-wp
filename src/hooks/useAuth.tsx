@@ -199,13 +199,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Verify the update took effect
       const { data: verifyData } = await supabase
         .from('profiles')
-        .select('active_session_id')
+        .select('active_session_id, session_started_at')
         .eq('id', userId)
         .single();
 
       const dbValue = (verifyData as any)?.active_session_id;
       if (dbValue === sessionId) {
-        console.log('[Auth] Session registration verified on attempt', attempt);
+        // Record when we successfully registered — this is our authoritative timestamp
+        const dbStartedAt = (verifyData as any)?.session_started_at;
+        ourSessionRegisteredAtRef.current = dbStartedAt
+          ? new Date(dbStartedAt).getTime()
+          : Date.now();
+        console.log('[Auth] Session registration verified on attempt', attempt, 'at', new Date(ourSessionRegisteredAtRef.current).toISOString());
         return;
       }
 
