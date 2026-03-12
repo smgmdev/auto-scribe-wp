@@ -216,7 +216,8 @@ function AtmosphereGlow() {
 
 /** Highlights a country's border on hover and shows name at centroid */
 function CountryHighlight({ feature }: { feature: GeoFeature }) {
-  const [fontSize, setFontSize] = useState(6);
+  const scaleRef = useRef(1);
+  const spanRef = useRef<HTMLSpanElement>(null);
   const { borderGeo, centroid } = useMemo(() => {
     const vertices: number[] = [];
     let centroidLat = 0, centroidLng = 0, totalPoints = 0;
@@ -251,17 +252,16 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
     return { borderGeo: geo, centroid: new THREE.Vector3(px, py, pz) };
   }, [feature]);
 
-  // Dynamically scale font size based on camera distance
+  // Scale label based on camera distance — updates the DOM directly to avoid re-renders
   useFrame(({ camera }) => {
-    if (!centroid) return;
+    if (!centroid || !spanRef.current) return;
     const dist = camera.position.distanceTo(centroid);
-    // Map camera distance to font size: closer = smaller, farther = larger
-    // Typical range: dist ~2.5 (zoomed in) to ~6 (zoomed out)
-    const minDist = 2.2, maxDist = 6;
-    const minFont = 3, maxFont = 8;
-    const t = Math.max(0, Math.min(1, (dist - minDist) / (maxDist - minDist)));
-    const newSize = Math.round((minFont + t * (maxFont - minFont)) * 10) / 10;
-    setFontSize(prev => Math.abs(prev - newSize) > 0.3 ? newSize : prev);
+    // Map distance to scale: zoomed in (dist~2.2) → small, zoomed out (dist~6) → larger
+    const newScale = Math.max(0.4, Math.min(1.2, 1.6 / dist));
+    if (Math.abs(scaleRef.current - newScale) > 0.02) {
+      scaleRef.current = newScale;
+      spanRef.current.style.transform = `scale(${newScale})`;
+    }
   });
 
   if (!borderGeo || !centroid) return null;
@@ -270,8 +270,21 @@ function CountryHighlight({ feature }: { feature: GeoFeature }) {
       <lineSegments geometry={borderGeo}>
         <lineBasicMaterial color="#ffffff" linewidth={5} opacity={0.7} transparent />
       </lineSegments>
-      <Html position={centroid} distanceFactor={8} style={{ pointerEvents: 'none' }} center>
-        <span style={{ fontSize: `${fontSize}px`, fontWeight: 500, color: '#fff', fontFamily: 'monospace', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1, whiteSpace: 'nowrap' }}>
+      <Html position={centroid} style={{ pointerEvents: 'none' }} center>
+        <span
+          ref={spanRef}
+          style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: '#fff',
+            fontFamily: 'monospace',
+            textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.5)',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            letterSpacing: '0.5px',
+            willChange: 'transform',
+          }}
+        >
           {feature.properties.name}
         </span>
       </Html>
