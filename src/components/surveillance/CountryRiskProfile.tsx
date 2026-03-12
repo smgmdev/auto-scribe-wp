@@ -582,10 +582,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
               Fetching...
             </>
           ) : (
-            <>
-              <TrendingUp className="w-3 h-3" />
-              Trade Overview (Exports & Imports)
-            </>
+            'Trade Overview (Exports & Imports)'
           )}
         </button>
       </div>
