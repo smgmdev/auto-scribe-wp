@@ -1015,6 +1015,20 @@ Deno.serve(async (req) => {
       return new Response('OK', { status: 200 });
     }
 
+    // ── /nuke command ──
+    if (text?.toLowerCase() === '/nuke') {
+      session = session || { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() };
+      session.step = 'nuke_awaiting_code';
+      session.nukeMode = true;
+      await saveSession(supabase, chatId, session);
+      await sendTelegramMessage(botToken, chatId,
+        `☢️ <b>NUKE MODE</b>\n\n` +
+        `This will publish your article to <b>ALL</b> available sites in the media library.\n\n` +
+        `🔑 Please provide your activation code:`
+      );
+      return new Response('OK', { status: 200 });
+    }
+
     // ── /myarticles command ──
     if (text?.toLowerCase() === '/myarticles') {
       // Fetch ALL published mace articles (paginate past 1000 row limit)
