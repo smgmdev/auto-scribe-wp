@@ -404,8 +404,14 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
   const [tradeLoading, setTradeLoading] = useState(false);
   const [tradePopupOpen, setTradePopupOpen] = useState(false);
 
+  // Track previous country to reset only when country actually changes
+  const prevCountryRef = useRef({ name: countryName, code: countryCode });
+  
   // Reset cached data when country changes
   useEffect(() => {
+    const prev = prevCountryRef.current;
+    if (prev.name === countryName && prev.code === countryCode) return;
+    prevCountryRef.current = { name: countryName, code: countryCode };
     setProfile(null);
     setArmsData(null);
     setTradeData(null);
