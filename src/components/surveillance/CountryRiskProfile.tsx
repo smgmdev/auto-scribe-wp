@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Shield, Swords, DollarSign, Handshake, Clock, Target, ChevronDown, ChevronUp, ArrowRightLeft, PackageCheck } from 'lucide-react';
+import { Loader2, Shield, Swords, DollarSign, Handshake, Clock, Target, ChevronDown, ChevronUp, ArrowRightLeft, PackageCheck, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -244,20 +244,19 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
     }
   };
 
-  const fetchArmsData = async () => {
+  const fetchArmsData = async (forceRefresh = false) => {
     if (!countryName || !countryCode) {
       toast.error('Country information not available');
       return;
     }
     setArmsPopupOpen(true);
-    if (armsData) return; // already loaded
+    if (armsData && !forceRefresh) return; // already loaded
     setArmsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-sipri-transfers', {
-        body: { country_name: countryName, country_code: countryCode },
+        body: { country_name: countryName, country_code: countryCode, force_refresh: forceRefresh },
       });
       if (error) {
-        // Try to read error body
         const ctx = (error as any)?.context;
         if (ctx && typeof ctx.json === 'function') {
           const body = await ctx.json();
@@ -267,10 +266,11 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
       }
       if (data?.error) throw new Error(data.error);
       setArmsData(data);
+      if (forceRefresh) toast.success('Arms trade data refreshed');
     } catch (err: any) {
       console.error('SIPRI fetch error:', err);
       toast.error(err.message || 'Failed to fetch arms transfer data');
-      setArmsPopupOpen(false);
+      if (!armsData) setArmsPopupOpen(false);
     } finally {
       setArmsLoading(false);
     }
@@ -296,7 +296,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
           )}
         </button>
         <button
-          onClick={fetchArmsData}
+          onClick={() => fetchArmsData()}
           disabled={armsLoading}
           className="w-full py-2 text-[10px] font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
         >
@@ -508,7 +508,19 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
             <span className="text-[10px] text-gray-400">Fetching SIPRI arms transfer records...</span>
           </div>
         )}
-        {armsData && <ArmsTradeContent data={armsData} />}
+        {armsData && (
+          <>
+            <ArmsTradeContent data={armsData} />
+            <button
+              onClick={() => { setArmsData(null); fetchArmsData(true); }}
+              disabled={armsLoading}
+              className="w-full py-1.5 text-[9px] text-gray-600 hover:text-gray-400 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Refresh Data
+            </button>
+          </>
+        )}
       </DraggablePopup>
     </>
   );
