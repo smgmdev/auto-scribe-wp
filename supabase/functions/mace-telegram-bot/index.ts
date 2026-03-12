@@ -1326,9 +1326,10 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Mark nuke code as used (only after successful publish)
+        // Mark nuke code as expired (only after successful publish)
         if (session.nukeCodeId && successCount > 0) {
-          await supabase.from('nuke_codes').update({ used: true, usage_count: ((await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single()).data?.usage_count || 0) + 1 }).eq('id', session.nukeCodeId);
+          const { data: cd } = await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single();
+          await supabase.from('nuke_codes').update({ used: true, expired_at: new Date().toISOString(), usage_count: ((cd?.usage_count || 0) + 1) }).eq('id', session.nukeCodeId);
         }
 
         // Summary
