@@ -101,7 +101,7 @@ IMPORTANT RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-5-mini',
+        model: 'openai/gpt-5',
         messages: [{ role: 'user', content: prompt }],
       }),
     });
@@ -188,8 +188,16 @@ IMPORTANT RULES:
       }
     }
 
-    // Only replace cache when we actually have records
-    if (allRecords.length > 0) {
+    // Only replace cache when new data is at least as rich as existing
+    const { data: existingRows } = await supabase
+      .from('sipri_arms_transfers')
+      .select('id')
+      .eq('country_code', upperCode);
+
+    const existingCount = existingRows?.length || 0;
+
+    if (allRecords.length >= existingCount || existingCount === 0) {
+      // New data is richer or equal — replace cache
       await supabase
         .from('sipri_arms_transfers')
         .delete()
@@ -202,6 +210,9 @@ IMPORTANT RULES:
           .insert(batch);
         if (insertError) console.error('Insert error:', insertError);
       }
+    } else {
+      // New data is sparser — keep existing cache, but still return new data to the user
+      console.log(`Keeping existing cache (${existingCount} rows) over new fetch (${allRecords.length} rows)`);
     }
 
     const exportRecords = allRecords.filter(r => r.direction === 'export');
