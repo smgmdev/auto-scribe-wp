@@ -75,6 +75,35 @@ interface ArmsTradeData {
   source: string;
 }
 
+interface TradeProduct {
+  product: string;
+  value_usd: string;
+  share_pct: string;
+  category: string;
+}
+
+interface TradePartner {
+  country: string;
+  value_usd: string;
+  share_pct: string;
+}
+
+interface TradeOverview {
+  gdp_usd: string;
+  trade_balance_usd: string;
+  total_exports_usd: string;
+  total_imports_usd: string;
+  trade_to_gdp_ratio: string;
+  currency: string;
+  data_year: string;
+  top_exports: TradeProduct[];
+  top_imports: TradeProduct[];
+  top_export_partners: TradePartner[];
+  top_import_partners: TradePartner[];
+  trade_agreements: string[];
+  key_insights: string[];
+}
+
 interface CountryRiskProfileProps {
   countryName: string;
   countryCode: string;
