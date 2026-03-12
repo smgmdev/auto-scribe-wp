@@ -125,13 +125,7 @@ IMPORTANT RULES:
       throw new Error('Failed to parse arms transfer data');
     }
 
-    // Clear old cache
-    await supabase
-      .from('sipri_arms_transfers')
-      .delete()
-      .eq('country_code', upperCode);
-
-    // Prepare and insert records
+    // Prepare records first
     const allRecords: any[] = [];
 
     for (const item of (parsed.exports || [])) {
@@ -170,7 +164,37 @@ IMPORTANT RULES:
       });
     }
 
+    // If AI returns empty, fall back to any existing stored rows for this country (even if older)
+    if (allRecords.length === 0) {
+      const { data: fallbackRows } = await supabase
+        .from('sipri_arms_transfers')
+        .select('*')
+        .eq('country_code', upperCode)
+        .order('fetched_at', { ascending: false })
+        .limit(500);
+
+      if (fallbackRows && fallbackRows.length > 0) {
+        const exports = fallbackRows.filter((r: any) => r.direction === 'export');
+        const imports = fallbackRows.filter((r: any) => r.direction === 'import');
+        return new Response(JSON.stringify({
+          exports,
+          imports,
+          cached: true,
+          data_years: `${fallbackRows[0].data_year_from}-${fallbackRows[0].data_year_to}`,
+          source: 'SIPRI Arms Transfers Database (Annual)',
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Only replace cache when we actually have records
     if (allRecords.length > 0) {
+      await supabase
+        .from('sipri_arms_transfers')
+        .delete()
+        .eq('country_code', upperCode);
+
       for (let i = 0; i < allRecords.length; i += 50) {
         const batch = allRecords.slice(i, i + 50);
         const { error: insertError } = await supabase
