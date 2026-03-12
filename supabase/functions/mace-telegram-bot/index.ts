@@ -1158,6 +1158,23 @@ Deno.serve(async (req) => {
         await supabase.from('nuke_code_attempts').insert({
           telegram_chat_id: chatId,
           user_id: supabaseUserId || null,
+          attempted_code: answer,
+          success: false,
+        });
+        await sendTelegramMessage(botToken, chatId, `❌ Invalid code. Try again or type <b>cancel</b>.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      // Check if code has already been used
+      if (codeRow.used) {
+        await sendTelegramMessage(botToken, chatId, `❌ This code has already been used. Request a new code from admin.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      // Log successful attempt (moved below used check)
+      await supabase.from('nuke_code_attempts').insert({
+        telegram_chat_id: chatId,
+        user_id: supabaseUserId || null,
           attempted_code: '***REDACTED***',
           success: false,
         });
