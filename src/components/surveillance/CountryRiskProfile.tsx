@@ -300,12 +300,12 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
         width={520}
         maxHeight="90vh"
         zIndex={300}
-        className="bg-[#0a0f1a] text-white border-white/10"
-        headerClassName="bg-[#0d1220]"
+        className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
+        headerClassName="!bg-[#0d1220] !border-white/5"
+        bodyClassName="!p-0"
         headerContent={
-          <div className="flex items-center gap-2 px-2">
-            <Target className="w-3.5 h-3.5 text-[#f2a547]" />
-            <span className="text-[11px] font-bold tracking-wide">INTELLIGENCE DOSSIER — {countryName}</span>
+          <div className="flex items-center gap-2 pl-2">
+            <span className="text-sm font-bold text-white">Intelligence Dossier — {countryName}</span>
             {profile && (
               <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5 ml-auto", tc.bg, tc.text, tc.border)}>
                 {profile.risk_assessment.overall_threat_rating}
