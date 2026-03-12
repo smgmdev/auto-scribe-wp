@@ -263,36 +263,48 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
     setArmsPopupOpen(true);
     if (armsData && !forceRefresh) return; // already loaded
     setArmsLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('fetch-sipri-transfers', {
-        body: { country_name: countryName, country_code: countryCode, force_refresh: forceRefresh },
-      });
-      if (error) {
-        const ctx = (error as any)?.context;
-        if (ctx && typeof ctx.json === 'function') {
-          const body = await ctx.json();
-          throw new Error(body?.error || 'Edge function error');
+    const MAX_RETRIES = 2;
+    let lastError: any = null;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        if (attempt > 0) {
+          console.log(`SIPRI fetch retry ${attempt}/${MAX_RETRIES}...`);
+          await new Promise(r => setTimeout(r, 1500 * attempt));
         }
-        throw error;
+        const { data, error } = await supabase.functions.invoke('fetch-sipri-transfers', {
+          body: { country_name: countryName, country_code: countryCode, force_refresh: forceRefresh },
+        });
+        if (error) {
+          const ctx = (error as any)?.context;
+          if (ctx && typeof ctx.json === 'function') {
+            const body = await ctx.json();
+            throw new Error(body?.error || 'Edge function error');
+          }
+          throw error;
+        }
+        if (data?.error) throw new Error(data.error);
+        
+        // Normalize: ensure exports/imports are arrays
+        const normalized: ArmsTradeData = {
+          exports: Array.isArray(data?.exports) ? data.exports : [],
+          imports: Array.isArray(data?.imports) ? data.imports : [],
+          data_years: data?.data_years || '',
+          source: data?.source || '',
+        };
+        setArmsData(normalized);
+        if (forceRefresh) toast.success(`Arms trade data refreshed (${normalized.exports.length} exports, ${normalized.imports.length} imports)`);
+        lastError = null;
+        break;
+      } catch (err: any) {
+        lastError = err;
+        console.error(`SIPRI fetch error (attempt ${attempt + 1}):`, err);
+        if (attempt === MAX_RETRIES) {
+          toast.error(err.message || 'Failed to fetch arms transfer data');
+          if (!armsData) setArmsPopupOpen(false);
+        }
       }
-      if (data?.error) throw new Error(data.error);
-      
-      // Normalize: ensure exports/imports are arrays
-      const normalized: ArmsTradeData = {
-        exports: Array.isArray(data?.exports) ? data.exports : [],
-        imports: Array.isArray(data?.imports) ? data.imports : [],
-        data_years: data?.data_years || '',
-        source: data?.source || '',
-      };
-      setArmsData(normalized);
-      if (forceRefresh) toast.success(`Arms trade data refreshed (${normalized.exports.length} exports, ${normalized.imports.length} imports)`);
-    } catch (err: any) {
-      console.error('SIPRI fetch error:', err);
-      toast.error(err.message || 'Failed to fetch arms transfer data');
-      if (!armsData) setArmsPopupOpen(false);
-    } finally {
-      setArmsLoading(false);
     }
+    setArmsLoading(false);
   };
 
   const tc = profile ? (threatColors[profile.risk_assessment.overall_threat_rating] || threatColors.MODERATE) : threatColors.MODERATE;
