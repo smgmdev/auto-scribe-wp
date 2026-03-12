@@ -1108,15 +1108,52 @@ function RotatingGlobe({
     }
   }, []);
 
+  // GeoJSON names → COUNTRY_COORDINATES name aliases
+  const GEO_NAME_ALIASES: Record<string, string> = {
+    'united arab emirates': 'uae',
+    'united states of america': 'united states',
+    'republic of korea': 'south korea',
+    'democratic republic of the congo': 'dr congo',
+    'republic of the congo': 'congo',
+    'czech republic': 'czech republic',
+    'ivory coast': 'ivory coast',
+    "cote d'ivoire": 'ivory coast',
+    'myanmar': 'myanmar',
+    'burma': 'myanmar',
+    'republic of serbia': 'serbia',
+    'the bahamas': 'bahamas',
+    'united republic of tanzania': 'tanzania',
+    'somaliland': 'somalia',
+    'republic of congo': 'congo',
+    'guinea bissau': 'guinea-bissau',
+    'northern cyprus': 'cyprus',
+    'east timor': 'timor-leste',
+    'swaziland': 'eswatini',
+    'macedon': 'north macedonia',
+    'falkland islands': 'falkland islands',
+    'western sahara': 'western sahara',
+    'french southern and antarctic lands': 'france',
+    'korea': 'south korea',
+    'dem. rep. korea': 'north korea',
+    'lao pdr': 'laos',
+  };
+
   const handleGlobeClick = useCallback(
     (geoName: string) => {
       const geoLower = geoName.toLowerCase();
-      // 1. Direct name match
-      let match = countries.find((c) => c.name.toLowerCase() === geoLower);
+      const aliased = GEO_NAME_ALIASES[geoLower] || geoLower;
+      // 1. Direct name match (try both original and aliased)
+      let match = countries.find((c) => {
+        const cLower = c.name.toLowerCase();
+        return cLower === geoLower || cLower === aliased;
+      });
       if (!match) {
-        // 2. Find country code from COUNTRY_COORDINATES by geo name, then match by code
+        // 2. Find country code from COUNTRY_COORDINATES by geo name or alias, then match by code
         const codeEntry = Object.entries(COUNTRY_COORDINATES).find(
-          ([, v]) => v.name?.toLowerCase() === geoLower
+          ([, v]) => {
+            const coordName = v.name?.toLowerCase() || '';
+            return coordName === geoLower || coordName === aliased;
+          }
         );
         if (codeEntry) {
           match = countries.find((c) => c.code === codeEntry[0]);
@@ -1125,14 +1162,18 @@ function RotatingGlobe({
       if (!match) {
         // 3. Partial / contains match (e.g. "United States of America" contains "United States")
         match = countries.find(
-          (c) => geoLower.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(geoLower)
+          (c) => geoLower.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(geoLower) ||
+                 aliased.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(aliased)
         );
       }
       if (match) {
         onCountryClick(match);
       } else {
         const codeEntry = Object.entries(COUNTRY_COORDINATES).find(
-          ([, v]) => v.name?.toLowerCase() === geoLower
+          ([, v]) => {
+            const coordName = v.name?.toLowerCase() || '';
+            return coordName === geoLower || coordName === aliased;
+          }
         );
         const code = codeEntry ? codeEntry[0] : '';
         onCountryClick({
