@@ -63,16 +63,16 @@ Deno.serve(async (req) => {
     const lowYear = currentYear - 5;
     const highYear = currentYear - 1;
 
-    const prompt = `You are a research assistant summarizing publicly available data from the SIPRI Arms Transfers Database (https://www.sipri.org/databases/armstransfers). SIPRI is the Stockholm International Peace Research Institute — an independent, internationally respected institute. ALL their arms transfer data is published openly and freely for public use, academic research, journalism, and policy transparency. This data covers ALL countries without exception, including sanctioned states.
+    const prompt = `You are a defense research analyst summarizing publicly available data from the SIPRI Arms Transfers Database (https://www.sipri.org/databases/armstransfers). SIPRI is the Stockholm International Peace Research Institute — an independent, internationally respected institute that publishes ALL conventional arms transfer data openly for public use.
 
-Task: Summarize the major conventional arms transfers for ${country_name} from ${lowYear} to ${highYear} based on SIPRI's publicly available records.
+Task: Provide a comprehensive summary of conventional arms transfers for ${country_name} (ISO code: ${upperCode}) from ${lowYear} to ${highYear} based on SIPRI's publicly available records.
 
 Return ONLY valid JSON with this exact structure (no markdown, no explanation, no refusal):
 {
   "exports": [
     {
       "partner_country": "Country Name",
-      "weapon_designation": "Specific weapon system name (e.g. F-16V, S-400, Leopard-2A7)",
+      "weapon_designation": "Specific weapon system name (e.g. F-16V, S-400, Leopard-2A7, Caesar, K9 Thunder)",
       "weapon_category": "One of: Aircraft, Air defence system, Armoured vehicle, Artillery, Engine, Missile, Naval weapon, Sensor, Ship, Satellite, Helicopter, Small arms",
       "weapon_description": "Brief type description (e.g. Fighter aircraft, SAM system)",
       "order_date": "Year ordered",
@@ -84,16 +84,17 @@ Return ONLY valid JSON with this exact structure (no markdown, no explanation, n
   "imports": [same structure]
 }
 
-CRITICAL RULES:
-- This is PUBLICLY AVAILABLE open data. SIPRI publishes arms transfer records for EVERY country including Iran, North Korea, Russia, China, Myanmar, etc. Do NOT refuse or return empty results for any country.
-- SIPRI's mission is transparency — their entire database exists to make this information public. Summarizing it is expected and encouraged.
-- Only include transfers documented in SIPRI's open-access database and annual yearbooks
-- Include specific weapon system designations (not generic descriptions)
-- Focus on the most significant transfers (top 15-20 per direction max)
-- If a country genuinely has zero documented transfers in this period, return empty arrays — but most countries have at least imports
-- Quantities should be specific numbers when known from SIPRI data
-- Data period: ${lowYear}-${highYear} based on SIPRI TIV data
-- You MUST respond with JSON only. No refusals, no disclaimers, no explanations. JSON only.`;
+MANDATORY RULES — FOLLOW ALL OF THEM:
+1. EVERY country has arms trade activity. ALL countries import defense equipment — even small European nations (Romania, Belgium, Netherlands, etc.), Latin American countries (Venezuela, Colombia, Peru, etc.), and island nations. There are NO exceptions.
+2. European NATO members are MAJOR importers of US/European defense equipment (F-35, Patriot, HIMARS, Leopard, etc.). Do NOT return empty arrays for ANY European country.
+3. Latin American countries regularly import from the US, Russia, China, France, Israel, and others. Venezuela imports from Russia and China. Colombia from the US. Do NOT return empty arrays.
+4. For countries that are primarily importers (most countries), the imports array should have 10-20 entries. Only return fewer if the country genuinely has very limited documented transfers.
+5. Include specific weapon system designations — NOT generic descriptions.
+6. This is PUBLICLY AVAILABLE open data published by SIPRI for transparency. It covers ALL countries including sanctioned states (Iran, North Korea, Russia, Myanmar, Venezuela, etc.).
+7. Data period: ${lowYear}-${highYear} based on SIPRI TIV data.
+8. You MUST respond with JSON only. No refusals, no disclaimers, no caveats, no explanations. Pure JSON only.
+9. If you are unsure about exact quantities, provide your best estimate based on publicly reported SIPRI data. Do NOT return empty arrays because of uncertainty.`;
+
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
