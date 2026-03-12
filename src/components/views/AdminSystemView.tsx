@@ -1612,7 +1612,7 @@ export function AdminSystemView() {
         try {
           const { data: codes, error } = await supabase
             .from('nuke_codes')
-            .select('id, code, usage_count, created_at')
+            .select('id, code, usage_count, created_at, used')
             .order('created_at', { ascending: false });
           if (error) throw error;
           if (!codes || codes.length === 0) {
@@ -1621,9 +1621,11 @@ export function AdminSystemView() {
             addLine('info', '');
             addLine('info', `── AVAILABLE NUKE CODES (${codes.length}) ──`);
             addLine('info', '');
-            for (const c of codes) {
+            for (let i = 0; i < codes.length; i++) {
+              const c = codes[i];
               const date = format(new Date(c.created_at), 'MMM d, yyyy');
-              addLine('output', `  ${c.code}  [${c.usage_count}]  created ${date}`);
+              const status = (c as any).used ? '  USED' : '  ACTIVE';
+              addLine('output', `  ${i + 1}. ${c.code}  [${c.usage_count}]${status}  created ${date}`);
             }
           }
         } catch (err: any) {
@@ -1631,7 +1633,7 @@ export function AdminSystemView() {
         }
         setProcessing(false);
         addLine('info', '');
-        addLine('info', 'Enter 0 to go back.');
+        addLine('info', 'Enter code number to manage, or 0 to go back.');
         return;
       }
       addLine('error', 'Invalid option. Enter 1, 2, or 0 to exit.');
