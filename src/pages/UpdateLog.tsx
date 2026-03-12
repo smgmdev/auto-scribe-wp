@@ -18,6 +18,20 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 
 const updates = [
   {
+    date: 'March 12, 2026',
+    title: 'Trade Intelligence & Globe Enhancements',
+    changes: [
+      'Added Trade Overview panel to country profiles — view GDP, trade balance, top export/import products, key trading partners, and trade agreements for any country on the surveillance globe',
+      'Trade data is AI-generated from publicly available sources including UN Comtrade, World Bank, and OEC datasets',
+      'Products and Partners tabs allow toggling between commodity breakdowns and partner country rankings with category-colored badges',
+      'Trade Agreements section lists active free trade agreements and economic partnerships',
+      'Key Insights section highlights notable trade patterns and economic trends for each country',
+      'Arms Trade Data (SIPRI) now stays open during data refresh — previously the popup would close when refreshing arms transfer records',
+      'Fixed country label rendering on the 3D surveillance globe — labels are now crisp and sharp at all zoom levels instead of appearing blurry when zooming in or out',
+      'Improved label scaling using native font rendering with dynamic camera-distance-based transforms for GPU-accelerated smoothness',
+    ],
+  },
+  {
     date: 'March 10, 2026',
     title: 'Article Editor & Content Display Fixes',
     changes: [
