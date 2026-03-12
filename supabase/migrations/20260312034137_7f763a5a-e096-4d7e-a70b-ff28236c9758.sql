@@ -1,0 +1,1 @@
+UPDATE public.missile_alerts SET active = false WHERE id = '8f1dd46d-6ae4-4450-a4e7-0de45cbb8ba7';
