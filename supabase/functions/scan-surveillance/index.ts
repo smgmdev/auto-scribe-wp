@@ -981,10 +981,16 @@ CRITICAL — TRAJECTORY DATA: For missile, drone, rocket, and bombing events, pr
 - "Missile hits Qatar base": origin_country_code=null, destination_country_code=null ❌ (who fired is unknown)
 - "UK says missiles fired in direction of Cyprus": origin_country_code=null, destination_country_code=null ❌ (UK is REPORTING, not attacking. "UK says" means UK is the source of the statement, NOT the attacker)
 - "France warns of Iranian missile threat": origin_country_code=null, destination_country_code=null ❌ (France is commenting, not involved in any attack)
+- "Thai cargo ship attacked in Strait of Hormuz": origin_country_code=null, destination_country_code=null ❌ (The Strait of Hormuz is a LOCATION, not an attacker. The headline does NOT say who attacked. Do NOT infer UAE/Iran/Oman just because of geography)
+- "Ship sunk near Yemen coast": origin_country_code=null, destination_country_code=null ❌ (geographic proximity does NOT identify the attacker)
+- "Cargo vessel hit by missile in Red Sea": origin_country_code=null, destination_country_code=null ❌ (no attacker named)
+- "Houthis attack Thai cargo ship in Strait of Hormuz": origin_country_code="YE", destination_country_code="TH" ✅ (Houthis=Yemen explicitly named as attacker, Thai ship=Thailand target)
 RULES:
 1. If the title does NOT explicitly name WHO attacked, set origin to null. Never guess the attacker.
 2. If a country is the SUBJECT of a reporting verb (says, reports, confirms, warns, reveals, announces, claims, denies), that country is a REPORTER/COMMENTER — do NOT treat it as the attacker or target.
 3. A country where explosions/attacks happen is the TARGET, not the attacker.
+4. A geographic location (strait, sea, coast, gulf, channel) where an attack occurs does NOT identify the attacker. Never infer the attacker from the location of the incident.
+5. The NATIONALITY of a ship/aircraft/vehicle that was attacked identifies the TARGET country, NOT the origin. The attacker must be explicitly named.
 
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
