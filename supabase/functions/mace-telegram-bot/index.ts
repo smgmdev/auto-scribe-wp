@@ -34,6 +34,8 @@ interface UserSession {
   codeExpiresAt?: number;
   lastActivity: number;
   chatHistory?: ChatMessage[];
+  nukeMode?: boolean;
+  nukeCodeId?: string;
 }
 
 // In-memory cache (warm instance optimization)
