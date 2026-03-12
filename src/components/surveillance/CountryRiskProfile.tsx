@@ -236,6 +236,10 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
   };
 
   const fetchArmsData = async () => {
+    if (!countryName || !countryCode) {
+      toast.error('Country information not available');
+      return;
+    }
     setArmsPopupOpen(true);
     if (armsData) return; // already loaded
     setArmsLoading(true);
@@ -243,7 +247,15 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
       const { data, error } = await supabase.functions.invoke('fetch-sipri-transfers', {
         body: { country_name: countryName, country_code: countryCode },
       });
-      if (error) throw error;
+      if (error) {
+        // Try to read error body
+        const ctx = (error as any)?.context;
+        if (ctx && typeof ctx.json === 'function') {
+          const body = await ctx.json();
+          throw new Error(body?.error || 'Edge function error');
+        }
+        throw error;
+      }
       if (data?.error) throw new Error(data.error);
       setArmsData(data);
     } catch (err: any) {
