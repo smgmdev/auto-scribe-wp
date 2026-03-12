@@ -1388,25 +1388,45 @@ Deno.serve(async (req) => {
       reliefData,
     );
 
-    // ── Auto-infer trajectory data for events missing origin/destination ──
-    // Also strip trajectory from speculative/question headlines even if Perplexity provided it
+    // ── Validate & infer trajectory data for ALL events ──
+    // Strip trajectory from non-kinetic headlines even if Perplexity provided it
+    // Re-validate Perplexity-provided trajectories against title text
     for (const ev of mergedEvents) {
       const evText = `${ev.title || ''} ${ev.description || ''}`;
-      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText) || isAftermathOrFollowUpTitle(evText) || isMilitaryTestingOrDrill(evText)) {
-        // Speculative/analytical headlines should never have attack trajectories
+      if (isSpeculativeTitle(evText) || isAnalyticalTitle(evText) || isPersonalOrLifestyleTitle(evText) || isAftermathOrFollowUpTitle(evText) || isMilitaryTestingOrDrill(evText) || isDiplomaticOrCoordinationTitle(evText)) {
+        // Non-kinetic headlines should never have attack trajectories
         ev.origin_country_code = null;
         ev.origin_country_name = null;
         ev.destination_country_code = null;
         ev.destination_country_name = null;
         continue;
       }
+      
+      // If Perplexity provided trajectory data, RE-VALIDATE it against the title
+      // This catches false positives like "Qatar coordination with Iran" getting QA→IR trajectory
+      if (ev.origin_country_code && ev.destination_country_code) {
+        const isConfirmed = validateTrajectoryConfirmed(ev.title || '', ev.origin_country_code, ev.destination_country_code);
+        if (!isConfirmed) {
+          console.log(`Stripped unconfirmed trajectory ${ev.origin_country_code}→${ev.destination_country_code} from: "${ev.title}"`);
+          ev.origin_country_code = null;
+          ev.origin_country_name = null;
+          ev.destination_country_code = null;
+          ev.destination_country_name = null;
+        }
+      }
+      
+      // If still missing trajectory, try to infer from text
       if (!ev.origin_country_code || !ev.destination_country_code) {
         const inferred = inferTrajectory(ev.title || '', ev.description || '', ev.country_code || null);
         if (inferred.origin && inferred.destination) {
-          ev.origin_country_code = ev.origin_country_code || inferred.origin;
-          ev.origin_country_name = ev.origin_country_name || null;
-          ev.destination_country_code = ev.destination_country_code || inferred.destination;
-          ev.destination_country_name = ev.destination_country_name || null;
+          // Validate the inferred trajectory too
+          const isConfirmed = validateTrajectoryConfirmed(ev.title || '', inferred.origin, inferred.destination);
+          if (isConfirmed) {
+            ev.origin_country_code = ev.origin_country_code || inferred.origin;
+            ev.origin_country_name = ev.origin_country_name || null;
+            ev.destination_country_code = ev.destination_country_code || inferred.destination;
+            ev.destination_country_name = ev.destination_country_name || null;
+          }
         }
       }
     }
