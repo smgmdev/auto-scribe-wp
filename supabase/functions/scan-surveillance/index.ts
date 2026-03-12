@@ -1082,6 +1082,8 @@ RULES:
 3. A country where explosions/attacks happen is the TARGET, not the attacker.
 4. A geographic location (strait, sea, coast, gulf, channel) where an attack occurs does NOT identify the attacker. Never infer the attacker from the location of the incident.
 5. The NATIONALITY of a ship/aircraft/vehicle that was attacked identifies the TARGET country, NOT the origin. The attacker must be explicitly named.
+6. DIPLOMACY & COORDINATION ARE NOT ATTACKS: If a headline describes delegations, visits, coordination, meetings, discussions, talks, or cooperation between countries, set origin and destination to null. Example: "Ukrainian delegation visits Qatar for coordination with Iran" — Qatar and Iran are NOT attacking each other. This is diplomacy.
+7. Two countries being MENTIONED together does NOT mean one is attacking the other. Only explicit attack language ("X strikes Y", "X bombs Y", "X fires missiles at Y") confirms an attack trajectory.
 
 CRITICAL — RUSSIA-UKRAINE WAR: You MUST always include the latest Russian missile strikes, drone attacks (Shahed/kamikaze drones), and any nuclear threats against Ukraine. For every such event set origin_country_code="RU", origin_country_name="Russia", destination_country_code="UA", destination_country_name="Ukraine". This is the most active missile/drone conflict in the world — never omit it.
 
