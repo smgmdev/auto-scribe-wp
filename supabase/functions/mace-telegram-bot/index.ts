@@ -1149,7 +1149,7 @@ Deno.serve(async (req) => {
       // Validate code against DB
       const { data: codeRow } = await supabase
         .from('nuke_codes')
-        .select('id, code')
+        .select('id, code, used')
         .eq('code', answer)
         .maybeSingle();
 
