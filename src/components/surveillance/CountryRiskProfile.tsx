@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Shield, Swords, DollarSign, Handshake, Clock, Target, ChevronDown, ChevronUp, ArrowRightLeft, PackageCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { DraggablePopup } from '@/components/ui/DraggablePopup';
 
 interface MilitaryStrength {
   active_personnel: string;
@@ -121,42 +122,10 @@ const weaponCategoryIcons: Record<string, string> = {
   'Satellite': '🛰',
 };
 
-function ArmsTradeSection({ data, loading, onFetch }: {
-  data: ArmsTradeData | null;
-  loading: boolean;
-  onFetch: () => void;
-}) {
+function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
   const [showTab, setShowTab] = useState<'export' | 'import'>('export');
-
-  if (!data && !loading) {
-    return (
-      <button
-        onClick={onFetch}
-        disabled={loading}
-        className="w-full mt-1 py-2 text-[10px] font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
-      >
-        <ArrowRightLeft className="w-3 h-3" />
-        Load Arms Trade Data (SIPRI)
-      </button>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="mt-1 p-3 border border-white/5 bg-white/[0.02]">
-        <div className="flex items-center justify-center gap-2">
-          <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
-          <span className="text-[10px] text-gray-400">Fetching SIPRI arms transfer records...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) return null;
-
   const items = showTab === 'export' ? data.exports : data.imports;
 
-  // Group by partner country for summary
   const partnerSummary = new Map<string, { count: number; categories: Set<string> }>();
   for (const item of items) {
     const existing = partnerSummary.get(item.partner_country) || { count: 0, categories: new Set<string>() };
@@ -164,26 +133,21 @@ function ArmsTradeSection({ data, loading, onFetch }: {
     if (item.weapon_category) existing.categories.add(item.weapon_category);
     partnerSummary.set(item.partner_country, existing);
   }
-
   const sortedPartners = [...partnerSummary.entries()].sort((a, b) => b[1].count - a[1].count);
 
   return (
-    <div className="border border-cyan-500/10 mt-1">
+    <div className="space-y-0">
       <div className="flex items-center gap-1.5 p-2 bg-cyan-500/[0.03]">
         <ArrowRightLeft className="w-3 h-3 text-cyan-400" />
         <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Arms Transfers</span>
         <span className="text-[8px] text-gray-600 ml-auto">{data.data_years} · SIPRI Annual</span>
       </div>
-
-      {/* Tabs */}
       <div className="flex border-b border-white/5">
         <button
           onClick={() => setShowTab('export')}
           className={cn(
             "flex-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
-            showTab === 'export'
-              ? 'text-orange-400 bg-orange-500/10 border-b border-orange-400'
-              : 'text-gray-600 hover:text-gray-400'
+            showTab === 'export' ? 'text-orange-400 bg-orange-500/10 border-b border-orange-400' : 'text-gray-600 hover:text-gray-400'
           )}
         >
           Exports ({data.exports.length})
@@ -192,90 +156,50 @@ function ArmsTradeSection({ data, loading, onFetch }: {
           onClick={() => setShowTab('import')}
           className={cn(
             "flex-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
-            showTab === 'import'
-              ? 'text-blue-400 bg-blue-500/10 border-b border-blue-400'
-              : 'text-gray-600 hover:text-gray-400'
+            showTab === 'import' ? 'text-blue-400 bg-blue-500/10 border-b border-blue-400' : 'text-gray-600 hover:text-gray-400'
           )}
         >
           Imports ({data.imports.length})
         </button>
       </div>
-
       {items.length === 0 ? (
         <div className="p-3 text-center">
           <span className="text-[10px] text-gray-600">No {showTab} records found in this period</span>
         </div>
       ) : (
         <>
-          {/* Partner summary */}
           <div className="p-1.5 bg-white/[0.01]">
             <div className="text-[8px] text-gray-600 mb-1 uppercase tracking-wider">
               {showTab === 'export' ? 'Recipient Countries' : 'Supplier Countries'}
             </div>
             <div className="flex flex-wrap gap-1">
               {sortedPartners.slice(0, 12).map(([partner, info]) => (
-                <Badge
-                  key={partner}
-                  variant="outline"
-                  className={cn(
-                    "text-[7px] px-1.5 py-0 h-4",
-                    showTab === 'export'
-                      ? 'bg-orange-500/5 text-orange-300 border-orange-500/20'
-                      : 'bg-blue-500/5 text-blue-300 border-blue-500/20'
-                  )}
-                >
+                <Badge key={partner} variant="outline" className={cn("text-[7px] px-1.5 py-0 h-4", showTab === 'export' ? 'bg-orange-500/5 text-orange-300 border-orange-500/20' : 'bg-blue-500/5 text-blue-300 border-blue-500/20')}>
                   {partner} ({info.count})
                 </Badge>
               ))}
-              {sortedPartners.length > 12 && (
-                <span className="text-[8px] text-gray-600">+{sortedPartners.length - 12} more</span>
-              )}
+              {sortedPartners.length > 12 && <span className="text-[8px] text-gray-600">+{sortedPartners.length - 12} more</span>}
             </div>
           </div>
-
-          {/* Detailed records - show first 15 */}
-          <div className="max-h-[200px] overflow-y-auto">
-            {items.slice(0, 15).map((item, i) => (
+          <div className="max-h-[400px] overflow-y-auto">
+            {items.map((item, i) => (
               <div key={item.id || i} className="p-1.5 border-t border-white/[0.03] hover:bg-white/[0.02]">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px]">
-                    {weaponCategoryIcons[item.weapon_category] || '⚙'}
-                  </span>
-                  <span className="text-[10px] text-white font-medium flex-1 truncate">
-                    {item.weapon_designation || item.weapon_description || item.weapon_category}
-                  </span>
-                  <span className={cn(
-                    "text-[8px]",
-                    showTab === 'export' ? 'text-orange-400' : 'text-blue-400'
-                  )}>
-                    → {item.partner_country}
-                  </span>
+                  <span className="text-[10px]">{weaponCategoryIcons[item.weapon_category] || '⚙'}</span>
+                  <span className="text-[10px] text-white font-medium flex-1 truncate">{item.weapon_designation || item.weapon_description || item.weapon_category}</span>
+                  <span className={cn("text-[8px]", showTab === 'export' ? 'text-orange-400' : 'text-blue-400')}>→ {item.partner_country}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  {item.weapon_category && (
-                    <span className="text-[8px] text-gray-600">{item.weapon_category}</span>
-                  )}
-                  {item.quantity && item.quantity !== '0' && (
-                    <span className="text-[8px] text-gray-500">Qty: {item.quantity}</span>
-                  )}
-                  {item.delivery_years && (
-                    <span className="text-[8px] text-gray-600">Del: {item.delivery_years}</span>
-                  )}
-                  {item.order_date && (
-                    <span className="text-[8px] text-gray-600">Ord: {item.order_date}</span>
-                  )}
+                  {item.weapon_category && <span className="text-[8px] text-gray-600">{item.weapon_category}</span>}
+                  {item.quantity && item.quantity !== '0' && <span className="text-[8px] text-gray-500">Qty: {item.quantity}</span>}
+                  {item.delivery_years && <span className="text-[8px] text-gray-600">Del: {item.delivery_years}</span>}
+                  {item.order_date && <span className="text-[8px] text-gray-600">Ord: {item.order_date}</span>}
                 </div>
               </div>
             ))}
-            {items.length > 15 && (
-              <div className="p-1.5 text-center text-[9px] text-gray-600 border-t border-white/[0.03]">
-                +{items.length - 15} more transfers
-              </div>
-            )}
           </div>
         </>
       )}
-
       <div className="p-1 bg-white/[0.01] border-t border-white/[0.03]">
         <span className="text-[7px] text-gray-700">Source: {data.source}</span>
       </div>
@@ -286,35 +210,34 @@ function ArmsTradeSection({ data, loading, onFetch }: {
 export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProfileProps) {
   const [profile, setProfile] = useState<RiskProfile | null>(null);
   const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [riskPopupOpen, setRiskPopupOpen] = useState(false);
   const [armsData, setArmsData] = useState<ArmsTradeData | null>(null);
   const [armsLoading, setArmsLoading] = useState(false);
+  const [armsPopupOpen, setArmsPopupOpen] = useState(false);
 
   const generateProfile = async () => {
+    setRiskPopupOpen(true);
+    if (profile) return; // already loaded
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('country-risk-profile', {
         body: { country_name: countryName, country_code: countryCode },
       });
-      if (error) {
-        console.error('country-risk-profile invoke error:', error);
-        throw error;
-      }
-      if (data?.error) {
-        console.error('country-risk-profile data error:', data.error);
-        throw new Error(data.error);
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       setProfile(data.profile);
-      setExpanded(true);
     } catch (err: any) {
       console.error('country-risk-profile caught:', err);
       toast.error(err.message || 'Failed to generate risk profile');
+      setRiskPopupOpen(false);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchArmsData = async () => {
+    setArmsPopupOpen(true);
+    if (armsData) return; // already loaded
     setArmsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-sipri-transfers', {
@@ -326,13 +249,16 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
     } catch (err: any) {
       console.error('SIPRI fetch error:', err);
       toast.error(err.message || 'Failed to fetch arms transfer data');
+      setArmsPopupOpen(false);
     } finally {
       setArmsLoading(false);
     }
   };
 
-  if (!expanded && !profile) {
-    return (
+  const tc = profile ? (threatColors[profile.risk_assessment.overall_threat_rating] || threatColors.MODERATE) : threatColors.MODERATE;
+
+  return (
+    <>
       <div className="space-y-1 mt-3">
         <button
           onClick={generateProfile}
@@ -342,195 +268,227 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
           {loading ? (
             <>
               <Loader2 className="w-3 h-3 animate-spin" />
-              Generating Intelligence Dossier...
+              Generating...
             </>
           ) : (
             'AI Risk Profile'
           )}
         </button>
-        <ArmsTradeSection data={armsData} loading={armsLoading} onFetch={fetchArmsData} />
+        <button
+          onClick={fetchArmsData}
+          disabled={armsLoading}
+          className="w-full py-2 text-[10px] font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+        >
+          {armsLoading ? (
+            <>
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Fetching...
+            </>
+          ) : (
+            <>
+              <ArrowRightLeft className="w-3 h-3" />
+              Load Arms Trade Data (SIPRI)
+            </>
+          )}
+        </button>
       </div>
-    );
-  }
 
-  if (loading) {
-    return (
-      <div className="mt-3 p-4 border border-white/5 bg-white/[0.02]">
-        <div className="flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 text-[#f2a547] animate-spin" />
-          <span className="text-[10px] text-gray-400">Compiling intelligence dossier...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) return null;
-
-  const tc = threatColors[profile.risk_assessment.overall_threat_rating] || threatColors.MODERATE;
-
-  return (
-    <div className="mt-3 border-t border-white/5 pt-3">
-      {/* Header with toggle */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between mb-2"
+      {/* Risk Profile Popup */}
+      <DraggablePopup
+        open={riskPopupOpen}
+        onOpenChange={setRiskPopupOpen}
+        width={520}
+        maxHeight="90vh"
+        zIndex={300}
+        className="bg-[#0a0f1a] text-white border-white/10"
+        headerClassName="bg-[#0d1220]"
+        headerContent={
+          <div className="flex items-center gap-2 px-2">
+            <Target className="w-3.5 h-3.5 text-[#f2a547]" />
+            <span className="text-[11px] font-bold tracking-wide">INTELLIGENCE DOSSIER — {countryName}</span>
+            {profile && (
+              <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5 ml-auto", tc.bg, tc.text, tc.border)}>
+                {profile.risk_assessment.overall_threat_rating}
+              </Badge>
+            )}
+          </div>
+        }
       >
-        <div className="flex items-center gap-2">
-          <Target className="w-3 h-3 text-[#f2a547]" />
-          <span className="text-[11px] font-bold text-white tracking-wide">INTELLIGENCE DOSSIER</span>
-          <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5", tc.bg, tc.text, tc.border)}>
-            {profile.risk_assessment.overall_threat_rating}
-          </Badge>
-        </div>
-        {expanded ? <ChevronUp className="w-3 h-3 text-gray-500" /> : <ChevronDown className="w-3 h-3 text-gray-500" />}
-      </button>
-
-      {expanded && (
-        <div className="space-y-0">
-          {/* Risk Assessment Summary */}
-          <div className={cn("p-2.5 border", tc.border, tc.bg)}>
-            <div className="flex items-center justify-between mb-1">
-              <span className={cn("text-[11px] font-bold", tc.text)}>Risk Score: {profile.risk_assessment.risk_score}/100</span>
-            </div>
-            <p className="text-[10px] text-gray-300 leading-relaxed">{profile.risk_assessment.assessment_summary}</p>
+        {loading && (
+          <div className="flex items-center justify-center gap-2 py-8">
+            <Loader2 className="w-4 h-4 text-[#f2a547] animate-spin" />
+            <span className="text-[10px] text-gray-400">Compiling intelligence dossier...</span>
           </div>
-
-          {/* Military Strength */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <Swords className="w-3 h-3 text-red-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Military Strength</span>
-              <span className="text-[9px] text-gray-600 ml-auto">Rank {profile.military_strength.global_firepower_rank}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-px bg-white/[0.03]">
-              {[
-                ['Personnel', profile.military_strength.active_personnel],
-                ['Reserves', profile.military_strength.reserve_personnel],
-                ['Tanks', profile.military_strength.tanks],
-                ['Aircraft', profile.military_strength.aircraft],
-                ['Naval', profile.military_strength.naval_vessels],
-                ['Budget', profile.military_strength.defense_budget_usd],
-              ].map(([label, value]) => (
-                <div key={label} className="p-1.5 bg-[#0d1220]">
-                  <span className="text-[8px] text-gray-600 block">{label}</span>
-                  <span className="text-[10px] text-white font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-            {profile.military_strength.nuclear_capable && (
-              <div className="p-1.5 bg-red-500/5 border-t border-red-500/10 flex items-center gap-1.5">
-                <span className="text-[9px] text-red-400 font-bold">☢ NUCLEAR: {profile.military_strength.nuclear_warheads} warheads</span>
+        )}
+        {profile && (
+          <div className="space-y-0">
+            {/* Risk Assessment Summary */}
+            <div className={cn("p-2.5 border", tc.border, tc.bg)}>
+              <div className="flex items-center justify-between mb-1">
+                <span className={cn("text-[11px] font-bold", tc.text)}>Risk Score: {profile.risk_assessment.risk_score}/100</span>
               </div>
-            )}
-          </div>
-
-          {/* Arms Trade Section - SIPRI Data */}
-          <ArmsTradeSection data={armsData} loading={armsLoading} onFetch={fetchArmsData} />
-
-          {/* Economic Stability */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <DollarSign className="w-3 h-3 text-emerald-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Economic Profile</span>
+              <p className="text-[10px] text-gray-300 leading-relaxed">{profile.risk_assessment.assessment_summary}</p>
             </div>
-            <div className="grid grid-cols-3 gap-px bg-white/[0.03]">
-              {[
-                ['GDP', profile.economic_stability.gdp_usd],
-                ['Growth', profile.economic_stability.gdp_growth],
-                ['Debt/GDP', profile.economic_stability.debt_to_gdp],
-              ].map(([label, value]) => (
-                <div key={label} className="p-1.5 bg-[#0d1220]">
-                  <span className="text-[8px] text-gray-600 block">{label}</span>
-                  <span className="text-[10px] text-white font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-            {profile.economic_stability.sanctions_status !== 'None' && (
-              <div className="p-1.5 bg-amber-500/5 border-t border-amber-500/10">
-                <span className="text-[9px] text-amber-400">⚠ {profile.economic_stability.sanctions_status}</span>
+
+            {/* Military Strength */}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <Swords className="w-3 h-3 text-red-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Military Strength</span>
+                <span className="text-[9px] text-gray-600 ml-auto">Rank {profile.military_strength.global_firepower_rank}</span>
               </div>
-            )}
-            <div className="p-1.5 border-t border-white/5">
-              <p className="text-[9px] text-gray-500">{profile.economic_stability.economic_vulnerabilities}</p>
-            </div>
-          </div>
-
-          {/* Alliance Network */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <Handshake className="w-3 h-3 text-blue-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Alliance Network</span>
-              <span className="text-[9px] text-gray-600 ml-auto">{profile.alliance_network.length} pacts</span>
-            </div>
-            <div className="space-y-0">
-              {profile.alliance_network.map((a, i) => (
-                <div key={i} className="flex items-center gap-2 p-1.5 border-t border-white/[0.03]">
-                  <span className="text-[10px] text-white flex-1">{a.name}</span>
-                  <Badge variant="outline" className={cn("text-[7px] px-1 py-0 h-3", allianceTypeColors[a.type])}>
-                    {a.type.toUpperCase()}
-                  </Badge>
-                  <span className={cn("text-[8px]", strengthColors[a.strength])}>●</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Historical Conflicts */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <Clock className="w-3 h-3 text-amber-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Historical Conflicts</span>
-            </div>
-            <div className="space-y-0">
-              {profile.historical_conflicts.map((c, i) => (
-                <div key={i} className="p-1.5 border-t border-white/[0.03]">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-white flex-1">{c.name}</span>
-                    <Badge variant="outline" className="text-[7px] px-1 py-0 h-3 bg-white/5 text-gray-500 border-white/10">
-                      {conflictTypeLabels[c.type] || c.type}
-                    </Badge>
-                    <span className="text-[9px] text-gray-600">{c.year}</span>
+              <div className="grid grid-cols-2 gap-px bg-white/[0.03]">
+                {[
+                  ['Personnel', profile.military_strength.active_personnel],
+                  ['Reserves', profile.military_strength.reserve_personnel],
+                  ['Tanks', profile.military_strength.tanks],
+                  ['Aircraft', profile.military_strength.aircraft],
+                  ['Naval', profile.military_strength.naval_vessels],
+                  ['Budget', profile.military_strength.defense_budget_usd],
+                ].map(([label, value]) => (
+                  <div key={label} className="p-1.5 bg-[#0d1220]">
+                    <span className="text-[8px] text-gray-600 block">{label}</span>
+                    <span className="text-[10px] text-white font-medium">{value}</span>
                   </div>
-                  <p className="text-[9px] text-gray-500 mt-0.5">{c.outcome}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Vulnerabilities & Advantages */}
-          <div className="grid grid-cols-2 gap-px">
-            <div className="border border-white/[0.05]">
-              <div className="p-1.5 bg-red-500/[0.03]">
-                <span className="text-[9px] font-semibold text-red-400 uppercase tracking-wider">Vulnerabilities</span>
+                ))}
               </div>
-              {profile.risk_assessment.key_vulnerabilities.map((v, i) => (
-                <div key={i} className="p-1.5 border-t border-white/[0.03]">
-                  <p className="text-[9px] text-red-300/70">• {v}</p>
+              {profile.military_strength.nuclear_capable && (
+                <div className="p-1.5 bg-red-500/5 border-t border-red-500/10 flex items-center gap-1.5">
+                  <span className="text-[9px] text-red-400 font-bold">☢ NUCLEAR: {profile.military_strength.nuclear_warheads} warheads</span>
                 </div>
-              ))}
+              )}
             </div>
-            <div className="border border-white/[0.05]">
-              <div className="p-1.5 bg-emerald-500/[0.03]">
-                <span className="text-[9px] font-semibold text-emerald-400 uppercase tracking-wider">Advantages</span>
-              </div>
-              {profile.risk_assessment.strategic_advantages.map((a, i) => (
-                <div key={i} className="p-1.5 border-t border-white/[0.03]">
-                  <p className="text-[9px] text-emerald-300/70">• {a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Regenerate */}
-          <button
-            onClick={generateProfile}
-            disabled={loading}
-            className="w-full py-1.5 text-[9px] text-gray-600 hover:text-gray-400 transition-colors"
-          >
-            Regenerate Profile
-          </button>
-        </div>
-      )}
-    </div>
+            {/* Economic Stability */}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <DollarSign className="w-3 h-3 text-emerald-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Economic Profile</span>
+              </div>
+              <div className="grid grid-cols-3 gap-px bg-white/[0.03]">
+                {[
+                  ['GDP', profile.economic_stability.gdp_usd],
+                  ['Growth', profile.economic_stability.gdp_growth],
+                  ['Debt/GDP', profile.economic_stability.debt_to_gdp],
+                ].map(([label, value]) => (
+                  <div key={label} className="p-1.5 bg-[#0d1220]">
+                    <span className="text-[8px] text-gray-600 block">{label}</span>
+                    <span className="text-[10px] text-white font-medium">{value}</span>
+                  </div>
+                ))}
+              </div>
+              {profile.economic_stability.sanctions_status !== 'None' && (
+                <div className="p-1.5 bg-amber-500/5 border-t border-amber-500/10">
+                  <span className="text-[9px] text-amber-400">⚠ {profile.economic_stability.sanctions_status}</span>
+                </div>
+              )}
+              <div className="p-1.5 border-t border-white/5">
+                <p className="text-[9px] text-gray-500">{profile.economic_stability.economic_vulnerabilities}</p>
+              </div>
+            </div>
+
+            {/* Alliance Network */}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <Handshake className="w-3 h-3 text-blue-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Alliance Network</span>
+                <span className="text-[9px] text-gray-600 ml-auto">{profile.alliance_network.length} pacts</span>
+              </div>
+              <div className="space-y-0">
+                {profile.alliance_network.map((a, i) => (
+                  <div key={i} className="flex items-center gap-2 p-1.5 border-t border-white/[0.03]">
+                    <span className="text-[10px] text-white flex-1">{a.name}</span>
+                    <Badge variant="outline" className={cn("text-[7px] px-1 py-0 h-3", allianceTypeColors[a.type])}>
+                      {a.type.toUpperCase()}
+                    </Badge>
+                    <span className={cn("text-[8px]", strengthColors[a.strength])}>●</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Historical Conflicts */}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <Clock className="w-3 h-3 text-amber-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Historical Conflicts</span>
+              </div>
+              <div className="space-y-0">
+                {profile.historical_conflicts.map((c, i) => (
+                  <div key={i} className="p-1.5 border-t border-white/[0.03]">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-white flex-1">{c.name}</span>
+                      <Badge variant="outline" className="text-[7px] px-1 py-0 h-3 bg-white/5 text-gray-500 border-white/10">
+                        {conflictTypeLabels[c.type] || c.type}
+                      </Badge>
+                      <span className="text-[9px] text-gray-600">{c.year}</span>
+                    </div>
+                    <p className="text-[9px] text-gray-500 mt-0.5">{c.outcome}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Vulnerabilities & Advantages */}
+            <div className="grid grid-cols-2 gap-px">
+              <div className="border border-white/[0.05]">
+                <div className="p-1.5 bg-red-500/[0.03]">
+                  <span className="text-[9px] font-semibold text-red-400 uppercase tracking-wider">Vulnerabilities</span>
+                </div>
+                {profile.risk_assessment.key_vulnerabilities.map((v, i) => (
+                  <div key={i} className="p-1.5 border-t border-white/[0.03]">
+                    <p className="text-[9px] text-red-300/70">• {v}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="border border-white/[0.05]">
+                <div className="p-1.5 bg-emerald-500/[0.03]">
+                  <span className="text-[9px] font-semibold text-emerald-400 uppercase tracking-wider">Advantages</span>
+                </div>
+                {profile.risk_assessment.strategic_advantages.map((a, i) => (
+                  <div key={i} className="p-1.5 border-t border-white/[0.03]">
+                    <p className="text-[9px] text-emerald-300/70">• {a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Regenerate */}
+            <button
+              onClick={() => { setProfile(null); generateProfile(); }}
+              disabled={loading}
+              className="w-full py-1.5 text-[9px] text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              Regenerate Profile
+            </button>
+          </div>
+        )}
+      </DraggablePopup>
+
+      {/* Arms Trade Popup */}
+      <DraggablePopup
+        open={armsPopupOpen}
+        onOpenChange={setArmsPopupOpen}
+        width={520}
+        maxHeight="90vh"
+        zIndex={300}
+        className="bg-[#0a0f1a] text-white border-white/10"
+        headerClassName="bg-[#0d1220]"
+        headerContent={
+          <div className="flex items-center gap-2 px-2">
+            <ArrowRightLeft className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-[11px] font-bold tracking-wide">ARMS TRADE — {countryName}</span>
+          </div>
+        }
+      >
+        {armsLoading && (
+          <div className="flex items-center justify-center gap-2 py-8">
+            <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+            <span className="text-[10px] text-gray-400">Fetching SIPRI arms transfer records...</span>
+          </div>
+        )}
+        {armsData && <ArmsTradeContent data={armsData} />}
+      </DraggablePopup>
+    </>
   );
 }
