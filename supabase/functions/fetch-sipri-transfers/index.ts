@@ -101,7 +101,7 @@ IMPORTANT RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-5-mini',
+        model: 'openai/gpt-5',
         messages: [{ role: 'user', content: prompt }],
       }),
     });
