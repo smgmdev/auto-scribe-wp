@@ -408,6 +408,20 @@ export function AdminSystemView() {
     }
   };
 
+  // --- Nuke menu ---
+  const showNukeMenu = () => {
+    setTerminalMode('nuke-menu');
+    addLine('info', '');
+    addLine('info', '═══════════════════════════════════════');
+    addLine('info', '  NUKE CODES');
+    addLine('info', '═══════════════════════════════════════');
+    addLine('info', '');
+    addLine('output', '  1. Create new code');
+    addLine('output', '  2. Available codes');
+    addLine('info', '');
+    addLine('info', 'Enter option number (0 to exit):');
+  };
+
   // --- Marketing menu ---
   const showMarketingMenu = () => {
     setTerminalMode('marketing');
