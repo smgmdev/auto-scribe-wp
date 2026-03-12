@@ -25,17 +25,24 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
 
     if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
       const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-      const anonClient = createClient(supabaseUrl, anonKey, {
-        global: { headers: { Authorization: authHeader } },
-      });
-      const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(authHeader.replace("Bearer ", ""));
-      if (claimsError || !claimsData?.claims) {
+      // Skip auth check if token is the anon key itself (unauthenticated call)
+      if (token === anonKey) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const userId = claimsData.claims.sub as string;
+      const anonClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData, error: userError } = await anonClient.auth.getUser(token);
+      if (userError || !userData?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const userId = userData.user.id;
       const { data: hasAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
       const { data: profile } = await supabase.from("profiles").select("precision_enabled").eq("id", userId).single();
       if (!hasAdmin && !profile?.precision_enabled) {
