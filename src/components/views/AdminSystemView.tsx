@@ -1632,7 +1632,7 @@ export function AdminSystemView() {
                 const expiredTime = (c as any).expired_at ? format(new Date((c as any).expired_at), 'MMM d, yyyy HH:mm') : '';
                 addLine('output', `  ${i + 1}. ${c.code}  [${c.usage_count}]  EXPIRED ${expiredTime}  created ${date}`);
               } else {
-                addLine('output', `  ${i + 1}. ${c.code}  [${c.usage_count}]  ACTIVE  created ${date}`);
+                addLine('output', `  ${i + 1}. ${c.code}  [0]  ACTIVE  created ${date}`);
               }
             }
           }
