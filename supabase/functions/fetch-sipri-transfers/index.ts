@@ -101,8 +101,9 @@ IMPORTANT RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-5',
+        model: 'google/gemini-2.5-flash',
         messages: [{ role: 'user', content: prompt }],
+        max_tokens: 8192,
       }),
     });
 
