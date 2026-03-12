@@ -564,7 +564,8 @@ function inferTrajectory(title: string, description: string, countryCode: string
   }
   
   // Skip compound/roundup headlines with semicolons listing multiple locations — these are summaries
-  if (lower.includes(';') && ['and more', 'unfolding', 'day '].some(p => lower.includes(p))) {
+  const lowerText = text.toLowerCase();
+  if (lowerText.includes(';') && ['and more', 'unfolding', 'day '].some(p => lowerText.includes(p))) {
     return { origin: null, destination: null };
   }
 
