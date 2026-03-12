@@ -1386,6 +1386,30 @@ export type Database = {
         }
         Relationships: []
       }
+      nuke_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          id: string
+          usage_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          id?: string
+          usage_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           accepted_at: string | null

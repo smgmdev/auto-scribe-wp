@@ -34,6 +34,8 @@ interface UserSession {
   codeExpiresAt?: number;
   lastActivity: number;
   chatHistory?: ChatMessage[];
+  nukeMode?: boolean;
+  nukeCodeId?: string;
 }
 
 // In-memory cache (warm instance optimization)
@@ -1013,6 +1015,20 @@ Deno.serve(async (req) => {
       return new Response('OK', { status: 200 });
     }
 
+    // ── /nuke command ──
+    if (text?.toLowerCase() === '/nuke') {
+      session = session || { step: 'idle', userId: supabaseUserId!, lastActivity: Date.now() };
+      session.step = 'nuke_awaiting_code';
+      session.nukeMode = true;
+      await saveSession(supabase, chatId, session);
+      await sendTelegramMessage(botToken, chatId,
+        `☢️ <b>NUKE MODE</b>\n\n` +
+        `This will publish your article to <b>ALL</b> available sites in the media library.\n\n` +
+        `🔑 Please provide your activation code:`
+      );
+      return new Response('OK', { status: 200 });
+    }
+
     // ── /myarticles command ──
     if (text?.toLowerCase() === '/myarticles') {
       // Fetch ALL published mace articles (paginate past 1000 row limit)
@@ -1097,6 +1113,225 @@ Deno.serve(async (req) => {
     }
     session.userId = supabaseUserId!;
     session.lastActivity = Date.now();
+
+    // ── Nuke: awaiting activation code ──
+    if (session.step === 'nuke_awaiting_code') {
+      const answer = text?.trim();
+      if (!answer) {
+        await sendTelegramMessage(botToken, chatId, `🔑 Please enter your activation code, or reply <b>Cancel</b>.`);
+        return new Response('OK', { status: 200 });
+      }
+      if (answer.toLowerCase() === 'cancel') {
+        session.step = 'idle';
+        session.nukeMode = false;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Nuke mode cancelled.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      // Validate code against DB
+      const { data: codeRow } = await supabase
+        .from('nuke_codes')
+        .select('id, code')
+        .eq('code', answer)
+        .maybeSingle();
+
+      if (!codeRow) {
+        await sendTelegramMessage(botToken, chatId, `❌ Invalid code. Please try again or reply <b>Cancel</b>.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      session.nukeCodeId = codeRow.id;
+      session.step = 'idle';
+      session.nukeMode = true;
+      await saveSession(supabase, chatId, session);
+
+      await sendTelegramMessage(botToken, chatId,
+        `✅ <b>Code accepted!</b> ☢️ Nuke mode activated.\n\n` +
+        `Now send me the article content (text, photo, document, or link) and it will be published to <b>ALL</b> available sites.\n\n` +
+        `💡 The normal article flow applies — once you approve, I'll publish everywhere.`
+      );
+      return new Response('OK', { status: 200 });
+    }
+
+    // ── Nuke: final confirmation before publishing to all sites ──
+    if (session.step === 'nuke_confirm_publish') {
+      const answer = text?.toLowerCase().trim();
+      if (answer === 'confirm' || answer === 'yes' || answer === 'y') {
+        await sendTelegramMessage(botToken, chatId, `☢️ <b>NUKE PUBLISHING...</b> Deploying to all sites...`);
+
+        // Fetch all connected WP sites
+        const { data: allWpSites } = await supabase
+          .from('wordpress_sites')
+          .select('id, name, url, username, app_password, seo_plugin, user_id, agency, favicon')
+          .eq('connected', true)
+          .order('created_at', { ascending: true });
+
+        const sites = allWpSites || [];
+        if (sites.length === 0) {
+          await sendTelegramMessage(botToken, chatId, `❌ No connected sites found.`);
+          session.step = 'idle';
+          session.nukeMode = false;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        // Parse article content
+        const contentText = session.content || '';
+        const contentLines = contentText.trim().split('\n');
+        let articleTitle = contentLines[0].replace(/^#+\s*/, '').replace(/^\*+/, '').replace(/\*+$/, '').trim();
+        let startIdx = 1;
+        while (startIdx < contentLines.length && contentLines[startIdx].trim() === '') startIdx++;
+        const body = contentLines.slice(startIdx).join('\n').trim();
+        const paragraphs = body.split(/\n\s*\n/).filter((p: string) => p.trim());
+        const htmlContent = paragraphs.map((p: string) => `<p>${p.trim().replace(/\n/g, ' ')}</p>`).join('\n');
+
+        if (!articleTitle || !htmlContent) {
+          await sendTelegramMessage(botToken, chatId, `❌ No article content to publish.`);
+          session.step = 'idle';
+          session.nukeMode = false;
+          await saveSession(supabase, chatId, session);
+          return new Response('OK', { status: 200 });
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+        const publishedLinks: string[] = [];
+        const userId = supabaseUserId!;
+
+        for (const site of sites) {
+          try {
+            const credentials = btoa(`${site.username}:${site.app_password}`);
+            const wpAuthHeader = `Basic ${credentials}`;
+            const baseUrl = site.url.replace(/\/+$/, '');
+
+            // Upload featured image if available
+            let featuredMediaId = 0;
+            if (session.photoFileId) {
+              try {
+                const photoFile = await downloadTelegramFile(botToken, session.photoFileId);
+                if (photoFile) {
+                  const formData = new FormData();
+                  const blob = new Blob([photoFile.buffer], { type: photoFile.mimeType });
+                  formData.append('file', blob, photoFile.fileName || 'image.jpg');
+                  const mediaRes = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+                    method: 'POST',
+                    headers: { 'Authorization': wpAuthHeader },
+                    body: formData,
+                  });
+                  if (mediaRes.ok) {
+                    const mediaData = await mediaRes.json();
+                    featuredMediaId = mediaData.id;
+                  }
+                }
+              } catch {}
+            }
+
+            // Determine category
+            const hasImage = featuredMediaId > 0;
+            let resolvedCategories: number[] = [];
+            try {
+              const { data: catRows } = await supabase
+                .from('mace_site_categories')
+                .select('category_id')
+                .eq('site_id', site.id)
+                .eq('has_image', hasImage);
+              if (catRows && catRows.length > 0) {
+                resolvedCategories = catRows.map((r: any) => r.category_id);
+              }
+            } catch {}
+
+            const postBody: Record<string, unknown> = {
+              title: articleTitle,
+              content: htmlContent,
+              status: 'publish',
+              categories: resolvedCategories,
+              featured_media: featuredMediaId,
+            };
+
+            const wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
+              method: 'POST',
+              headers: { 'Authorization': wpAuthHeader, 'Content-Type': 'application/json' },
+              body: JSON.stringify(postBody),
+            });
+
+            if (wpResponse.ok) {
+              const wpData = await wpResponse.json();
+              successCount++;
+              publishedLinks.push(`${site.name}: ${wpData.link}`);
+
+              // Save article record
+              await supabase.from('articles').insert({
+                user_id: userId,
+                title: articleTitle,
+                content: htmlContent,
+                tone: 'journalist',
+                status: 'published',
+                published_to: site.id,
+                published_to_name: site.name,
+                published_to_favicon: site.favicon || null,
+                wp_post_id: wpData.id,
+                wp_link: wpData.link,
+                source_headline: { source: 'mace-telegram-nuke' },
+              });
+
+              sendTelegramAlert(TelegramAlerts.maceAIPublished(site.name, articleTitle, wpData.link || '')).catch(() => {});
+            } else {
+              failCount++;
+              console.error(`[mace-nuke] Failed to publish to ${site.name}:`, wpResponse.status);
+            }
+          } catch (err) {
+            failCount++;
+            console.error(`[mace-nuke] Error publishing to ${site.name}:`, err);
+          }
+        }
+
+        // Increment nuke code usage
+        if (session.nukeCodeId) {
+          const { data: codeData } = await supabase.from('nuke_codes').select('usage_count').eq('id', session.nukeCodeId).single();
+          if (codeData) {
+            await supabase.from('nuke_codes').update({ usage_count: (codeData.usage_count || 0) + 1 }).eq('id', session.nukeCodeId);
+          }
+        }
+
+        // Summary
+        const linksText = publishedLinks.length > 0
+          ? `\n\n<b>Published to:</b>\n${publishedLinks.map(l => `• ${l}`).join('\n')}`
+          : '';
+
+        await sendTelegramMessage(botToken, chatId,
+          `☢️ <b>NUKE COMPLETE</b>\n\n` +
+          `✅ Success: ${successCount} sites\n` +
+          `${failCount > 0 ? `❌ Failed: ${failCount} sites\n` : ''}` +
+          linksText
+        );
+
+        // Reset session
+        session.step = 'idle';
+        session.content = undefined;
+        session.originalContent = undefined;
+        session.reviewedContent = undefined;
+        session.photoFileId = undefined;
+        session.photoCaption = undefined;
+        session.topic = undefined;
+        session.nukeMode = false;
+        session.nukeCodeId = undefined;
+        await saveSession(supabase, chatId, session);
+        return new Response('OK', { status: 200 });
+      }
+
+      if (answer === 'cancel' || answer === 'no' || answer === 'n') {
+        session.step = 'idle';
+        session.nukeMode = false;
+        session.nukeCodeId = undefined;
+        await saveSession(supabase, chatId, session);
+        await sendTelegramMessage(botToken, chatId, `👍 Nuke cancelled.`);
+        return new Response('OK', { status: 200 });
+      }
+
+      await sendTelegramMessage(botToken, chatId, `Reply <b>Confirm</b> to publish to ALL sites, or <b>Cancel</b>.`);
+      return new Response('OK', { status: 200 });
+    }
 
     // ── /myarticles: user selected an article number ──
     if (session.step === 'myarticles_list') {
@@ -1724,22 +1959,47 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
 
     // ── User sending featured image ──
     if (session.step === 'awaiting_photo') {
+      // Helper: transition to site selection or nuke confirmation
+      const transitionToSiteOrNuke = async (imageMsg: string) => {
+        if (session!.nukeMode) {
+          // Nuke mode: skip site selection, go to confirmation
+          const { data: allSites } = await supabase
+            .from('wordpress_sites')
+            .select('name')
+            .eq('connected', true)
+            .order('created_at', { ascending: true });
+          const siteCount = (allSites || []).length;
+          const siteList = (allSites || []).map((s: any) => s.name).join(', ');
+
+          session!.step = 'nuke_confirm_publish';
+          await saveSession(supabase, chatId, session!);
+
+          await sendTelegramMessage(botToken, chatId,
+            `${imageMsg}\n\n` +
+            `☢️ <b>NUKE CONFIRMATION</b>\n\n` +
+            `Your article will be published to <b>ALL ${siteCount} sites</b>:\n${siteList}\n\n` +
+            `Reply <b>Confirm</b> to proceed or <b>Cancel</b> to abort.`
+          );
+        } else {
+          session!.step = 'awaiting_site';
+          const { data: wpSites } = await supabase
+            .from('wordpress_sites')
+            .select('name')
+            .eq('connected', true)
+            .order('created_at', { ascending: true });
+          const siteNames = (wpSites || []).map((s: any) => s.name);
+
+          await sendTelegramMessage(botToken, chatId,
+            `${imageMsg}\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
+          );
+          await saveSession(supabase, chatId, session!);
+        }
+      };
+
       // Skip option
       if (text?.toLowerCase().trim() === 'skip') {
         session.photoFileId = undefined;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true)
-          .order('created_at', { ascending: true });
-        const siteNames = (wpSites || []).map((s: any) => s.name);
-
-        await sendTelegramMessage(botToken, chatId,
-          `👍 No image — got it.\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
-        );
-        await saveSession(supabase, chatId, session);
+        await transitionToSiteOrNuke('👍 No image — got it.');
         return new Response('OK', { status: 200 });
       }
 
@@ -1755,19 +2015,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
           return new Response('OK', { status: 200 });
         }
         session.photoFileId = largestPhoto.file_id;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true)
-          .order('created_at', { ascending: true });
-        const siteNames = (wpSites || []).map((s: any) => s.name);
-
-        await sendTelegramMessage(botToken, chatId,
-          `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
-        );
-        await saveSession(supabase, chatId, session);
+        await transitionToSiteOrNuke('📸 Got your image!');
         return new Response('OK', { status: 200 });
       }
 
@@ -1796,19 +2044,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
         }
 
         session.photoFileId = message.document.file_id;
-        session.step = 'awaiting_site';
-
-        const { data: wpSites } = await supabase
-          .from('wordpress_sites')
-          .select('name')
-          .eq('connected', true)
-          .order('created_at', { ascending: true });
-        const siteNames = (wpSites || []).map((s: any) => s.name);
-
-        await sendTelegramMessage(botToken, chatId,
-          `📸 Got your image!\n\nWhich site should I publish to?\n\n${formatSiteList(siteNames)}\n\n💡 Reply with a <b>number</b> or site name.`
-        );
-        await saveSession(supabase, chatId, session);
+        await transitionToSiteOrNuke('📸 Got your image!');
         return new Response('OK', { status: 200 });
       }
 
