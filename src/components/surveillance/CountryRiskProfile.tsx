@@ -215,6 +215,15 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
   const [armsLoading, setArmsLoading] = useState(false);
   const [armsPopupOpen, setArmsPopupOpen] = useState(false);
 
+  // Reset cached data when country changes
+  useEffect(() => {
+    setProfile(null);
+    setArmsData(null);
+    setRiskPopupOpen(false);
+    setArmsPopupOpen(false);
+    setLoading(false);
+    setArmsLoading(false);
+  }, [countryName, countryCode]);
   const generateProfile = async () => {
     setRiskPopupOpen(true);
     if (profile) return; // already loaded
