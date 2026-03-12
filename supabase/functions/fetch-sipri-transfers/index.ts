@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       .gte('fetched_at', cacheThreshold.toISOString())
       .limit(500);
 
-    if (cached && cached.length > 0) {
+    if (cached && cached.length > 0 && !force_refresh) {
       const exports = cached.filter((r: any) => r.direction === 'export');
       const imports = cached.filter((r: any) => r.direction === 'import');
       return new Response(JSON.stringify({
