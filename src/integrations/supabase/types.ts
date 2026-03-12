@@ -1418,6 +1418,7 @@ export type Database = {
           code: string
           created_at: string
           created_by: string
+          expired_at: string | null
           id: string
           usage_count: number
           used: boolean
@@ -1426,6 +1427,7 @@ export type Database = {
           code: string
           created_at?: string
           created_by: string
+          expired_at?: string | null
           id?: string
           usage_count?: number
           used?: boolean
@@ -1434,6 +1436,7 @@ export type Database = {
           code?: string
           created_at?: string
           created_by?: string
+          expired_at?: string | null
           id?: string
           usage_count?: number
           used?: boolean

@@ -1614,7 +1614,7 @@ export function AdminSystemView() {
         try {
           const { data: codes, error } = await (supabase
             .from('nuke_codes')
-            .select('id, code, usage_count, created_at, used')
+            .select('id, code, usage_count, created_at, used, expired_at')
             .order('created_at', { ascending: false }) as any);
           if (error) throw error;
           if (!codes || codes.length === 0) {
@@ -1628,8 +1628,12 @@ export function AdminSystemView() {
             for (let i = 0; i < codes.length; i++) {
               const c = codes[i];
               const date = format(new Date(c.created_at), 'MMM d, yyyy');
-              const status = (c as any).used ? '  EXPIRED' : '  ACTIVE';
-              addLine('output', `  ${i + 1}. ${c.code}  [${c.usage_count}]${status}  created ${date}`);
+              if ((c as any).used) {
+                const expiredTime = (c as any).expired_at ? format(new Date((c as any).expired_at), 'MMM d, yyyy HH:mm') : '';
+                addLine('output', `  ${i + 1}. ${c.code}  [${c.usage_count}]  EXPIRED ${expiredTime}  created ${date}`);
+              } else {
+                addLine('output', `  ${i + 1}. ${c.code}  [${c.usage_count}]  ACTIVE  created ${date}`);
+              }
             }
           }
         } catch (err: any) {
@@ -1719,7 +1723,7 @@ export function AdminSystemView() {
       if (trimmed === '2' && selectedNukeCode.used) {
         setProcessing(true);
         try {
-          const { error } = await supabase.from('nuke_codes').update({ used: false } as any).eq('id', selectedNukeCode.id);
+          const { error } = await supabase.from('nuke_codes').update({ used: false, expired_at: null } as any).eq('id', selectedNukeCode.id);
           if (error) throw error;
           addLine('output', `Code "${selectedNukeCode.code}" reset. Can be used again.`);
         } catch (err: any) {
