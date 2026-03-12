@@ -1171,17 +1171,6 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
-      // Log successful attempt (moved below used check)
-      await supabase.from('nuke_code_attempts').insert({
-        telegram_chat_id: chatId,
-        user_id: supabaseUserId || null,
-          attempted_code: '***REDACTED***',
-          success: false,
-        });
-        const remaining = 4 - (recentAttempts?.length || 0);
-        await sendTelegramMessage(botToken, chatId, `❌ Invalid code. ${remaining > 0 ? `${remaining} attempts remaining.` : 'Last attempt before lockout.'} Reply <b>Cancel</b> to exit.`);
-        return new Response('OK', { status: 200 });
-      }
 
       // Log successful attempt
       await supabase.from('nuke_code_attempts').insert({
