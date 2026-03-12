@@ -1165,9 +1165,10 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 });
       }
 
-      // Check if code has already been used
-      if (codeRow.used) {
-        await sendTelegramMessage(botToken, chatId, `❌ This code has already been used. Request a new code from admin.`);
+      // Check if code has already been used (expired)
+      if (codeRow.used === true) {
+        console.log(`[mace-nuke] Code "${answer}" is expired/used, rejecting`);
+        await sendTelegramMessage(botToken, chatId, `❌ This code has expired (already used). Request a new code from admin.`);
         return new Response('OK', { status: 200 });
       }
 
