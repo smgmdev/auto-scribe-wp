@@ -210,35 +210,34 @@ function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
 export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProfileProps) {
   const [profile, setProfile] = useState<RiskProfile | null>(null);
   const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [riskPopupOpen, setRiskPopupOpen] = useState(false);
   const [armsData, setArmsData] = useState<ArmsTradeData | null>(null);
   const [armsLoading, setArmsLoading] = useState(false);
+  const [armsPopupOpen, setArmsPopupOpen] = useState(false);
 
   const generateProfile = async () => {
+    setRiskPopupOpen(true);
+    if (profile) return; // already loaded
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('country-risk-profile', {
         body: { country_name: countryName, country_code: countryCode },
       });
-      if (error) {
-        console.error('country-risk-profile invoke error:', error);
-        throw error;
-      }
-      if (data?.error) {
-        console.error('country-risk-profile data error:', data.error);
-        throw new Error(data.error);
-      }
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       setProfile(data.profile);
-      setExpanded(true);
     } catch (err: any) {
       console.error('country-risk-profile caught:', err);
       toast.error(err.message || 'Failed to generate risk profile');
+      setRiskPopupOpen(false);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchArmsData = async () => {
+    setArmsPopupOpen(true);
+    if (armsData) return; // already loaded
     setArmsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-sipri-transfers', {
@@ -250,13 +249,16 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
     } catch (err: any) {
       console.error('SIPRI fetch error:', err);
       toast.error(err.message || 'Failed to fetch arms transfer data');
+      setArmsPopupOpen(false);
     } finally {
       setArmsLoading(false);
     }
   };
 
-  if (!expanded && !profile) {
-    return (
+  const tc = profile ? (threatColors[profile.risk_assessment.overall_threat_rating] || threatColors.MODERATE) : threatColors.MODERATE;
+
+  return (
+    <>
       <div className="space-y-1 mt-3">
         <button
           onClick={generateProfile}
@@ -266,120 +268,126 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
           {loading ? (
             <>
               <Loader2 className="w-3 h-3 animate-spin" />
-              Generating Intelligence Dossier...
+              Generating...
             </>
           ) : (
             'AI Risk Profile'
           )}
         </button>
-        <ArmsTradeSection data={armsData} loading={armsLoading} onFetch={fetchArmsData} />
+        <button
+          onClick={fetchArmsData}
+          disabled={armsLoading}
+          className="w-full py-2 text-[10px] font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+        >
+          {armsLoading ? (
+            <>
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Fetching...
+            </>
+          ) : (
+            <>
+              <ArrowRightLeft className="w-3 h-3" />
+              Load Arms Trade Data (SIPRI)
+            </>
+          )}
+        </button>
       </div>
-    );
-  }
 
-  if (loading) {
-    return (
-      <div className="mt-3 p-4 border border-white/5 bg-white/[0.02]">
-        <div className="flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 text-[#f2a547] animate-spin" />
-          <span className="text-[10px] text-gray-400">Compiling intelligence dossier...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!profile) return null;
-
-  const tc = threatColors[profile.risk_assessment.overall_threat_rating] || threatColors.MODERATE;
-
-  return (
-    <div className="mt-3 border-t border-white/5 pt-3">
-      {/* Header with toggle */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between mb-2"
+      {/* Risk Profile Popup */}
+      <DraggablePopup
+        open={riskPopupOpen}
+        onOpenChange={setRiskPopupOpen}
+        width={520}
+        maxHeight="90vh"
+        zIndex={300}
+        className="bg-[#0a0f1a] text-white border-white/10"
+        headerClassName="bg-[#0d1220]"
+        headerContent={
+          <div className="flex items-center gap-2 px-2">
+            <Target className="w-3.5 h-3.5 text-[#f2a547]" />
+            <span className="text-[11px] font-bold tracking-wide">INTELLIGENCE DOSSIER — {countryName}</span>
+            {profile && (
+              <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5 ml-auto", tc.bg, tc.text, tc.border)}>
+                {profile.risk_assessment.overall_threat_rating}
+              </Badge>
+            )}
+          </div>
+        }
       >
-        <div className="flex items-center gap-2">
-          <Target className="w-3 h-3 text-[#f2a547]" />
-          <span className="text-[11px] font-bold text-white tracking-wide">INTELLIGENCE DOSSIER</span>
-          <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5", tc.bg, tc.text, tc.border)}>
-            {profile.risk_assessment.overall_threat_rating}
-          </Badge>
-        </div>
-        {expanded ? <ChevronUp className="w-3 h-3 text-gray-500" /> : <ChevronDown className="w-3 h-3 text-gray-500" />}
-      </button>
-
-      {expanded && (
-        <div className="space-y-0">
-          {/* Risk Assessment Summary */}
-          <div className={cn("p-2.5 border", tc.border, tc.bg)}>
-            <div className="flex items-center justify-between mb-1">
-              <span className={cn("text-[11px] font-bold", tc.text)}>Risk Score: {profile.risk_assessment.risk_score}/100</span>
-            </div>
-            <p className="text-[10px] text-gray-300 leading-relaxed">{profile.risk_assessment.assessment_summary}</p>
+        {loading && (
+          <div className="flex items-center justify-center gap-2 py-8">
+            <Loader2 className="w-4 h-4 text-[#f2a547] animate-spin" />
+            <span className="text-[10px] text-gray-400">Compiling intelligence dossier...</span>
           </div>
-
-          {/* Military Strength */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <Swords className="w-3 h-3 text-red-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Military Strength</span>
-              <span className="text-[9px] text-gray-600 ml-auto">Rank {profile.military_strength.global_firepower_rank}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-px bg-white/[0.03]">
-              {[
-                ['Personnel', profile.military_strength.active_personnel],
-                ['Reserves', profile.military_strength.reserve_personnel],
-                ['Tanks', profile.military_strength.tanks],
-                ['Aircraft', profile.military_strength.aircraft],
-                ['Naval', profile.military_strength.naval_vessels],
-                ['Budget', profile.military_strength.defense_budget_usd],
-              ].map(([label, value]) => (
-                <div key={label} className="p-1.5 bg-[#0d1220]">
-                  <span className="text-[8px] text-gray-600 block">{label}</span>
-                  <span className="text-[10px] text-white font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-            {profile.military_strength.nuclear_capable && (
-              <div className="p-1.5 bg-red-500/5 border-t border-red-500/10 flex items-center gap-1.5">
-                <span className="text-[9px] text-red-400 font-bold">☢ NUCLEAR: {profile.military_strength.nuclear_warheads} warheads</span>
+        )}
+        {profile && (
+          <div className="space-y-0">
+            {/* Risk Assessment Summary */}
+            <div className={cn("p-2.5 border", tc.border, tc.bg)}>
+              <div className="flex items-center justify-between mb-1">
+                <span className={cn("text-[11px] font-bold", tc.text)}>Risk Score: {profile.risk_assessment.risk_score}/100</span>
               </div>
-            )}
-          </div>
-
-          {/* Arms Trade Section - SIPRI Data */}
-          <ArmsTradeSection data={armsData} loading={armsLoading} onFetch={fetchArmsData} />
-
-          {/* Economic Stability */}
-          <div className="border border-white/[0.05]">
-            <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
-              <DollarSign className="w-3 h-3 text-emerald-400" />
-              <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Economic Profile</span>
+              <p className="text-[10px] text-gray-300 leading-relaxed">{profile.risk_assessment.assessment_summary}</p>
             </div>
-            <div className="grid grid-cols-3 gap-px bg-white/[0.03]">
-              {[
-                ['GDP', profile.economic_stability.gdp_usd],
-                ['Growth', profile.economic_stability.gdp_growth],
-                ['Debt/GDP', profile.economic_stability.debt_to_gdp],
-              ].map(([label, value]) => (
-                <div key={label} className="p-1.5 bg-[#0d1220]">
-                  <span className="text-[8px] text-gray-600 block">{label}</span>
-                  <span className="text-[10px] text-white font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-            {profile.economic_stability.sanctions_status !== 'None' && (
-              <div className="p-1.5 bg-amber-500/5 border-t border-amber-500/10">
-                <span className="text-[9px] text-amber-400">⚠ {profile.economic_stability.sanctions_status}</span>
+
+            {/* Military Strength */}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <Swords className="w-3 h-3 text-red-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Military Strength</span>
+                <span className="text-[9px] text-gray-600 ml-auto">Rank {profile.military_strength.global_firepower_rank}</span>
               </div>
-            )}
-            <div className="p-1.5 border-t border-white/5">
-              <p className="text-[9px] text-gray-500">{profile.economic_stability.economic_vulnerabilities}</p>
+              <div className="grid grid-cols-2 gap-px bg-white/[0.03]">
+                {[
+                  ['Personnel', profile.military_strength.active_personnel],
+                  ['Reserves', profile.military_strength.reserve_personnel],
+                  ['Tanks', profile.military_strength.tanks],
+                  ['Aircraft', profile.military_strength.aircraft],
+                  ['Naval', profile.military_strength.naval_vessels],
+                  ['Budget', profile.military_strength.defense_budget_usd],
+                ].map(([label, value]) => (
+                  <div key={label} className="p-1.5 bg-[#0d1220]">
+                    <span className="text-[8px] text-gray-600 block">{label}</span>
+                    <span className="text-[10px] text-white font-medium">{value}</span>
+                  </div>
+                ))}
+              </div>
+              {profile.military_strength.nuclear_capable && (
+                <div className="p-1.5 bg-red-500/5 border-t border-red-500/10 flex items-center gap-1.5">
+                  <span className="text-[9px] text-red-400 font-bold">☢ NUCLEAR: {profile.military_strength.nuclear_warheads} warheads</span>
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Alliance Network */}
+            {/* Economic Stability */}
+            <div className="border border-white/[0.05]">
+              <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
+                <DollarSign className="w-3 h-3 text-emerald-400" />
+                <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Economic Profile</span>
+              </div>
+              <div className="grid grid-cols-3 gap-px bg-white/[0.03]">
+                {[
+                  ['GDP', profile.economic_stability.gdp_usd],
+                  ['Growth', profile.economic_stability.gdp_growth],
+                  ['Debt/GDP', profile.economic_stability.debt_to_gdp],
+                ].map(([label, value]) => (
+                  <div key={label} className="p-1.5 bg-[#0d1220]">
+                    <span className="text-[8px] text-gray-600 block">{label}</span>
+                    <span className="text-[10px] text-white font-medium">{value}</span>
+                  </div>
+                ))}
+              </div>
+              {profile.economic_stability.sanctions_status !== 'None' && (
+                <div className="p-1.5 bg-amber-500/5 border-t border-amber-500/10">
+                  <span className="text-[9px] text-amber-400">⚠ {profile.economic_stability.sanctions_status}</span>
+                </div>
+              )}
+              <div className="p-1.5 border-t border-white/5">
+                <p className="text-[9px] text-gray-500">{profile.economic_stability.economic_vulnerabilities}</p>
+              </div>
+            </div>
+
+            {/* Alliance Network */}
           <div className="border border-white/[0.05]">
             <div className="flex items-center gap-1.5 p-2 bg-white/[0.02]">
               <Handshake className="w-3 h-3 text-blue-400" />
