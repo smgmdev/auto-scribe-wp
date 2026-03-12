@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Shield, Swords, DollarSign, Handshake, Clock, Target, ChevronDown, ChevronUp, ArrowRightLeft, PackageCheck, RefreshCw, TrendingUp, Package, Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -404,8 +404,14 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
   const [tradeLoading, setTradeLoading] = useState(false);
   const [tradePopupOpen, setTradePopupOpen] = useState(false);
 
+  // Track previous country to reset only when country actually changes
+  const prevCountryRef = useRef({ name: countryName, code: countryCode });
+  
   // Reset cached data when country changes
   useEffect(() => {
+    const prev = prevCountryRef.current;
+    if (prev.name === countryName && prev.code === countryCode) return;
+    prevCountryRef.current = { name: countryName, code: countryCode };
     setProfile(null);
     setArmsData(null);
     setTradeData(null);
@@ -562,10 +568,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
               Fetching...
             </>
           ) : (
-            <>
-              <ArrowRightLeft className="w-3 h-3" />
-              Load Arms Trade Data (SIPRI)
-            </>
+            'Load Arms Trade Data (SIPRI)'
           )}
         </button>
         <button
@@ -579,10 +582,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
               Fetching...
             </>
           ) : (
-            <>
-              <TrendingUp className="w-3 h-3" />
-              Trade Overview (Exports & Imports)
-            </>
+            'Trade Overview (Exports & Imports)'
           )}
         </button>
       </div>
