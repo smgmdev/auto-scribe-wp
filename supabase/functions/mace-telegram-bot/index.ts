@@ -2010,7 +2010,7 @@ Return ONLY the article text: headline on line 1, then a blank line, then the bo
           await sendTelegramMessage(botToken, chatId,
             `${imageMsg}\n\n` +
             `☢️ <b>NUKE CONFIRMATION</b>\n\n` +
-            `Your article will be published to <b>ALL ${siteCount} sites</b>:\n${siteList}\n\n` +
+            `Your article will be published to <b>ALL ${siteCount} sites</b> at <b>no credit cost</b>:\n${siteList}\n\n` +
             `Reply <b>Confirm</b> to proceed or <b>Cancel</b> to abort.`
           );
         } else {
