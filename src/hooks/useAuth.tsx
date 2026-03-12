@@ -163,6 +163,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     previousUserIdRef.current = null;
   };
 
+  // Track when OUR session was registered — used to determine if a DB mismatch
+  // is from a genuinely newer login or just a stale/transient value
+  const ourSessionRegisteredAtRef = useRef<number>(0);
+
   // Grace period: ignore realtime kicks briefly after registering our own session
   const sessionGraceUntilRef = useRef<number>(0);
 
@@ -195,13 +199,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Verify the update took effect
       const { data: verifyData } = await supabase
         .from('profiles')
-        .select('active_session_id')
+        .select('active_session_id, session_started_at')
         .eq('id', userId)
         .single();
 
       const dbValue = (verifyData as any)?.active_session_id;
       if (dbValue === sessionId) {
-        console.log('[Auth] Session registration verified on attempt', attempt);
+        // Record when we successfully registered — this is our authoritative timestamp
+        const dbStartedAt = (verifyData as any)?.session_started_at;
+        ourSessionRegisteredAtRef.current = dbStartedAt
+          ? new Date(dbStartedAt).getTime()
+          : Date.now();
+        console.log('[Auth] Session registration verified on attempt', attempt, 'at', new Date(ourSessionRegisteredAtRef.current).toISOString());
         return;
       }
 
@@ -349,104 +358,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
-  // Consecutive mismatch counter — require 3 consecutive mismatches before kicking
-  // to avoid false positives from transient DB states, heartbeat timing, etc.
-  const consecutiveMismatchRef = useRef(0);
-  const KICK_THRESHOLD = 3; // need 3 consecutive mismatches (≈15s at 5s poll)
-
-  // Single-session enforcement: watch for active_session_id changes (skip in shadow mode)
+  // Single-session enforcement: truly session-based — only kick when a NEWER
+  // login has taken over (by comparing session_started_at timestamps), not on
+  // transient DB state changes from heartbeats, token refreshes, etc.
   useEffect(() => {
-    if (!user || shadowModeRef.current) {
-      consecutiveMismatchRef.current = 0;
-      return;
-    }
+    if (!user || shadowModeRef.current) return;
+    if (window.location.pathname === '/reset-password') return;
 
-    // Skip session guard on reset-password page
-    if (window.location.pathname === '/reset-password') {
-      return;
-    }
-
+    // Core check: is there a genuinely newer session that has taken over?
     const checkSessionValidity = async () => {
       if (sessionKickedRef.current) return;
-      if (Date.now() < sessionGraceUntilRef.current) {
-        consecutiveMismatchRef.current = 0;
-        return;
-      }
+      if (Date.now() < sessionGraceUntilRef.current) return;
+      // Don't check until we've registered our own session
+      if (ourSessionRegisteredAtRef.current === 0) return;
+
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('active_session_id')
+          .select('active_session_id, session_started_at')
           .eq('id', user.id)
           .maybeSingle();
-        
-        if (error || data === null) {
-          console.warn('[Auth] Session check query failed, skipping cycle:', error?.message);
-          return; // Don't increment mismatch on query failure
+
+        // Query failures are NOT evidence of another session — skip
+        if (error || data === null) return;
+
+        const dbSessionId = (data as any)?.active_session_id;
+        const dbStartedAt = (data as any)?.session_started_at;
+
+        // No active session in DB → was cleared (e.g. stale cleanup). Re-register.
+        if (!dbSessionId) {
+          console.log('[Auth] Session cleared in DB, re-registering');
+          await registerActiveSession(user.id);
+          return;
         }
-        
-        const currentActive = (data as any)?.active_session_id;
-        if (currentActive && currentActive !== localSessionIdRef.current) {
-          consecutiveMismatchRef.current += 1;
-          console.warn(`[Auth] Session mismatch #${consecutiveMismatchRef.current}/${KICK_THRESHOLD}. DB: ${currentActive}, Local: ${localSessionIdRef.current}`);
-          
-          if (consecutiveMismatchRef.current >= KICK_THRESHOLD) {
-            // Final confirmation fetch before kicking
-            await new Promise(r => setTimeout(r, 2000));
-            const { data: recheck } = await supabase
-              .from('profiles')
-              .select('active_session_id')
-              .eq('id', user.id)
-              .maybeSingle();
-            const recheckActive = (recheck as any)?.active_session_id;
-            
-            if (recheckActive && recheckActive !== localSessionIdRef.current) {
-              console.error('[Auth] Session mismatch confirmed after', KICK_THRESHOLD, 'consecutive checks. Kicking.');
-              consecutiveMismatchRef.current = 0;
-              handleSessionKicked();
-            } else {
-              console.log('[Auth] Session mismatch resolved on final check, resetting counter');
-              consecutiveMismatchRef.current = 0;
-            }
-          }
+
+        // Same session ID → we're fine
+        if (dbSessionId === localSessionIdRef.current) return;
+
+        // Different session ID — check if it's genuinely NEWER than ours
+        const dbStartedMs = dbStartedAt ? new Date(dbStartedAt).getTime() : 0;
+        const ourStartedMs = ourSessionRegisteredAtRef.current;
+
+        if (dbStartedMs > ourStartedMs) {
+          // A newer login has genuinely taken over — this is a real kick
+          console.error('[Auth] Another session registered AFTER ours. DB started:', dbStartedAt, 'Ours:', new Date(ourStartedMs).toISOString());
+          handleSessionKicked();
         } else {
-          // Session matches or is null — reset counter
-          if (consecutiveMismatchRef.current > 0) {
-            console.log('[Auth] Session match restored, resetting mismatch counter');
-          }
-          consecutiveMismatchRef.current = 0;
+          // The DB has an OLDER or equal timestamp — this is stale data or a race condition.
+          // Re-register our session to reclaim it.
+          console.log('[Auth] Stale session ID in DB (older than ours), re-registering');
+          await registerActiveSession(user.id);
         }
       } catch {
         // ignore transient fetch errors
       }
     };
 
-    // Poll every 8 seconds (increased from 5s for more resilience)
-    const pollInterval = setInterval(checkSessionValidity, 8000);
+    // Poll every 10 seconds — we're checking timestamps, not racing against changes
+    const pollInterval = setInterval(checkSessionValidity, 10000);
 
+    // On tab focus: re-register our session (we're clearly still here)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // On tab focus, re-register session first before checking validity
-        // This prevents false kicks when the tab was backgrounded and the
-        // session ID in DB was cleared by stale cleanup
         console.log('[Auth] Page became visible, re-registering session');
-        sessionGraceUntilRef.current = Date.now() + 10000;
-        consecutiveMismatchRef.current = 0;
-        registerActiveSession(user.id).then(() => {
-          sessionGraceUntilRef.current = Date.now() + 5000;
-        });
+        sessionGraceUntilRef.current = Date.now() + 8000;
+        registerActiveSession(user.id);
       }
     };
     const handleFocus = () => {
-      // Same as visibility change — re-register before checking
-      sessionGraceUntilRef.current = Date.now() + 8000;
-      consecutiveMismatchRef.current = 0;
-      registerActiveSession(user.id).then(() => {
-        sessionGraceUntilRef.current = Date.now() + 5000;
-      });
+      sessionGraceUntilRef.current = Date.now() + 6000;
+      registerActiveSession(user.id);
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
 
+    // Realtime: only react when a genuinely NEWER session takes over
     const channel = supabase
       .channel(`session-guard-${user.id}`)
       .on(
@@ -459,20 +445,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
         (payload) => {
           const newSessionId = (payload.new as any)?.active_session_id;
-          if (newSessionId && newSessionId !== localSessionIdRef.current) {
-            if (Date.now() < sessionGraceUntilRef.current) {
-              console.log('[Auth] Ignoring session change during grace period');
-              return;
-            }
-            // Don't kick immediately from realtime — let the poll counter handle it
-            // This prevents false kicks from transient realtime events
-            consecutiveMismatchRef.current += 1;
-            console.warn(`[Auth] Realtime session mismatch #${consecutiveMismatchRef.current}/${KICK_THRESHOLD}`);
-            if (consecutiveMismatchRef.current >= KICK_THRESHOLD) {
-              handleSessionKicked();
-            }
+          const newStartedAt = (payload.new as any)?.session_started_at;
+
+          // Ignore if same session, null, or within grace period
+          if (!newSessionId || newSessionId === localSessionIdRef.current) return;
+          if (Date.now() < sessionGraceUntilRef.current) {
+            console.log('[Auth] Ignoring session change during grace period');
+            return;
+          }
+
+          // Only kick if the new session is genuinely newer than ours
+          const newStartedMs = newStartedAt ? new Date(newStartedAt).getTime() : 0;
+          if (newStartedMs > ourSessionRegisteredAtRef.current) {
+            console.error('[Auth] Realtime: newer session detected. New:', newStartedAt, 'Ours:', new Date(ourSessionRegisteredAtRef.current).toISOString());
+            handleSessionKicked();
           } else {
-            consecutiveMismatchRef.current = 0;
+            console.log('[Auth] Realtime: ignoring older/stale session change');
           }
         }
       )
@@ -480,7 +468,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       clearInterval(pollInterval);
-      consecutiveMismatchRef.current = 0;
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
       supabase.removeChannel(channel);
