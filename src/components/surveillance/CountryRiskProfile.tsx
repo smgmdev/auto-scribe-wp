@@ -408,10 +408,13 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
   useEffect(() => {
     setProfile(null);
     setArmsData(null);
+    setTradeData(null);
     setRiskPopupOpen(false);
     setArmsPopupOpen(false);
+    setTradePopupOpen(false);
     setLoading(false);
     setArmsLoading(false);
+    setTradeLoading(false);
   }, [countryName, countryCode]);
   const generateProfile = async () => {
     setRiskPopupOpen(true);
