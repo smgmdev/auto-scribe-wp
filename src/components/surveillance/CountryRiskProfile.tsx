@@ -122,42 +122,10 @@ const weaponCategoryIcons: Record<string, string> = {
   'Satellite': '🛰',
 };
 
-function ArmsTradeSection({ data, loading, onFetch }: {
-  data: ArmsTradeData | null;
-  loading: boolean;
-  onFetch: () => void;
-}) {
+function ArmsTradeContent({ data }: { data: ArmsTradeData }) {
   const [showTab, setShowTab] = useState<'export' | 'import'>('export');
-
-  if (!data && !loading) {
-    return (
-      <button
-        onClick={onFetch}
-        disabled={loading}
-        className="w-full mt-1 py-2 text-[10px] font-bold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
-      >
-        <ArrowRightLeft className="w-3 h-3" />
-        Load Arms Trade Data (SIPRI)
-      </button>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="mt-1 p-3 border border-white/5 bg-white/[0.02]">
-        <div className="flex items-center justify-center gap-2">
-          <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
-          <span className="text-[10px] text-gray-400">Fetching SIPRI arms transfer records...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) return null;
-
   const items = showTab === 'export' ? data.exports : data.imports;
 
-  // Group by partner country for summary
   const partnerSummary = new Map<string, { count: number; categories: Set<string> }>();
   for (const item of items) {
     const existing = partnerSummary.get(item.partner_country) || { count: 0, categories: new Set<string>() };
@@ -165,26 +133,21 @@ function ArmsTradeSection({ data, loading, onFetch }: {
     if (item.weapon_category) existing.categories.add(item.weapon_category);
     partnerSummary.set(item.partner_country, existing);
   }
-
   const sortedPartners = [...partnerSummary.entries()].sort((a, b) => b[1].count - a[1].count);
 
   return (
-    <div className="border border-cyan-500/10 mt-1">
+    <div className="space-y-0">
       <div className="flex items-center gap-1.5 p-2 bg-cyan-500/[0.03]">
         <ArrowRightLeft className="w-3 h-3 text-cyan-400" />
         <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-wider">Arms Transfers</span>
         <span className="text-[8px] text-gray-600 ml-auto">{data.data_years} · SIPRI Annual</span>
       </div>
-
-      {/* Tabs */}
       <div className="flex border-b border-white/5">
         <button
           onClick={() => setShowTab('export')}
           className={cn(
             "flex-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
-            showTab === 'export'
-              ? 'text-orange-400 bg-orange-500/10 border-b border-orange-400'
-              : 'text-gray-600 hover:text-gray-400'
+            showTab === 'export' ? 'text-orange-400 bg-orange-500/10 border-b border-orange-400' : 'text-gray-600 hover:text-gray-400'
           )}
         >
           Exports ({data.exports.length})
@@ -193,90 +156,50 @@ function ArmsTradeSection({ data, loading, onFetch }: {
           onClick={() => setShowTab('import')}
           className={cn(
             "flex-1 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors",
-            showTab === 'import'
-              ? 'text-blue-400 bg-blue-500/10 border-b border-blue-400'
-              : 'text-gray-600 hover:text-gray-400'
+            showTab === 'import' ? 'text-blue-400 bg-blue-500/10 border-b border-blue-400' : 'text-gray-600 hover:text-gray-400'
           )}
         >
           Imports ({data.imports.length})
         </button>
       </div>
-
       {items.length === 0 ? (
         <div className="p-3 text-center">
           <span className="text-[10px] text-gray-600">No {showTab} records found in this period</span>
         </div>
       ) : (
         <>
-          {/* Partner summary */}
           <div className="p-1.5 bg-white/[0.01]">
             <div className="text-[8px] text-gray-600 mb-1 uppercase tracking-wider">
               {showTab === 'export' ? 'Recipient Countries' : 'Supplier Countries'}
             </div>
             <div className="flex flex-wrap gap-1">
               {sortedPartners.slice(0, 12).map(([partner, info]) => (
-                <Badge
-                  key={partner}
-                  variant="outline"
-                  className={cn(
-                    "text-[7px] px-1.5 py-0 h-4",
-                    showTab === 'export'
-                      ? 'bg-orange-500/5 text-orange-300 border-orange-500/20'
-                      : 'bg-blue-500/5 text-blue-300 border-blue-500/20'
-                  )}
-                >
+                <Badge key={partner} variant="outline" className={cn("text-[7px] px-1.5 py-0 h-4", showTab === 'export' ? 'bg-orange-500/5 text-orange-300 border-orange-500/20' : 'bg-blue-500/5 text-blue-300 border-blue-500/20')}>
                   {partner} ({info.count})
                 </Badge>
               ))}
-              {sortedPartners.length > 12 && (
-                <span className="text-[8px] text-gray-600">+{sortedPartners.length - 12} more</span>
-              )}
+              {sortedPartners.length > 12 && <span className="text-[8px] text-gray-600">+{sortedPartners.length - 12} more</span>}
             </div>
           </div>
-
-          {/* Detailed records - show first 15 */}
-          <div className="max-h-[200px] overflow-y-auto">
-            {items.slice(0, 15).map((item, i) => (
+          <div className="max-h-[400px] overflow-y-auto">
+            {items.map((item, i) => (
               <div key={item.id || i} className="p-1.5 border-t border-white/[0.03] hover:bg-white/[0.02]">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px]">
-                    {weaponCategoryIcons[item.weapon_category] || '⚙'}
-                  </span>
-                  <span className="text-[10px] text-white font-medium flex-1 truncate">
-                    {item.weapon_designation || item.weapon_description || item.weapon_category}
-                  </span>
-                  <span className={cn(
-                    "text-[8px]",
-                    showTab === 'export' ? 'text-orange-400' : 'text-blue-400'
-                  )}>
-                    → {item.partner_country}
-                  </span>
+                  <span className="text-[10px]">{weaponCategoryIcons[item.weapon_category] || '⚙'}</span>
+                  <span className="text-[10px] text-white font-medium flex-1 truncate">{item.weapon_designation || item.weapon_description || item.weapon_category}</span>
+                  <span className={cn("text-[8px]", showTab === 'export' ? 'text-orange-400' : 'text-blue-400')}>→ {item.partner_country}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  {item.weapon_category && (
-                    <span className="text-[8px] text-gray-600">{item.weapon_category}</span>
-                  )}
-                  {item.quantity && item.quantity !== '0' && (
-                    <span className="text-[8px] text-gray-500">Qty: {item.quantity}</span>
-                  )}
-                  {item.delivery_years && (
-                    <span className="text-[8px] text-gray-600">Del: {item.delivery_years}</span>
-                  )}
-                  {item.order_date && (
-                    <span className="text-[8px] text-gray-600">Ord: {item.order_date}</span>
-                  )}
+                  {item.weapon_category && <span className="text-[8px] text-gray-600">{item.weapon_category}</span>}
+                  {item.quantity && item.quantity !== '0' && <span className="text-[8px] text-gray-500">Qty: {item.quantity}</span>}
+                  {item.delivery_years && <span className="text-[8px] text-gray-600">Del: {item.delivery_years}</span>}
+                  {item.order_date && <span className="text-[8px] text-gray-600">Ord: {item.order_date}</span>}
                 </div>
               </div>
             ))}
-            {items.length > 15 && (
-              <div className="p-1.5 text-center text-[9px] text-gray-600 border-t border-white/[0.03]">
-                +{items.length - 15} more transfers
-              </div>
-            )}
           </div>
         </>
       )}
-
       <div className="p-1 bg-white/[0.01] border-t border-white/[0.03]">
         <span className="text-[7px] text-gray-700">Source: {data.source}</span>
       </div>
