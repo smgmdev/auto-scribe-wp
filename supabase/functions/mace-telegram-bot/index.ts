@@ -1116,7 +1116,7 @@ Deno.serve(async (req) => {
 
     // ── Nuke: awaiting activation code ──
     if (session.step === 'nuke_awaiting_code') {
-      const answer = text?.trim();
+      const answer = text?.trim()?.substring(0, 30);
       if (!answer) {
         await sendTelegramMessage(botToken, chatId, `🔑 Please enter your activation code, or reply <b>Cancel</b>.`);
         return new Response('OK', { status: 200 });
