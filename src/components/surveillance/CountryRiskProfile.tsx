@@ -512,7 +512,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
         width={520}
         maxHeight="90vh"
         zIndex={300}
-        className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3"
+        className="!bg-[#0d1220]/95 !border-white/10 !text-white !rounded-lg !p-0 [&>div:last-child]:!border-white/5 [&>div:last-child]:!py-2 [&>div:last-child]:!px-3 max-md:!h-[100dvh] max-md:!max-h-[100dvh]"
         headerClassName="!bg-[#2a2a2a] !border-white/5"
         bodyClassName="!p-0"
         headerContent={
