@@ -54,9 +54,9 @@ Deno.serve(async (req) => {
 
     // Use Lovable AI to generate SIPRI-based arms transfer data
     // This uses publicly known data from SIPRI annual reports
-    const gatewayUrl = Deno.env.get('AI_GATEWAY_URL');
-    if (!gatewayUrl) {
-      throw new Error('AI gateway not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
     const currentYear = new Date().getFullYear();
