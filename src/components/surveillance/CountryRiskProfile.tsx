@@ -568,10 +568,7 @@ export function CountryRiskProfile({ countryName, countryCode }: CountryRiskProf
               Fetching...
             </>
           ) : (
-            <>
-              <ArrowRightLeft className="w-3 h-3" />
-              Load Arms Trade Data (SIPRI)
-            </>
+            'Load Arms Trade Data (SIPRI)'
           )}
         </button>
         <button
