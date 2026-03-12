@@ -1160,10 +1160,23 @@ function RotatingGlobe({
         }
       }
       if (!match) {
-        // 3. Partial / contains match (e.g. "United States of America" contains "United States")
+        // 3. Partial / contains match — only allow when the country-data name CONTAINS the geo name
+        // (not the reverse, to avoid "romania".includes("oman") false positives)
         match = countries.find(
-          (c) => geoLower.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(geoLower) ||
-                 aliased.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(aliased)
+          (c) => {
+            const cLower = c.name.toLowerCase();
+            return cLower.includes(geoLower) || cLower.includes(aliased);
+          }
+        );
+      }
+      if (!match) {
+        // 4. Reverse contains — geo name contains country name, but require high overlap
+        match = countries.find(
+          (c) => {
+            const cLower = c.name.toLowerCase();
+            return (geoLower.includes(cLower) && cLower.length >= geoLower.length * 0.75) ||
+                   (aliased.includes(cLower) && cLower.length >= aliased.length * 0.75);
+          }
         );
       }
       if (match) {
