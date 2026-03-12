@@ -1336,6 +1336,7 @@ Deno.serve(async (req) => {
           `☢️ <b>NUKE COMPLETE</b>\n\n` +
           `✅ Success: ${successCount} sites\n` +
           `${failCount > 0 ? `❌ Failed: ${failCount} sites\n` : ''}` +
+          `💰 Credits used: 0 (free)` +
           linksText
         );
 
