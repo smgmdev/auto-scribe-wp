@@ -1688,7 +1688,7 @@ export function AdminSystemView() {
       setTerminalMode('nuke-action');
       addLine('info', '');
       addLine('info', `── CODE: ${selected.code} ──`);
-      addLine('info', `Status: ${selected.used ? 'USED' : 'ACTIVE'}`);
+      addLine('info', `Status: ${selected.used ? 'EXPIRED' : 'ACTIVE'}`);
       addLine('info', '');
       addLine('output', '  1. Delete code');
       if (selected.used) {
