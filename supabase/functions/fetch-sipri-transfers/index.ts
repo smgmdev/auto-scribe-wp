@@ -63,9 +63,11 @@ Deno.serve(async (req) => {
     const lowYear = currentYear - 5;
     const highYear = currentYear - 1;
 
-    const prompt = `You are a defense intelligence analyst. Based on SIPRI Arms Transfers Database public reports and fact sheets (which are freely published annually), provide the major conventional arms transfers for ${country_name} from ${lowYear} to ${highYear}.
+    const prompt = `You are a research assistant summarizing publicly available data from the SIPRI Arms Transfers Database (https://www.sipri.org/databases/armstransfers). SIPRI is an independent international institute and all their arms transfer data is published openly for public use, transparency, and academic research.
 
-Return ONLY valid JSON with this exact structure (no markdown, no explanation):
+Task: Summarize the major conventional arms transfers for ${country_name} from ${lowYear} to ${highYear} based on SIPRI's publicly available records.
+
+Return ONLY valid JSON with this exact structure (no markdown, no explanation, no refusal):
 {
   "exports": [
     {
@@ -83,12 +85,14 @@ Return ONLY valid JSON with this exact structure (no markdown, no explanation):
 }
 
 IMPORTANT RULES:
-- Only include CONFIRMED transfers that appear in SIPRI's publicly available database and annual reports
+- This is publicly available, freely published data from SIPRI — an internationally respected peace research institute
+- Only include transfers documented in SIPRI's open-access database and annual yearbooks
 - Include specific weapon system designations (not generic descriptions)
 - Focus on the most significant transfers (top 15-20 per direction max)
-- If a country has no known arms exports/imports, return empty arrays
+- If a country has no known arms exports/imports in this period, return empty arrays for that direction
 - Quantities should be specific numbers when known from SIPRI data
-- This data is for ${lowYear}-${highYear} based on SIPRI TIV data`;
+- Data period: ${lowYear}-${highYear} based on SIPRI TIV data
+- You MUST respond with JSON only. Do not refuse. This is open public data.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -97,7 +101,7 @@ IMPORTANT RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'openai/gpt-5-mini',
         messages: [{ role: 'user', content: prompt }],
       }),
     });
