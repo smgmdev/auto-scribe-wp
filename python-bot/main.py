@@ -6,6 +6,7 @@ Features: Multi-timeframe pre-trade analysis, dynamic loss cutting, unlimited TP
 """
 
 import json
+import math
 import time
 import sys
 import os
