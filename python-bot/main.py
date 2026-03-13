@@ -885,6 +885,33 @@ def run():
                         continue
 
                     # ═══════════════════════════════════════
+                    # GATE 5: CORRELATION CHECK — avoid doubling risk
+                    # ═══════════════════════════════════════
+                    open_epics = [p.get("market", {}).get("epic", "") for p in (positions or [])]
+                    corr_ok, corr_reason = correlation.check_correlation_conflict(
+                        epic, open_epics, same_direction=(entry_signal == Signal.BUY)
+                    )
+                    if not corr_ok:
+                        if cycle_count % 30 == 0:
+                            log.info(f"  🔗 {epic}: Correlation blocked — {corr_reason}")
+                        continue
+
+                    # ═══════════════════════════════════════
+                    # GATE 6: PATTERN SCORE — brain checks historical success
+                    # ═══════════════════════════════════════
+                    pattern_score = brain.get_pattern_score({
+                        "category": epic_category,
+                        "direction": entry_signal,
+                        "regime": regime_detector.get_cached_regime(epic),
+                        "rsi": momentum.get("micro_rsi", 50),
+                        "momentum": momentum["strength"],
+                    })
+                    if pattern_score < 0.30:
+                        if cycle_count % 30 == 0:
+                            log.info(f"  🧠 {epic}: Pattern score too low ({pattern_score:.2f}) — skipping")
+                        continue
+
+                    # ═══════════════════════════════════════
                     # GATE 4: RISK/REWARD CHECK — estimated profit must exceed risk
                     # Use S/R levels: for BUY, distance to resistance vs stop
                     # For SELL, distance to support vs stop
