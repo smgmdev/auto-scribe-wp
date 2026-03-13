@@ -16,8 +16,8 @@ log = get_logger("pos_mgr")
 
 # Initial SL: 1% below entry (default)
 INITIAL_SL_PCT = 0.01
-# Step size for SL ratcheting: 5% of entry price (default)
-PROFIT_STEP_PCT = 0.05
+# Step size for SL ratcheting: 1% of entry price (default)
+PROFIT_STEP_PCT = 0.01
 
 # BTC-specific overrides
 BTC_INITIAL_SL_PCT = 0.0075   # 0.75% from entry
