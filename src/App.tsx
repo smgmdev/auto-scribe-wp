@@ -204,7 +204,7 @@ const App = () => {
               <Route path="/industries" element={<Industries />} />
               <Route path="/mace-ai" element={<MaceAI />} />
               <Route path="/arcana-precision" element={<ArcanaIntelligence />} />
-              <Route path="/investor-relations" element={<InvestorRelations />} />
+              <Route path="/ir" element={<InvestorRelations />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

@@ -94,7 +94,7 @@ export default function InvestorRelations() {
   return (
     <>
       <SEOHead
-        title="Investor Relations — Arcana Mace"
+        title="Arcana Mace - Investor Relations"
         description="Invest in the future of global media intelligence. Arcana Mace is redefining how organizations access media distribution, AI-powered publishing, and geopolitical intelligence."
       />
 
