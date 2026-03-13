@@ -371,6 +371,7 @@ export default function InvestorRelations() {
         <PWAInstallButtons />
       </div>
       <Footer narrow showTopBorder dark />
+    </div>
     </>
   );
 }
