@@ -65,7 +65,7 @@ CRYPTO_PINNED = ["BTCUSD"]
 # Runtime watchlists (updated by AssetDiscovery)
 WATCHLIST_STOCKS: list[str] = list(WATCHLIST_STOCKS_FALLBACK)
 WATCHLIST_CRYPTO: list[str] = list(WATCHLIST_CRYPTO_FALLBACK)
-WATCHLIST_FOREX: list[str] = []
+WATCHLIST_FOREX: list[str] = list(WATCHLIST_FOREX_FALLBACK)
 
 # Epic → category mapping (rebuilt when watchlists update)
 EPIC_CATEGORY: dict[str, str] = {}
