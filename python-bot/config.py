@@ -98,26 +98,54 @@ def update_dynamic_watchlists(
 
 def get_category(epic: str) -> str:
     """Get the category for an epic code.
-    First checks the known mapping, then infers from epic name patterns.
+    First checks the known mapping, then checks current watchlists,
+    then infers from epic name patterns.
     """
+    # 1) Known mapping (populated by rebuild_watchlist)
     if epic in EPIC_CATEGORY:
         return EPIC_CATEGORY[epic]
 
-    # Infer from epic name patterns
+    # 2) Check current runtime watchlists directly (handles race conditions)
+    if epic in WATCHLIST_CRYPTO:
+        return CATEGORY_CRYPTO
+    if epic in WATCHLIST_STOCKS:
+        return CATEGORY_STOCKS
+    if epic in WATCHLIST_FOREX:
+        return CATEGORY_FOREX
+    if epic in WATCHLIST_COMMODITIES:
+        return CATEGORY_COMMODITIES
+
+    # 3) Infer from epic name patterns
     _commodities = {"GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER", "PLATINUM", "PALLADIUM", "OIL_BRENT"}
     if epic in _commodities:
         return CATEGORY_COMMODITIES
 
-    _crypto_suffixes = ("USD",)
+    # Crypto: any epic ending in "USD" where the base is a known crypto ticker
     _crypto_bases = {"BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", "DOT", "MATIC",
                      "LINK", "UNI", "SHIB", "LTC", "ATOM", "NEAR", "APT", "ARB", "OP", "FIL",
                      "TRX", "ETC", "XLM", "ALGO", "HBAR", "VET", "FTM", "SAND", "MANA", "AXS",
                      "AAVE", "CRV", "MKR", "COMP", "SNX", "PEPE", "SUI", "SEI", "TIA", "JUP",
-                     "WIF", "BONK", "FLOKI", "RENDER", "INJ", "FET", "ONDO", "JASMY", "GALA"}
+                     "WIF", "BONK", "FLOKI", "RENDER", "INJ", "FET", "ONDO", "JASMY", "GALA",
+                     "TON", "KAS", "TAO", "STX", "IMX", "RUNE", "THETA", "GRT", "ENS", "PENDLE",
+                     "W", "ZRO", "PYTH", "JTO", "STRK", "DYM", "MANTA", "ALT", "PIXEL", "PORTAL",
+                     "BEAM", "ACE", "XAI", "AI", "WLD", "BLUR", "ID", "CAKE", "SUSHI", "1INCH",
+                     "LIDO", "RPL", "SSV", "EIGEN", "ETHFI", "REZ", "IO", "ZK", "LISTA", "NOT",
+                     "PEOPLE", "ORDI", "SATS", "RATS", "DOG", "BOME", "MEW", "POPCAT", "TURBO",
+                     "BRETT", "NEIRO", "MOTHER", "MYRO", "TNSR", "KMNO", "DRIFT", "JITO",
+                     "POL", "CHZ", "APE", "DYDX", "GMX", "PERP", "LQTY", "SPELL"}
     for base in _crypto_bases:
         if epic.startswith(base) and epic.endswith("USD"):
             return CATEGORY_CRYPTO
 
+    # Broader crypto catch: short epic ending in USD that's NOT a 6-char forex pair
+    # Typical crypto: 5-10 chars like BTCUSD, ETHUSD, DOGEUSD, SOLUSD
+    if epic.endswith("USD") and len(epic) >= 5 and len(epic) != 6:
+        base_part = epic[:-3]
+        # If it's all uppercase letters and short, likely crypto
+        if base_part.isalpha() and len(base_part) <= 8:
+            return CATEGORY_CRYPTO
+
+    # Forex: exactly 6 chars with known currency codes
     _forex_pairs = {"EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD", "USD", "NOK", "SEK", "SGD", "HKD", "ZAR", "TRY", "MXN", "PLN", "CZK", "HUF"}
     if len(epic) == 6:
         base = epic[:3]
