@@ -188,10 +188,10 @@ export default function InvestorRelations() {
                 Arcana Mace is building the infrastructure layer for global media distribution, AI-powered publishing, and real-time geopolitical intelligence.
               </p>
               <Button
-                onClick={() => setContactOpen(true)}
+                onClick={() => document.getElementById('media-buying-marketplace')?.scrollIntoView({ behavior: 'smooth' })}
                 className="rounded-none bg-white text-black hover:bg-white/90 h-12 px-8 text-base font-medium"
               >
-                Contact Investor Relations
+                Explore Our Products
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </AnimatedSection>
