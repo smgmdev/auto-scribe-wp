@@ -794,7 +794,7 @@ export default function UpdateLog() {
             Changelog
           </h1>
           <p className="text-white/50 border-b border-white/10 pb-8">
-            Last update: March 9, 2026
+            Last update: March 13, 2026
           </p>
         </div>
 
