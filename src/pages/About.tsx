@@ -395,7 +395,7 @@ export default function About() {
       {/* Control Your Distribution Section */}
       <section className="relative overflow-hidden min-h-screen flex items-center justify-center bg-black">
         {!distributionImgLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="absolute top-4 left-4 z-10">
             <Loader2 className="h-8 w-8 animate-spin text-white/50" />
           </div>
         )}
