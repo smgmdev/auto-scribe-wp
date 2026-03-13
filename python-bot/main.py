@@ -285,9 +285,26 @@ def run():
                             continue
                         current_price = tick_history[pos_epic][-1]["mid"]
 
-                        # Auto-track if not already tracked
+                        # Auto-track if not already tracked (restart recovery)
                         if deal_id not in pos_manager.tracked:
                             entry_price = float(pos.get("position", {}).get("level", current_price))
+                            # Read spread from live tick data
+                            last_tick = tick_history[pos_epic][-1] if tick_history.get(pos_epic) else {}
+                            live_spread = last_tick.get("spread", 0.0)
+
+                            # Read created date from Capital.com position data
+                            created_str = pos.get("position", {}).get("createdDateUTC", "")
+                            created_ts = 0.0
+                            if created_str:
+                                try:
+                                    from datetime import datetime as dt_parse
+                                    # Capital.com format: "2025-01-15T08:30:00.000"
+                                    created_ts = dt_parse.fromisoformat(
+                                        created_str.replace("Z", "+00:00")
+                                    ).timestamp()
+                                except Exception:
+                                    pass
+
                             # Use scanner's ATR-based stop distance if available
                             scan = scanner.scan_cache.get(pos_epic)
                             stop_dist = scan.stop_distance if scan and scan.stop_distance > 0 else 0
@@ -295,9 +312,14 @@ def run():
                                 # Fallback: estimate from recent ticks
                                 recent = [t["mid"] for t in tick_history[pos_epic][-30:]]
                                 stop_dist = (max(recent) - min(recent)) * 1.5 if recent else entry_price * 0.01
+
+                            # Pass current_price so position_manager can reconstruct profit steps
                             pos_manager.track_position(
                                 deal_id, pos_epic, pos_direction,
-                                entry_price, stop_dist, stop_dist * 1.5  # profit_distance is ignored (unlimited TP)
+                                entry_price, stop_dist, stop_dist * 1.5,
+                                spread=live_spread,
+                                current_price=current_price,
+                                created_date=created_ts,
                             )
 
                         # Get adaptive params
