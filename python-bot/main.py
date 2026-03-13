@@ -186,6 +186,7 @@ def run():
     config.update_dynamic_watchlists(
         discovered["stock_epics"], discovered["crypto_epics"],
         forex_epics=discovered.get("forex_epics"),
+        commodity_epics=discovered.get("commodity_epics"),
     )
     log.info(
         f"📈 Stocks: {', '.join(config.WATCHLIST_STOCKS)} | "
