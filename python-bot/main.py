@@ -787,7 +787,8 @@ def run():
                         pos_manager.track_position(
                             real_deal_id, epic, entry_signal,
                             mid, stop_distance, profit_distance,
-                            spread=spread
+                            spread=spread,
+                            category=config.get_category(epic),
                         )
 
                         # Store entry info for journal
