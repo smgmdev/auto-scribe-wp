@@ -500,9 +500,18 @@ class MarketScanner:
 
         # ═══════════════════════════════════════════
         # STANDARD SCAN — stocks & commodities (every 2 min)
+        # Skip categories that are full
         # ═══════════════════════════════════════════
         if now - self.last_full_scan >= self.FULL_SCAN_INTERVAL:
-            std_epics = config.WATCHLIST_STOCKS + config.WATCHLIST_COMMODITIES
+            std_epics = []
+            if config.CATEGORY_STOCKS not in self._full_categories:
+                std_epics += config.WATCHLIST_STOCKS
+            else:
+                log.info("⏭️  Stocks: 5/5 positions filled — skipping scan")
+            if config.CATEGORY_COMMODITIES not in self._full_categories:
+                std_epics += config.WATCHLIST_COMMODITIES
+            else:
+                log.info("⏭️  Commodities: 5/5 positions filled — skipping scan")
             if std_epics:
                 log.info("🔍 ═══ STANDARD SCAN (Stocks + Commodities) ═══")
 
