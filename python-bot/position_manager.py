@@ -28,7 +28,7 @@ class PositionManager:
     def track_position(self, deal_id: str, epic: str, direction: str,
                        entry_price: float, stop_distance: float, profit_distance: float,
                        spread: float = 0.0, current_price: float = 0.0,
-                       created_date: float = 0.0):
+                       created_date: float = 0.0, category: str = ""):
         """Start tracking a new position.
         
         Args:
