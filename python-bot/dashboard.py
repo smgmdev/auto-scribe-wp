@@ -503,8 +503,11 @@ function buildGrid() {
     const container = document.getElementById('gridContainer');
     let html = '';
     CATEGORIES.forEach(cat => {
-        html += '<div class="category-row">';
-        html += '<div class="category-label">' + cat + '</div>';
+        html += '<div class="category-row" id="row-' + cat + '">';
+        html += '<div class="category-label">' + cat +
+                '<div class="cat-toggle on" id="toggle-' + cat + '" onclick="toggleCategory(\'' + cat + '\')">' +
+                '<div class="knob"></div></div>' +
+                '<span class="cat-status" id="status-' + cat + '">ACTIVE</span></div>';
         html += '<div class="slots" id="slots-' + cat + '">';
         for (let i = 0; i < MAX_SLOTS; i++) {
             html += '<div class="slot empty" id="slot-' + cat + '-' + i + '">' +
