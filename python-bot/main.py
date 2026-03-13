@@ -776,9 +776,21 @@ def run():
                     if len(tick_history[epic]) < 5:
                         continue
 
+                    # Feed correlation tracker
+                    correlation.update_prices(epic, mid)
+
                     # Determine if this is a scalp asset (crypto/forex)
                     epic_category = config.get_category(epic)
                     is_scalp_asset = epic_category in (config.CATEGORY_CRYPTO, config.CATEGORY_FOREX)
+
+                    # ═══════════════════════════════════════
+                    # GATE -1: BRAIN CHECK — blacklist, bad hours, low win rate
+                    # ═══════════════════════════════════════
+                    brain_ok, brain_reason = brain.should_trade_now(epic)
+                    if not brain_ok:
+                        if cycle_count % 60 == 0:
+                            log.info(f"🧠 {epic}: Brain blocked — {brain_reason}")
+                        continue
 
                     # ═══════════════════════════════════════
                     # GATE 0: LOSS COOLDOWN — don't re-enter an epic that just lost
