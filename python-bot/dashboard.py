@@ -44,6 +44,12 @@ _live_cache = {
 }
 _cache_lock = threading.Lock()
 _api_ref = None  # Set by start_dashboard_thread
+_pos_manager_ref = None  # Set by main after PositionManager init
+
+
+def set_pos_manager_ref(pm):
+    global _pos_manager_ref
+    _pos_manager_ref = pm
 
 # Categories disabled by toggle — positions get closed, no new trades
 _disabled_categories: set = set()
