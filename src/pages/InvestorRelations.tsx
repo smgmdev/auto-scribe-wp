@@ -66,6 +66,7 @@ export default function InvestorRelations() {
   const [productsVideoLoaded, setProductsVideoLoaded] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [precisionVideoLoaded, setPrecisionVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -329,9 +330,15 @@ export default function InvestorRelations() {
               Arcana Precision
             </h2>
             <div className="relative w-full max-w-2xl mb-8">
+              {!precisionVideoLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                </div>
+              )}
               <video
                 className="w-full rounded-lg"
                 src={arcanaPrecisionGlobe}
+                onCanPlayThrough={() => setPrecisionVideoLoaded(true)}
                 autoPlay
                 muted
                 loop
