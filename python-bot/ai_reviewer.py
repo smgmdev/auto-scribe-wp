@@ -1,248 +1,303 @@
 """
-AI Trade Reviewer — post-trade analysis using an LLM.
+Local Statistical Trade Reviewer — no API keys required.
 
-After each trade closes, sends the full context to an AI model
-to get a review of what went right/wrong and suggested improvements.
-
-Uses OpenAI-compatible API (can be local ollama, OpenAI, or any compatible endpoint).
-Falls back gracefully if no API is configured.
+Analyzes trades using pure math: win-rate trends, drawdown detection,
+regime-specific performance, time-of-day patterns, and streak analysis.
+Generates actionable lessons and parameter adjustments automatically.
 """
 
-import os
 import json
-import time
+import math
 from typing import Optional
 from logger_setup import get_logger
 
-log = get_logger("ai_reviewer")
+log = get_logger("stat_reviewer")
 
-# Configure via env vars
-AI_REVIEW_ENABLED = os.getenv("AI_REVIEW_ENABLED", "true").lower() == "true"
-AI_REVIEW_API_URL = os.getenv("AI_REVIEW_API_URL", "https://api.openai.com/v1/chat/completions")
-AI_REVIEW_API_KEY = os.getenv("AI_REVIEW_API_KEY", "")
-AI_REVIEW_MODEL = os.getenv("AI_REVIEW_MODEL", "gpt-4o-mini")
-AI_REVIEW_INTERVAL = int(os.getenv("AI_REVIEW_INTERVAL", "5"))  # Review every N trades
+REVIEW_INTERVAL = 5  # Review every N trades
 
 
 class AITradeReviewer:
-    """Reviews trades using an LLM for learning insights."""
+    """Reviews trades using local statistical analysis. Zero API cost."""
 
     def __init__(self, brain=None):
         self.brain = brain
         self._trade_count = 0
-        self._enabled = AI_REVIEW_ENABLED and bool(AI_REVIEW_API_KEY)
-
-        if self._enabled:
-            log.info(f"🤖 AI Trade Reviewer enabled (model: {AI_REVIEW_MODEL})")
-        else:
-            log.info("🤖 AI Trade Reviewer: disabled (no API key or disabled in env)")
+        log.info("📊 Local Statistical Trade Reviewer enabled (no API key needed)")
 
     def review_trade(self, trade: dict, trade_id: int,
                      brain_summary: dict = None) -> Optional[dict]:
-        """
-        Review a single trade. Called after every trade close.
-        Only actually calls the API every AI_REVIEW_INTERVAL trades
-        to save costs, but always stores the trade context.
-        """
+        """Analyze a trade using statistics. Runs every N trades."""
         self._trade_count += 1
-
-        if not self._enabled:
-            return None
-
-        # Only call API every N trades (batch review)
-        if self._trade_count % AI_REVIEW_INTERVAL != 0:
+        if self._trade_count % REVIEW_INTERVAL != 0:
             return None
 
         try:
-            return self._call_review_api(trade, trade_id, brain_summary)
+            return self._statistical_review(trade, trade_id, brain_summary)
         except Exception as e:
-            log.warning(f"AI review failed: {e}")
+            log.warning(f"Statistical review failed: {e}")
             return None
 
-    def _call_review_api(self, trade: dict, trade_id: int,
-                         brain_summary: dict = None) -> Optional[dict]:
-        """Call the LLM API for trade review."""
-        import requests
+    # ──────────────────────────────────────────────
+    # CORE ANALYSIS ENGINE
+    # ──────────────────────────────────────────────
 
-        # Build context prompt
-        recent_lessons = []
+    def _statistical_review(self, trade: dict, trade_id: int,
+                            brain_summary: dict = None) -> Optional[dict]:
+        """Run all local analyzers and produce a combined review."""
+        lessons = []
+        adjustments = {}
+        analysis_parts = []
+        confidence = 0.5
+
+        pnl = trade.get("pnl", 0)
+        epic = trade.get("epic", "?")
+        direction = trade.get("direction", "?")
+        regime = trade.get("regime", "unknown")
+        exit_reason = trade.get("exit_reason", "unknown")
+        rsi = trade.get("rsi_at_entry", 50)
+        momentum = trade.get("momentum_at_entry", 0)
+        duration = trade.get("duration_seconds", 0)
+        scanner_conf = trade.get("scanner_confidence", 0)
+        won = pnl > 0
+
+        # ── 1. Basic outcome ──
+        pnl_pct = trade.get("pnl_pct", 0)
+        analysis_parts.append(
+            f"{'WIN' if won else 'LOSS'} on {epic} ({direction}): {pnl_pct:+.2f}%"
+        )
+
+        # ── 2. Stop-loss hit analysis ──
+        if exit_reason in ("stop_loss", "SL"):
+            lessons.append("Stop-loss triggered — check if SL was too tight for current volatility")
+            if duration < 120:
+                lessons.append(f"Trade lasted only {duration:.0f}s before SL — likely noise entry")
+                adjustments["min_hold_seconds"] = max(60, int(duration * 2))
+
+        # ── 3. RSI extremes ──
+        if direction == "BUY" and rsi > 70:
+            lessons.append(f"Bought with RSI={rsi:.0f} (overbought) — avoid BUY entries above 65")
+            adjustments["max_rsi_for_buy"] = 65
+        elif direction == "SELL" and rsi < 30:
+            lessons.append(f"Sold with RSI={rsi:.0f} (oversold) — avoid SELL entries below 35")
+            adjustments["min_rsi_for_sell"] = 35
+
+        # ── 4. Low-confidence entry ──
+        if scanner_conf < 0.4 and not won:
+            lessons.append(f"Lost on low-confidence entry ({scanner_conf:.2f}) — raise min threshold")
+            adjustments["min_scanner_confidence"] = 0.50
+
+        # ── 5. Regime mismatch ──
+        if regime == "ranging" and abs(momentum) > 0.002:
+            lessons.append("Momentum signal in ranging market — momentum unreliable in chop")
+        if regime == "volatile" and not won:
+            lessons.append("Loss in volatile regime — consider wider stops or skipping volatile periods")
+            adjustments["volatile_stop_multiplier"] = 1.5
+
+        # ── 6. Duration analysis ──
+        if won and duration > 3600:
+            lessons.append("Profitable but held >1hr — could tighten trailing stop for faster lock-in")
+        if not won and duration > 1800:
+            lessons.append("Losing trade held >30min — consider time-based exit at 20min if flat")
+
+        # ── 7. Historical pattern analysis from brain ──
         if self.brain:
-            recent_lessons = self.brain.get_recent_lessons(5)
+            recent = self._get_recent_trades(10)
+            if recent:
+                pattern_insights, pattern_adj = self._analyze_patterns(recent, trade)
+                lessons.extend(pattern_insights)
+                adjustments.update(pattern_adj)
 
-        prompt = self._build_review_prompt(trade, brain_summary, recent_lessons)
+                # Confidence based on data quality
+                confidence = min(0.9, 0.4 + len(recent) * 0.05)
 
-        payload = {
-            "model": AI_REVIEW_MODEL,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": (
-                        "You are an elite quantitative trading analyst at a top hedge fund. "
-                        "Analyze the trade data provided and give actionable feedback. "
-                        "Be specific about what went wrong or right and suggest concrete parameter adjustments. "
-                        "Respond in JSON format with keys: "
-                        "'analysis' (2-3 sentence review), "
-                        "'lessons' (array of 1-3 short lesson strings), "
-                        "'adjustments' (dict of parameter changes, e.g. {'momentum_threshold': 0.6}), "
-                        "'confidence' (0.0-1.0 how confident you are in this analysis), "
-                        "'avoid_pattern' (string describing what to avoid, or null)"
-                    )
-                },
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.3,
-            "max_tokens": 500,
+        # ── 8. Brain summary analysis ──
+        if brain_summary:
+            wr = brain_summary.get("win_rate", 0.5)
+            total = brain_summary.get("total_trades", 0)
+            if total > 20 and wr < 0.40:
+                lessons.append(f"Overall win rate {wr:.0%} is below 40% — bot needs strategy adjustment")
+                adjustments["global_confidence_boost"] = 0.1
+            if total > 20 and wr > 0.60:
+                analysis_parts.append(f"Strong overall performance ({wr:.0%} WR)")
+
+        # Compose final analysis
+        analysis = ". ".join(analysis_parts) if analysis_parts else "Trade recorded."
+
+        # Build avoid pattern
+        avoid_pattern = None
+        if not won and exit_reason in ("stop_loss", "SL"):
+            avoid_pattern = f"Avoid {direction} {epic} in {regime} regime with RSI={rsi:.0f}"
+
+        review = {
+            "analysis": analysis,
+            "lessons": lessons[:5],
+            "adjustments": adjustments,
+            "confidence": confidence,
+            "avoid_pattern": avoid_pattern,
         }
-
-        headers = {
-            "Authorization": f"Bearer {AI_REVIEW_API_KEY}",
-            "Content-Type": "application/json",
-        }
-
-        resp = requests.post(AI_REVIEW_API_URL, json=payload, headers=headers, timeout=30)
-        if resp.status_code != 200:
-            log.warning(f"AI review API error: {resp.status_code}")
-            return None
-
-        content = resp.json()["choices"][0]["message"]["content"]
-
-        # Parse JSON response
-        try:
-            # Handle markdown code blocks
-            if "```json" in content:
-                content = content.split("```json")[1].split("```")[0]
-            elif "```" in content:
-                content = content.split("```")[1].split("```")[0]
-
-            review = json.loads(content.strip())
-        except json.JSONDecodeError:
-            review = {
-                "analysis": content[:500],
-                "lessons": [],
-                "adjustments": {},
-                "confidence": 0.3,
-                "avoid_pattern": None,
-            }
 
         # Store in brain
         if self.brain:
             self.brain.store_ai_review(
                 trade_id=trade_id,
-                review_text=review.get("analysis", ""),
-                lessons=review.get("lessons", []),
-                adjustments=review.get("adjustments", {}),
-                confidence=review.get("confidence", 0.5),
+                review_text=analysis,
+                lessons=lessons[:5],
+                adjustments=adjustments,
+                confidence=confidence,
             )
 
-        log.info(f"🤖 AI Review for trade #{trade_id}: {review.get('analysis', '')[:100]}")
-
-        if review.get("lessons"):
-            for lesson in review["lessons"]:
-                log.info(f"  📝 Lesson: {lesson}")
+        log.info(f"📊 Review for trade #{trade_id}: {analysis[:100]}")
+        for lesson in lessons[:3]:
+            log.info(f"  📝 {lesson}")
 
         return review
 
-    def _build_review_prompt(self, trade: dict, brain_summary: dict = None,
-                              recent_lessons: list = None) -> str:
-        """Build the prompt for trade review."""
-        won = "WON" if trade.get("pnl", 0) > 0 else "LOST"
-        lines = [
-            f"Trade Result: {won}",
-            f"Asset: {trade.get('epic')} ({trade.get('category', 'unknown')})",
-            f"Direction: {trade.get('direction')}",
-            f"Entry: {trade.get('entry_price')} → Exit: {trade.get('exit_price')}",
-            f"P&L: {trade.get('pnl', 0):.5f} ({trade.get('pnl_pct', 0):.2f}%)",
-            f"Duration: {trade.get('duration_seconds', 0):.0f}s",
-            f"Entry Reason: {trade.get('entry_reason', 'unknown')}",
-            f"Exit Reason: {trade.get('exit_reason', 'unknown')}",
-            f"Market Regime: {trade.get('regime', 'unknown')}",
-            f"RSI at Entry: {trade.get('rsi_at_entry', 50):.1f}",
-            f"Momentum at Entry: {trade.get('momentum_at_entry', 0):.3f}",
-            f"Scanner Confidence: {trade.get('scanner_confidence', 0):.3f}",
-            f"Stop Distance: {trade.get('stop_distance', 0):.5f}",
-            f"Nearest Support: {trade.get('nearest_support', 0):.5f}",
-            f"Nearest Resistance: {trade.get('nearest_resistance', 0):.5f}",
-        ]
+    # ──────────────────────────────────────────────
+    # PATTERN ANALYSIS (uses brain DB)
+    # ──────────────────────────────────────────────
 
-        if brain_summary:
-            lines.append(f"\nOverall Bot Performance:")
-            lines.append(f"Total trades: {brain_summary.get('total_trades', 0)}")
-            lines.append(f"Win rate: {brain_summary.get('win_rate', 0):.1%}")
-            lines.append(f"Total P&L: {brain_summary.get('total_pnl', 0):.2f}")
+    def _get_recent_trades(self, n: int) -> list[dict]:
+        """Pull recent trades from brain DB."""
+        try:
+            rows = self.brain.conn.execute("""
+                SELECT epic, direction, pnl, pnl_pct, regime, exit_reason,
+                       rsi_at_entry, momentum_at_entry, duration_seconds,
+                       scanner_confidence, entry_hour
+                FROM trades ORDER BY closed_at DESC LIMIT ?
+            """, (n,)).fetchall()
+            return [dict(r) for r in rows]
+        except Exception:
+            return []
 
-        if recent_lessons:
-            lines.append(f"\nRecent AI Lessons:")
-            for lesson in recent_lessons[:3]:
-                lessons_text = lesson.get("lessons_learned", "[]")
-                try:
-                    parsed = json.loads(lessons_text) if isinstance(lessons_text, str) else lessons_text
-                    for l in parsed:
-                        lines.append(f"  - {l}")
-                except Exception:
-                    pass
+    def _analyze_patterns(self, recent: list[dict], current: dict) -> tuple[list[str], dict]:
+        """Find statistical patterns in recent trades."""
+        lessons = []
+        adjustments = {}
 
-        return "\n".join(lines)
+        # ── Streak detection ──
+        streak = 0
+        for t in recent:
+            if t.get("pnl", 0) <= 0:
+                streak += 1
+            else:
+                break
+        if streak >= 3:
+            lessons.append(f"Currently on a {streak}-trade losing streak — consider pausing or reducing size")
+            adjustments["position_size_multiplier"] = max(0.5, 1.0 - streak * 0.1)
+
+        # ── Same-asset repeated losses ──
+        epic = current.get("epic", "")
+        epic_trades = [t for t in recent if t.get("epic") == epic]
+        if len(epic_trades) >= 3:
+            epic_losses = sum(1 for t in epic_trades if t.get("pnl", 0) <= 0)
+            if epic_losses >= 2:
+                lessons.append(f"{epic}: {epic_losses}/{len(epic_trades)} recent trades lost — consider temporary blacklist")
+
+        # ── Regime performance ──
+        regime = current.get("regime", "unknown")
+        regime_trades = [t for t in recent if t.get("regime") == regime]
+        if len(regime_trades) >= 3:
+            regime_wr = sum(1 for t in regime_trades if t.get("pnl", 0) > 0) / len(regime_trades)
+            if regime_wr < 0.33:
+                lessons.append(f"Win rate in '{regime}' regime is only {regime_wr:.0%} — avoid trading this regime")
+                adjustments[f"skip_regime_{regime}"] = True
+
+        # ── Time-of-day patterns ──
+        hour = current.get("entry_hour")
+        if hour is not None:
+            hour_trades = [t for t in recent if t.get("entry_hour") == hour]
+            if len(hour_trades) >= 2:
+                hour_losses = sum(1 for t in hour_trades if t.get("pnl", 0) <= 0)
+                if hour_losses == len(hour_trades):
+                    lessons.append(f"All recent trades at hour {hour}:00 lost — blacklist this hour")
+
+        # ── Average loss size vs win size ──
+        wins = [t.get("pnl_pct", 0) for t in recent if t.get("pnl", 0) > 0]
+        losses = [abs(t.get("pnl_pct", 0)) for t in recent if t.get("pnl", 0) <= 0]
+        if wins and losses:
+            avg_win = sum(wins) / len(wins)
+            avg_loss = sum(losses) / len(losses)
+            if avg_loss > avg_win * 1.5:
+                lessons.append(f"Avg loss ({avg_loss:.2f}%) is {avg_loss/avg_win:.1f}x avg win ({avg_win:.2f}%) — tighten stops")
+                adjustments["stop_loss_tightening"] = 0.8
+
+        return lessons, adjustments
+
+    # ──────────────────────────────────────────────
+    # BATCH REVIEW (periodic deeper analysis)
+    # ──────────────────────────────────────────────
 
     def get_batch_review(self, trades: list[dict]) -> Optional[dict]:
-        """Review a batch of recent trades for broader pattern insights."""
-        if not self._enabled or len(trades) < 5:
+        """Statistical batch review of recent trades — no API needed."""
+        if len(trades) < 5:
             return None
 
-        # Only do batch review if we have enough losses
         losses = [t for t in trades if t.get("pnl", 0) <= 0]
+        wins = [t for t in trades if t.get("pnl", 0) > 0]
+
         if len(losses) < 3:
             return None
 
-        try:
-            import requests
+        issues = []
+        changes = {}
 
-            summary_lines = []
-            for t in trades[-10:]:
-                won = "✅" if t.get("pnl", 0) > 0 else "❌"
-                summary_lines.append(
-                    f"{won} {t.get('direction')} {t.get('epic')} | "
-                    f"P&L: {t.get('pnl', 0):.5f} | {t.get('exit_reason', '?')}"
-                )
+        # ── Win rate trend ──
+        total = len(trades)
+        wr = len(wins) / total if total else 0
+        issues.append(f"Win rate: {wr:.0%} over last {total} trades")
 
-            prompt = (
-                f"Review these last {len(trades)} trades and identify patterns:\n\n" +
-                "\n".join(summary_lines) +
-                "\n\nWhat systemic issues do you see? What should the bot change?"
-            )
+        # ── Most losing asset ──
+        epic_losses = {}
+        for t in losses:
+            ep = t.get("epic", "?")
+            epic_losses[ep] = epic_losses.get(ep, 0) + 1
+        if epic_losses:
+            worst = max(epic_losses, key=epic_losses.get)
+            issues.append(f"Most losses on {worst} ({epic_losses[worst]} losses)")
+            changes[f"reduce_size_{worst}"] = 0.5
 
-            payload = {
-                "model": AI_REVIEW_MODEL,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a quantitative trading systems analyst. "
-                            "Identify patterns in the trade log and suggest systemic improvements. "
-                            "Respond in JSON: {'systemic_issues': [...], 'recommended_changes': {...}, 'priority': 'high'|'medium'|'low'}"
-                        )
-                    },
-                    {"role": "user", "content": prompt}
-                ],
-                "temperature": 0.3,
-                "max_tokens": 500,
-            }
+        # ── Exit reason breakdown ──
+        exit_counts = {}
+        for t in losses:
+            reason = t.get("exit_reason", "unknown")
+            exit_counts[reason] = exit_counts.get(reason, 0) + 1
+        if exit_counts:
+            main_exit = max(exit_counts, key=exit_counts.get)
+            issues.append(f"Main loss exit: {main_exit} ({exit_counts[main_exit]}x)")
 
-            headers = {
-                "Authorization": f"Bearer {AI_REVIEW_API_KEY}",
-                "Content-Type": "application/json",
-            }
+        # ── Profit factor ──
+        total_wins = sum(t.get("pnl", 0) for t in wins)
+        total_losses = abs(sum(t.get("pnl", 0) for t in losses))
+        pf = total_wins / total_losses if total_losses > 0 else float('inf')
+        issues.append(f"Profit factor: {pf:.2f}")
+        if pf < 1.0:
+            changes["reduce_global_size"] = 0.7
 
-            resp = requests.post(AI_REVIEW_API_URL, json=payload, headers=headers, timeout=30)
-            if resp.status_code == 200:
-                content = resp.json()["choices"][0]["message"]["content"]
-                try:
-                    if "```json" in content:
-                        content = content.split("```json")[1].split("```")[0]
-                    return json.loads(content.strip())
-                except Exception:
-                    return {"systemic_issues": [content[:300]], "priority": "medium"}
+        # ── Direction bias ──
+        buy_wins = sum(1 for t in wins if t.get("direction") == "BUY")
+        sell_wins = sum(1 for t in wins if t.get("direction") == "SELL")
+        buy_total = sum(1 for t in trades if t.get("direction") == "BUY")
+        sell_total = sum(1 for t in trades if t.get("direction") == "SELL")
+        if buy_total >= 3 and sell_total >= 3:
+            buy_wr = buy_wins / buy_total
+            sell_wr = sell_wins / sell_total
+            if abs(buy_wr - sell_wr) > 0.25:
+                better = "BUY" if buy_wr > sell_wr else "SELL"
+                worse = "SELL" if better == "BUY" else "BUY"
+                issues.append(f"{better} ({max(buy_wr,sell_wr):.0%}) outperforms {worse} ({min(buy_wr,sell_wr):.0%})")
 
-        except Exception as e:
-            log.warning(f"Batch review failed: {e}")
+        priority = "high" if wr < 0.35 or pf < 0.8 else "medium" if wr < 0.50 else "low"
 
-        return None
+        result = {
+            "systemic_issues": issues,
+            "recommended_changes": changes,
+            "priority": priority,
+            "win_rate": wr,
+            "profit_factor": pf,
+        }
+
+        log.info(f"📊 Batch review: WR={wr:.0%}, PF={pf:.2f}, priority={priority}")
+        for issue in issues:
+            log.info(f"  🔍 {issue}")
+
+        return result
