@@ -24,9 +24,23 @@ BTC_PROFIT_STEP_PCT = 0.01   # 1% steps
 BTC_EPICS = {"BTCUSD", "BITCOIN", "BTC"}
 
 
-def _initial_sl(entry_price: float, direction: str) -> float:
-    """Calculate initial SL at -1.5% from entry."""
-    dist = entry_price * INITIAL_SL_PCT
+def _is_btc(epic: str) -> bool:
+    """Check if epic is a BTC instrument."""
+    upper = epic.upper()
+    return any(b in upper for b in BTC_EPICS)
+
+
+def _get_params(epic: str) -> tuple[float, float]:
+    """Return (initial_sl_pct, step_pct) for the given epic."""
+    if _is_btc(epic):
+        return BTC_INITIAL_SL_PCT, BTC_PROFIT_STEP_PCT
+    return INITIAL_SL_PCT, PROFIT_STEP_PCT
+
+
+def _initial_sl(entry_price: float, direction: str, epic: str = "") -> float:
+    """Calculate initial SL from entry."""
+    sl_pct, _ = _get_params(epic)
+    dist = entry_price * sl_pct
     if direction == "BUY":
         return entry_price - dist  # SL below entry
     else:
