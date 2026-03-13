@@ -346,20 +346,79 @@ class MarketScanner:
             if not has_trend_aligned:
                 trend_ok = False
 
-        if majority_count >= min_majority and abs(weighted_score) >= min_confidence and rsi_ok and trend_ok:
+        # ═══════════════════════════════════════════
+        # SUPPORT / RESISTANCE GATE
+        # Aggregate S/R from the highest timeframe available
+        # BUY: reject if price is near/at resistance (buying into a ceiling)
+        # SELL: reject if price is near/at support (selling into a floor)
+        # ═══════════════════════════════════════════
+        sr_ok = True
+        sr_reason = ""
+
+        # Pick the highest TF S/R data available (most reliable levels)
+        sr_tf_priority = ["60min", "15min", "5min", "1min"]
+        best_sr = None
+        for tf_key in sr_tf_priority:
+            if tf_key in scan.analyses and scan.analyses[tf_key].sr_data:
+                sr = scan.analyses[tf_key].sr_data
+                if sr.get("nearest_support") or sr.get("nearest_resistance"):
+                    best_sr = sr
+                    break
+
+        if best_sr:
+            scan.nearest_support = best_sr.get("nearest_support", 0)
+            scan.nearest_resistance = best_sr.get("nearest_resistance", 0)
+            scan.sr_quality = best_sr.get("sr_quality", 0)
+
+            current_p = scan.price if scan.price > 0 else 1
+
+            # How close is price to nearest S/R? (as % of price)
+            if scan.nearest_resistance > 0 and majority_dir == "BUY":
+                dist_to_resistance_pct = (scan.nearest_resistance - current_p) / current_p * 100
+                # Block BUY if price is within 0.15% of resistance (too close to ceiling)
+                if dist_to_resistance_pct < 0.15:
+                    sr_ok = False
+                    sr_reason = f"Price too close to resistance ({scan.nearest_resistance:.5f}, {dist_to_resistance_pct:.3f}% away)"
+
+            if scan.nearest_support > 0 and majority_dir == "SELL":
+                dist_to_support_pct = (current_p - scan.nearest_support) / current_p * 100
+                # Block SELL if price is within 0.15% of support (too close to floor)
+                if dist_to_support_pct < 0.15:
+                    sr_ok = False
+                    sr_reason = f"Price too close to support ({scan.nearest_support:.5f}, {dist_to_support_pct:.3f}% away)"
+
+            # Bonus: boost confidence if BUY near support or SELL near resistance
+            if sr_ok and scan.nearest_support > 0 and majority_dir == "BUY":
+                dist_to_support_pct = (current_p - scan.nearest_support) / current_p * 100
+                if dist_to_support_pct < 0.5:
+                    # Near support — great BUY zone, boost confidence
+                    weighted_score = weighted_score * 1.15 if weighted_score > 0 else weighted_score
+
+            if sr_ok and scan.nearest_resistance > 0 and majority_dir == "SELL":
+                dist_to_resistance_pct = (scan.nearest_resistance - current_p) / current_p * 100
+                if dist_to_resistance_pct < 0.5:
+                    # Near resistance — great SELL zone, boost confidence
+                    weighted_score = weighted_score * 1.15 if weighted_score < 0 else weighted_score
+
+        if majority_count >= min_majority and abs(weighted_score) >= min_confidence and rsi_ok and trend_ok and sr_ok:
             scan.overall_signal = majority_dir
             scan.confidence = round(abs(weighted_score), 3)
 
             tf_summary = " | ".join(f"{k}={v}" for k, v in directions.items())
             mode_tag = "SCALP" if is_scalp else "STD"
+            sr_info = ""
+            if scan.nearest_support > 0 or scan.nearest_resistance > 0:
+                sr_info = f" | S={scan.nearest_support:.5f} R={scan.nearest_resistance:.5f}"
             scan.reason = (
                 f"[{mode_tag}] Multi-TF {majority_dir}: [{tf_summary}] "
-                f"conf={scan.confidence:.2f}"
+                f"conf={scan.confidence:.2f}{sr_info}"
             )
         else:
             scan.overall_signal = "HOLD"
             tf_summary = " | ".join(f"{k}={v}" for k, v in directions.items())
-            if not rsi_ok:
+            if not sr_ok:
+                scan.reason = f"S/R block: {sr_reason} | [{tf_summary}]"
+            elif not rsi_ok:
                 scan.reason = f"RSI extreme — no entry | [{tf_summary}]"
             elif not trend_ok:
                 scan.reason = f"No EMA trend alignment | [{tf_summary}]"
