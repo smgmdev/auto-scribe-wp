@@ -1,7 +1,8 @@
 """
 Capital.com Real-Time Trading Bot — Smart Adaptive Trading
 Streams prices via polling at 1s intervals, uses tick-level momentum detection.
-Features: Dynamic loss cutting, early profit taking, and AI-driven parameter adaptation.
+Features: Multi-timeframe pre-trade analysis, dynamic loss cutting, unlimited TP with
+          5% step trailing SL, and AI-driven parameter adaptation.
 """
 
 import time
@@ -15,6 +16,7 @@ from strategy import analyze, Signal, tick_momentum
 from risk import calculate_position_size, can_open_position
 from position_manager import PositionManager
 from trade_journal import TradeJournal
+from market_scanner import MarketScanner
 from logger_setup import get_logger
 
 log = get_logger("main")
@@ -24,7 +26,8 @@ BANNER = """
 ║   CAPITAL.COM REAL-TIME TRADING BOT  (DEMO)             ║
 ║   ⚡ 1-second price scanning — tick-level precision      ║
 ║   🧠 Adaptive AI: learns from every trade                ║
-║   Strategy: EMA + Momentum + Smart Exits + Trailing SL   ║
+║   📊 Multi-TF scanner: 60m → 15m → 5m confirmation      ║
+║   🔒 Unlimited TP with 5% step trailing SL               ║
 ║   Assets: Gold, Silver, Oil, Gas, US Stocks              ║
 ╚══════════════════════════════════════════════════════════╝
 """
@@ -53,6 +56,7 @@ def run():
     # Initialize smart systems
     pos_manager = PositionManager()
     journal = TradeJournal()
+    scanner = MarketScanner(api, config.WATCHLIST)
 
     # Print learning stats on startup
     stats = journal.get_stats()
@@ -73,11 +77,6 @@ def run():
     # Track entry info for journal logging
     entry_info: dict[str, dict] = {}  # deal_id -> {entry_price, momentum, rsi, reason, time}
 
-    # Candle analysis cache
-    candle_cache: dict[str, dict] = {}
-    last_candle_fetch = 0
-    CANDLE_REFRESH_INTERVAL = 60
-
     # Session keepalive
     cycle_count = 0
     positions = []
@@ -87,26 +86,14 @@ def run():
             cycle_start = time.time()
             cycle_count += 1
 
-            # Refresh candle-based analysis every 60s
-            now = time.time()
-            if now - last_candle_fetch >= CANDLE_REFRESH_INTERVAL:
-                log.info("━━━ Refreshing candle analysis ━━━")
-                for epic in config.WATCHLIST:
-                    try:
-                        # Get adaptive params for this epic
-                        adaptive = journal.get_params(epic)
-                        prices = api.get_prices(epic, config.CANDLE_TIMEFRAME, num_points=config.EMA_TREND + 10)
-                        if prices:
-                            candle_cache[epic] = analyze(prices, adaptive)
-                            sig = candle_cache[epic]
-                            if sig["signal"] != Signal.HOLD:
-                                log.info(
-                                    f"  {epic}: {sig['signal']} — {sig['reason']} "
-                                    f"| RSI={sig.get('rsi', '?')} mom={sig.get('momentum_score', '?')}"
-                                )
-                    except Exception as e:
-                        log.error(f"Candle fetch error {epic}: {e}")
-                last_candle_fetch = now
+            # ═══════════════════════════════════════════
+            # 📊 MULTI-TIMEFRAME MARKET SCAN — every 2 min
+            # ═══════════════════════════════════════════
+            # The scanner handles its own timing internally (120s interval)
+            # It: 1) ranks all assets by volatility
+            #     2) deep-analyzes top 5 on 60m/15m/5m
+            #     3) only confirms entry when timeframes agree
+            scan_results = scanner.scan_all()
 
             # Session keepalive every 60 cycles
             if cycle_count % 60 == 0:
@@ -151,13 +138,17 @@ def run():
                         # Auto-track if not already tracked
                         if deal_id not in pos_manager.tracked:
                             entry_price = float(pos.get("position", {}).get("level", current_price))
-                            stop_dist = candle_cache.get(pos_epic, {}).get("stop_distance", 0)
-                            profit_dist = candle_cache.get(pos_epic, {}).get("profit_distance", 0)
-                            if stop_dist > 0 and profit_dist > 0:
-                                pos_manager.track_position(
-                                    deal_id, pos_epic, pos_direction,
-                                    entry_price, stop_dist, profit_dist
-                                )
+                            # Use scanner's ATR-based stop distance if available
+                            scan = scanner.scan_cache.get(pos_epic)
+                            stop_dist = scan.stop_distance if scan and scan.stop_distance > 0 else 0
+                            if stop_dist <= 0:
+                                # Fallback: estimate from recent ticks
+                                recent = [t["mid"] for t in tick_history[pos_epic][-30:]]
+                                stop_dist = (max(recent) - min(recent)) * 1.5 if recent else entry_price * 0.01
+                            pos_manager.track_position(
+                                deal_id, pos_epic, pos_direction,
+                                entry_price, stop_dist, stop_dist * 1.5  # profit_distance is ignored (unlimited TP)
+                            )
 
                         # Get adaptive params
                         adaptive = journal.get_params(pos_epic)
@@ -208,7 +199,7 @@ def run():
                         log.error(f"Position management error: {e}")
 
             # ═══════════════════════════════════════════
-            # ⚡ ENTRY SCANNING — every second
+            # ⚡ ENTRY SCANNING — tick collection + scanner-gated entry
             # ═══════════════════════════════════════════
             for epic in config.WATCHLIST:
                 try:
@@ -234,43 +225,46 @@ def run():
                     if len(tick_history[epic]) < 10:
                         continue
 
-                    # Get candle-level trend bias
-                    candle_signal = candle_cache.get(epic, {})
-                    trend_bias = candle_signal.get("signal", Signal.HOLD)
-                    atr = candle_signal.get("atr", 0)
-                    stop_distance = candle_signal.get("stop_distance", 0)
-                    profit_distance = candle_signal.get("profit_distance", 0)
+                    # ═══════════════════════════════════════
+                    # GATE 1: Multi-TF scanner must confirm direction
+                    # ═══════════════════════════════════════
+                    scan_signal = scanner.get_entry_signal(epic)
+                    if not scan_signal:
+                        # Scanner says HOLD or no data — skip this asset
+                        if cycle_count % 30 == 0:
+                            cached = scanner.scan_cache.get(epic)
+                            reason = cached.reason if cached else "not scanned"
+                            log.debug(f"  {epic}: Scanner HOLD — {reason}")
+                        continue
 
-                    # Get adaptive params for this epic
+                    scanner_direction = scan_signal.overall_signal  # "BUY" or "SELL"
+                    scanner_confidence = scan_signal.confidence
+                    stop_distance = scan_signal.stop_distance
+                    atr = scan_signal.atr
+
+                    # ═══════════════════════════════════════
+                    # GATE 2: Tick momentum must align with scanner
+                    # ═══════════════════════════════════════
                     adaptive = journal.get_params(epic)
-                    entry_threshold = adaptive.get("momentum_entry_threshold", 0.6)
+                    entry_threshold = adaptive.get("momentum_entry_threshold", 0.5)
 
-                    # ⚡ Tick-level momentum
                     momentum = tick_momentum(tick_history[epic])
 
-                    # Entry logic with adaptive thresholds
                     entry_signal = Signal.HOLD
 
-                    if trend_bias == Signal.BUY and momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
-                        entry_signal = Signal.BUY
-                    elif trend_bias == Signal.SELL and momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
-                        entry_signal = Signal.SELL
-
-                    # Pure tick breakout (higher threshold)
-                    if entry_signal == Signal.HOLD and momentum["strength"] >= 0.85:
-                        if momentum["direction"] == "UP" and momentum["acceleration"] > 0:
+                    # Only enter if tick momentum CONFIRMS scanner direction
+                    if scanner_direction == Signal.BUY:
+                        if momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.BUY
-                            log.info(f"⚡ {epic} TICK BREAKOUT BUY | str={momentum['strength']:.2f} RSI={momentum.get('micro_rsi', '?')}")
-                        elif momentum["direction"] == "DOWN" and momentum["acceleration"] < 0:
+                    elif scanner_direction == Signal.SELL:
+                        if momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.SELL
-                            log.info(f"⚡ {epic} TICK BREAKOUT SELL | str={momentum['strength']:.2f} RSI={momentum.get('micro_rsi', '?')}")
 
                     if entry_signal == Signal.HOLD:
                         if cycle_count % 10 == 0:
                             log.debug(
-                                f"{epic}: {mid:.5f} | spread={spread:.5f} | "
-                                f"mom={momentum['direction']} {momentum['strength']:.2f} | "
-                                f"RSI={momentum.get('micro_rsi', '?')}"
+                                f"  {epic}: Scanner={scanner_direction} but tick mom={momentum['direction']} "
+                                f"str={momentum['strength']:.2f} — waiting for alignment"
                             )
                         continue
 
@@ -280,35 +274,40 @@ def run():
                     if not can_open_position(positions, epic):
                         continue
 
-                    # Use adaptive SL/TP from learning
+                    # Calculate stop distance from scanner's multi-TF ATR
                     if stop_distance <= 0 or atr <= 0:
                         recent_prices = [t["mid"] for t in tick_history[epic][-30:]]
                         price_range = max(recent_prices) - min(recent_prices)
                         stop_distance = max(price_range * 1.5, spread * 10)
-                        profit_distance = stop_distance * 1.5
-                    else:
-                        # Apply learned multipliers
-                        stop_distance = atr * adaptive.get("sl_multiplier", config.ATR_SL_MULTIPLIER)
-                        profit_distance = atr * adaptive.get("tp_multiplier", config.ATR_TP_MULTIPLIER)
+
+                    # profit_distance is set but won't be used (unlimited TP via position manager)
+                    profit_distance = stop_distance * 3
 
                     size = calculate_position_size(balance, stop_distance, mid)
                     if size <= 0:
                         continue
 
                     # EXECUTE
+                    log.info(
+                        f"🎯 ENTRY CONFIRMED: {entry_signal} {epic} | "
+                        f"Scanner: {scanner_direction} conf={scanner_confidence:.2f} | "
+                        f"Tick: {momentum['direction']} str={momentum['strength']:.2f} RSI={momentum.get('micro_rsi', '?')} | "
+                        f"TF: {scan_signal.reason}"
+                    )
+
                     trade = api.open_position(
                         epic=epic,
                         direction=entry_signal,
                         size=size,
                         stop_distance=stop_distance,
-                        profit_distance=profit_distance,
+                        profit_distance=None,  # No TP — unlimited profit riding
                     )
 
                     if trade:
                         deal_ref = trade.get("dealReference", "")
                         active_signals[epic] = entry_signal
 
-                        # Immediately refresh positions to prevent exceeding limit
+                        # Immediately refresh positions
                         positions = api.get_positions()
 
                         # Track for smart management (pass spread for fee calculation)
@@ -320,17 +319,20 @@ def run():
 
                         # Store entry info for journal
                         entry_info[deal_ref] = {
-                            "reason": candle_signal.get("reason", "tick breakout"),
+                            "reason": scan_signal.reason,
                             "momentum": momentum["strength"],
                             "rsi": momentum.get("micro_rsi", 50),
                             "time": time.time(),
+                            "scanner_confidence": scanner_confidence,
                         }
+
+                        # Invalidate scanner cache for this asset (prevent duplicate entry)
+                        scanner.invalidate(epic)
 
                         log.info(
                             f"✅ {entry_signal} {epic} @ {mid:.5f} | "
-                            f"Size: {size} | SL: {stop_distance:.5f} | TP: {profit_distance:.5f} | "
-                            f"Mom: {momentum['strength']:.2f} | RSI: {momentum.get('micro_rsi', '?')} | "
-                            f"Adaptive: SL={adaptive.get('sl_multiplier', '?')}x TP={adaptive.get('tp_multiplier', '?')}x"
+                            f"Size: {size} | SL: {stop_distance:.5f} | TP: UNLIMITED | "
+                            f"Mom: {momentum['strength']:.2f} | Scanner conf: {scanner_confidence:.2f}"
                         )
 
                 except Exception as e:
