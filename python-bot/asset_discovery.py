@@ -188,7 +188,9 @@ class AssetDiscovery:
 
         if len(all_crypto) < TOP_CRYPTO:
             for term in ["BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", 
-                         "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB"]:
+                         "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB",
+                         "PEPE", "SHIB", "WIF", "BONK", "SUI", "SEI", "TIA",
+                         "FET", "RENDER", "INJ", "JUP", "ONDO", "OP", "STX"]:
                 results = self.api.search_markets(term)
                 crypto_results = [r for r in results if r.get("instrumentType") == "CRYPTOCURRENCIES"
                                   and r.get("marketStatus") == "TRADEABLE"]
