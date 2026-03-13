@@ -800,6 +800,8 @@ def run():
                     log.warning(
                         f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})"
                     )
+                # Resume scanner thread after batch fetch completes
+                _scanner_paused.clear()
             elif balanced_epics and cycle_count % 30 == 0 and now_ts < _next_batch_fetch_ts:
                 wait_left = int(max(0, _next_batch_fetch_ts - now_ts))
                 log.info(f"⏳ Batch fetch paused for backoff: {wait_left}s remaining")
