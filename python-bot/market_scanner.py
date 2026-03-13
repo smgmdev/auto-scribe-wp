@@ -155,7 +155,7 @@ class MarketScanner:
 
             # Momentum direction
             total_signals += 1
-            mom_threshold = 0.08 if is_scalp else 0.15
+            mom_threshold = 0.15 if is_scalp else 0.20
             if momentum["score"] > mom_threshold:
                 buy_signals += 1
             elif momentum["score"] < -mom_threshold:
