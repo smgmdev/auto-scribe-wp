@@ -136,22 +136,68 @@ class AssetDiscovery:
         ranked.sort(key=lambda x: x["score"], reverse=True)
         return ranked
 
-    def _search_fallback(self, terms: list[str], instrument_type: str) -> list[dict]:
-        """Search for assets by term list with pacing between calls."""
-        results = []
+    def _search_fallback(
+        self,
+        terms: list[str],
+        instrument_types: tuple[str, ...],
+        require_tradeable: bool = True,
+        limit_per_term: int = 5,
+    ) -> list[dict]:
+        """Search for assets by terms with pacing between calls."""
+        results: list[dict] = []
+        seen_epics: set[str] = set()
+        allowed_types = {t.upper() for t in instrument_types}
+
         for term in terms:
             try:
                 markets = self.api.search_markets(term)
-                matched = [r for r in markets
-                           if r.get("instrumentType") == instrument_type
-                           and r.get("marketStatus") == "TRADEABLE"]
+                matched = []
+                for r in markets:
+                    epic = r.get("epic", "")
+                    r_type = str(r.get("instrumentType", "")).upper()
+                    r_status = str(r.get("marketStatus", "")).upper()
+                    if not epic or epic in seen_epics:
+                        continue
+                    if not any(r_type == t or r_type.startswith(t) for t in allowed_types):
+                        continue
+                    if require_tradeable and r_status != "TRADEABLE":
+                        continue
+                    matched.append(r)
+                    seen_epics.add(epic)
+                    if len(matched) >= limit_per_term:
+                        break
+
                 results.extend(matched)
                 if matched:
-                    log.info(f"  🔍 Search '{term}': found {len(matched)} {instrument_type}")
+                    mode = "TRADEABLE" if require_tradeable else "ANY"
+                    log.info(f"  🔍 Search '{term}' [{mode}]: found {len(matched)}")
             except Exception as e:
                 log.warning(f"  Search '{term}' failed: {e}")
             time.sleep(_SEARCH_DELAY)
         return results
+
+    def _placeholder_ranked(self, markets: list[dict], top_n: int, fallback_type: str) -> list[dict]:
+        """Build ranked-like fallback list from raw market records (even if not tradeable)."""
+        ranked: list[dict] = []
+        seen_epics: set[str] = set()
+        for m in markets:
+            epic = m.get("epic", "")
+            if not epic or epic in seen_epics:
+                continue
+            seen_epics.add(epic)
+            ranked.append({
+                "epic": epic,
+                "name": m.get("instrumentName", epic),
+                "type": m.get("instrumentType", fallback_type),
+                "pct_change": round(abs(m.get("percentageChange", 0) or 0), 2),
+                "spread_pct": 0,
+                "bid": m.get("bid", 0) or 0,
+                "offer": m.get("offer", 0) or 0,
+                "score": 0.0,
+            })
+            if len(ranked) >= top_n:
+                break
+        return ranked
 
     def discover(self, force: bool = False) -> dict:
         """
@@ -201,9 +247,18 @@ class AssetDiscovery:
                               "BA", "DIS", "PYPL", "INTC", "UBER", "COIN", "PLTR", "SNAP", "SQ", "SHOP"]
         if len(all_stocks) < TOP_STOCKS:
             log.info(f"  📡 Running stock search fallback ({len(all_stocks)}/{TOP_STOCKS} found so far)...")
-            fallback = self._search_fallback(stock_search_terms, "SHARES")
-            # Also try EQUITIES type
-            fallback += self._search_fallback(["AAPL", "TSLA", "NVDA"], "EQUITIES")
+            fallback = self._search_fallback(
+                stock_search_terms,
+                ("SHARES", "EQUITIES"),
+                require_tradeable=True,
+            )
+            if len(fallback) < TOP_STOCKS:
+                fallback += self._search_fallback(
+                    stock_search_terms,
+                    ("SHARES", "EQUITIES"),
+                    require_tradeable=False,
+                    limit_per_term=2,
+                )
             all_stocks.extend(fallback)
 
         ranked_stocks = self._rank_assets(all_stocks)[:TOP_STOCKS]
@@ -230,7 +285,22 @@ class AssetDiscovery:
                             "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB",
                             "PEPE", "SHIB", "WIF", "BONK", "SUI", "SEI", "TIA",
                             "FET", "RENDER", "INJ", "JUP", "ONDO", "OP", "STX"]
-            all_crypto.extend(self._search_fallback(crypto_terms, "CRYPTOCURRENCIES"))
+            all_crypto.extend(
+                self._search_fallback(
+                    crypto_terms,
+                    ("CRYPTOCURRENCIES",),
+                    require_tradeable=True,
+                )
+            )
+            if len(all_crypto) < TOP_CRYPTO:
+                all_crypto.extend(
+                    self._search_fallback(
+                        crypto_terms,
+                        ("CRYPTOCURRENCIES",),
+                        require_tradeable=False,
+                        limit_per_term=2,
+                    )
+                )
 
         ranked_crypto = self._rank_assets(all_crypto)[:TOP_CRYPTO]
 
@@ -278,16 +348,42 @@ class AssetDiscovery:
             forex_terms = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
                            "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
                            "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "GBPAUD"]
-            all_forex.extend(self._search_fallback(forex_terms, "CURRENCIES"))
+            all_forex.extend(
+                self._search_fallback(
+                    forex_terms,
+                    ("CURRENCIES", "FOREX"),
+                    require_tradeable=True,
+                )
+            )
+            if len(all_forex) < TOP_FOREX:
+                all_forex.extend(
+                    self._search_fallback(
+                        forex_terms,
+                        ("CURRENCIES", "FOREX"),
+                        require_tradeable=False,
+                        limit_per_term=2,
+                    )
+                )
 
         ranked_forex = self._rank_assets(all_forex)[:TOP_FOREX]
 
-        # If ranked forex is STILL empty, use the fallback watchlist directly
+        # If ranked forex is still empty, build fallback list from searchable market epics
         if not ranked_forex:
-            log.warning("  ⚠️ Discovery found 0 forex — using hardcoded fallback epics")
-            ranked_forex = [{"epic": ep, "name": ep, "type": "CURRENCIES",
-                             "pct_change": 0, "spread_pct": 0, "bid": 0,
-                             "offer": 0, "score": 0} for ep in config.WATCHLIST_FOREX_FALLBACK]
+            log.warning("  ⚠️ Discovery found 0 forex — attempting non-tradeable epic fallback")
+            forex_fallback_terms = [
+                "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
+                "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
+                "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "GBPAUD",
+            ]
+            fallback_forex = self._search_fallback(
+                forex_fallback_terms,
+                ("CURRENCIES", "FOREX"),
+                require_tradeable=False,
+                limit_per_term=2,
+            )
+            ranked_forex = self._placeholder_ranked(fallback_forex, TOP_FOREX, "CURRENCIES")
+            if not ranked_forex and self.discovered_forex:
+                ranked_forex = self.discovered_forex[:TOP_FOREX]
 
         # --- Discover commodities ---
         log.info("🪙 Scanning commodities...")
@@ -310,16 +406,42 @@ class AssetDiscovery:
             log.info(f"  📡 Running commodity search fallback ({len(all_commodities)}/{TOP_COMMODITIES} found so far)...")
             commodity_terms = ["GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER",
                                "PLATINUM", "PALLADIUM", "OIL_BRENT"]
-            all_commodities.extend(self._search_fallback(commodity_terms, "COMMODITIES"))
+            all_commodities.extend(
+                self._search_fallback(
+                    commodity_terms,
+                    ("COMMODITIES", "COMMODITY", "CURRENCIES"),
+                    require_tradeable=True,
+                )
+            )
+            if len(all_commodities) < TOP_COMMODITIES:
+                all_commodities.extend(
+                    self._search_fallback(
+                        commodity_terms,
+                        ("COMMODITIES", "COMMODITY", "CURRENCIES"),
+                        require_tradeable=False,
+                        limit_per_term=2,
+                    )
+                )
 
         ranked_commodities = self._rank_assets(all_commodities)[:TOP_COMMODITIES]
 
-        # If ranked commodities is STILL empty, use fallback
+        # If ranked commodities is still empty, build fallback list from searchable market epics
         if not ranked_commodities:
-            log.warning("  ⚠️ Discovery found 0 commodities — using hardcoded fallback epics")
-            ranked_commodities = [{"epic": ep, "name": ep, "type": "COMMODITIES",
-                                   "pct_change": 0, "spread_pct": 0, "bid": 0,
-                                   "offer": 0, "score": 0} for ep in config.WATCHLIST_COMMODITIES_FALLBACK]
+            log.warning("  ⚠️ Discovery found 0 commodities — attempting non-tradeable epic fallback")
+            commodity_fallback_terms = [
+                "GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER",
+                "PLATINUM", "PALLADIUM", "OIL_BRENT", "XAUUSD", "XAGUSD",
+                "USCRUDE", "BRENT", "NATGAS",
+            ]
+            fallback_commodities = self._search_fallback(
+                commodity_fallback_terms,
+                ("COMMODITIES", "COMMODITY", "CURRENCIES"),
+                require_tradeable=False,
+                limit_per_term=2,
+            )
+            ranked_commodities = self._placeholder_ranked(fallback_commodities, TOP_COMMODITIES, "COMMODITIES")
+            if not ranked_commodities and self.discovered_commodities:
+                ranked_commodities = self.discovered_commodities[:TOP_COMMODITIES]
 
         # Store results
         self.discovered_stocks = ranked_stocks

@@ -341,28 +341,67 @@ class CapitalAPI:
         return []
 
     def get_markets_details(self, epics: list[str]) -> list:
-        """Get details for multiple markets by epic codes (max 50).
-        Includes retry logic for resilience.
+        """Get details for multiple markets by epic codes (max 50 per request).
+        Resilient to invalid epics: splits failed chunks recursively.
         """
         if not epics:
             return []
-        for attempt in range(_MAX_RETRIES + 1):
-            _pace_request()
-            try:
-                resp = self.session.get(
-                    f"{self.base_url}/api/v1/markets",
-                    params={"epics": ",".join(epics[:50])},
-                    headers=self._headers(),
-                    timeout=15,
-                )
-                if resp.status_code == 200:
-                    _handle_success()
-                    return resp.json().get("markets", [])
-                else:
+
+        cleaned_epics = [e for e in dict.fromkeys(epics) if e]
+        if not cleaned_epics:
+            return []
+
+        def _fetch_chunk(chunk: list[str], depth: int = 0) -> list:
+            if not chunk:
+                return []
+
+            should_split = False
+            for attempt in range(_MAX_RETRIES + 1):
+                _pace_request()
+                try:
+                    resp = self.session.get(
+                        f"{self.base_url}/api/v1/markets",
+                        params={"epics": ",".join(chunk[:50])},
+                        headers=self._headers(),
+                        timeout=15,
+                    )
+                    if resp.status_code == 200:
+                        _handle_success()
+                        return resp.json().get("markets", [])
+
                     _handle_error(resp.status_code)
-                    log.warning(f"Markets details attempt {attempt+1}: {resp.status_code}")
-            except Exception as e:
-                log.error(f"Markets details exception (attempt {attempt+1}): {e}")
-                if attempt < _MAX_RETRIES:
-                    time.sleep(1 * (attempt + 1))
-        return []
+                    log.warning(
+                        f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
+                    )
+
+                    # Split only for invalid/oversized chunk responses
+                    if resp.status_code in (400, 404, 413, 414) and len(chunk) > 1:
+                        should_split = True
+                        break
+
+                except Exception as e:
+                    log.error(f"Markets details exception (attempt {attempt+1}, chunk={len(chunk)}): {e}")
+                    if attempt < _MAX_RETRIES:
+                        time.sleep(1 * (attempt + 1))
+
+            # Split recursively only when chunk shape/content likely invalid
+            if should_split and len(chunk) > 1:
+                mid = len(chunk) // 2
+                left = _fetch_chunk(chunk[:mid], depth + 1)
+                time.sleep(0.2)
+                right = _fetch_chunk(chunk[mid:], depth + 1)
+                return left + right
+
+            # Single epic failed OR non-splittable error (rate limit/auth/network)
+            if len(chunk) == 1:
+                log.debug(f"Skipping invalid/unavailable epic in markets batch: {chunk[0]}")
+            return []
+
+        all_markets: list = []
+        for i in range(0, len(cleaned_epics), 50):
+            chunk = cleaned_epics[i:i+50]
+            all_markets.extend(_fetch_chunk(chunk))
+            if i + 50 < len(cleaned_epics):
+                time.sleep(0.2)
+
+        return all_markets
