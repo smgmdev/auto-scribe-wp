@@ -713,34 +713,65 @@ def run():
                     is_scalp_asset = epic_category in (config.CATEGORY_CRYPTO, config.CATEGORY_FOREX)
 
                     # ═══════════════════════════════════════
+                    # GATE 0: LOSS COOLDOWN — don't re-enter an epic that just lost
+                    # ═══════════════════════════════════════
+                    cooldown_info = loss_cooldowns.get(epic)
+                    if cooldown_info:
+                        consec = cooldown_info.get("consecutive_losses", 1)
+                        if consec >= 2:
+                            cooldown_secs = COOLDOWN_CONSECUTIVE_LOSSES
+                        else:
+                            cooldown_secs = COOLDOWN_AFTER_LOSS_SCALP if is_scalp_asset else COOLDOWN_AFTER_LOSS_STANDARD
+                        elapsed_since_loss = time.time() - cooldown_info["time"]
+                        if elapsed_since_loss < cooldown_secs:
+                            remaining = int(cooldown_secs - elapsed_since_loss)
+                            if cycle_count % 60 == 0:
+                                log.info(
+                                    f"🧊 {epic}: Cooldown active ({consec} consecutive loss{'es' if consec > 1 else ''}) "
+                                    f"— {remaining}s remaining"
+                                )
+                            continue
+                        else:
+                            # Cooldown expired — allow entry but keep consecutive count
+                            # (will reset on next profitable trade)
+                            pass
+
+                    # ═══════════════════════════════════════
                     # GATE 1: Multi-TF scanner must confirm direction
                     # ═══════════════════════════════════════
                     scan_signal = scanner.get_entry_signal(epic)
                     if not scan_signal:
-                        # Scanner says HOLD or no data — skip this asset
                         if cycle_count % 30 == 0:
                             cached = scanner.scan_cache.get(epic)
                             reason = cached.reason if cached else "not scanned"
                             log.debug(f"  {epic}: Scanner HOLD — {reason}")
                         continue
 
-                    scanner_direction = scan_signal.overall_signal  # "BUY" or "SELL"
+                    scanner_direction = scan_signal.overall_signal
                     scanner_confidence = scan_signal.confidence
                     stop_distance = scan_signal.stop_distance
                     atr = scan_signal.atr
 
                     # ═══════════════════════════════════════
-                    # GATE 2: Tick momentum must align with scanner
-                    # Scalp assets: much lower threshold for fast entries
+                    # GATE 2: Minimum scanner confidence (raised)
+                    # ═══════════════════════════════════════
+                    min_conf = 0.45 if is_scalp_asset else 0.55
+                    if scanner_confidence < min_conf:
+                        if cycle_count % 30 == 0:
+                            log.debug(f"  {epic}: Scanner conf {scanner_confidence:.2f} < {min_conf} — skipping")
+                        continue
+
+                    # ═══════════════════════════════════════
+                    # GATE 3: Tick momentum must STRONGLY align with scanner
+                    # Raised thresholds to prevent weak entries
                     # ═══════════════════════════════════════
                     adaptive = journal.get_params(epic)
-                    default_threshold = 0.45 if is_scalp_asset else 0.65
+                    default_threshold = 0.55 if is_scalp_asset else 0.70
                     entry_threshold = adaptive.get("momentum_entry_threshold", default_threshold)
-                    # Cap threshold for scalp to prevent it going too low
                     if is_scalp_asset:
-                        entry_threshold = max(entry_threshold, 0.40)
+                        entry_threshold = max(entry_threshold, 0.50)
                     else:
-                        entry_threshold = max(entry_threshold, 0.55)
+                        entry_threshold = max(entry_threshold, 0.60)
 
                     momentum = tick_momentum(tick_history[epic])
 
@@ -750,13 +781,13 @@ def run():
                     if scanner_direction == Signal.BUY:
                         if momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.BUY
-                        # Scalp: also enter on FLAT only with very strong scanner confidence
-                        elif is_scalp_asset and scanner_confidence >= 0.6 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.3:
+                        # Scalp: relaxed entry only with VERY strong scanner confidence
+                        elif is_scalp_asset and scanner_confidence >= 0.70 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.40:
                             entry_signal = Signal.BUY
                     elif scanner_direction == Signal.SELL:
                         if momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.SELL
-                        elif is_scalp_asset and scanner_confidence >= 0.6 and momentum["direction"] != "UP" and momentum["strength"] >= 0.3:
+                        elif is_scalp_asset and scanner_confidence >= 0.70 and momentum["direction"] != "UP" and momentum["strength"] >= 0.40:
                             entry_signal = Signal.SELL
 
                     if entry_signal == Signal.HOLD:
