@@ -324,7 +324,14 @@ class MarketScanner:
         min_majority = 2 if is_scalp else 2
         min_confidence = 0.35 if is_scalp else 0.45
 
-        if majority_count >= min_majority and abs(weighted_score) >= min_confidence and rsi_ok:
+        # For standard mode, require at least one TF with trend alignment
+        trend_ok = True
+        if not is_scalp:
+            has_trend_aligned = any(a.trend_aligned for a in scan.analyses.values() if a.direction == majority_dir)
+            if not has_trend_aligned:
+                trend_ok = False
+
+        if majority_count >= min_majority and abs(weighted_score) >= min_confidence and rsi_ok and trend_ok:
             scan.overall_signal = majority_dir
             scan.confidence = round(abs(weighted_score), 3)
 
@@ -339,6 +346,8 @@ class MarketScanner:
             tf_summary = " | ".join(f"{k}={v}" for k, v in directions.items())
             if not rsi_ok:
                 scan.reason = f"RSI extreme — no entry | [{tf_summary}]"
+            elif not trend_ok:
+                scan.reason = f"No EMA trend alignment | [{tf_summary}]"
             elif majority_count < min_majority:
                 scan.reason = f"No TF agreement | [{tf_summary}]"
             else:
