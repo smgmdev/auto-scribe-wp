@@ -176,7 +176,7 @@ export function Footer({ narrow = false, showTopBorder = false, dark = false, hi
             <ul className={`space-y-2 text-xs ${dark ? 'text-white/50' : 'text-muted-foreground'}`}>
               <li><button onClick={() => navigate('/press')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Newsroom</button></li>
               <li><button onClick={() => navigate('/about')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>About</button></li>
-              <li><button onClick={() => navigate('/investor-relations')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Investor Relations</button></li>
+              <li><button onClick={() => navigate('/ir')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Investor Relations</button></li>
               <li><button onClick={() => navigate('/help')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>Help Center</button></li>
               <li><button onClick={() => navigate('/system-status')} className={`transition-colors text-left ${dark ? 'hover:text-white' : 'hover:text-foreground'}`}>System Status</button></li>
             </ul>

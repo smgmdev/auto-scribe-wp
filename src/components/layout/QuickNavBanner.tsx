@@ -234,7 +234,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                     <ul className="space-y-1.5 text-sm text-white/50">
                       <li><NavLink onClick={() => handleNav('/press')} label="Newsroom" /></li>
                       <li><NavLink onClick={() => handleNav('/about')} label="About" /></li>
-                      <li><NavLink onClick={() => handleNav('/investor-relations')} label="Investor Relations" /></li>
+                      <li><NavLink onClick={() => handleNav('/ir')} label="Investor Relations" /></li>
                       <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
                       <li><NavLink onClick={() => handleNav('/system-status')} label="System Status" /></li>
                       

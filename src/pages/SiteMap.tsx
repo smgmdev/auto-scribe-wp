@@ -15,7 +15,7 @@ const SITEMAP_SECTIONS = [
     title: 'About Arcana Mace',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Investor Relations', href: '/investor-relations' },
+      { label: 'Investor Relations', href: '/ir' },
       { label: 'Help Center', href: '/help' },
       { label: 'Newsroom', href: '/press' },
     ],
