@@ -392,34 +392,25 @@ class CapitalAPI:
                         return resp.json().get("markets", [])
 
                     _handle_error(resp.status_code)
-                    log.warning(
-                        f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
-                    )
+                    if resp.status_code >= 500:
+                        log.warning(
+                            f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
+                        )
+                    else:
+                        log.debug(
+                            f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
+                        )
 
                     # Split only for invalid/oversized chunk responses
                     if resp.status_code in (400, 404, 413, 414) and len(chunk) > 1:
                         should_split = True
                         break
-
-                except Exception as e:
-                    log.error(f"Markets details exception (attempt {attempt+1}, chunk={len(chunk)}): {e}")
-                    if attempt < _MAX_RETRIES:
-                        time.sleep(1 * (attempt + 1))
-
-            # Split recursively only when chunk shape/content likely invalid
-            if should_split and len(chunk) > 1:
-                mid = len(chunk) // 2
-                left = _fetch_chunk(chunk[:mid], depth + 1)
-                time.sleep(0.2)
-                right = _fetch_chunk(chunk[mid:], depth + 1)
-                return left + right
-
-            # Single epic failed as invalid/unavailable -> blacklist it
+...
             if len(chunk) == 1 and last_status in (400, 404):
                 bad_epic = chunk[0]
                 if bad_epic not in self._invalid_epics:
                     self._invalid_epics.add(bad_epic)
-                    log.warning(f"🚫 Blacklisting invalid epic from batch fetch: {bad_epic}")
+                    log.info(f"🚫 Blacklisting invalid epic from batch fetch: {bad_epic}")
             return []
 
         all_markets: list = []

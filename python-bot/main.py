@@ -740,6 +740,7 @@ def run():
                 bool(balanced_epics)
                 and (cycle_count % 10 == 0)
                 and (now_ts >= _next_batch_fetch_ts)
+                and (not _scanner_scan_active.is_set())
             )
 
             if should_fetch_prices:
@@ -766,7 +767,7 @@ def run():
                         if i + 50 < len(balanced_epics):
                             time.sleep(0.5)
                 except Exception as e:
-                    log.warning(f"Batch price fetch error: {e}")
+                    log.info(f"Batch price fetch transient error: {e}")
 
                 if batch_success:
                     _batch_fail_streak = 0
@@ -775,7 +776,8 @@ def run():
                     _batch_fail_streak += 1
                     cooldown = min(45, 4 * _batch_fail_streak)
                     _next_batch_fetch_ts = time.time() + cooldown
-                    log.warning(f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})")
+                    if cycle_count % 30 == 0:
+                        log.info(f"Batch fetch backoff {cooldown}s (streak: {_batch_fail_streak})")
 
             # Always populate batch_prices from tick_history for non-fetch cycles or empty results
             for epic in balanced_epics:
@@ -786,8 +788,8 @@ def run():
                         "mid": last["mid"], "spread": last["spread"],
                     }
 
-            if should_fetch_prices and not batch_prices and cycle_count % 30 == 0:
-                log.warning("⚠️ No price data — batch fetch returned empty and no tick history available")
+            if should_fetch_prices and not batch_prices and cycle_count % 60 == 0:
+                log.info("No fresh batch prices this cycle; using cached tick history")
 
             for epic in balanced_epics:
                 try:
