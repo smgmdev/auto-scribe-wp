@@ -112,8 +112,36 @@ def update_dynamic_watchlists(
 
 
 def get_category(epic: str) -> str:
-    """Get the category for an epic code."""
-    return EPIC_CATEGORY.get(epic, "unknown")
+    """Get the category for an epic code.
+    First checks the known mapping, then infers from epic name patterns.
+    """
+    if epic in EPIC_CATEGORY:
+        return EPIC_CATEGORY[epic]
+
+    # Infer from epic name patterns
+    _commodities = {"GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER", "PLATINUM", "PALLADIUM", "OIL_BRENT"}
+    if epic in _commodities:
+        return CATEGORY_COMMODITIES
+
+    _crypto_suffixes = ("USD",)
+    _crypto_bases = {"BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", "DOT", "MATIC",
+                     "LINK", "UNI", "SHIB", "LTC", "ATOM", "NEAR", "APT", "ARB", "OP", "FIL",
+                     "TRX", "ETC", "XLM", "ALGO", "HBAR", "VET", "FTM", "SAND", "MANA", "AXS",
+                     "AAVE", "CRV", "MKR", "COMP", "SNX", "PEPE", "SUI", "SEI", "TIA", "JUP",
+                     "WIF", "BONK", "FLOKI", "RENDER", "INJ", "FET", "ONDO", "JASMY", "GALA"}
+    for base in _crypto_bases:
+        if epic.startswith(base) and epic.endswith("USD"):
+            return CATEGORY_CRYPTO
+
+    _forex_pairs = {"EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD", "USD", "NOK", "SEK", "SGD", "HKD", "ZAR", "TRY", "MXN", "PLN", "CZK", "HUF"}
+    if len(epic) == 6:
+        base = epic[:3]
+        quote = epic[3:]
+        if base in _forex_pairs and quote in _forex_pairs:
+            return CATEGORY_FOREX
+
+    # Default to stocks for unknown epics (company tickers)
+    return CATEGORY_STOCKS
 
 
 # Initial build
