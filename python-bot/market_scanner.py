@@ -463,7 +463,7 @@ class MarketScanner:
                 log.info("⚡ ═══ SCALP SCAN (Crypto + FX) ═══")
 
                 # Quick volatility rank — parallel
-                with ThreadPoolExecutor(max_workers=6) as pool:
+                with ThreadPoolExecutor(max_workers=3) as pool:
                     futures = {pool.submit(self._quick_volatility_scan, ep): ep for ep in scalp_epics}
                     vol_scans = []
                     for f in as_completed(futures):
