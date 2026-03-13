@@ -29,7 +29,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
     return () => window.removeEventListener('keydown', handleKey);
   }, [expanded]);
 
-  // Measure inner content height and re-measure on resize
+  // Measure inner content height and re-measure on resize or expand
   useEffect(() => {
     const measure = () => {
       if (innerRef.current) {
@@ -39,12 +39,15 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
     measure();
     // Re-measure after a short delay to catch late-rendering content
     const timer = setTimeout(measure, 100);
+    // Also measure after a longer delay for slow renders
+    const timer2 = setTimeout(measure, 300);
     window.addEventListener('resize', measure);
     return () => {
       clearTimeout(timer);
+      clearTimeout(timer2);
       window.removeEventListener('resize', measure);
     };
-  }, []);
+  }, [expanded]);
 
   // Sync CSS variable with expanded state
   useEffect(() => {
