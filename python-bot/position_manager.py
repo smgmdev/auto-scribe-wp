@@ -233,10 +233,9 @@ class PositionManager:
                 current_steps = int(pnl / step_size)
 
                 if current_steps > pos["locked_steps"]:
-                    # Lock profit at (current_steps - 1) * step_size above entry
-                    # This means: if price is at +15%, SL locks at +10%
-                    # Giving 1 step (5%) of breathing room
-                    lock_level_pnl = (current_steps - 1) * step_size
+                    # Lock profit AT the current step level
+                    # If price is at +10%, SL locks at +10% (no breathing room)
+                    lock_level_pnl = current_steps * step_size
 
                     # But never below fee-breakeven
                     lock_level_pnl = max(lock_level_pnl, fee_cost * 1.5)
