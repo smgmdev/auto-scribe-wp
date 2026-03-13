@@ -698,7 +698,13 @@ async function fetchState() {
 
         syncToggles(d.disabled_categories);
         updateGrid(d);
-    } catch(e) {}
+    } catch(e) {
+        console.error('fetchState failed:', e);
+        const dot = document.getElementById('statusDot');
+        if (dot) dot.className = 'status-dot stopped';
+        const tick = document.getElementById('lastTick');
+        if (tick) tick.textContent = 'API ERR';
+    }
 }
 
 async function pullAndRestart() {
