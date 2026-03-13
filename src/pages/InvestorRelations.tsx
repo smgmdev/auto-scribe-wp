@@ -209,43 +209,29 @@ export default function InvestorRelations() {
               </p>
             </AnimatedSection>
 
-            <div className="space-y-6">
+            <div className="grid md:grid-cols-3 gap-6">
               {[
                 {
-                  name: 'Arcana Mace Marketplace',
-                  description: 'Global media buying platform connecting clients with 500+ media outlets through verified agency partners.',
-                  status: 'Live',
+                  name: 'Media Buying Marketplace',
+                  description: 'Global media buying platform connecting clients with 500+ media outlets across 85+ countries through verified agency partners.',
+                  icon: Globe,
                 },
                 {
                   name: 'Mace AI',
-                  description: 'AI-powered article generation, rewriting, and content optimization engine for enterprise publishers.',
-                  status: 'Live',
-                },
-                {
-                  name: 'Self-Publishing Suite',
-                  description: 'End-to-end WordPress publishing pipeline with AI SEO, category management, and auto-publishing.',
-                  status: 'Live',
+                  description: 'AI-powered article generation, voice publishing, and content optimization engine for enterprise publishers.',
+                  icon: Zap,
                 },
                 {
                   name: 'Arcana Precision',
                   description: 'Geopolitical intelligence platform with AI threat forecasting, conflict simulation, and real-time surveillance.',
-                  status: 'Live',
-                },
-                {
-                  name: 'Arcana Intelligence Network',
-                  description: 'Global surveillance and monitoring infrastructure tracking missile alerts, defense trades, and geopolitical risk.',
-                  status: 'Live',
+                  icon: Shield,
                 },
               ].map((product, i) => (
-                <AnimatedSection key={product.name} delay={i * 60}>
-                  <div className="flex items-start justify-between border-b border-white/10 pb-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
-                      <p className="text-sm text-white/50 max-w-xl">{product.description}</p>
-                    </div>
-                    <span className="text-xs font-medium bg-white/10 text-white/70 px-3 py-1 shrink-0 ml-4">
-                      {product.status}
-                    </span>
+                <AnimatedSection key={product.name} delay={i * 100}>
+                  <div className="border border-white/10 p-8 hover:border-white/25 transition-colors h-full">
+                    <product.icon className="h-6 w-6 mb-4 text-white/40" />
+                    <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
+                    <p className="text-sm text-white/50 leading-relaxed">{product.description}</p>
                   </div>
                 </AnimatedSection>
               ))}
