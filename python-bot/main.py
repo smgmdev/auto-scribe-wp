@@ -767,6 +767,7 @@ def run():
                                 }
                         if details:
                             batch_success = True
+                            _last_batch_success = time.time()
                 except Exception as e:
                     log.warning(f"Batch price fetch error: {e}")
 
