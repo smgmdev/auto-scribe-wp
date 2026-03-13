@@ -1,5 +1,6 @@
 """Capital.com REST API wrapper for demo/live trading."""
 
+import math
 import requests
 from typing import Optional
 from logger_setup import get_logger
@@ -115,18 +116,23 @@ class CapitalAPI:
             if info:
                 dealing = info.get("dealingRules", {})
                 # Try multiple possible paths Capital.com uses
-                for key in ("minNormalStopOrLimitDistance", "minStopOrLimitDistance"):
+                for key in (
+                    "minNormalStopOrLimitDistance",
+                    "minStopOrLimitDistance",
+                    "minControlledRiskStopDistance",
+                ):
                     node = dealing.get(key, {})
                     val = node.get("value", 0)
                     if val and float(val) > 0:
                         log.info(f"📏 {epic} min stop distance from API: {float(val)} (unit: {node.get('unit', '?')})")
                         return float(val)
-                # Also check snapshot for minDealSize hints
+                # Also check snapshot fallbacks
                 snap = info.get("snapshot", {})
-                min_stop = snap.get("minNormalStopOrLimitDistance", 0)
-                if min_stop and float(min_stop) > 0:
-                    log.info(f"📏 {epic} min stop from snapshot: {float(min_stop)}")
-                    return float(min_stop)
+                for snap_key in ("minNormalStopOrLimitDistance", "minStopOrLimitDistance"):
+                    min_stop = snap.get(snap_key, 0)
+                    if min_stop and float(min_stop) > 0:
+                        log.info(f"📏 {epic} min stop from snapshot {snap_key}: {float(min_stop)}")
+                        return float(min_stop)
         except Exception as e:
             log.warning(f"Could not fetch min stop for {epic}: {e}")
         return 0.0
@@ -146,25 +152,36 @@ class CapitalAPI:
             "size": size,
         }
         if stop_distance is not None:
-            # Capital.com requires stopDistance to be positive
-            sd = round(abs(stop_distance), 2)
+            # Capital.com requires stopDistance to be positive + finite
+            try:
+                sd = abs(float(stop_distance))
+            except Exception:
+                sd = 0.0
+
+            if not math.isfinite(sd):
+                sd = 0.0
 
             # Enforce minimum from API
             min_sd = self.get_min_stop_distance(epic)
             if min_sd > 0 and sd < min_sd:
                 log.warning(f"⚠️ {epic} SL {sd} < min {min_sd}, bumping to {min_sd}")
-                sd = round(min_sd * 1.05, 2)  # 5% above minimum for safety margin
+                sd = min_sd * 1.05  # 5% above minimum for safety margin
 
             if sd <= 0:
-                sd = 1.0  # absolute minimum fallback
+                # Non-zero hard fallback to avoid minvalue:0 rejections
+                sd = max(min_sd * 1.05, 0.01)
+
+            # Keep precision for forex/crypto instruments
+            sd = round(sd, 6)
             payload["stopDistance"] = sd
-            log.info(f"📏 {epic} final stopDistance={sd}")
+            log.info(f"📏 {epic} final stopDistance={sd} (raw={stop_distance})")
         if profit_distance is not None:
             pd = round(abs(profit_distance), 2)
             if pd > 0:
                 payload["profitDistance"] = pd
 
         try:
+            log.debug(f"Order payload {epic}: {payload}")
             resp = self.session.post(
                 f"{self.base_url}/api/v1/positions",
                 json=payload,
