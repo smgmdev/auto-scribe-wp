@@ -469,11 +469,13 @@ function updateGrid(data) {
                 el.querySelector('.slot-dir').textContent = dir;
                 el.querySelector('.slot-pair').textContent = t.pair || epic;
                 el.querySelector('.slot-price').textContent = formatPrice(price);
+                el.querySelector('.slot-entry').textContent = 'Entry: ' + formatPrice(entryP);
 
-                // P&L with percentage
-                var pnlPct = (entryP > 0) ? ((pnl / entryP) * 100) : 0;
-                var pnlText = formatPnl(pnl) + '  ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
+                // P&L percentage only
+                var pnlPct = (entryP > 0) ? (((price - entryP) / entryP) * 100 * (dir === 'BUY' ? 1 : -1)) : 0;
+                var pnlText = (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
                 el.querySelector('.slot-pnl').textContent = pnlText;
+                el.querySelector('.slot-pnl').style.color = pnlPct >= 0 ? '#4ade80' : '#f87171';
                 el.querySelector('.slot-empty-text').textContent = '';
 
                 // Flash on price change — quick 150ms transition
