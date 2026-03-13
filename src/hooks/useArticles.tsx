@@ -178,6 +178,10 @@ export function useArticles() {
     return () => window.removeEventListener('session-extended', handler);
   }, []);
 
+  // Use a ref for fetchArticles so realtime/polling always call the latest version
+  const fetchArticlesRef = useRef(fetchArticles);
+  fetchArticlesRef.current = fetchArticles;
+
   // Subscribe to realtime updates - only for this user's articles (or all for admin)
   useEffect(() => {
     if (!user) return;
@@ -191,12 +195,19 @@ export function useArticles() {
       .channel(`articles-changes-${resubKey}`)
       .on('postgres_changes', channelConfig, () => {
         // Background refresh without loading spinner
-        fetchArticles(false);
+        fetchArticlesRef.current(false);
       })
       .subscribe();
 
+    // Polling fallback: check every 10s in case realtime misses an event
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+    pollInterval = setInterval(() => {
+      fetchArticlesRef.current(false);
+    }, 10000);
+
     return () => {
       supabase.removeChannel(channel);
+      if (pollInterval) clearInterval(pollInterval);
     };
   }, [user?.id, isAdmin, resubKey]);
 
