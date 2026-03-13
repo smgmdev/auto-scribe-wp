@@ -1,4 +1,4 @@
-"""Position sizing and risk management."""
+"""Position sizing and risk management with per-category limits."""
 
 from logger_setup import get_logger
 import config
@@ -38,11 +38,26 @@ def calculate_position_size(
     return size
 
 
+def count_positions_by_category(open_positions: list) -> dict[str, int]:
+    """Count open positions per category."""
+    counts = {
+        config.CATEGORY_STOCKS: 0,
+        config.CATEGORY_CRYPTO: 0,
+        config.CATEGORY_COMMODITIES: 0,
+    }
+    for pos in open_positions:
+        epic = pos.get("market", {}).get("epic", "")
+        cat = config.get_category(epic)
+        if cat in counts:
+            counts[cat] += 1
+    return counts
+
+
 def can_open_position(open_positions: list, epic: str) -> bool:
-    """Check if we can open a new position for this epic."""
-    # Don't exceed max open positions
+    """Check if we can open a new position for this epic (respects per-category limits)."""
+    # Don't exceed global max
     if len(open_positions) >= config.MAX_OPEN_POSITIONS:
-        log.info(f"⛔ Max positions ({config.MAX_OPEN_POSITIONS}) reached")
+        log.info(f"⛔ Global max positions ({config.MAX_OPEN_POSITIONS}) reached")
         return False
 
     # Don't open duplicate positions on same epic
@@ -50,5 +65,14 @@ def can_open_position(open_positions: list, epic: str) -> bool:
         if pos.get("market", {}).get("epic") == epic:
             log.debug(f"Already have position on {epic}")
             return False
+
+    # Per-category limit
+    category = config.get_category(epic)
+    counts = count_positions_by_category(open_positions)
+    cat_count = counts.get(category, 0)
+
+    if cat_count >= config.MAX_POSITIONS_PER_CATEGORY:
+        log.info(f"⛔ {category} limit ({config.MAX_POSITIONS_PER_CATEGORY}) reached ({cat_count} open)")
+        return False
 
     return True
