@@ -364,7 +364,10 @@ class CapitalAPI:
         if not epics:
             return []
 
-        cleaned_epics = [e for e in dict.fromkeys(epics) if e]
+        cleaned_epics = [
+            e for e in dict.fromkeys(epics)
+            if e and e not in self._invalid_epics
+        ]
         if not cleaned_epics:
             return []
 
