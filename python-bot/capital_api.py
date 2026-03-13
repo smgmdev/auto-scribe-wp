@@ -306,7 +306,7 @@ class CapitalAPI:
                 return resp.json().get("nodes", [])
             else:
                 _handle_error(resp.status_code)
-                log.warning(f"Market categories: {resp.status_code}")
+                log.info(f"Market categories: {resp.status_code}")
         except Exception as e:
             log.error(f"Market categories exception: {e}")
         return []
