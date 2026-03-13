@@ -748,7 +748,9 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             data = generate_api_response()
             self.send_response(200)
             self.send_header("Content-type", "application/json")
-            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             self.end_headers()
             self.wfile.write(json.dumps(data).encode())
         else:
