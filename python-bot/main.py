@@ -5,8 +5,10 @@ Features: Multi-timeframe pre-trade analysis, dynamic loss cutting, unlimited TP
           5% step trailing SL, and AI-driven parameter adaptation.
 """
 
+import json
 import time
 import sys
+import os
 from datetime import datetime
 from collections import defaultdict
 
@@ -17,6 +19,7 @@ from risk import calculate_position_size, can_open_position
 from position_manager import PositionManager
 from trade_journal import TradeJournal
 from market_scanner import MarketScanner
+from dashboard import start_dashboard_thread
 from logger_setup import get_logger
 
 log = get_logger("main")
