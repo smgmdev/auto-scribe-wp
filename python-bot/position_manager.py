@@ -48,15 +48,12 @@ def _initial_sl(entry_price: float, direction: str, epic: str = "") -> float:
 
 
 def _validate_sl(sl_price: float, entry_price: float, direction: str,
-                 locked_steps: int) -> float:
+                 locked_steps: int, epic: str = "") -> float:
     """
     Ensure SL makes sense for the direction and profit level.
-    - BUY with 0 steps: SL must be BELOW entry
-    - SELL with 0 steps: SL must be ABOVE entry
-    - BUY with steps >= 1: SL must be >= entry + (steps * 5%)
-    - SELL with steps >= 1: SL must be <= entry - (steps * 5%)
-    If invalid, reset to correct value.
     """
+    sl_pct, step_pct = _get_params(epic)
+    step_label = f"{step_pct*100:.0f}%"
     if locked_steps == 0:
         # No profit locked — SL must be on the loss side
         if direction == "BUY" and sl_price >= entry_price:
