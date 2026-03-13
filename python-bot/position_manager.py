@@ -104,10 +104,11 @@ class PositionManager:
                        spread: float = 0.0, current_price: float = 0.0,
                        created_date: float = 0.0, category: str = ""):
         """Start tracking a new position."""
-        step_size = entry_price * PROFIT_STEP_PCT
+        sl_pct, step_pct = _get_params(epic)
+        step_size = entry_price * step_pct
 
-        # Always start with default SL at -1.5%
-        trailing_stop_price = _initial_sl(entry_price, direction)
+        # Always start with default SL
+        trailing_stop_price = _initial_sl(entry_price, direction, epic)
         locked_steps = 0
 
         # Restart recovery: reconstruct locked steps from current price
@@ -131,7 +132,7 @@ class PositionManager:
 
         # SANITY CHECK: validate SL makes sense
         trailing_stop_price = _validate_sl(
-            trailing_stop_price, entry_price, direction, locked_steps
+            trailing_stop_price, entry_price, direction, locked_steps, epic
         )
 
         entry_time = created_date if created_date > 0 else time.time()
