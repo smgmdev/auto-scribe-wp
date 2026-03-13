@@ -1118,6 +1118,18 @@ def run():
                     log.error(f"Tick scan error {epic}: {e}")
                     continue
 
+            # ═══════════════════════════════════════════
+            # STALL DETECTION — if no batch succeeds for 60s, force re-login
+            # ═══════════════════════════════════════════
+            if time.time() - _last_batch_success > _stall_threshold:
+                log.warning("⚠️ STALL DETECTED — no successful batch fetch for 60s. Re-authenticating...")
+                if api.login():
+                    _last_batch_success = time.time()
+                    log.info("✅ Re-authenticated after stall")
+                else:
+                    log.error("❌ Re-login failed — will retry next cycle")
+                    time.sleep(5)
+
             # Sleep to maintain 1-second cycle
             elapsed = time.time() - cycle_start
             sleep_time = max(0, config.SCAN_INTERVAL_SECONDS - elapsed)
