@@ -661,6 +661,7 @@ def run():
                 key=lambda c: cat_counts.get(c, 0),
             )
             balanced_epics = []
+            scanning_cats = []
             for cat in _cat_order:
                 if cat in full_categories:
                     continue  # Skip full categories entirely
@@ -671,6 +672,10 @@ def run():
                     config.CATEGORY_FOREX: config.WATCHLIST_FOREX,
                 }.get(cat, [])
                 balanced_epics.extend(cat_epics)
+                scanning_cats.append(f"{cat}({cat_counts.get(cat, 0)}/{config.MAX_POSITIONS_PER_CATEGORY})")
+
+            if cycle_count % 30 == 0 and scanning_cats:
+                log.info(f"🔄 Entry scan order: {' → '.join(scanning_cats)} | {len(balanced_epics)} epics")
 
             for epic in balanced_epics:
                 try:
