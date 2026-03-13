@@ -311,10 +311,11 @@ def run():
                         # Immediately refresh positions to prevent exceeding limit
                         positions = api.get_positions()
 
-                        # Track for smart management
+                        # Track for smart management (pass spread for fee calculation)
                         pos_manager.track_position(
                             deal_ref, epic, entry_signal,
-                            mid, stop_distance, profit_distance
+                            mid, stop_distance, profit_distance,
+                            spread=spread
                         )
 
                         # Store entry info for journal
