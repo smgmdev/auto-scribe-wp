@@ -517,10 +517,11 @@ class MarketScanner:
             if std_epics:
                 log.info("🔍 ═══ STANDARD SCAN (Stocks + Commodities) ═══")
 
-                vol_scans = []
-                for epic in std_epics:
-                    vs = self._quick_volatility_scan(epic)
-                    vol_scans.append(vs)
+                with ThreadPoolExecutor(max_workers=6) as pool:
+                    futures = {pool.submit(self._quick_volatility_scan, ep): ep for ep in std_epics}
+                    vol_scans = []
+                    for f in as_completed(futures):
+                        vol_scans.append(f.result())
 
                 vol_scans.sort(key=lambda x: x["volatility"], reverse=True)
 
