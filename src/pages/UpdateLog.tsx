@@ -829,7 +829,7 @@ export default function UpdateLog() {
           <p className="text-white/50 leading-relaxed">
             We regularly release updates to improve performance, introduce new capabilities, and refine the user experience across publishing, media buying, and agency management. Each entry below details the changes included in that release.
           </p>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <div className="mt-6 flex flex-col sm:flex-row gap-0">
             <input
               type="text"
               placeholder="Search updates..."
