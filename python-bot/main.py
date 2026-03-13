@@ -1018,7 +1018,7 @@ def run():
                     stop_distance = max(safe_stop, spread * 3, mid * 0.0005)
 
                     if not math.isfinite(stop_distance) or stop_distance <= 0:
-                        log.warning(f"Skipping {epic}: invalid stop_distance computed ({stop_distance})")
+                        log.info(f"Skipping {epic}: invalid stop_distance computed ({stop_distance})")
                         continue
 
                     # Query market info for minimum stop distance
