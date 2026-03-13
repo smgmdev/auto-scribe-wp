@@ -1125,16 +1125,18 @@ def run():
                     continue
 
             # ═══════════════════════════════════════════
-            # STALL DETECTION — if no batch succeeds for 60s, force re-login
+            # STALL DETECTION — if no batch succeeds for 120s, force re-login
+            # (increased from 60s to avoid premature re-auth loops)
             # ═══════════════════════════════════════════
-            if time.time() - _last_batch_success > _stall_threshold:
-                log.warning("⚠️ STALL DETECTED — no successful batch fetch for 60s. Re-authenticating...")
+            if time.time() - _last_batch_success > 120:
+                log.warning("⚠️ STALL DETECTED — no successful batch fetch for 120s. Re-authenticating...")
+                time.sleep(3)  # Brief pause before re-auth
                 if api.login():
                     _last_batch_success = time.time()
                     log.info("✅ Re-authenticated after stall")
                 else:
-                    log.error("❌ Re-login failed — will retry next cycle")
-                    time.sleep(5)
+                    log.error("❌ Re-login failed — will retry in 10s")
+                    time.sleep(10)
 
             # Sleep to maintain 1-second cycle
             elapsed = time.time() - cycle_start

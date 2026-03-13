@@ -131,13 +131,18 @@ class CapitalAPI:
 
     def get_market_info(self, epic: str) -> Optional[dict]:
         """Get market details (min size, lot size, etc.)."""
+        _pace_request()
         try:
             resp = self.session.get(
                 f"{self.base_url}/api/v1/markets/{epic}",
                 headers=self._headers(),
+                timeout=10,
             )
             if resp.status_code == 200:
+                _handle_success()
                 return resp.json()
+            else:
+                _handle_error(resp.status_code)
         except Exception as e:
             log.error(f"Market info exception for {epic}: {e}")
         return None
