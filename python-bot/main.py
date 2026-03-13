@@ -186,6 +186,7 @@ def run():
     config.update_dynamic_watchlists(
         discovered["stock_epics"], discovered["crypto_epics"],
         forex_epics=discovered.get("forex_epics"),
+        commodity_epics=discovered.get("commodity_epics"),
     )
     log.info(
         f"📈 Stocks: {', '.join(config.WATCHLIST_STOCKS)} | "
@@ -251,27 +252,32 @@ def run():
                 log.warning(f"Failed to fetch startup prices: {e}")
 
         # ═══════════════════════════════════════════
-        # CLOSE ALL NON-CRYPTO POSITIONS (crypto-only mode)
-        # Retry up to 3 times with delays for rate limiting
+        # CLOSE POSITIONS IN DISABLED CATEGORIES (respects dashboard toggles)
         # ═══════════════════════════════════════════
+        from dashboard import is_category_disabled
+        _cat_map_startup = {
+            config.CATEGORY_STOCKS: "Stocks", config.CATEGORY_CRYPTO: "Crypto",
+            config.CATEGORY_COMMODITIES: "Commodities", config.CATEGORY_FOREX: "FX",
+        }
         for attempt in range(3):
-            positions = api.get_positions()  # Re-fetch each attempt
-            non_crypto = []
+            positions = api.get_positions()
+            disabled_pos = []
             for pos in positions:
                 epic = pos.get("market", {}).get("epic", "")
                 deal_id = pos.get("position", {}).get("dealId", "")
                 if not deal_id or not epic:
                     continue
                 category = config.get_category(epic)
-                if category != config.CATEGORY_CRYPTO:
-                    non_crypto.append((epic, deal_id, category))
+                display_cat = _cat_map_startup.get(category, "Stocks")
+                if is_category_disabled(display_cat):
+                    disabled_pos.append((epic, deal_id, category))
 
-            if not non_crypto:
-                log.info(f"✅ All non-crypto positions closed (attempt {attempt + 1})")
+            if not disabled_pos:
+                log.info(f"✅ No disabled-category positions to close (attempt {attempt + 1})")
                 break
 
-            log.info(f"🚫 Attempt {attempt + 1}: Closing {len(non_crypto)} non-crypto position(s)...")
-            for epic, deal_id, category in non_crypto:
+            log.info(f"🚫 Attempt {attempt + 1}: Closing {len(disabled_pos)} disabled-category position(s)...")
+            for epic, deal_id, category in disabled_pos:
                 log.info(f"  🚫 Closing {epic} ({category}) deal={deal_id}")
                 try:
                     closed = api.close_position(deal_id)
@@ -283,9 +289,9 @@ def run():
                         log.warning(f"    ⚠️ Failed to close {epic} — will retry")
                 except Exception as e:
                     log.error(f"    ❌ Error closing {epic}: {e}")
-                time.sleep(0.3)  # Rate limit protection
+                time.sleep(0.3)
 
-            time.sleep(1)  # Wait before retry
+            time.sleep(1)
 
         # Final refresh
         positions = api.get_positions()
@@ -456,11 +462,12 @@ def run():
 
                 # Re-discover best stocks & crypto (rotates into hottest movers)
                 discovered = discovery.discover()
-                if discovered["stock_epics"] or discovered["crypto_epics"] or discovered.get("forex_epics"):
+                if discovered["stock_epics"] or discovered["crypto_epics"] or discovered.get("forex_epics") or discovered.get("commodity_epics"):
                     old_watchlist = set(config.WATCHLIST)
                     config.update_dynamic_watchlists(
                         discovered["stock_epics"], discovered["crypto_epics"],
                         forex_epics=discovered.get("forex_epics"),
+                        commodity_epics=discovered.get("commodity_epics"),
                     )
                     new_watchlist = set(config.WATCHLIST)
                     added = new_watchlist - old_watchlist
@@ -482,18 +489,24 @@ def run():
             write_live_state(api, balance, positions, pos_manager, tick_history)
 
             # ═══════════════════════════════════════════
-            # 🚫 ENFORCE CRYPTO-ONLY — close any non-crypto that snuck through
+            # 🚫 ENFORCE DISABLED CATEGORIES — close positions in toggled-off categories
             # ═══════════════════════════════════════════
             if positions and cycle_count % 10 == 0:
+                from dashboard import is_category_disabled
+                _cat_map_loop = {config.CATEGORY_STOCKS: "Stocks", config.CATEGORY_CRYPTO: "Crypto",
+                                 config.CATEGORY_COMMODITIES: "Commodities", config.CATEGORY_FOREX: "FX"}
                 for pos in positions:
                     epic = pos.get("market", {}).get("epic", "")
                     deal_id = pos.get("position", {}).get("dealId", "")
-                    if epic and deal_id and config.get_category(epic) != config.CATEGORY_CRYPTO:
-                        log.info(f"🚫 Force-closing non-crypto: {epic} deal={deal_id}")
-                        if api.close_position(deal_id):
-                            pos_manager.untrack(deal_id)
-                            active_signals.pop(epic, None)
-                        time.sleep(0.3)
+                    if epic and deal_id:
+                        cat = config.get_category(epic)
+                        disp_cat = _cat_map_loop.get(cat, "Stocks")
+                        if is_category_disabled(disp_cat):
+                            log.info(f"🚫 Force-closing disabled-category: {epic} ({cat}) deal={deal_id}")
+                            if api.close_position(deal_id):
+                                pos_manager.untrack(deal_id)
+                                active_signals.pop(epic, None)
+                            time.sleep(0.3)
 
             # ═══════════════════════════════════════════
             # ⚡ SMART POSITION MANAGEMENT — every cycle

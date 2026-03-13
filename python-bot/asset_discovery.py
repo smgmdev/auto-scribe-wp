@@ -8,7 +8,7 @@ Instead of a hardcoded watchlist, the bot:
 4. Re-scans periodically to rotate into the hottest assets
 5. Ensures pinned assets (e.g. BTCUSD) are always included
 
-Commodities remain fixed (limited set, all are liquid).
+Commodities are also dynamically discovered from Capital.com categories.
 """
 
 import time
@@ -20,7 +20,9 @@ log = get_logger("discovery")
 
 # How many assets to select per category
 TOP_STOCKS = 10
-TOP_CRYPTO = 15   # More crypto for scalp coverage
+TOP_CRYPTO = 15
+TOP_FOREX = 12
+TOP_COMMODITIES = 8
 TOP_FOREX = 12    # More forex pairs for scalp coverage
 
 # Re-discover every N minutes (faster for volatile markets)
@@ -48,9 +50,11 @@ class AssetDiscovery:
         self.discovered_stocks: list[dict] = []
         self.discovered_crypto: list[dict] = []
         self.discovered_forex: list[dict] = []
+        self.discovered_commodities: list[dict] = []
         self.stock_epics: list[str] = []
         self.crypto_epics: list[str] = []
         self.forex_epics: list[str] = []
+        self.commodity_epics: list[str] = []
 
     def _discover_category_assets(self, node_id: str, max_depth: int = 2) -> list[dict]:
         """Recursively discover tradeable assets from a market navigation node."""
@@ -140,9 +144,11 @@ class AssetDiscovery:
                 "stocks": self.discovered_stocks,
                 "crypto": self.discovered_crypto,
                 "forex": self.discovered_forex,
+                "commodities": self.discovered_commodities,
                 "stock_epics": self.stock_epics,
                 "crypto_epics": self.crypto_epics,
                 "forex_epics": self.forex_epics,
+                "commodity_epics": self.commodity_epics,
             }
 
         log.info("🔎 ═══ ASSET DISCOVERY — Finding best movers ═══")
@@ -245,13 +251,39 @@ class AssetDiscovery:
 
         ranked_forex = self._rank_assets(all_forex)[:TOP_FOREX]
 
+        # --- Discover commodities ---
+        log.info("🪙 Scanning commodities...")
+        all_commodities = []
+
+        commodity_nodes = [n for n in categories if "commodit" in n.get("name", "").lower()
+                           or "commodit" in n.get("id", "").lower()]
+
+        for node in commodity_nodes:
+            assets = self._discover_category_assets(node["id"], max_depth=2)
+            commodity_assets = [a for a in assets if a.get("instrumentType") == "COMMODITIES"]
+            all_commodities.extend(commodity_assets)
+            log.info(f"  Found {len(commodity_assets)} commodities from {node.get('name', node.get('id'))}")
+
+        # Fallback: search popular commodities
+        if len(all_commodities) < TOP_COMMODITIES:
+            for term in ["GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER",
+                         "PLATINUM", "PALLADIUM", "OIL_BRENT"]:
+                results = self.api.search_markets(term)
+                commodity_results = [r for r in results if r.get("instrumentType") == "COMMODITIES"
+                                     and r.get("marketStatus") == "TRADEABLE"]
+                all_commodities.extend(commodity_results)
+
+        ranked_commodities = self._rank_assets(all_commodities)[:TOP_COMMODITIES]
+
         # Store results
         self.discovered_stocks = ranked_stocks
         self.discovered_crypto = ranked_crypto
         self.discovered_forex = ranked_forex
+        self.discovered_commodities = ranked_commodities
         self.stock_epics = [s["epic"] for s in ranked_stocks]
         self.crypto_epics = [c["epic"] for c in ranked_crypto]
         self.forex_epics = [f["epic"] for f in ranked_forex]
+        self.commodity_epics = [c["epic"] for c in ranked_commodities]
         self.last_discovery = now
 
         # Log results
@@ -268,11 +300,17 @@ class AssetDiscovery:
         for i, f in enumerate(ranked_forex):
             log.info(f"  {i+1}. {f['epic']} ({f['name']}) | move={f['pct_change']}% spread={f['spread_pct']:.3f}% score={f['score']}")
 
+        log.info(f"🪙 Top {len(ranked_commodities)} Commodities selected:")
+        for i, c in enumerate(ranked_commodities):
+            log.info(f"  {i+1}. {c['epic']} ({c['name']}) | move={c['pct_change']}% spread={c['spread_pct']:.3f}% score={c['score']}")
+
         return {
             "stocks": ranked_stocks,
             "crypto": ranked_crypto,
             "forex": ranked_forex,
+            "commodities": ranked_commodities,
             "stock_epics": self.stock_epics,
             "crypto_epics": self.crypto_epics,
             "forex_epics": self.forex_epics,
+            "commodity_epics": self.commodity_epics,
         }

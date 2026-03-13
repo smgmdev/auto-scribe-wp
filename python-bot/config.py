@@ -36,14 +36,24 @@ CATEGORY_CRYPTO = "crypto"
 CATEGORY_COMMODITIES = "commodities"
 CATEGORY_FOREX = "forex"
 
-# Commodities — DISABLED (crypto only mode)
-WATCHLIST_COMMODITIES = []
+# Commodities — AI discovers best, fallback list below
+WATCHLIST_COMMODITIES_FALLBACK = [
+    "GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS",
+    "COPPER", "PLATINUM", "OIL_BRENT",
+]
+WATCHLIST_COMMODITIES: list[str] = list(WATCHLIST_COMMODITIES_FALLBACK)
 
-# Forex — DISABLED (crypto only mode)
-WATCHLIST_FOREX_FALLBACK = []
+# Forex — AI discovers best, fallback list below
+WATCHLIST_FOREX_FALLBACK = [
+    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
+    "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
+]
 
-# Stocks — DISABLED (crypto only mode)
-WATCHLIST_STOCKS_FALLBACK = []
+# Stocks — AI discovers best, fallback list below
+WATCHLIST_STOCKS_FALLBACK = [
+    "AAPL", "TSLA", "NVDA", "MSFT", "AMZN",
+    "META", "GOOGL", "AMD", "NFLX", "COIN",
+]
 WATCHLIST_CRYPTO_FALLBACK = [
     "BTCUSD", "ETHUSD", "SOLUSD", "XRPUSD",
     "BNBUSD", "DOGEUSD", "ADAUSD", "AVAXUSD",
@@ -80,9 +90,10 @@ def update_dynamic_watchlists(
     stock_epics: list[str],
     crypto_epics: list[str],
     forex_epics: list[str] | None = None,
+    commodity_epics: list[str] | None = None,
 ):
     """Called by AssetDiscovery to update the live watchlists."""
-    global WATCHLIST_STOCKS, WATCHLIST_CRYPTO, WATCHLIST_FOREX
+    global WATCHLIST_STOCKS, WATCHLIST_CRYPTO, WATCHLIST_FOREX, WATCHLIST_COMMODITIES
     if stock_epics:
         WATCHLIST_STOCKS = stock_epics
     if crypto_epics:
@@ -93,6 +104,8 @@ def update_dynamic_watchlists(
         WATCHLIST_CRYPTO = crypto_epics
     if forex_epics:
         WATCHLIST_FOREX = forex_epics
+    if commodity_epics:
+        WATCHLIST_COMMODITIES = commodity_epics
     rebuild_watchlist()
 
 
