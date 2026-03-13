@@ -158,7 +158,7 @@ class AssetDiscovery:
                     r_status = str(r.get("marketStatus", "")).upper()
                     if not epic or epic in seen_epics:
                         continue
-                    if r_type not in allowed_types:
+                    if not any(r_type == t or r_type.startswith(t) for t in allowed_types):
                         continue
                     if require_tradeable and r_status != "TRADEABLE":
                         continue
