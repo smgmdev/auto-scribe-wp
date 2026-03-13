@@ -247,9 +247,18 @@ class AssetDiscovery:
                               "BA", "DIS", "PYPL", "INTC", "UBER", "COIN", "PLTR", "SNAP", "SQ", "SHOP"]
         if len(all_stocks) < TOP_STOCKS:
             log.info(f"  📡 Running stock search fallback ({len(all_stocks)}/{TOP_STOCKS} found so far)...")
-            fallback = self._search_fallback(stock_search_terms, "SHARES")
-            # Also try EQUITIES type
-            fallback += self._search_fallback(["AAPL", "TSLA", "NVDA"], "EQUITIES")
+            fallback = self._search_fallback(
+                stock_search_terms,
+                ("SHARES", "EQUITIES"),
+                require_tradeable=True,
+            )
+            if len(fallback) < TOP_STOCKS:
+                fallback += self._search_fallback(
+                    stock_search_terms,
+                    ("SHARES", "EQUITIES"),
+                    require_tradeable=False,
+                    limit_per_term=2,
+                )
             all_stocks.extend(fallback)
 
         ranked_stocks = self._rank_assets(all_stocks)[:TOP_STOCKS]
