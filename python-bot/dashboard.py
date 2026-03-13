@@ -206,15 +206,15 @@ def _price_fetcher_loop():
                         current_price = entry_price
                         bid = ask = entry_price
 
-                # P&L from API or calculate
+                # P&L from API or calculate (multiply by size for dollar value)
                 api_pnl = pos.get("position", {}).get("profit")
                 if api_pnl is not None:
                     pnl = float(api_pnl)
                 else:
                     if direction == "BUY":
-                        pnl = current_price - entry_price
+                        pnl = (current_price - entry_price) * size
                     else:
-                        pnl = entry_price - current_price
+                        pnl = (entry_price - current_price) * size
 
                 # Format pair name
                 pair = epic
@@ -226,6 +226,24 @@ def _price_fetcher_loop():
                 raw_cat = config.get_category(epic)
                 display_cat = cat_map.get(raw_cat, "Stocks")
 
+                # Get SL data from position manager
+                deal_id = pos.get("position", {}).get("dealId", "")
+                tracked = {}
+                if _pos_manager_ref and deal_id:
+                    tracked = _pos_manager_ref.tracked.get(deal_id, {})
+
+                trailing_stop = tracked.get("trailing_stop_price")
+                stop_dist = tracked.get("stop_distance", 0)
+
+                # If no trailing stop, calculate initial SL from stop_distance
+                if trailing_stop is None and stop_dist > 0:
+                    if direction == "BUY":
+                        sl_price = entry_price - stop_dist
+                    else:
+                        sl_price = entry_price + stop_dist
+                else:
+                    sl_price = trailing_stop
+
                 categories[display_cat].append({
                     "epic": epic,
                     "pair": pair,
@@ -236,6 +254,8 @@ def _price_fetcher_loop():
                     "direction": direction,
                     "entry_price": entry_price,
                     "size": size,
+                    "trailing_stop": round(sl_price, 6) if sl_price is not None else None,
+                    "stop_distance": stop_dist,
                 })
 
             now = datetime.utcnow()
