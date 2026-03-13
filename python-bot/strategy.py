@@ -277,3 +277,108 @@ def tick_momentum(ticks: list[dict]) -> dict:
         "velocity": round(avg_velocity, 8),
         "micro_rsi": round(micro_rsi, 2),
     }
+
+
+def compute_support_resistance(highs: np.ndarray, lows: np.ndarray, closes: np.ndarray,
+                                lookback: int = 20, num_levels: int = 3,
+                                cluster_pct: float = 0.003) -> dict:
+    """
+    Detect key support and resistance levels from candle data using pivot points
+    and price clustering.
+
+    Returns:
+        {
+            "support": [float, ...],       # sorted ascending (nearest first)
+            "resistance": [float, ...],    # sorted ascending (nearest first)
+            "nearest_support": float,
+            "nearest_resistance": float,
+            "sr_quality": float,           # 0-1 how well-defined the levels are
+        }
+    """
+    if len(closes) < lookback:
+        price = float(closes[-1]) if len(closes) > 0 else 0
+        return {
+            "support": [], "resistance": [],
+            "nearest_support": 0, "nearest_resistance": 0,
+            "sr_quality": 0,
+        }
+
+    current_price = float(closes[-1])
+
+    # ── Step 1: Find pivot highs and pivot lows ──
+    pivot_highs = []
+    pivot_lows = []
+    window = 3  # candles on each side
+
+    for i in range(window, len(highs) - window):
+        # Pivot high: higher than `window` candles on each side
+        if all(highs[i] >= highs[i - j] for j in range(1, window + 1)) and \
+           all(highs[i] >= highs[i + j] for j in range(1, window + 1)):
+            pivot_highs.append(float(highs[i]))
+
+        # Pivot low: lower than `window` candles on each side
+        if all(lows[i] <= lows[i - j] for j in range(1, window + 1)) and \
+           all(lows[i] <= lows[i + j] for j in range(1, window + 1)):
+            pivot_lows.append(float(lows[i]))
+
+    # ── Step 2: Cluster nearby pivots (within cluster_pct %) ──
+    def cluster_levels(levels: list, pct: float) -> list:
+        if not levels:
+            return []
+        levels = sorted(levels)
+        clusters = []
+        current_cluster = [levels[0]]
+        for lv in levels[1:]:
+            if abs(lv - current_cluster[-1]) / max(current_cluster[-1], 1e-10) <= pct:
+                current_cluster.append(lv)
+            else:
+                clusters.append(current_cluster)
+                current_cluster = [lv]
+        clusters.append(current_cluster)
+
+        # Return the mean of each cluster, weighted by cluster size (more touches = stronger)
+        result = []
+        for cl in clusters:
+            result.append({"level": sum(cl) / len(cl), "touches": len(cl)})
+        return result
+
+    support_clusters = cluster_levels(pivot_lows, cluster_pct)
+    resistance_clusters = cluster_levels(pivot_highs, cluster_pct)
+
+    # ── Step 3: Separate into support (below price) and resistance (above price) ──
+    supports = sorted(
+        [c for c in support_clusters if c["level"] < current_price],
+        key=lambda c: c["level"], reverse=True  # nearest first
+    )
+    resistances = sorted(
+        [c for c in resistance_clusters if c["level"] > current_price],
+        key=lambda c: c["level"]  # nearest first
+    )
+
+    # Also consider resistance clusters below price as broken-resistance-turned-support
+    for c in resistance_clusters:
+        if c["level"] < current_price:
+            supports.append(c)
+    supports = sorted(supports, key=lambda c: c["level"], reverse=True)[:num_levels]
+
+    # And support clusters above price as broken-support-turned-resistance
+    for c in support_clusters:
+        if c["level"] > current_price:
+            resistances.append(c)
+    resistances = sorted(resistances, key=lambda c: c["level"])[:num_levels]
+
+    nearest_sup = supports[0]["level"] if supports else 0
+    nearest_res = resistances[0]["level"] if resistances else 0
+
+    # Quality: how many touches do the nearest levels have
+    sup_touches = supports[0]["touches"] if supports else 0
+    res_touches = resistances[0]["touches"] if resistances else 0
+    sr_quality = min(1.0, (sup_touches + res_touches) / 6.0)
+
+    return {
+        "support": [s["level"] for s in supports],
+        "resistance": [r["level"] for r in resistances],
+        "nearest_support": round(nearest_sup, 6),
+        "nearest_resistance": round(nearest_res, 6),
+        "sr_quality": round(sr_quality, 3),
+    }
