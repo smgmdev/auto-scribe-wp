@@ -121,8 +121,9 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
           className={expanded ? "overflow-y-auto" : "overflow-hidden"}
           style={{
             height: expanded ? `${panelHeight}px` : '0px',
-            maxHeight: expanded ? 'calc(100vh - 28px)' : '0px',
+            maxHeight: expanded ? 'calc(100dvh - 28px)' : '0px',
             transition: 'height 0.3s ease-in-out, max-height 0.3s ease-in-out',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           <div ref={innerRef} className="bg-black border-b border-white/20">
