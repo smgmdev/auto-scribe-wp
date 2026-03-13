@@ -181,7 +181,7 @@ export default function InvestorRelations() {
               <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
             </div>
           )}
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-32 pb-24 md:py-36 text-center relative z-10">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 pt-[136px] pb-24 md:py-36 text-center relative z-10">
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/50 mb-4">Investor Relations</p>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
