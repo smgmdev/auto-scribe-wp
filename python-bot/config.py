@@ -129,7 +129,10 @@ def get_category(epic: str) -> str:
         return CATEGORY_COMMODITIES
 
     # 3) Infer from epic name patterns
-    _commodities = {"GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER", "PLATINUM", "PALLADIUM", "OIL_BRENT"}
+    _commodities = {
+        "GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER", "PLATINUM", "PALLADIUM", "OIL_BRENT",
+        "XAUUSD", "XAGUSD", "USCRUDE", "UKOIL", "BRENT", "NATGAS",
+    }
     if epic in _commodities:
         return CATEGORY_COMMODITIES
 
