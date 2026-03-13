@@ -93,11 +93,13 @@ class CapitalAPI:
 
     def get_account(self) -> Optional[dict]:
         """Get account balance and details."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/accounts", headers=self._headers()
+                f"{self.base_url}/api/v1/accounts", headers=self._headers(), timeout=10
             )
             if resp.status_code == 200:
+                _handle_success()
                 accounts = resp.json().get("accounts", [])
                 if accounts:
                     acct = accounts[0]
@@ -109,6 +111,7 @@ class CapitalAPI:
                     )
                     return acct
             else:
+                _handle_error(resp.status_code)
                 log.error(f"Account fetch failed: {resp.status_code}")
         except Exception as e:
             log.error(f"Account exception: {e}")
