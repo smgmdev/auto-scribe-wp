@@ -1,5 +1,6 @@
 """Capital.com REST API wrapper for demo/live trading."""
 
+import math
 import requests
 from typing import Optional
 from logger_setup import get_logger
