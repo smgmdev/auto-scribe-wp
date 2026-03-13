@@ -275,7 +275,7 @@ body {
     flex: 1;
     min-width: 0;
     min-height: 70px;
-    border-radius: 8px;
+    border-radius: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -369,7 +369,7 @@ body {
     .grid-container { padding: 16px 12px; gap: 12px; }
     .category-label { width: 70px; min-width: 70px; font-size: 14px; }
     .slots { gap: 6px; }
-    .slot { min-height: 60px; padding: 8px 4px; border-radius: 6px; }
+    .slot { min-height: 60px; padding: 8px 4px; border-radius: 0; }
 }
 
 @media (max-width: 600px) {
@@ -379,7 +379,7 @@ body {
     .category-row { gap: 8px; }
     .category-label { width: 50px; min-width: 50px; font-size: 12px; }
     .slots { gap: 4px; }
-    .slot { min-height: 50px; padding: 6px 3px; border-radius: 4px; }
+    .slot { min-height: 50px; padding: 6px 3px; border-radius: 0; }
     .slot-dir { font-size: 7px; top: 2px; right: 3px; }
 }
 </style>
