@@ -321,6 +321,36 @@ export default function InvestorRelations() {
           </AnimatedSection>
         </section>
 
+        {/* Arcana Precision Section */}
+        <section className="bg-black min-h-screen flex flex-col items-center justify-center px-4 md:px-6">
+          <AnimatedSection className="text-center flex flex-col items-center">
+            <p className="text-sm font-medium tracking-wider uppercase text-white/40 mb-4">Our Products</p>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-6">
+              Arcana Precision
+            </h2>
+            <div className="relative w-full max-w-2xl mb-8">
+              <video
+                className="w-full rounded-lg"
+                src={arcanaPrecisionGlobe}
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            </div>
+            <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
+              Real-time geopolitical intelligence platform delivering AI-powered threat forecasting, market signals, and conflict simulation for governments and institutions.
+            </p>
+            <Button
+              onClick={() => navigate('/arcana-precision')}
+              className="rounded-none bg-blue-600 text-white hover:bg-blue-700 h-12 px-8 text-base font-medium mt-8"
+            >
+              Learn More
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </AnimatedSection>
+        </section>
+
 
         {/* Product Portfolio */}
         <section className="py-20 bg-[#1d1d1f] text-white">
