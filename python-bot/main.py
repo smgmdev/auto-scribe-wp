@@ -308,6 +308,9 @@ def run():
                         deal_ref = trade.get("dealReference", "")
                         active_signals[epic] = entry_signal
 
+                        # Immediately refresh positions to prevent exceeding limit
+                        positions = api.get_positions()
+
                         # Track for smart management
                         pos_manager.track_position(
                             deal_ref, epic, entry_signal,
