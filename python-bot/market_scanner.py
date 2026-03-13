@@ -12,6 +12,7 @@ Before entering any trade, the bot:
 import time
 import numpy as np
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from logger_setup import get_logger
 from strategy import compute_ema, compute_rsi, compute_atr, compute_momentum_score, compute_support_resistance
 import config
@@ -461,11 +462,12 @@ class MarketScanner:
             if scalp_epics:
                 log.info("⚡ ═══ SCALP SCAN (Crypto + FX) ═══")
 
-                # Quick volatility rank
-                vol_scans = []
-                for epic in scalp_epics:
-                    vs = self._quick_volatility_scan(epic)
-                    vol_scans.append(vs)
+                # Quick volatility rank — parallel
+                with ThreadPoolExecutor(max_workers=6) as pool:
+                    futures = {pool.submit(self._quick_volatility_scan, ep): ep for ep in scalp_epics}
+                    vol_scans = []
+                    for f in as_completed(futures):
+                        vol_scans.append(f.result())
 
                 # Sort by volatility × volume expansion (catches surges)
                 vol_scans.sort(
@@ -515,10 +517,11 @@ class MarketScanner:
             if std_epics:
                 log.info("🔍 ═══ STANDARD SCAN (Stocks + Commodities) ═══")
 
-                vol_scans = []
-                for epic in std_epics:
-                    vs = self._quick_volatility_scan(epic)
-                    vol_scans.append(vs)
+                with ThreadPoolExecutor(max_workers=6) as pool:
+                    futures = {pool.submit(self._quick_volatility_scan, ep): ep for ep in std_epics}
+                    vol_scans = []
+                    for f in as_completed(futures):
+                        vol_scans.append(f.result())
 
                 vol_scans.sort(key=lambda x: x["volatility"], reverse=True)
 
