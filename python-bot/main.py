@@ -626,12 +626,12 @@ def run():
                             )
                             closed = api.close_position(deal_id)
                             if closed:
-                                # Log to journal for learning
                                 tracked = pos_manager.tracked.get(deal_id, {})
                                 entry_data = entry_info.get(deal_id, {})
-                                journal.log_trade({
+                                trade_data = {
                                     "epic": pos_epic,
                                     "direction": pos_direction,
+                                    "category": config.get_category(pos_epic),
                                     "entry_price": tracked.get("entry_price", 0),
                                     "exit_price": current_price,
                                     "pnl": evaluation["unrealized_pnl"],
@@ -643,12 +643,22 @@ def run():
                                     "momentum_at_entry": entry_data.get("momentum", 0),
                                     "momentum_at_exit": tick_momentum(tick_history.get(pos_epic, [])).get("strength", 0),
                                     "rsi_at_entry": entry_data.get("rsi", 50),
+                                    "scanner_confidence": entry_data.get("scanner_confidence", 0),
+                                    "regime": regime_detector.get_cached_regime(pos_epic),
                                     "stop_distance": tracked.get("stop_distance", 0),
                                     "profit_distance": tracked.get("profit_distance", 0),
                                     "hit_tp": False,
                                     "hit_sl": "LOSS" in evaluation["action"],
                                     "early_exit": True,
-                                })
+                                }
+                                journal.log_trade(trade_data)
+
+                                # 🧠 Log to Brain (persistent learning)
+                                trade_id = brain.log_trade(trade_data)
+
+                                # 🤖 AI Review (every N trades)
+                                ai_reviewer.review_trade(trade_data, trade_id, brain.get_brain_summary())
+
                                 pos_manager.untrack(deal_id)
                                 active_signals.pop(pos_epic, None)
                                 entry_info.pop(deal_id, None)
