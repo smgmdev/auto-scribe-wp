@@ -213,7 +213,14 @@ def run():
     # Track which epics have active signals
     active_signals: dict[str, str] = {}
 
-    # Track entry info for journal logging
+    # ═══════════════════════════════════════════
+    # LOSS COOLDOWN: prevent re-entering same epic right after a loss
+    # epic -> {"time": timestamp, "consecutive_losses": int}
+    # ═══════════════════════════════════════════
+    loss_cooldowns: dict[str, dict] = {}
+    COOLDOWN_AFTER_LOSS_SCALP = 300       # 5 min cooldown after 1 loss (scalp assets)
+    COOLDOWN_AFTER_LOSS_STANDARD = 600    # 10 min cooldown after 1 loss (standard assets)
+    COOLDOWN_CONSECUTIVE_LOSSES = 1800    # 30 min cooldown after 2+ consecutive losses
     entry_info: dict[str, dict] = {}  # deal_id -> {entry_price, momentum, rsi, reason, time}
 
     # ═══════════════════════════════════════════
