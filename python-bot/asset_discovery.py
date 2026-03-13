@@ -110,10 +110,11 @@ class AssetDiscovery:
             spread_pct = (spread / mid) * 100 if mid > 0 else 100
 
             # Score: high movement + low spread = good tradeable asset
-            vol_score = min(pct_change, 10)
+            # Crypto/forex weight volatility more heavily
+            vol_score = min(pct_change, 15)
             liq_score = max(0, 5 - spread_pct * 10)
 
-            total_score = vol_score * 0.7 + liq_score * 0.3
+            total_score = vol_score * 0.8 + liq_score * 0.2
 
             ranked.append({
                 "epic": epic,
