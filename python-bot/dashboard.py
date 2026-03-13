@@ -332,10 +332,18 @@ body {
     white-space: nowrap;
 }
 
-.slot-pnl {
-    font-size: clamp(8px, 1vw, 10px);
+.slot-entry {
+    font-size: clamp(8px, 1vw, 11px);
     margin-top: 2px;
-    opacity: 0.85;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.slot-pnl {
+    font-size: clamp(9px, 1.1vw, 13px);
+    margin-top: 3px;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
 
