@@ -61,6 +61,7 @@ export default function InvestorRelations() {
   const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [productsVideoLoaded, setProductsVideoLoaded] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
