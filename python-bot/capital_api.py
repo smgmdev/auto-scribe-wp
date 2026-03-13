@@ -60,6 +60,7 @@ class CapitalAPI:
         self.session = requests.Session()
         self.cst: Optional[str] = None
         self.security_token: Optional[str] = None
+        self._invalid_epics: set[str] = set()
 
     def login(self) -> bool:
         """Authenticate and obtain session tokens."""
@@ -92,11 +93,13 @@ class CapitalAPI:
 
     def get_account(self) -> Optional[dict]:
         """Get account balance and details."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/accounts", headers=self._headers()
+                f"{self.base_url}/api/v1/accounts", headers=self._headers(), timeout=10
             )
             if resp.status_code == 200:
+                _handle_success()
                 accounts = resp.json().get("accounts", [])
                 if accounts:
                     acct = accounts[0]
@@ -108,6 +111,7 @@ class CapitalAPI:
                     )
                     return acct
             else:
+                _handle_error(resp.status_code)
                 log.error(f"Account fetch failed: {resp.status_code}")
         except Exception as e:
             log.error(f"Account exception: {e}")
@@ -153,12 +157,15 @@ class CapitalAPI:
 
     def get_positions(self) -> list:
         """Get all open positions."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/positions", headers=self._headers()
+                f"{self.base_url}/api/v1/positions", headers=self._headers(), timeout=10
             )
             if resp.status_code == 200:
+                _handle_success()
                 return resp.json().get("positions", [])
+            _handle_error(resp.status_code)
         except Exception as e:
             log.error(f"Positions exception: {e}")
         return []
@@ -272,12 +279,18 @@ class CapitalAPI:
 
     def ping(self) -> bool:
         """Keep session alive."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/session", headers=self._headers()
+                f"{self.base_url}/api/v1/session", headers=self._headers(), timeout=10
             )
-            return resp.status_code == 200
-        except:
+            ok = resp.status_code == 200
+            if ok:
+                _handle_success()
+            else:
+                _handle_error(resp.status_code)
+            return ok
+        except Exception:
             return False
 
     def get_market_categories(self) -> list:
@@ -351,7 +364,10 @@ class CapitalAPI:
         if not epics:
             return []
 
-        cleaned_epics = [e for e in dict.fromkeys(epics) if e]
+        cleaned_epics = [
+            e for e in dict.fromkeys(epics)
+            if e and e not in self._invalid_epics
+        ]
         if not cleaned_epics:
             return []
 
@@ -360,6 +376,7 @@ class CapitalAPI:
                 return []
 
             should_split = False
+            last_status = None
             for attempt in range(_MAX_RETRIES + 1):
                 _pace_request()
                 try:
@@ -369,6 +386,7 @@ class CapitalAPI:
                         headers=self._headers(),
                         timeout=15,
                     )
+                    last_status = resp.status_code
                     if resp.status_code == 200:
                         _handle_success()
                         return resp.json().get("markets", [])
@@ -396,9 +414,12 @@ class CapitalAPI:
                 right = _fetch_chunk(chunk[mid:], depth + 1)
                 return left + right
 
-            # Single epic failed OR non-splittable error (rate limit/auth/network)
-            if len(chunk) == 1:
-                log.debug(f"Skipping invalid/unavailable epic in markets batch: {chunk[0]}")
+            # Single epic failed as invalid/unavailable -> blacklist it
+            if len(chunk) == 1 and last_status in (400, 404):
+                bad_epic = chunk[0]
+                if bad_epic not in self._invalid_epics:
+                    self._invalid_epics.add(bad_epic)
+                    log.warning(f"🚫 Blacklisting invalid epic from batch fetch: {bad_epic}")
             return []
 
         all_markets: list = []

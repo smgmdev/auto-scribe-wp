@@ -488,9 +488,11 @@ def run():
     scanner_thread.start()
     log.info("🔄 Background scanner thread started")
 
-    # Also remove stall threshold variable (now hardcoded to 120s)
+    # Adaptive fetch backoff for persistent API pressure
     cycle_count = 0
     _last_batch_success = time.time()
+    _batch_fail_streak = 0
+    _next_batch_fetch_ts = time.time()
 
     while True:
         try:
@@ -741,11 +743,17 @@ def run():
                 log.info(f"🔄 Entry scan order: {' → '.join(scanning_cats)} | {len(balanced_epics)} epics")
 
             # ═══════════════════════════════════════════
-            # ⚡ BATCH PRICE FETCH — every 3 cycles (3s) to avoid API saturation
+            # ⚡ BATCH PRICE FETCH — every 5 cycles with adaptive cooldown
             # Background scanner also makes API calls, so main loop must pace itself
             # ═══════════════════════════════════════════
             batch_prices: dict[str, dict] = {}
-            should_fetch_prices = (cycle_count % 3 == 0) and balanced_epics
+            now_ts = time.time()
+            should_fetch_prices = (
+                bool(balanced_epics)
+                and (cycle_count % 5 == 0)
+                and (now_ts >= _next_batch_fetch_ts)
+            )
+
             if should_fetch_prices:
                 batch_success = False
                 try:
@@ -768,11 +776,11 @@ def run():
                             batch_success = True
                             _last_batch_success = time.time()
                         if i + 50 < len(balanced_epics):
-                            time.sleep(0.3)  # Pace between chunks
+                            time.sleep(0.4)
                 except Exception as e:
                     log.warning(f"Batch price fetch error: {e}")
 
-                # Fallback: if batch returned nothing, try smaller chunks with delays
+                # Fallback: if batch returned nothing, try smaller chunks with stronger delays
                 if not batch_success and len(balanced_epics) > 10:
                     log.info("🔄 Batch fetch failed — retrying with smaller chunks...")
                     try:
@@ -794,9 +802,24 @@ def run():
                             if details:
                                 batch_success = True
                                 _last_batch_success = time.time()
-                            time.sleep(0.5)  # Longer delay for retry chunks
+                            time.sleep(1.0)
                     except Exception as e2:
                         log.warning(f"Fallback batch also failed: {e2}")
+
+                # Adaptive cooldown to stop hammering API when failing repeatedly
+                if batch_success:
+                    _batch_fail_streak = 0
+                    _next_batch_fetch_ts = time.time() + 1
+                else:
+                    _batch_fail_streak += 1
+                    cooldown = min(60, 2 ** min(_batch_fail_streak, 6))
+                    _next_batch_fetch_ts = time.time() + cooldown
+                    log.warning(
+                        f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})"
+                    )
+            elif balanced_epics and cycle_count % 30 == 0 and now_ts < _next_batch_fetch_ts:
+                wait_left = int(max(0, _next_batch_fetch_ts - now_ts))
+                log.info(f"⏳ Batch fetch paused for backoff: {wait_left}s remaining")
 
             # Always populate batch_prices from tick_history for non-fetch cycles or empty results
             for epic in balanced_epics:
