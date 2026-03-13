@@ -116,18 +116,23 @@ class CapitalAPI:
             if info:
                 dealing = info.get("dealingRules", {})
                 # Try multiple possible paths Capital.com uses
-                for key in ("minNormalStopOrLimitDistance", "minStopOrLimitDistance"):
+                for key in (
+                    "minNormalStopOrLimitDistance",
+                    "minStopOrLimitDistance",
+                    "minControlledRiskStopDistance",
+                ):
                     node = dealing.get(key, {})
                     val = node.get("value", 0)
                     if val and float(val) > 0:
                         log.info(f"📏 {epic} min stop distance from API: {float(val)} (unit: {node.get('unit', '?')})")
                         return float(val)
-                # Also check snapshot for minDealSize hints
+                # Also check snapshot fallbacks
                 snap = info.get("snapshot", {})
-                min_stop = snap.get("minNormalStopOrLimitDistance", 0)
-                if min_stop and float(min_stop) > 0:
-                    log.info(f"📏 {epic} min stop from snapshot: {float(min_stop)}")
-                    return float(min_stop)
+                for snap_key in ("minNormalStopOrLimitDistance", "minStopOrLimitDistance"):
+                    min_stop = snap.get(snap_key, 0)
+                    if min_stop and float(min_stop) > 0:
+                        log.info(f"📏 {epic} min stop from snapshot {snap_key}: {float(min_stop)}")
+                        return float(min_stop)
         except Exception as e:
             log.warning(f"Could not fetch min stop for {epic}: {e}")
         return 0.0
