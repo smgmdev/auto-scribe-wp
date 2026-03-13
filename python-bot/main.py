@@ -161,7 +161,7 @@ def run():
         sys.exit(1)
 
     # Start dashboard AFTER login so it can use the API session
-    start_dashboard_thread(api=api)
+    start_dashboard_thread(api=api, pos_manager=None)  # pos_manager set later
 
     account = api.get_account()
     if not account:
