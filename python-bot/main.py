@@ -167,6 +167,8 @@ def run():
             # Get positions every 5 cycles
             if cycle_count % 5 == 0:
                 positions = api.get_positions()
+                # Update dashboard live state
+                write_live_state(balance, positions, pos_manager, tick_history)
 
             # ═══════════════════════════════════════════
             # ⚡ SMART POSITION MANAGEMENT — every cycle
