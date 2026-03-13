@@ -2,7 +2,7 @@
 Capital.com Real-Time Trading Bot — Smart Adaptive Trading
 Streams prices via polling at 1s intervals, uses tick-level momentum detection.
 Features: Multi-timeframe pre-trade analysis, dynamic loss cutting, unlimited TP with
-          5% step trailing SL, and AI-driven parameter adaptation.
+          1% step trailing SL, AI-driven parameter adaptation, and self-learning brain.
 """
 
 import json
@@ -22,6 +22,10 @@ from trade_journal import TradeJournal
 from market_scanner import MarketScanner
 from asset_discovery import AssetDiscovery
 from dashboard import start_dashboard_thread
+from learning_db import TradingBrain
+from regime_detector import RegimeDetector
+from correlation_tracker import CorrelationTracker
+from ai_reviewer import AITradeReviewer
 from logger_setup import get_logger
 
 log = get_logger("main")
