@@ -25,7 +25,7 @@ ATR_PERIOD = int(os.getenv("ATR_PERIOD", "14"))
 ATR_SL_MULTIPLIER = float(os.getenv("ATR_SL_MULTIPLIER", "2.0"))
 ATR_TP_MULTIPLIER = float(os.getenv("ATR_TP_MULTIPLIER", "3.0"))
 CANDLE_TIMEFRAME = os.getenv("CANDLE_TIMEFRAME", "MINUTE_15")
-SCAN_INTERVAL_SECONDS = int(os.getenv("SCAN_INTERVAL_SECONDS", "60"))
+SCAN_INTERVAL_SECONDS = int(os.getenv("SCAN_INTERVAL_SECONDS", "1"))
 
 # ═══════════════════════════════════════════════
 # ASSET CATEGORIES — each with 5-trade limit
