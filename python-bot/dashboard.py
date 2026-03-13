@@ -205,7 +205,10 @@ def _price_fetcher_loop():
 def generate_api_response() -> dict:
     """Return the live cache (updated every 1s by dedicated thread)."""
     with _cache_lock:
-        return dict(_live_cache)
+        data = dict(_live_cache)
+    with _disabled_lock:
+        data["disabled_categories"] = list(_disabled_categories)
+    return data
 
 
 def generate_html() -> str:
