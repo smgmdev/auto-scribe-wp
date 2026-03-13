@@ -80,11 +80,58 @@ def _price_fetcher_loop():
 
     while True:
         try:
+            tick_count += 1
+
+            # Fallback mode: if dashboard is started standalone, read live_state.json
             if _api_ref is None:
+                try:
+                    if os.path.exists(LIVE_STATE_FILE):
+                        with open(LIVE_STATE_FILE, "r") as f:
+                            state = json.load(f)
+
+                        categories = {"Stocks": [], "Commodities": [], "Crypto": [], "FX": []}
+                        for p in state.get("positions", []):
+                            epic = p.get("epic", "")
+                            raw_cat = p.get("category") or config.get_category(epic)
+                            display_cat = cat_map.get(raw_cat, "Stocks")
+
+                            pair = epic
+                            for suffix in ("USD", "JPY", "GBP", "CHF", "CAD", "AUD", "NZD", "EUR"):
+                                if len(epic) >= 6 and epic.endswith(suffix):
+                                    pair = epic[:-len(suffix)] + "/" + suffix
+                                    break
+
+                            categories[display_cat].append({
+                                "epic": epic,
+                                "pair": pair,
+                                "price": round(float(p.get("current_price", 0) or 0), 6),
+                                "bid": round(float(p.get("bid", 0) or 0), 6),
+                                "ask": round(float(p.get("ask", 0) or 0), 6),
+                                "pnl": round(float(p.get("unrealized_pnl", 0) or 0), 5),
+                                "direction": p.get("direction", ""),
+                                "entry_price": float(p.get("entry_price", 0) or 0),
+                                "size": float(p.get("size", 0) or 0),
+                            })
+
+                        with _cache_lock:
+                            _live_cache = {
+                                "status": "running-file",
+                                "balance": state.get("balance", _live_cache.get("balance", 0)),
+                                "positions": [],
+                                "updated_at": state.get("updated_at", "—"),
+                                "total_open": len(state.get("positions", [])),
+                                "categories": categories,
+                                "tick_count": tick_count,
+                            }
+                    else:
+                        with _cache_lock:
+                            _live_cache["status"] = "waiting-file"
+                            _live_cache["tick_count"] = tick_count
+                except Exception as e:
+                    log.debug(f"Fallback state read error: {e}")
+
                 time.sleep(1)
                 continue
-
-            tick_count += 1
 
             # 1) Fetch open positions (includes entry price, direction, P&L)
             positions = _api_ref.get_positions()
