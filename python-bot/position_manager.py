@@ -10,8 +10,6 @@ Key behaviors:
 
 import time
 from logger_setup import get_logger
-from strategy import tick_momentum, compute_rsi
-import numpy as np
 
 log = get_logger("pos_mgr")
 
@@ -20,6 +18,64 @@ INITIAL_SL_PCT = 0.015
 
 # Step size for SL ratcheting (5% of entry price)
 PROFIT_STEP_PCT = 0.05
+
+
+def _initial_sl(entry_price: float, direction: str) -> float:
+    """Calculate initial SL at -1.5% from entry."""
+    dist = entry_price * INITIAL_SL_PCT
+    if direction == "BUY":
+        return entry_price - dist  # SL below entry
+    else:
+        return entry_price + dist  # SL above entry
+
+
+def _validate_sl(sl_price: float, entry_price: float, direction: str,
+                 locked_steps: int) -> float:
+    """
+    Ensure SL makes sense for the direction and profit level.
+    - BUY with 0 steps: SL must be BELOW entry
+    - SELL with 0 steps: SL must be ABOVE entry
+    - BUY with steps >= 1: SL must be >= entry + (steps * 5%)
+    - SELL with steps >= 1: SL must be <= entry - (steps * 5%)
+    If invalid, reset to correct value.
+    """
+    if locked_steps == 0:
+        # No profit locked — SL must be on the loss side
+        if direction == "BUY" and sl_price >= entry_price:
+            corrected = _initial_sl(entry_price, direction)
+            log.warning(
+                f"⚠️ SL sanity fix: BUY SL {sl_price:.6f} >= entry {entry_price:.6f} "
+                f"with 0 steps. Reset to {corrected:.6f}"
+            )
+            return corrected
+        elif direction == "SELL" and sl_price <= entry_price:
+            corrected = _initial_sl(entry_price, direction)
+            log.warning(
+                f"⚠️ SL sanity fix: SELL SL {sl_price:.6f} <= entry {entry_price:.6f} "
+                f"with 0 steps. Reset to {corrected:.6f}"
+            )
+            return corrected
+    else:
+        # Profit locked — SL should be at locked level
+        expected_pnl = locked_steps * entry_price * PROFIT_STEP_PCT
+        if direction == "BUY":
+            expected_sl = entry_price + expected_pnl
+            if sl_price < entry_price:
+                log.warning(
+                    f"⚠️ SL sanity fix: BUY SL {sl_price:.6f} < entry with "
+                    f"{locked_steps} steps locked. Reset to {expected_sl:.6f}"
+                )
+                return expected_sl
+        else:
+            expected_sl = entry_price - expected_pnl
+            if sl_price > entry_price:
+                log.warning(
+                    f"⚠️ SL sanity fix: SELL SL {sl_price:.6f} > entry with "
+                    f"{locked_steps} steps locked. Reset to {expected_sl:.6f}"
+                )
+                return expected_sl
+
+    return sl_price
 
 
 class PositionManager:
@@ -34,17 +90,12 @@ class PositionManager:
                        created_date: float = 0.0, category: str = ""):
         """Start tracking a new position."""
         step_size = entry_price * PROFIT_STEP_PCT
-        initial_sl_dist = entry_price * INITIAL_SL_PCT
 
-        # Default SL at -1.5%
-        if direction == "BUY":
-            trailing_stop_price = entry_price - initial_sl_dist
-        else:
-            trailing_stop_price = entry_price + initial_sl_dist
-
+        # Always start with default SL at -1.5%
+        trailing_stop_price = _initial_sl(entry_price, direction)
         locked_steps = 0
 
-        # Restart recovery: reconstruct state from current price
+        # Restart recovery: reconstruct locked steps from current price
         if current_price > 0 and entry_price > 0:
             if direction == "BUY":
                 pnl = current_price - entry_price
@@ -63,6 +114,11 @@ class PositionManager:
         else:
             pnl = 0.0
 
+        # SANITY CHECK: validate SL makes sense
+        trailing_stop_price = _validate_sl(
+            trailing_stop_price, entry_price, direction, locked_steps
+        )
+
         entry_time = created_date if created_date > 0 else time.time()
 
         # Resolve category
@@ -73,7 +129,7 @@ class PositionManager:
             "epic": epic,
             "direction": direction,
             "entry_price": entry_price,
-            "stop_distance": initial_sl_dist,
+            "stop_distance": entry_price * INITIAL_SL_PCT,
             "profit_distance": profit_distance,
             "highest_profit": max(pnl, 0.0),
             "lowest_profit": min(pnl, 0.0),
@@ -88,13 +144,13 @@ class PositionManager:
         if current_price > 0:
             recovery_tag = (
                 f" | 🔄 RECOVERED: pnl={pnl:.5f} steps={locked_steps} "
-                f"trailing_sl={trailing_stop_price}"
+                f"trailing_sl={trailing_stop_price:.6f}"
             )
 
         log.info(
-            f"📌 Tracking {direction} {epic} @ {entry_price:.5f} | "
-            f"SL={trailing_stop_price:.5f} (-1.5%) TP=UNLIMITED | "
-            f"Step size={step_size:.5f} (5%){recovery_tag}"
+            f"📌 Tracking {direction} {epic} @ {entry_price:.6f} | "
+            f"SL={trailing_stop_price:.6f} ({'-1.5%' if locked_steps == 0 else f'+{locked_steps*5}%'}) "
+            f"TP=UNLIMITED | Step size={step_size:.6f} (5%){recovery_tag}"
         )
 
     def untrack(self, deal_id: str):
@@ -178,36 +234,40 @@ class PositionManager:
                     log.info(
                         f"🔒 {pos['epic']} SL ratcheted! Step {current_steps} "
                         f"(+{locked_pct}% profit) | "
-                        f"SL: {old_sl:.5f} → {new_sl:.5f}"
+                        f"SL: {old_sl:.6f} → {new_sl:.6f}"
                     )
+
+        # Periodic sanity check on SL
+        pos["trailing_stop_price"] = _validate_sl(
+            pos["trailing_stop_price"], entry, direction, pos["locked_steps"]
+        )
 
         # ═══════════════════════════════════════════
         # 2. CHECK IF SL IS HIT → close position
         # ═══════════════════════════════════════════
 
-        if pos["trailing_stop_price"] is not None:
-            sl_hit = False
-            if direction == "BUY" and current_price <= pos["trailing_stop_price"]:
-                sl_hit = True
-            elif direction == "SELL" and current_price >= pos["trailing_stop_price"]:
-                sl_hit = True
+        sl_hit = False
+        if direction == "BUY" and current_price <= pos["trailing_stop_price"]:
+            sl_hit = True
+        elif direction == "SELL" and current_price >= pos["trailing_stop_price"]:
+            sl_hit = True
 
-            if sl_hit:
-                if pos["locked_steps"] >= 1:
-                    # Closing in profit (SL was above entry)
-                    result["action"] = "CLOSE_PROFIT"
-                    result["reason"] = (
-                        f"Trailing SL hit @ {pos['trailing_stop_price']:.5f} | "
-                        f"Locked {pos['locked_steps'] * 5}% profit | "
-                        f"Peak: {pos['highest_profit']:.5f}"
-                    )
-                else:
-                    # Closing at initial -1.5% SL
-                    result["action"] = "CLOSE_LOSS"
-                    result["reason"] = (
-                        f"Initial SL hit @ {pos['trailing_stop_price']:.5f} "
-                        f"(-1.5% from entry {entry:.5f})"
-                    )
-                return result
+        if sl_hit:
+            if pos["locked_steps"] >= 1:
+                # Closing in profit (SL was above entry)
+                result["action"] = "CLOSE_PROFIT"
+                result["reason"] = (
+                    f"Trailing SL hit @ {pos['trailing_stop_price']:.6f} | "
+                    f"Locked {pos['locked_steps'] * 5}% profit | "
+                    f"Peak: {pos['highest_profit']:.5f}"
+                )
+            else:
+                # Closing at initial -1.5% SL
+                result["action"] = "CLOSE_LOSS"
+                result["reason"] = (
+                    f"Initial SL hit @ {pos['trailing_stop_price']:.6f} "
+                    f"(-1.5% from entry {entry:.6f})"
+                )
+            return result
 
         return result
