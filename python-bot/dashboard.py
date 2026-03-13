@@ -739,13 +739,27 @@ setInterval(fetchState, 1000);
 </html>"""
 
 
+def _safe_json(value):
+    """Recursively sanitize data so JSON output is always browser-parseable."""
+    if isinstance(value, float):
+        return value if math.isfinite(value) else 0.0
+    if isinstance(value, dict):
+        return {k: _safe_json(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_safe_json(v) for v in value]
+    if isinstance(value, tuple):
+        return [_safe_json(v) for v in value]
+    return value
+
+
 class DashboardHandler(SimpleHTTPRequestHandler):
     def _json_response(self, data, status=200):
+        safe_data = _safe_json(data)
         self.send_response(status)
         self.send_header("Content-type", "application/json")
         self.send_header("Cache-Control", "no-cache")
         self.end_headers()
-        self.wfile.write(json.dumps(data).encode())
+        self.wfile.write(json.dumps(safe_data, allow_nan=False).encode())
 
     def do_GET(self):
         if self.path == "/" or self.path == "/index.html":
@@ -756,14 +770,14 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(html.encode())
         elif self.path.startswith("/api/state"):
-            data = generate_api_response()
+            data = _safe_json(generate_api_response())
             self.send_response(200)
             self.send_header("Content-type", "application/json")
             self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
             self.send_header("Pragma", "no-cache")
             self.send_header("Expires", "0")
             self.end_headers()
-            self.wfile.write(json.dumps(data).encode())
+            self.wfile.write(json.dumps(data, allow_nan=False).encode())
         else:
             self.send_response(404)
             self.end_headers()
