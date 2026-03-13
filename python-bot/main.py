@@ -19,6 +19,7 @@ from risk import calculate_position_size, can_open_position
 from position_manager import PositionManager
 from trade_journal import TradeJournal
 from market_scanner import MarketScanner
+from asset_discovery import AssetDiscovery
 from dashboard import start_dashboard_thread
 from logger_setup import get_logger
 
