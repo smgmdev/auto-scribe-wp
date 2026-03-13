@@ -31,7 +31,8 @@ BANNER = """
 ║   🧠 Adaptive AI: learns from every trade                ║
 ║   📊 Multi-TF scanner: 60m → 15m → 5m confirmation      ║
 ║   🔒 Unlimited TP with 5% step trailing SL               ║
-║   Assets: Gold, Silver, Oil, Gas, US Stocks              ║
+║   📈 Stocks (5) | ₿ Crypto (5) | 🪙 Commodities (5)     ║
+║   📊 Dashboard: http://localhost:8050                    ║
 ╚══════════════════════════════════════════════════════════╝
 """
 
