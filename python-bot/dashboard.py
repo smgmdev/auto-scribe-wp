@@ -332,10 +332,18 @@ body {
     white-space: nowrap;
 }
 
-.slot-pnl {
-    font-size: clamp(8px, 1vw, 10px);
+.slot-entry {
+    font-size: clamp(8px, 1vw, 11px);
     margin-top: 2px;
-    opacity: 0.85;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.slot-pnl {
+    font-size: clamp(9px, 1.1vw, 13px);
+    margin-top: 3px;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
 
@@ -435,6 +443,7 @@ function buildGrid() {
                     '<span class="slot-dir"></span>' +
                     '<span class="slot-pair"></span>' +
                     '<span class="slot-price"></span>' +
+                    '<span class="slot-entry"></span>' +
                     '<span class="slot-pnl"></span>' +
                     '<span class="slot-empty-text">—</span>' +
                     '</div>';
@@ -468,11 +477,13 @@ function updateGrid(data) {
                 el.querySelector('.slot-dir').textContent = dir;
                 el.querySelector('.slot-pair').textContent = t.pair || epic;
                 el.querySelector('.slot-price').textContent = formatPrice(price);
+                el.querySelector('.slot-entry').textContent = 'Entry: ' + formatPrice(entryP);
 
-                // P&L with percentage
-                var pnlPct = (entryP > 0) ? ((pnl / entryP) * 100) : 0;
-                var pnlText = formatPnl(pnl) + '  ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
+                // P&L percentage only
+                var pnlPct = (entryP > 0) ? (((price - entryP) / entryP) * 100 * (dir === 'BUY' ? 1 : -1)) : 0;
+                var pnlText = (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
                 el.querySelector('.slot-pnl').textContent = pnlText;
+                el.querySelector('.slot-pnl').style.color = pnlPct >= 0 ? '#4ade80' : '#f87171';
                 el.querySelector('.slot-empty-text').textContent = '';
 
                 // Flash on price change — quick 150ms transition
@@ -497,7 +508,9 @@ function updateGrid(data) {
                 el.querySelector('.slot-dir').textContent = '';
                 el.querySelector('.slot-pair').textContent = '';
                 el.querySelector('.slot-price').textContent = '';
+                el.querySelector('.slot-entry').textContent = '';
                 el.querySelector('.slot-pnl').textContent = '';
+                el.querySelector('.slot-pnl').style.color = '';
                 el.querySelector('.slot-empty-text').textContent = '—';
             }
         }
