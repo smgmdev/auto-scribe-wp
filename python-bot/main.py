@@ -37,11 +37,58 @@ BANNER = """
 """
 
 
+def write_live_state(balance, positions, pos_manager, tick_history):
+    """Write live state to disk for dashboard to read."""
+    try:
+        live_positions = []
+        for pos in positions:
+            epic = pos.get("market", {}).get("epic", "")
+            deal_id = pos.get("position", {}).get("dealId", "")
+            direction = pos.get("position", {}).get("direction", "")
+            entry_price = float(pos.get("position", {}).get("level", 0))
+            
+            current_price = entry_price
+            if epic in tick_history and tick_history[epic]:
+                current_price = tick_history[epic][-1]["mid"]
+            
+            tracked = pos_manager.tracked.get(deal_id, {})
+            if direction == "BUY":
+                pnl = current_price - entry_price
+            else:
+                pnl = entry_price - current_price
+
+            live_positions.append({
+                "epic": epic,
+                "direction": direction,
+                "entry_price": entry_price,
+                "current_price": current_price,
+                "unrealized_pnl": round(pnl, 5),
+                "locked_steps": tracked.get("locked_steps", 0),
+                "category": config.get_category(epic),
+            })
+
+        state = {
+            "status": "running",
+            "balance": balance,
+            "positions": live_positions,
+            "updated_at": datetime.utcnow().strftime("%H:%M:%S"),
+        }
+        state_file = os.path.join(os.path.dirname(__file__), "live_state.json")
+        with open(state_file, "w") as f:
+            json.dump(state, f)
+    except Exception as e:
+        log.error(f"Failed to write live state: {e}")
+
+
 def run():
     print(BANNER)
     log.info(f"Watchlist: {', '.join(config.WATCHLIST)}")
     log.info(f"⚡ Scan interval: {config.SCAN_INTERVAL_SECONDS}s (real-time)")
     log.info(f"Risk per trade: {config.RISK_PER_TRADE * 100}% | Max positions: {config.MAX_OPEN_POSITIONS}")
+    log.info(f"📈 Stocks: {len(config.WATCHLIST_STOCKS)} | ₿ Crypto: {len(config.WATCHLIST_CRYPTO)} | 🪙 Commodities: {len(config.WATCHLIST_COMMODITIES)}")
+
+    # Start dashboard in background
+    start_dashboard_thread()
 
     api = CapitalAPI()
 
