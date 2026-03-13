@@ -252,11 +252,11 @@ def run():
                     if s["total"] > 0:
                         log.info(f"  🧠 {epic}: {s['total']} trades, {s['win_rate']:.0%} win rate")
 
-            # Get positions every 3 cycles, write live state every cycle
+            # Refresh positions every 3 cycles from API
             if cycle_count % 3 == 0:
                 positions = api.get_positions()
-            # Write live state every cycle for 1s dashboard updates
-            write_live_state(balance, positions, pos_manager, tick_history)
+            # Write live state every cycle — fetches live prices directly from API
+            write_live_state(api, balance, positions, pos_manager, tick_history)
 
             # ═══════════════════════════════════════════
             # ⚡ SMART POSITION MANAGEMENT — every cycle
