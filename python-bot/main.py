@@ -364,6 +364,9 @@ def run():
                     spread = ask - bid
                     ts = time.time()
 
+                    if (not all(math.isfinite(v) for v in (bid, ask, mid, spread))) or mid <= 0 or spread <= 0:
+                        continue
+
                     tick_history[epic].append({
                         "time": ts, "bid": bid, "ask": ask,
                         "mid": mid, "spread": spread,
