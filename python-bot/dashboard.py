@@ -44,6 +44,23 @@ _live_cache = {
 _cache_lock = threading.Lock()
 _api_ref = None  # Set by start_dashboard_thread
 
+# Categories disabled by toggle — positions get closed, no new trades
+_disabled_categories: set = set()
+_disabled_lock = threading.Lock()
+
+
+def is_category_disabled(display_cat: str) -> bool:
+    with _disabled_lock:
+        return display_cat in _disabled_categories
+
+
+def set_category_disabled(display_cat: str, disabled: bool):
+    with _disabled_lock:
+        if disabled:
+            _disabled_categories.add(display_cat)
+        else:
+            _disabled_categories.discard(display_cat)
+
 
 def _price_fetcher_loop():
     """
