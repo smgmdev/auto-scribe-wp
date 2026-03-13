@@ -409,7 +409,7 @@ class AssetDiscovery:
             all_commodities.extend(
                 self._search_fallback(
                     commodity_terms,
-                    ("COMMODITIES",),
+                    ("COMMODITIES", "COMMODITY", "CURRENCIES"),
                     require_tradeable=True,
                 )
             )
