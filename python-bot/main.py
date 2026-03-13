@@ -113,9 +113,9 @@ def write_live_state(api, balance, positions, pos_manager, tick_history):
                 pnl = float(api_pnl)
             else:
                 if direction == "BUY":
-                    pnl = current_price - entry_price
+                    pnl = (current_price - entry_price) * size
                 else:
-                    pnl = entry_price - current_price
+                    pnl = (entry_price - current_price) * size
 
             tracked = pos_manager.tracked.get(deal_id, {})
 
