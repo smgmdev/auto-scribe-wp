@@ -400,6 +400,36 @@ body {
     letter-spacing: 1px;
 }
 
+/* Category toggle */
+.cat-toggle {
+    position: relative;
+    width: 32px; height: 16px;
+    background: #b91c1c;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+.cat-toggle.on { background: #16a34a; }
+.cat-toggle .knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 12px; height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.2s;
+}
+.cat-toggle.on .knob { left: 18px; }
+.category-label { flex-direction: column; }
+.cat-status {
+    font-size: 8px;
+    color: #666;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
 /* Footer */
 .footer {
     text-align: center;
