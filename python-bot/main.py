@@ -532,8 +532,8 @@ def run():
             # Refresh positions every 3 cycles from API
             if cycle_count % 3 == 0:
                 positions = api.get_positions()
-            # Write live state every cycle — fetches live prices directly from API
-            write_live_state(api, balance, positions, pos_manager, tick_history)
+            # Write live state every cycle — uses cached prices (NO extra API calls)
+            write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices)
 
             # ═══════════════════════════════════════════
             # 🚫 ENFORCE DISABLED CATEGORIES — close positions in toggled-off categories
