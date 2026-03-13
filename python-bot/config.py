@@ -36,22 +36,11 @@ CATEGORY_CRYPTO = "crypto"
 CATEGORY_COMMODITIES = "commodities"
 CATEGORY_FOREX = "forex"
 
-# Commodities are fixed (limited, all liquid)
-WATCHLIST_COMMODITIES = [
-    "GOLD",           # Gold
-    "SILVER",         # Silver
-    "OIL_CRUDE",      # Crude Oil (WTI)
-    "NATURALGAS",     # Natural Gas
-    "COPPER",         # Copper
-    "PLATINUM",       # Platinum
-]
+# Commodities — DISABLED (crypto only mode)
+WATCHLIST_COMMODITIES = []
 
-# Forex: major & minor pairs (fallback before discovery)
-WATCHLIST_FOREX_FALLBACK = [
-    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD",
-    "USDCAD", "USDCHF", "NZDUSD", "EURGBP",
-    "EURJPY", "GBPJPY",
-]
+# Forex — DISABLED (crypto only mode)
+WATCHLIST_FOREX_FALLBACK = []
 
 # Stocks & Crypto: populated dynamically by AssetDiscovery
 # These are fallbacks used before first discovery completes
