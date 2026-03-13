@@ -50,9 +50,11 @@ class AssetDiscovery:
         self.discovered_stocks: list[dict] = []
         self.discovered_crypto: list[dict] = []
         self.discovered_forex: list[dict] = []
+        self.discovered_commodities: list[dict] = []
         self.stock_epics: list[str] = []
         self.crypto_epics: list[str] = []
         self.forex_epics: list[str] = []
+        self.commodity_epics: list[str] = []
 
     def _discover_category_assets(self, node_id: str, max_depth: int = 2) -> list[dict]:
         """Recursively discover tradeable assets from a market navigation node."""
