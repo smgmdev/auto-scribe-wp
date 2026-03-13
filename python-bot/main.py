@@ -736,6 +736,8 @@ def run():
             )
 
             if should_fetch_prices:
+                # Pause scanner thread during batch fetch to avoid API contention
+                _scanner_paused.set()
                 batch_success = False
                 try:
                     for i in range(0, len(balanced_epics), 50):
