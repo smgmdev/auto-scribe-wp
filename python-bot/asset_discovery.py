@@ -23,10 +23,9 @@ TOP_STOCKS = 10
 TOP_CRYPTO = 15
 TOP_FOREX = 12
 TOP_COMMODITIES = 8
-TOP_FOREX = 12    # More forex pairs for scalp coverage
 
 # Re-discover every N minutes (faster for volatile markets)
-DISCOVERY_INTERVAL = 300  # 5 minutes (was 10)
+DISCOVERY_INTERVAL = 300  # 5 minutes
 
 # Instrument type mapping from Capital.com API
 INSTRUMENT_TYPE_MAP = {
@@ -36,6 +35,9 @@ INSTRUMENT_TYPE_MAP = {
     "CURRENCIES": "forex",
     "INDICES": "indices",   # excluded for now
 }
+
+# Delay between search API calls to avoid rate limits
+_SEARCH_DELAY = 0.3  # 300ms
 
 
 class AssetDiscovery:
@@ -69,15 +71,16 @@ class AssetDiscovery:
             if m.get("marketStatus") == "TRADEABLE":
                 assets.append(m)
 
-        # Recurse into "Most Traded" / "Most Volatile" sub-nodes (priority)
+        # Recurse into sub-nodes with delay between calls
         if max_depth > 0 and sub_nodes:
             priority_keywords = ["most_traded", "most_volatile", "top_gainers", "top_losers", "major", "minor"]
             for node in sub_nodes:
                 nid = node.get("id", "")
                 name = node.get("name", "")
-                is_priority = any(kw in nid.lower() or kw in name.lower() 
+                is_priority = any(kw in nid.lower() or kw in name.lower()
                                   for kw in priority_keywords)
                 if is_priority or max_depth >= 2:
+                    time.sleep(_SEARCH_DELAY)  # Pace recursive calls
                     sub_assets = self._discover_category_assets(nid, max_depth - 1)
                     assets.extend(sub_assets)
 
@@ -114,7 +117,6 @@ class AssetDiscovery:
             spread_pct = (spread / mid) * 100 if mid > 0 else 100
 
             # Score: high movement + low spread = good tradeable asset
-            # Crypto/forex weight volatility more heavily
             vol_score = min(pct_change, 15)
             liq_score = max(0, 5 - spread_pct * 10)
 
@@ -133,6 +135,23 @@ class AssetDiscovery:
 
         ranked.sort(key=lambda x: x["score"], reverse=True)
         return ranked
+
+    def _search_fallback(self, terms: list[str], instrument_type: str) -> list[dict]:
+        """Search for assets by term list with pacing between calls."""
+        results = []
+        for term in terms:
+            try:
+                markets = self.api.search_markets(term)
+                matched = [r for r in markets
+                           if r.get("instrumentType") == instrument_type
+                           and r.get("marketStatus") == "TRADEABLE"]
+                results.extend(matched)
+                if matched:
+                    log.info(f"  🔍 Search '{term}': found {len(matched)} {instrument_type}")
+            except Exception as e:
+                log.warning(f"  Search '{term}' failed: {e}")
+            time.sleep(_SEARCH_DELAY)
+        return results
 
     def discover(self, force: bool = False) -> dict:
         """
@@ -154,28 +173,38 @@ class AssetDiscovery:
         log.info("🔎 ═══ ASSET DISCOVERY — Finding best movers ═══")
 
         categories = self.api.get_market_categories()
+        if categories:
+            log.info(f"📂 Found {len(categories)} top-level categories: {[n.get('name', n.get('id')) for n in categories]}")
+        else:
+            log.warning("⚠️ No market categories returned — will use fallback searches only")
 
         # --- Discover stocks ---
         log.info("📈 Scanning stocks...")
         all_stocks = []
 
-        stock_nodes = [n for n in categories if "share" in n.get("name", "").lower() 
+        stock_nodes = [n for n in categories if "share" in n.get("name", "").lower()
                        or "stock" in n.get("name", "").lower()
+                       or "equit" in n.get("name", "").lower()
                        or "commons" in n.get("id", "").lower()]
 
-        for node in stock_nodes:
-            assets = self._discover_category_assets(node["id"], max_depth=2)
-            stock_assets = [a for a in assets if a.get("instrumentType") in ("SHARES", "EQUITIES")]
-            all_stocks.extend(stock_assets)
-            log.info(f"  Found {len(stock_assets)} stocks from {node.get('name', node.get('id'))}")
+        if stock_nodes:
+            for node in stock_nodes:
+                assets = self._discover_category_assets(node["id"], max_depth=2)
+                stock_assets = [a for a in assets if a.get("instrumentType") in ("SHARES", "EQUITIES")]
+                all_stocks.extend(stock_assets)
+                log.info(f"  Found {len(stock_assets)} stocks from {node.get('name', node.get('id'))}")
+        else:
+            log.warning("  ⚠️ No stock category nodes found — using search fallback")
 
+        # ALWAYS run fallback to fill gaps
+        stock_search_terms = ["AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "AMD", "NFLX", "JPM",
+                              "BA", "DIS", "PYPL", "INTC", "UBER", "COIN", "PLTR", "SNAP", "SQ", "SHOP"]
         if len(all_stocks) < TOP_STOCKS:
-            for term in ["AAPL", "TSLA", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "AMD", "NFLX", "JPM", 
-                         "BA", "DIS", "PYPL", "INTC", "UBER", "COIN", "PLTR", "SNAP", "SQ", "SHOP"]:
-                results = self.api.search_markets(term)
-                stock_results = [r for r in results if r.get("instrumentType") in ("SHARES", "EQUITIES")
-                                 and r.get("marketStatus") == "TRADEABLE"]
-                all_stocks.extend(stock_results)
+            log.info(f"  📡 Running stock search fallback ({len(all_stocks)}/{TOP_STOCKS} found so far)...")
+            fallback = self._search_fallback(stock_search_terms, "SHARES")
+            # Also try EQUITIES type
+            fallback += self._search_fallback(["AAPL", "TSLA", "NVDA"], "EQUITIES")
+            all_stocks.extend(fallback)
 
         ranked_stocks = self._rank_assets(all_stocks)[:TOP_STOCKS]
 
@@ -186,21 +215,22 @@ class AssetDiscovery:
         crypto_nodes = [n for n in categories if "crypto" in n.get("name", "").lower()
                         or "crypto" in n.get("id", "").lower()]
 
-        for node in crypto_nodes:
-            assets = self._discover_category_assets(node["id"], max_depth=2)
-            crypto_assets = [a for a in assets if a.get("instrumentType") == "CRYPTOCURRENCIES"]
-            all_crypto.extend(crypto_assets)
-            log.info(f"  Found {len(crypto_assets)} crypto from {node.get('name', node.get('id'))}")
+        if crypto_nodes:
+            for node in crypto_nodes:
+                assets = self._discover_category_assets(node["id"], max_depth=2)
+                crypto_assets = [a for a in assets if a.get("instrumentType") == "CRYPTOCURRENCIES"]
+                all_crypto.extend(crypto_assets)
+                log.info(f"  Found {len(crypto_assets)} crypto from {node.get('name', node.get('id'))}")
+        else:
+            log.warning("  ⚠️ No crypto category nodes found — using search fallback")
 
         if len(all_crypto) < TOP_CRYPTO:
-            for term in ["BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", 
-                         "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB",
-                         "PEPE", "SHIB", "WIF", "BONK", "SUI", "SEI", "TIA",
-                         "FET", "RENDER", "INJ", "JUP", "ONDO", "OP", "STX"]:
-                results = self.api.search_markets(term)
-                crypto_results = [r for r in results if r.get("instrumentType") == "CRYPTOCURRENCIES"
-                                  and r.get("marketStatus") == "TRADEABLE"]
-                all_crypto.extend(crypto_results)
+            log.info(f"  📡 Running crypto search fallback ({len(all_crypto)}/{TOP_CRYPTO} found so far)...")
+            crypto_terms = ["BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX",
+                            "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB",
+                            "PEPE", "SHIB", "WIF", "BONK", "SUI", "SEI", "TIA",
+                            "FET", "RENDER", "INJ", "JUP", "ONDO", "OP", "STX"]
+            all_crypto.extend(self._search_fallback(crypto_terms, "CRYPTOCURRENCIES"))
 
         ranked_crypto = self._rank_assets(all_crypto)[:TOP_CRYPTO]
 
@@ -208,8 +238,8 @@ class AssetDiscovery:
         pinned_epics = [c["epic"] for c in ranked_crypto]
         for pinned in config.CRYPTO_PINNED:
             if pinned not in pinned_epics:
-                # Search for it specifically
                 results = self.api.search_markets(pinned)
+                time.sleep(_SEARCH_DELAY)
                 for r in results:
                     if r.get("epic") == pinned and r.get("marketStatus") == "TRADEABLE":
                         ranked_crypto.insert(0, {
@@ -220,7 +250,7 @@ class AssetDiscovery:
                             "spread_pct": 0,
                             "bid": r.get("bid", 0),
                             "offer": r.get("offer", 0),
-                            "score": 99.0,  # Pinned = highest priority
+                            "score": 99.0,
                         })
                         break
 
@@ -233,23 +263,31 @@ class AssetDiscovery:
                        or "fx" in n.get("name", "").lower()
                        or "currenc" in n.get("id", "").lower()]
 
-        for node in forex_nodes:
-            assets = self._discover_category_assets(node["id"], max_depth=2)
-            forex_assets = [a for a in assets if a.get("instrumentType") == "CURRENCIES"]
-            all_forex.extend(forex_assets)
-            log.info(f"  Found {len(forex_assets)} forex from {node.get('name', node.get('id'))}")
+        if forex_nodes:
+            for node in forex_nodes:
+                assets = self._discover_category_assets(node["id"], max_depth=2)
+                forex_assets = [a for a in assets if a.get("instrumentType") == "CURRENCIES"]
+                all_forex.extend(forex_assets)
+                log.info(f"  Found {len(forex_assets)} forex from {node.get('name', node.get('id'))}")
+        else:
+            log.warning("  ⚠️ No forex category nodes found — using search fallback")
 
-        # Fallback: search popular forex pairs
+        # ALWAYS run forex fallback if insufficient
         if len(all_forex) < TOP_FOREX:
-            for term in ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
-                         "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
-                         "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "GBPAUD"]:
-                results = self.api.search_markets(term)
-                forex_results = [r for r in results if r.get("instrumentType") == "CURRENCIES"
-                                 and r.get("marketStatus") == "TRADEABLE"]
-                all_forex.extend(forex_results)
+            log.info(f"  📡 Running forex search fallback ({len(all_forex)}/{TOP_FOREX} found so far)...")
+            forex_terms = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
+                           "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
+                           "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "GBPAUD"]
+            all_forex.extend(self._search_fallback(forex_terms, "CURRENCIES"))
 
         ranked_forex = self._rank_assets(all_forex)[:TOP_FOREX]
+
+        # If ranked forex is STILL empty, use the fallback watchlist directly
+        if not ranked_forex:
+            log.warning("  ⚠️ Discovery found 0 forex — using hardcoded fallback epics")
+            ranked_forex = [{"epic": ep, "name": ep, "type": "CURRENCIES",
+                             "pct_change": 0, "spread_pct": 0, "bid": 0,
+                             "offer": 0, "score": 0} for ep in config.WATCHLIST_FOREX_FALLBACK]
 
         # --- Discover commodities ---
         log.info("🪙 Scanning commodities...")
@@ -258,22 +296,30 @@ class AssetDiscovery:
         commodity_nodes = [n for n in categories if "commodit" in n.get("name", "").lower()
                            or "commodit" in n.get("id", "").lower()]
 
-        for node in commodity_nodes:
-            assets = self._discover_category_assets(node["id"], max_depth=2)
-            commodity_assets = [a for a in assets if a.get("instrumentType") == "COMMODITIES"]
-            all_commodities.extend(commodity_assets)
-            log.info(f"  Found {len(commodity_assets)} commodities from {node.get('name', node.get('id'))}")
+        if commodity_nodes:
+            for node in commodity_nodes:
+                assets = self._discover_category_assets(node["id"], max_depth=2)
+                commodity_assets = [a for a in assets if a.get("instrumentType") == "COMMODITIES"]
+                all_commodities.extend(commodity_assets)
+                log.info(f"  Found {len(commodity_assets)} commodities from {node.get('name', node.get('id'))}")
+        else:
+            log.warning("  ⚠️ No commodity category nodes found — using search fallback")
 
-        # Fallback: search popular commodities
+        # ALWAYS run commodity fallback if insufficient
         if len(all_commodities) < TOP_COMMODITIES:
-            for term in ["GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER",
-                         "PLATINUM", "PALLADIUM", "OIL_BRENT"]:
-                results = self.api.search_markets(term)
-                commodity_results = [r for r in results if r.get("instrumentType") == "COMMODITIES"
-                                     and r.get("marketStatus") == "TRADEABLE"]
-                all_commodities.extend(commodity_results)
+            log.info(f"  📡 Running commodity search fallback ({len(all_commodities)}/{TOP_COMMODITIES} found so far)...")
+            commodity_terms = ["GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER",
+                               "PLATINUM", "PALLADIUM", "OIL_BRENT"]
+            all_commodities.extend(self._search_fallback(commodity_terms, "COMMODITIES"))
 
         ranked_commodities = self._rank_assets(all_commodities)[:TOP_COMMODITIES]
+
+        # If ranked commodities is STILL empty, use fallback
+        if not ranked_commodities:
+            log.warning("  ⚠️ Discovery found 0 commodities — using hardcoded fallback epics")
+            ranked_commodities = [{"epic": ep, "name": ep, "type": "COMMODITIES",
+                                   "pct_change": 0, "spread_pct": 0, "bid": 0,
+                                   "offer": 0, "score": 0} for ep in config.WATCHLIST_COMMODITIES_FALLBACK]
 
         # Store results
         self.discovered_stocks = ranked_stocks

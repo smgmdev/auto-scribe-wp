@@ -273,42 +273,66 @@ class CapitalAPI:
 
     def get_market_categories(self) -> list:
         """Get all top-level market navigation categories."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/marketnavigation", headers=self._headers()
+                f"{self.base_url}/api/v1/marketnavigation", headers=self._headers(),
+                timeout=10,
             )
             if resp.status_code == 200:
+                _handle_success()
                 return resp.json().get("nodes", [])
+            else:
+                _handle_error(resp.status_code)
+                log.warning(f"Market categories: {resp.status_code}")
         except Exception as e:
             log.error(f"Market categories exception: {e}")
         return []
 
     def get_category_markets(self, node_id: str, limit: int = 500) -> dict:
         """Get sub-nodes and markets within a category."""
-        try:
-            resp = self.session.get(
-                f"{self.base_url}/api/v1/marketnavigation/{node_id}",
-                params={"limit": limit},
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                return resp.json()
-        except Exception as e:
-            log.error(f"Category markets exception for {node_id}: {e}")
+        _pace_request()
+        for attempt in range(_MAX_RETRIES + 1):
+            try:
+                resp = self.session.get(
+                    f"{self.base_url}/api/v1/marketnavigation/{node_id}",
+                    params={"limit": limit},
+                    headers=self._headers(),
+                    timeout=10,
+                )
+                if resp.status_code == 200:
+                    _handle_success()
+                    return resp.json()
+                else:
+                    _handle_error(resp.status_code)
+                    log.warning(f"Category markets {node_id} attempt {attempt+1}: {resp.status_code}")
+            except Exception as e:
+                log.error(f"Category markets exception for {node_id} (attempt {attempt+1}): {e}")
+                if attempt < _MAX_RETRIES:
+                    time.sleep(1 * (attempt + 1))
         return {}
 
     def search_markets(self, search_term: str) -> list:
         """Search for markets by name."""
-        try:
-            resp = self.session.get(
-                f"{self.base_url}/api/v1/markets",
-                params={"searchTerm": search_term},
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                return resp.json().get("markets", [])
-        except Exception as e:
-            log.error(f"Search markets exception: {e}")
+        _pace_request()
+        for attempt in range(_MAX_RETRIES + 1):
+            try:
+                resp = self.session.get(
+                    f"{self.base_url}/api/v1/markets",
+                    params={"searchTerm": search_term},
+                    headers=self._headers(),
+                    timeout=10,
+                )
+                if resp.status_code == 200:
+                    _handle_success()
+                    return resp.json().get("markets", [])
+                else:
+                    _handle_error(resp.status_code)
+                    log.warning(f"Search markets '{search_term}' attempt {attempt+1}: {resp.status_code}")
+            except Exception as e:
+                log.error(f"Search markets exception '{search_term}' (attempt {attempt+1}): {e}")
+                if attempt < _MAX_RETRIES:
+                    time.sleep(1 * (attempt + 1))
         return []
 
     def get_markets_details(self, epics: list[str]) -> list:
