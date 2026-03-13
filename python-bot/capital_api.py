@@ -108,6 +108,29 @@ class CapitalAPI:
             log.error(f"Positions exception: {e}")
         return []
 
+    def get_min_stop_distance(self, epic: str) -> float:
+        """Fetch the minimum stop/limit distance for an instrument from the API."""
+        try:
+            info = self.get_market_info(epic)
+            if info:
+                dealing = info.get("dealingRules", {})
+                # Try multiple possible paths Capital.com uses
+                for key in ("minNormalStopOrLimitDistance", "minStopOrLimitDistance"):
+                    node = dealing.get(key, {})
+                    val = node.get("value", 0)
+                    if val and float(val) > 0:
+                        log.info(f"📏 {epic} min stop distance from API: {float(val)} (unit: {node.get('unit', '?')})")
+                        return float(val)
+                # Also check snapshot for minDealSize hints
+                snap = info.get("snapshot", {})
+                min_stop = snap.get("minNormalStopOrLimitDistance", 0)
+                if min_stop and float(min_stop) > 0:
+                    log.info(f"📏 {epic} min stop from snapshot: {float(min_stop)}")
+                    return float(min_stop)
+        except Exception as e:
+            log.warning(f"Could not fetch min stop for {epic}: {e}")
+        return 0.0
+
     def open_position(
         self,
         epic: str,
@@ -125,9 +148,17 @@ class CapitalAPI:
         if stop_distance is not None:
             # Capital.com requires stopDistance to be positive
             sd = round(abs(stop_distance), 2)
+
+            # Enforce minimum from API
+            min_sd = self.get_min_stop_distance(epic)
+            if min_sd > 0 and sd < min_sd:
+                log.warning(f"⚠️ {epic} SL {sd} < min {min_sd}, bumping to {min_sd}")
+                sd = round(min_sd * 1.05, 2)  # 5% above minimum for safety margin
+
             if sd <= 0:
                 sd = 1.0  # absolute minimum fallback
             payload["stopDistance"] = sd
+            log.info(f"📏 {epic} final stopDistance={sd}")
         if profit_distance is not None:
             pd = round(abs(profit_distance), 2)
             if pd > 0:
