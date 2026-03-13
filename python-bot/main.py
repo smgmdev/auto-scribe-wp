@@ -251,27 +251,32 @@ def run():
                 log.warning(f"Failed to fetch startup prices: {e}")
 
         # ═══════════════════════════════════════════
-        # CLOSE ALL NON-CRYPTO POSITIONS (crypto-only mode)
-        # Retry up to 3 times with delays for rate limiting
+        # CLOSE POSITIONS IN DISABLED CATEGORIES (respects dashboard toggles)
         # ═══════════════════════════════════════════
+        from dashboard import is_category_disabled
+        _cat_map_startup = {
+            config.CATEGORY_STOCKS: "Stocks", config.CATEGORY_CRYPTO: "Crypto",
+            config.CATEGORY_COMMODITIES: "Commodities", config.CATEGORY_FOREX: "FX",
+        }
         for attempt in range(3):
-            positions = api.get_positions()  # Re-fetch each attempt
-            non_crypto = []
+            positions = api.get_positions()
+            disabled_pos = []
             for pos in positions:
                 epic = pos.get("market", {}).get("epic", "")
                 deal_id = pos.get("position", {}).get("dealId", "")
                 if not deal_id or not epic:
                     continue
                 category = config.get_category(epic)
-                if category != config.CATEGORY_CRYPTO:
-                    non_crypto.append((epic, deal_id, category))
+                display_cat = _cat_map_startup.get(category, "Stocks")
+                if is_category_disabled(display_cat):
+                    disabled_pos.append((epic, deal_id, category))
 
-            if not non_crypto:
-                log.info(f"✅ All non-crypto positions closed (attempt {attempt + 1})")
+            if not disabled_pos:
+                log.info(f"✅ No disabled-category positions to close (attempt {attempt + 1})")
                 break
 
-            log.info(f"🚫 Attempt {attempt + 1}: Closing {len(non_crypto)} non-crypto position(s)...")
-            for epic, deal_id, category in non_crypto:
+            log.info(f"🚫 Attempt {attempt + 1}: Closing {len(disabled_pos)} disabled-category position(s)...")
+            for epic, deal_id, category in disabled_pos:
                 log.info(f"  🚫 Closing {epic} ({category}) deal={deal_id}")
                 try:
                     closed = api.close_position(deal_id)
@@ -283,9 +288,9 @@ def run():
                         log.warning(f"    ⚠️ Failed to close {epic} — will retry")
                 except Exception as e:
                     log.error(f"    ❌ Error closing {epic}: {e}")
-                time.sleep(0.3)  # Rate limit protection
+                time.sleep(0.3)
 
-            time.sleep(1)  # Wait before retry
+            time.sleep(1)
 
         # Final refresh
         positions = api.get_positions()
