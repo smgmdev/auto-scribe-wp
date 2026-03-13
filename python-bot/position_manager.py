@@ -78,6 +78,10 @@ class PositionManager:
 
         entry_time = created_date if created_date > 0 else time.time()
 
+        # Resolve category: use explicit param, or infer from epic
+        import config as _cfg
+        resolved_cat = category if category else _cfg.get_category(epic)
+
         self.tracked[deal_id] = {
             "epic": epic,
             "direction": direction,
@@ -92,6 +96,7 @@ class PositionManager:
             "spread": spread,
             "fee_cost": fee_cost,
             "locked_steps": locked_steps,
+            "category": resolved_cat,
         }
 
         recovery_tag = ""
