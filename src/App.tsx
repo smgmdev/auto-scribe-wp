@@ -61,7 +61,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Industries from "./pages/Industries";
 import MaceAI from "./pages/MaceAI";
 import ArcanaIntelligence from "./pages/ArcanaIntelligence";
-
+import InvestorRelations from "./pages/InvestorRelations";
 
 const queryClient = new QueryClient({
   defaultOptions: {
