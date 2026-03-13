@@ -145,7 +145,7 @@ class PositionManager:
             "epic": epic,
             "direction": direction,
             "entry_price": entry_price,
-            "stop_distance": entry_price * INITIAL_SL_PCT,
+            "stop_distance": entry_price * sl_pct,
             "profit_distance": profit_distance,
             "highest_profit": max(pnl, 0.0),
             "lowest_profit": min(pnl, 0.0),
