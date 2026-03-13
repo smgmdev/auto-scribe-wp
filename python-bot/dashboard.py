@@ -467,7 +467,12 @@ function updateGrid(data) {
                 el.querySelector('.slot-dir').textContent = dir;
                 el.querySelector('.slot-pair').textContent = t.pair || epic;
                 el.querySelector('.slot-price').textContent = formatPrice(price);
-                el.querySelector('.slot-pnl').textContent = formatPnl(pnl);
+
+                // P&L with percentage
+                var entryP = t.entry_price || 0;
+                var pnlPct = entryP > 0 ? ((pnl / entryP) * 100) : 0;
+                var pnlText = formatPnl(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%)';
+                el.querySelector('.slot-pnl').textContent = pnlText;
                 el.querySelector('.slot-empty-text').textContent = '';
 
                 // Flash on price change — quick 150ms transition
