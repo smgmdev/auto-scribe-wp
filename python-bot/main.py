@@ -19,6 +19,7 @@ from risk import calculate_position_size, can_open_position
 from position_manager import PositionManager
 from trade_journal import TradeJournal
 from market_scanner import MarketScanner
+from asset_discovery import AssetDiscovery
 from dashboard import start_dashboard_thread
 from logger_setup import get_logger
 
@@ -29,6 +30,7 @@ BANNER = """
 ║   CAPITAL.COM REAL-TIME TRADING BOT  (DEMO)             ║
 ║   ⚡ 1-second price scanning — tick-level precision      ║
 ║   🧠 Adaptive AI: learns from every trade                ║
+║   🔎 Auto-discovery: AI picks best stocks & crypto       ║
 ║   📊 Multi-TF scanner: 60m → 15m → 5m confirmation      ║
 ║   🔒 Unlimited TP with 5% step trailing SL               ║
 ║   📈 Stocks (5) | ₿ Crypto (5) | 🪙 Commodities (5)     ║
@@ -107,6 +109,18 @@ def run():
     # Initialize smart systems
     pos_manager = PositionManager()
     journal = TradeJournal()
+    discovery = AssetDiscovery(api)
+
+    # --- Initial asset discovery: AI picks best stocks & crypto ---
+    log.info("🔎 Running initial asset discovery...")
+    discovered = discovery.discover(force=True)
+    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+    log.info(
+        f"📈 Stocks selected: {', '.join(config.WATCHLIST_STOCKS)} | "
+        f"₿ Crypto selected: {', '.join(config.WATCHLIST_CRYPTO)} | "
+        f"🪙 Commodities: {', '.join(config.WATCHLIST_COMMODITIES)}"
+    )
+
     scanner = MarketScanner(api, config.WATCHLIST)
 
     # Print learning stats on startup
@@ -152,12 +166,25 @@ def run():
                     log.warning("Session expired, re-authenticating...")
                     api.login()
 
-            # Refresh balance every 5 minutes
+            # Refresh balance + re-discover assets every 5 minutes
             if cycle_count % 300 == 0:
                 acct = api.get_account()
                 if acct:
                     balance = acct.get("balance", {}).get("balance", balance)
                     log.info(f"💰 Balance refresh: {balance:.2f}")
+
+                # Re-discover best stocks & crypto (rotates into hottest movers)
+                discovered = discovery.discover()
+                if discovered["stock_epics"] or discovered["crypto_epics"]:
+                    old_watchlist = set(config.WATCHLIST)
+                    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+                    new_watchlist = set(config.WATCHLIST)
+                    added = new_watchlist - old_watchlist
+                    removed = old_watchlist - new_watchlist
+                    if added or removed:
+                        scanner.watchlist = config.WATCHLIST  # Update scanner's watchlist
+                        log.info(f"🔄 Watchlist rotated: +{len(added)} -{len(removed)} assets")
+
                 # Print learning summary
                 for epic in config.WATCHLIST:
                     s = journal.get_stats(epic)

@@ -171,3 +171,59 @@ class CapitalAPI:
             return resp.status_code == 200
         except:
             return False
+
+    def get_market_categories(self) -> list:
+        """Get all top-level market navigation categories."""
+        try:
+            resp = self.session.get(
+                f"{self.base_url}/api/v1/marketnavigation", headers=self._headers()
+            )
+            if resp.status_code == 200:
+                return resp.json().get("nodes", [])
+        except Exception as e:
+            log.error(f"Market categories exception: {e}")
+        return []
+
+    def get_category_markets(self, node_id: str, limit: int = 500) -> dict:
+        """Get sub-nodes and markets within a category."""
+        try:
+            resp = self.session.get(
+                f"{self.base_url}/api/v1/marketnavigation/{node_id}",
+                params={"limit": limit},
+                headers=self._headers(),
+            )
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception as e:
+            log.error(f"Category markets exception for {node_id}: {e}")
+        return {}
+
+    def search_markets(self, search_term: str) -> list:
+        """Search for markets by name."""
+        try:
+            resp = self.session.get(
+                f"{self.base_url}/api/v1/markets",
+                params={"searchTerm": search_term},
+                headers=self._headers(),
+            )
+            if resp.status_code == 200:
+                return resp.json().get("markets", [])
+        except Exception as e:
+            log.error(f"Search markets exception: {e}")
+        return []
+
+    def get_markets_details(self, epics: list[str]) -> list:
+        """Get details for multiple markets by epic codes (max 50)."""
+        if not epics:
+            return []
+        try:
+            resp = self.session.get(
+                f"{self.base_url}/api/v1/markets",
+                params={"epics": ",".join(epics[:50])},
+                headers=self._headers(),
+            )
+            if resp.status_code == 200:
+                return resp.json().get("markets", [])
+        except Exception as e:
+            log.error(f"Markets details exception: {e}")
+        return []

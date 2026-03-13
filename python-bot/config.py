@@ -34,31 +34,7 @@ CATEGORY_STOCKS = "stocks"
 CATEGORY_CRYPTO = "crypto"
 CATEGORY_COMMODITIES = "commodities"
 
-# Capital.com epic codes per category
-WATCHLIST_STOCKS = [
-    "AAPL",           # Apple
-    "TSLA",           # Tesla
-    "NVDA",           # NVIDIA
-    "MSFT",           # Microsoft
-    "AMZN",           # Amazon
-    "GOOGL",          # Alphabet
-    "META",           # Meta
-    "AMD",            # AMD
-    "NFLX",           # Netflix
-    "JPM",            # JPMorgan
-]
-
-WATCHLIST_CRYPTO = [
-    "BTCUSD",         # Bitcoin
-    "ETHUSD",         # Ethereum
-    "SOLUSD",         # Solana
-    "XRPUSD",        # XRP
-    "BNBUSD",         # BNB
-    "DOGEUSD",        # Dogecoin
-    "ADAUSD",         # Cardano
-    "AVAXUSD",        # Avalanche
-]
-
+# Commodities are fixed (limited, all liquid)
 WATCHLIST_COMMODITIES = [
     "GOLD",           # Gold
     "SILVER",         # Silver
@@ -68,19 +44,54 @@ WATCHLIST_COMMODITIES = [
     "PLATINUM",       # Platinum
 ]
 
-# Combined watchlist
-WATCHLIST = WATCHLIST_STOCKS + WATCHLIST_CRYPTO + WATCHLIST_COMMODITIES
+# Stocks & Crypto: populated dynamically by AssetDiscovery
+# These are fallbacks used before first discovery completes
+WATCHLIST_STOCKS_FALLBACK = [
+    "AAPL", "TSLA", "NVDA", "MSFT", "AMZN",
+    "GOOGL", "META", "AMD", "NFLX", "JPM",
+]
+WATCHLIST_CRYPTO_FALLBACK = [
+    "BTCUSD", "ETHUSD", "SOLUSD", "XRPUSD",
+    "BNBUSD", "DOGEUSD", "ADAUSD", "AVAXUSD",
+]
 
-# Epic → category mapping
+# Runtime watchlists (updated by AssetDiscovery)
+WATCHLIST_STOCKS: list[str] = list(WATCHLIST_STOCKS_FALLBACK)
+WATCHLIST_CRYPTO: list[str] = list(WATCHLIST_CRYPTO_FALLBACK)
+
+# Epic → category mapping (rebuilt when watchlists update)
 EPIC_CATEGORY: dict[str, str] = {}
-for epic in WATCHLIST_STOCKS:
-    EPIC_CATEGORY[epic] = CATEGORY_STOCKS
-for epic in WATCHLIST_CRYPTO:
-    EPIC_CATEGORY[epic] = CATEGORY_CRYPTO
-for epic in WATCHLIST_COMMODITIES:
-    EPIC_CATEGORY[epic] = CATEGORY_COMMODITIES
+
+
+def rebuild_watchlist():
+    """Rebuild the combined watchlist and category mapping."""
+    global WATCHLIST, EPIC_CATEGORY
+    EPIC_CATEGORY.clear()
+    for epic in WATCHLIST_STOCKS:
+        EPIC_CATEGORY[epic] = CATEGORY_STOCKS
+    for epic in WATCHLIST_CRYPTO:
+        EPIC_CATEGORY[epic] = CATEGORY_CRYPTO
+    for epic in WATCHLIST_COMMODITIES:
+        EPIC_CATEGORY[epic] = CATEGORY_COMMODITIES
+    WATCHLIST = WATCHLIST_STOCKS + WATCHLIST_CRYPTO + WATCHLIST_COMMODITIES
+
+
+def update_dynamic_watchlists(stock_epics: list[str], crypto_epics: list[str]):
+    """Called by AssetDiscovery to update the live watchlists."""
+    global WATCHLIST_STOCKS, WATCHLIST_CRYPTO
+    if stock_epics:
+        WATCHLIST_STOCKS = stock_epics
+    if crypto_epics:
+        WATCHLIST_CRYPTO = crypto_epics
+    rebuild_watchlist()
 
 
 def get_category(epic: str) -> str:
     """Get the category for an epic code."""
     return EPIC_CATEGORY.get(epic, "unknown")
+
+
+# Initial build
+rebuild_watchlist()
+# Combined watchlist (rebuilt by rebuild_watchlist)
+WATCHLIST: list[str] = WATCHLIST_STOCKS + WATCHLIST_CRYPTO + WATCHLIST_COMMODITIES
