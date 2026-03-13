@@ -70,7 +70,6 @@ export default function InvestorRelations() {
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="cursor-pointer"><HeaderLogo src={amlogo} alt="Arcana Mace" invert /></button>
           <div className="flex items-center gap-3">
-            <PWAInstallButtons />
             <button onClick={() => setSearchOpen(true)} className="text-white/60 hover:text-white transition-colors">
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M10 6.5C10 8.433 8.433 10 6.5 10C4.567 10 3 8.433 3 6.5C3 4.567 4.567 3 6.5 3C8.433 3 10 4.567 10 6.5ZM9.244 10.048C8.448 10.659 7.436 11 6.5 11C4.015 11 2 8.985 2 6.5C2 4.015 4.015 2 6.5 2C8.985 2 11 4.015 11 6.5C11 7.436 10.659 8.448 10.048 9.244L13.854 13.05C14.049 13.244 14.049 13.56 13.854 13.754C13.66 13.949 13.344 13.949 13.15 13.754L9.244 10.048Z" fill="currentColor" /></svg>
             </button>
@@ -292,7 +291,10 @@ export default function InvestorRelations() {
         </section>
       </main>
 
-      <Footer narrow showTopBorder />
+      <div className="bg-[#1d1d1f] border-t border-white/10">
+        <PWAInstallButtons />
+      </div>
+      <Footer narrow showTopBorder dark />
     </>
   );
 }
