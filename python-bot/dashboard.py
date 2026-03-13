@@ -379,7 +379,7 @@ body {
     .category-row { gap: 8px; }
     .category-label { width: 50px; min-width: 50px; font-size: 12px; }
     .slots { gap: 4px; }
-    .slot { min-height: 50px; padding: 6px 3px; border-radius: 4px; }
+    .slot { min-height: 50px; padding: 6px 3px; border-radius: 0; }
     .slot-dir { font-size: 7px; top: 2px; right: 3px; }
 }
 </style>
