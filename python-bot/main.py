@@ -267,7 +267,7 @@ def run():
                             "spread": float(ask) - float(bid),
                         }
             except Exception as e:
-                log.warning(f"Failed to fetch startup prices: {e}")
+                log.info(f"Failed to fetch startup prices: {e}")
 
         # ═══════════════════════════════════════════
         # CLOSE POSITIONS IN DISABLED CATEGORIES (respects dashboard toggles)
