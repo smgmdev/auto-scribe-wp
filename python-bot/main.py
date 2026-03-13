@@ -466,8 +466,33 @@ def run():
     else:
         log.info("🔄 No existing positions found — starting fresh")
 
-    # Session keepalive
+    # ═══════════════════════════════════════════
+    # 🔄 BACKGROUND SCANNER THREAD
+    # Runs scan_all() in a separate thread so the main 1s loop
+    # is never blocked by 30-60 API calls from the scanner.
+    # ═══════════════════════════════════════════
+    _scanner_lock = threading.Lock()
+    _scanner_running = True
+
+    def _scanner_thread_fn():
+        """Background thread: runs scanner.scan_all() on its own schedule."""
+        while _scanner_running:
+            try:
+                scanner.scan_all()
+            except Exception as e:
+                log.error(f"Scanner thread error: {e}")
+            # Scanner has its own internal timers (SCALP_SCAN_INTERVAL, FULL_SCAN_INTERVAL)
+            # Sleep 2s between iterations to avoid tight-looping
+            time.sleep(2)
+
+    scanner_thread = threading.Thread(target=_scanner_thread_fn, daemon=True, name="scanner")
+    scanner_thread.start()
+    log.info("🔄 Background scanner thread started")
+
+    # Session keepalive & stall detection
     cycle_count = 0
+    _last_batch_success = time.time()
+    _stall_threshold = 60  # If no batch succeeds for 60s, force re-login
 
     while True:
         try:
