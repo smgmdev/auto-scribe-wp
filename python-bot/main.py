@@ -39,31 +39,92 @@ BANNER = """
 """
 
 
-def write_live_state(balance, positions, pos_manager, tick_history):
-    """Write live state to disk for dashboard to read."""
+def write_live_state(api, balance, positions, pos_manager, tick_history):
+    """Write live state to disk for dashboard to read.
+    Uses Capital.com API's live bid/ask from positions, plus direct price
+    fetches for the most accurate real-time data.
+    """
     try:
         live_positions = []
+
+        # Collect epics that need fresh prices (from open positions)
+        epics_to_fetch = []
+        for pos in positions:
+            epic = pos.get("market", {}).get("epic", "")
+            if epic:
+                epics_to_fetch.append(epic)
+
+        # Batch-fetch live prices for all open position epics (max 50)
+        live_prices = {}
+        if epics_to_fetch:
+            try:
+                details = api.get_markets_details(epics_to_fetch[:50])
+                for m in details:
+                    ep = m.get("epic", "")
+                    snap = m.get("snapshot", {})
+                    bid = snap.get("bid", 0)
+                    ask = snap.get("offer", 0)
+                    if bid and ask:
+                        live_prices[ep] = {
+                            "bid": float(bid),
+                            "ask": float(ask),
+                            "mid": (float(bid) + float(ask)) / 2,
+                        }
+            except Exception as e:
+                log.debug(f"Live price fetch fallback: {e}")
+
         for pos in positions:
             epic = pos.get("market", {}).get("epic", "")
             deal_id = pos.get("position", {}).get("dealId", "")
             direction = pos.get("position", {}).get("direction", "")
             entry_price = float(pos.get("position", {}).get("level", 0))
-            
-            current_price = entry_price
-            if epic in tick_history and tick_history[epic]:
-                current_price = tick_history[epic][-1]["mid"]
-            
-            tracked = pos_manager.tracked.get(deal_id, {})
-            if direction == "BUY":
-                pnl = current_price - entry_price
+            size = float(pos.get("position", {}).get("size", 0))
+
+            # Priority 1: batch-fetched live market price
+            # Priority 2: position market snapshot (bid/offer from API)
+            # Priority 3: tick_history
+            # Priority 4: entry price (fallback)
+            if epic in live_prices:
+                current_price = live_prices[epic]["mid"]
+                bid = live_prices[epic]["bid"]
+                ask = live_prices[epic]["ask"]
             else:
-                pnl = entry_price - current_price
+                market = pos.get("market", {})
+                api_bid = market.get("bid")
+                api_ask = market.get("offer") or market.get("ask")
+                if api_bid and api_ask:
+                    bid = float(api_bid)
+                    ask = float(api_ask)
+                    current_price = (bid + ask) / 2
+                elif epic in tick_history and tick_history[epic]:
+                    current_price = tick_history[epic][-1]["mid"]
+                    bid = tick_history[epic][-1].get("bid", current_price)
+                    ask = tick_history[epic][-1].get("ask", current_price)
+                else:
+                    current_price = entry_price
+                    bid = ask = entry_price
+
+            # Use the actual P&L from the API if available
+            pos_data = pos.get("position", {})
+            api_pnl = pos_data.get("profit")
+            if api_pnl is not None:
+                pnl = float(api_pnl)
+            else:
+                if direction == "BUY":
+                    pnl = current_price - entry_price
+                else:
+                    pnl = entry_price - current_price
+
+            tracked = pos_manager.tracked.get(deal_id, {})
 
             live_positions.append({
                 "epic": epic,
                 "direction": direction,
                 "entry_price": entry_price,
-                "current_price": current_price,
+                "current_price": round(current_price, 6),
+                "bid": round(bid, 6),
+                "ask": round(ask, 6),
+                "size": size,
                 "unrealized_pnl": round(pnl, 5),
                 "locked_steps": tracked.get("locked_steps", 0),
                 "category": config.get_category(epic),
@@ -73,7 +134,7 @@ def write_live_state(balance, positions, pos_manager, tick_history):
             "status": "running",
             "balance": balance,
             "positions": live_positions,
-            "updated_at": datetime.utcnow().strftime("%H:%M:%S"),
+            "updated_at": datetime.utcnow().strftime("%H:%M:%S.") + f"{datetime.utcnow().microsecond // 1000:03d}",
         }
         state_file = os.path.join(os.path.dirname(__file__), "live_state.json")
         with open(state_file, "w") as f:
@@ -191,11 +252,11 @@ def run():
                     if s["total"] > 0:
                         log.info(f"  🧠 {epic}: {s['total']} trades, {s['win_rate']:.0%} win rate")
 
-            # Get positions every 3 cycles, write live state every cycle
+            # Refresh positions every 3 cycles from API
             if cycle_count % 3 == 0:
                 positions = api.get_positions()
-            # Write live state every cycle for 1s dashboard updates
-            write_live_state(balance, positions, pos_manager, tick_history)
+            # Write live state every cycle — fetches live prices directly from API
+            write_live_state(api, balance, positions, pos_manager, tick_history)
 
             # ═══════════════════════════════════════════
             # ⚡ SMART POSITION MANAGEMENT — every cycle

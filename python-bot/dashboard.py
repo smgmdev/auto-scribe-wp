@@ -314,10 +314,10 @@ tr:hover { background: #15152a; }
     <h3>⚡ Active Positions <span id="posCount" style="color:#00ff88"></span></h3>
     <table>
         <thead>
-            <tr><th>Cat</th><th>Dir</th><th>Asset</th><th>Entry</th><th>Current Price</th><th>P&L</th><th>SL Steps</th></tr>
+            <tr><th>Cat</th><th>Dir</th><th>Asset</th><th>Size</th><th>Entry</th><th>Bid</th><th>Ask</th><th>Mid Price</th><th>P&L</th><th>SL Steps</th></tr>
         </thead>
         <tbody id="positionsBody">
-            <tr><td colspan="7" class="empty">No open positions</td></tr>
+            <tr><td colspan="10" class="empty">No open positions</td></tr>
         </tbody>
     </table>
 </div>
@@ -374,7 +374,7 @@ function renderStats(containerId, stats) {
 function renderPositions(positions) {
     const body = document.getElementById('positionsBody');
     if (!positions || positions.length === 0) {
-        body.innerHTML = '<tr><td colspan="7" class="empty">No open positions</td></tr>';
+        body.innerHTML = '<tr><td colspan="10" class="empty">No open positions</td></tr>';
         return;
     }
 
@@ -383,6 +383,9 @@ function renderPositions(positions) {
         const epic = p.epic || '?';
         const prevPrice = prevPrices[epic];
         const currentPrice = p.current_price || 0;
+        const bid = p.bid || 0;
+        const ask = p.ask || 0;
+        const size = p.size || 0;
         const pnl = p.unrealized_pnl || 0;
         const cat = p.category || 'unknown';
 
@@ -398,19 +401,29 @@ function renderPositions(positions) {
 
         prevPrices[epic] = currentPrice;
 
-        html += `<tr>
+        // PnL row background tint
+        const pnlRowStyle = pnl > 0
+            ? 'border-left: 3px solid #00ff88;'
+            : pnl < 0
+                ? 'border-left: 3px solid #ff4444;'
+                : '';
+
+        html += `<tr style="${pnlRowStyle}">
             <td>${CAT_ICONS[cat] || '?'}</td>
             <td><span class="badge badge-${p.direction || '?'}">${p.direction || '?'}</span></td>
-            <td>${epic}</td>
+            <td><strong>${epic}</strong></td>
+            <td>${size}</td>
             <td>${(p.entry_price || 0).toFixed(5)}</td>
-            <td class="${flashClass} ${priceColorClass}" id="price-${epic}">${currentPrice.toFixed(5)}</td>
-            <td class="${pnlClass(pnl)}">${formatPnl(pnl)}</td>
+            <td class="${priceColorClass}">${bid.toFixed(5)}</td>
+            <td class="${priceColorClass}">${ask.toFixed(5)}</td>
+            <td class="${flashClass} ${priceColorClass}" id="price-${epic}"><strong>${currentPrice.toFixed(5)}</strong></td>
+            <td class="${pnlClass(pnl)}"><strong>${formatPnl(pnl)}</strong></td>
             <td>${p.locked_steps || 0} steps</td>
         </tr>`;
     });
     body.innerHTML = html;
 
-    // Re-trigger flash animations by forcing reflow
+    // Re-trigger flash animations
     positions.forEach(p => {
         const el = document.getElementById('price-' + p.epic);
         if (el && (el.classList.contains('flash-green') || el.classList.contains('flash-red'))) {
@@ -418,6 +431,7 @@ function renderPositions(positions) {
                 el.classList.remove('flash-green', 'flash-red');
             }, { once: true });
         }
+    });
     });
 }
 
