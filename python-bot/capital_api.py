@@ -285,16 +285,25 @@ class CapitalAPI:
 
     def get_category_markets(self, node_id: str, limit: int = 500) -> dict:
         """Get sub-nodes and markets within a category."""
-        try:
-            resp = self.session.get(
-                f"{self.base_url}/api/v1/marketnavigation/{node_id}",
-                params={"limit": limit},
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                return resp.json()
-        except Exception as e:
-            log.error(f"Category markets exception for {node_id}: {e}")
+        _pace_request()
+        for attempt in range(_MAX_RETRIES + 1):
+            try:
+                resp = self.session.get(
+                    f"{self.base_url}/api/v1/marketnavigation/{node_id}",
+                    params={"limit": limit},
+                    headers=self._headers(),
+                    timeout=10,
+                )
+                if resp.status_code == 200:
+                    _handle_success()
+                    return resp.json()
+                else:
+                    _handle_error(resp.status_code)
+                    log.warning(f"Category markets {node_id} attempt {attempt+1}: {resp.status_code}")
+            except Exception as e:
+                log.error(f"Category markets exception for {node_id} (attempt {attempt+1}): {e}")
+                if attempt < _MAX_RETRIES:
+                    time.sleep(1 * (attempt + 1))
         return {}
 
     def search_markets(self, search_term: str) -> list:
