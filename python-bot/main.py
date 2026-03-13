@@ -448,10 +448,16 @@ def run():
     # ═══════════════════════════════════════════
     _scanner_lock = threading.Lock()
     _scanner_running = True
+    _scanner_paused = threading.Event()  # When SET, scanner should pause
+    _scanner_paused.clear()
 
     def _scanner_thread_fn():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
+            # Wait if main loop is doing a batch fetch (avoid API contention)
+            if _scanner_paused.is_set():
+                time.sleep(0.5)
+                continue
             try:
                 scanner.scan_all()
             except Exception as e:
