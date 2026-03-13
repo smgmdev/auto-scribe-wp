@@ -56,8 +56,33 @@ function AnimatedStat({ value, suffix = '', prefix = '' }: { value: number; suff
 
 export default function InvestorRelations() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      const currentScrollY = scrollContainer.scrollTop;
+      const scrollThreshold = 64;
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > scrollThreshold) {
+        setIsHeaderHidden(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsHeaderHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
@@ -66,20 +91,70 @@ export default function InvestorRelations() {
         description="Invest in the future of global media intelligence. Arcana Mace is redefining how organizations access media distribution, AI-powered publishing, and geopolitical intelligence."
       />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-[rgba(29,29,31,0.92)] backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="cursor-pointer"><HeaderLogo src={amlogo} alt="Arcana Mace" invert /></button>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSearchOpen(true)} className="text-white/60 hover:text-white transition-colors">
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M10 6.5C10 8.433 8.433 10 6.5 10C4.567 10 3 8.433 3 6.5C3 4.567 4.567 3 6.5 3C8.433 3 10 4.567 10 6.5ZM9.244 10.048C8.448 10.659 7.436 11 6.5 11C4.015 11 2 8.985 2 6.5C2 4.015 4.015 2 6.5 2C8.985 2 11 4.015 11 6.5C11 7.436 10.659 8.448 10.048 9.244L13.854 13.05C14.049 13.244 14.049 13.56 13.854 13.754C13.66 13.949 13.344 13.949 13.15 13.754L9.244 10.048Z" fill="currentColor" /></svg>
+    <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
+      {/* Main Header - matches Mace AI page */}
+      <header 
+        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+      >
+        <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
+          <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <HeaderLogo src={amblack} />
+            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+          </button>
+          
+          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search media outlets...</span>
             </button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden hover:bg-black hover:text-white"
+              onClick={() => setSearchOpen(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+            
+            {user ? (
+              <Button 
+                onClick={() => navigate('/account')}
+                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+              >
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </header>
 
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
       <InvestorContactForm open={contactOpen} onOpenChange={setContactOpen} />
+
+      <div className="h-[92px]" />
+
+      {/* Sub-header */}
+      <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
+        <div className="bg-white border-b border-border">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
+            <span className="text-xl font-semibold text-foreground">Investor Relations</span>
+          </div>
+        </div>
+      </div>
 
       <main className="bg-white text-[#1d1d1f]">
 
