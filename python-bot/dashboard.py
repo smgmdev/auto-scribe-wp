@@ -212,13 +212,15 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 32px;
+    padding: 12px 20px;
     border-bottom: 1px solid #1a1a1a;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 .topbar-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 .status-dot {
     width: 10px; height: 10px;
@@ -228,8 +230,8 @@ body {
 .status-dot.running { background: #00ff88; }
 .status-dot.stopped { background: #ff4444; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-.topbar-title { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-.topbar-right { display: flex; gap: 24px; font-size: 13px; color: #888; }
+.topbar-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.topbar-right { display: flex; gap: 16px; font-size: 12px; color: #888; flex-wrap: wrap; }
 .topbar-right .val { color: #fff; font-weight: 600; }
 .tick-counter { font-variant-numeric: tabular-nums; }
 
@@ -239,44 +241,50 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 40px 48px;
-    gap: 24px;
+    padding: 20px;
+    gap: 16px;
+    overflow: hidden;
 }
 
 .category-row {
     display: flex;
-    align-items: center;
-    gap: 24px;
+    align-items: stretch;
+    gap: 16px;
 }
 
 .category-label {
-    width: 140px;
-    min-width: 140px;
-    font-size: 28px;
+    width: 100px;
+    min-width: 100px;
+    font-size: 18px;
     font-weight: 700;
     text-align: right;
     color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .slots {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     flex: 1;
+    min-width: 0;
 }
 
 .slot {
     flex: 1;
-    max-width: 200px;
-    min-height: 80px;
+    min-width: 0;
+    min-height: 70px;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 12px 8px;
+    padding: 10px 6px;
     transition: background-color 0.15s ease, border-color 0.15s ease;
     position: relative;
     border: 1px solid #222;
+    overflow: hidden;
 }
 
 .slot.empty {
@@ -305,22 +313,27 @@ body {
 }
 
 .slot-pair {
-    font-size: 15px;
+    font-size: clamp(10px, 1.4vw, 15px);
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .slot-price {
-    font-size: 13px;
+    font-size: clamp(9px, 1.2vw, 13px);
     font-weight: 500;
-    margin-top: 4px;
+    margin-top: 3px;
     opacity: 0.95;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }
 
 .slot-pnl {
-    font-size: 10px;
+    font-size: clamp(8px, 1vw, 10px);
     margin-top: 2px;
     opacity: 0.85;
     font-variant-numeric: tabular-nums;
@@ -328,9 +341,9 @@ body {
 
 .slot-dir {
     position: absolute;
-    top: 4px;
-    right: 6px;
-    font-size: 9px;
+    top: 3px;
+    right: 5px;
+    font-size: 8px;
     font-weight: 700;
     opacity: 0.7;
     letter-spacing: 1px;
@@ -345,10 +358,29 @@ body {
 /* Footer */
 .footer {
     text-align: center;
-    padding: 12px;
+    padding: 10px;
     color: #333;
     font-size: 11px;
     border-top: 1px solid #111;
+}
+
+/* ═══ Responsive ═══ */
+@media (max-width: 900px) {
+    .grid-container { padding: 16px 12px; gap: 12px; }
+    .category-label { width: 70px; min-width: 70px; font-size: 14px; }
+    .slots { gap: 6px; }
+    .slot { min-height: 60px; padding: 8px 4px; border-radius: 6px; }
+}
+
+@media (max-width: 600px) {
+    .topbar { padding: 10px 12px; }
+    .topbar-right { gap: 10px; font-size: 11px; }
+    .grid-container { padding: 12px 8px; gap: 10px; }
+    .category-row { gap: 8px; }
+    .category-label { width: 50px; min-width: 50px; font-size: 12px; }
+    .slots { gap: 4px; }
+    .slot { min-height: 50px; padding: 6px 3px; border-radius: 4px; }
+    .slot-dir { font-size: 7px; top: 2px; right: 3px; }
 }
 </style>
 </head>
