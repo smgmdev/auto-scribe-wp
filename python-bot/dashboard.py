@@ -51,8 +51,8 @@ def set_pos_manager_ref(pm):
     global _pos_manager_ref
     _pos_manager_ref = pm
 
-# Categories disabled by toggle — positions get closed, no new trades
-_disabled_categories: set = set()
+# Categories disabled by toggle — Stocks, Commodities, FX off by default (crypto-only)
+_disabled_categories: set = {"Stocks", "Commodities", "FX"}
 _disabled_lock = threading.Lock()
 
 
@@ -553,7 +553,7 @@ body {
     </div>
     <div class="topbar-right">
         <span>Balance: <span class="val" id="balance">$0.00</span></span>
-        <span>Open: <span class="val" id="openCount">0/5</span></span>
+        <span>Open: <span class="val" id="openCount">0/20</span></span>
         <span>Updated: <span class="val tick-counter" id="lastTick">—</span></span>
         <button id="updateBtn" onclick="pullAndRestart()" title="Git pull &amp; restart bot">⟳ Update</button>
     </div>
@@ -750,7 +750,7 @@ async function fetchState() {
         const dot = document.getElementById('statusDot');
         dot.className = 'status-dot ' + ((d.status === 'running' || d.status === 'running-file') ? 'running' : 'stopped');
         document.getElementById('balance').textContent = '$' + (d.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('openCount').textContent = (d.total_open || 0) + '/5';
+        document.getElementById('openCount').textContent = (d.total_open || 0) + '/20';
         document.getElementById('lastTick').textContent = d.updated_at || '—';
 
         syncToggles(d.disabled_categories);
