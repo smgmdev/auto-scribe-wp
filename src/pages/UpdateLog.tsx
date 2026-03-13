@@ -720,6 +720,7 @@ export default function UpdateLog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  const [visibleCount, setVisibleCount] = useState(15);
 
   const availableYears = useMemo(() => {
     const years = new Set(updates.map(u => u.date.split(', ')[1]));
