@@ -182,32 +182,7 @@ export default function InvestorRelations() {
           <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         </section>
 
-        {/* Key Metrics */}
-        <section className="py-20 bg-[#f5f5f7]">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <AnimatedSection>
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 tracking-tight">By the Numbers</h2>
-            </AnimatedSection>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { value: 500, suffix: '+', label: 'Media Outlets', icon: Globe },
-                { value: 85, suffix: '+', label: 'Countries Covered', icon: Target },
-                { value: 12, suffix: '+', label: 'Product Verticals', icon: Layers },
-                { value: 24, suffix: '/7', label: 'AI Intelligence', icon: Zap },
-              ].map((stat, i) => (
-                <AnimatedSection key={stat.label} delay={i * 100}>
-                  <div className="text-center">
-                    <stat.icon className="h-6 w-6 mx-auto mb-3 text-[#1d1d1f]/40" />
-                    <p className="text-3xl md:text-4xl font-bold tracking-tight">
-                      <AnimatedStat value={stat.value} suffix={stat.suffix} />
-                    </p>
-                    <p className="text-sm text-[#86868b] mt-1">{stat.label}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
+
 
 
         {/* Product Portfolio */}
@@ -264,40 +239,14 @@ export default function InvestorRelations() {
           </div>
         </section>
 
-        {/* Market Opportunity */}
-        <section className="py-20">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <AnimatedSection>
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 tracking-tight">Market Opportunity</h2>
-              <p className="text-center text-[#86868b] max-w-2xl mx-auto mb-16">
-                Arcana Mace operates at the intersection of three rapidly growing markets.
-              </p>
-            </AnimatedSection>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                { market: 'Global PR & Media Distribution', size: '$100B+', growth: 'Growing 8% annually' },
-                { market: 'AI Content & Publishing Tools', size: '$15B+', growth: 'Growing 35% annually' },
-                { market: 'Geopolitical Intelligence & Risk', size: '$12B+', growth: 'Growing 12% annually' },
-              ].map((m, i) => (
-                <AnimatedSection key={m.market} delay={i * 100}>
-                  <div className="text-center p-8 bg-[#f5f5f7]">
-                    <p className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{m.size}</p>
-                    <h3 className="text-sm font-semibold mb-1">{m.market}</h3>
-                    <p className="text-xs text-[#86868b]">{m.growth}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* CTA */}
         <section className="py-20 bg-[#f5f5f7]">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
             <AnimatedSection>
               <Briefcase className="h-10 w-10 mx-auto mb-6 text-[#1d1d1f]/30" />
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Partner With Us</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Invest in Arcana Mace</h2>
               <p className="text-[#86868b] max-w-xl mx-auto mb-8 leading-relaxed">
                 We are selectively engaging with strategic investors who share our vision of building the definitive global media intelligence platform.
               </p>
