@@ -8,7 +8,7 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { Button } from '@/components/ui/button';
 import { InvestorContactForm } from '@/components/investor/InvestorContactForm';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase, Target, Layers, Search, User } from 'lucide-react';
+import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase, Target, Layers, Search, User, Loader2 } from 'lucide-react';
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import investorHeroBg from '@/assets/investor-hero-bg.mp4';
@@ -61,6 +61,7 @@ export default function InvestorRelations() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -168,8 +169,14 @@ export default function InvestorRelations() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover opacity-40"
             src={investorHeroBg}
+            onCanPlayThrough={() => setVideoLoaded(true)}
           />
           <div className="absolute inset-0 bg-black/50" />
+          {!videoLoaded && (
+            <div className="absolute bottom-4 left-4 z-20">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+            </div>
+          )}
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-24 md:py-36 text-center relative z-10">
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/50 mb-4">Investor Relations</p>
