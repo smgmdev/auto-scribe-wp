@@ -152,14 +152,14 @@ def run():
     log.info(f"Risk per trade: {config.RISK_PER_TRADE * 100}% | Max positions: {config.MAX_OPEN_POSITIONS}")
     log.info(f"📈 Stocks: {len(config.WATCHLIST_STOCKS)} | ₿ Crypto: {len(config.WATCHLIST_CRYPTO)} | 🪙 Commodities: {len(config.WATCHLIST_COMMODITIES)}")
 
-    # Start dashboard in background
-    start_dashboard_thread()
-
     api = CapitalAPI()
 
     if not api.login():
         log.critical("Failed to login — check credentials in .env")
         sys.exit(1)
+
+    # Start dashboard AFTER login so it can use the API session
+    start_dashboard_thread(api=api)
 
     account = api.get_account()
     if not account:
