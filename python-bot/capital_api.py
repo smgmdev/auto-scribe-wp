@@ -111,15 +111,19 @@ class CapitalAPI:
 
     def get_prices(self, epic: str, resolution: str, num_points: int = 60) -> Optional[dict]:
         """Fetch historical price candles."""
+        _pace_request()
         try:
             resp = self.session.get(
                 f"{self.base_url}/api/v1/prices/{epic}",
                 params={"resolution": resolution, "max": num_points},
                 headers=self._headers(),
+                timeout=10,
             )
             if resp.status_code == 200:
+                _handle_success()
                 return resp.json()
             else:
+                _handle_error(resp.status_code)
                 log.warning(f"Prices for {epic}: {resp.status_code}")
         except Exception as e:
             log.error(f"Prices exception for {epic}: {e}")
