@@ -157,6 +157,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
                       <li><NavLink onClick={() => handleNav('/report-bug')} label="Report a Bug" /></li>
                       <li><NavLink onClick={() => handleNav('/sitemap')} label="Site Map" /></li>
+                      <li><NavLink onClick={() => handleNav('/update-log')} label="Changelog" /></li>
                     </ul>
                   </div>
                   <div className="bg-[#1a1a1a] p-6">
@@ -236,7 +237,7 @@ export function QuickNavBanner({ inDashboard = false }: { inDashboard?: boolean 
                       <li><NavLink onClick={() => handleNav('/investor-relations')} label="Investor Relations" /></li>
                       <li><NavLink onClick={() => handleNav('/help')} label="Help Center" /></li>
                       <li><NavLink onClick={() => handleNav('/system-status')} label="System Status" /></li>
-                      <li><NavLink onClick={() => handleNav('/update-log')} label="Changelog" /></li>
+                      
                     </ul>
                   </div>
                 </div>
