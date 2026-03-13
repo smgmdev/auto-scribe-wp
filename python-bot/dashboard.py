@@ -277,6 +277,8 @@ body {
 const MAX_SLOTS = 5;
 const CATEGORIES = ['Stocks', 'Commodities', 'Crypto', 'FX'];
 const prevPrices = {};
+const flashTimers = {};
+let gridBuilt = false;
 
 function formatPrice(val) {
     if (val === 0) return '—';
@@ -289,48 +291,84 @@ function formatPnl(val) {
     return (val >= 0 ? '+' : '') + val.toFixed(2);
 }
 
-function renderGrid(data) {
+function buildGrid() {
     const container = document.getElementById('gridContainer');
-    const cats = data.categories || {};
     let html = '';
+    CATEGORIES.forEach(cat => {
+        html += '<div class="category-row">';
+        html += '<div class="category-label">' + cat + '</div>';
+        html += '<div class="slots" id="slots-' + cat + '">';
+        for (let i = 0; i < MAX_SLOTS; i++) {
+            html += '<div class="slot empty" id="slot-' + cat + '-' + i + '">' +
+                    '<span class="slot-dir"></span>' +
+                    '<span class="slot-pair"></span>' +
+                    '<span class="slot-price"></span>' +
+                    '<span class="slot-pnl"></span>' +
+                    '<span class="slot-empty-text">—</span>' +
+                    '</div>';
+        }
+        html += '</div></div>';
+    });
+    container.innerHTML = html;
+    gridBuilt = true;
+}
+
+function updateGrid(data) {
+    if (!gridBuilt) buildGrid();
+    const cats = data.categories || {};
 
     CATEGORIES.forEach(cat => {
         const trades = cats[cat] || [];
-        html += '<div class="category-row">';
-        html += `<div class="category-label">${cat}</div>`;
-        html += '<div class="slots">';
-
         for (let i = 0; i < MAX_SLOTS; i++) {
+            const el = document.getElementById('slot-' + cat + '-' + i);
+            if (!el) continue;
+
             if (i < trades.length) {
                 const t = trades[i];
                 const epic = t.epic || '?';
                 const price = t.price || 0;
                 const prev = prevPrices[epic];
-                
-                let stateClass = 'neutral';
-                if (prev !== undefined && prev !== price) {
-                    stateClass = price > prev ? 'up' : 'down';
-                }
-                prevPrices[epic] = price;
-
                 const pnl = t.pnl || 0;
                 const dir = t.direction || '';
 
-                html += `<div class="slot ${stateClass}" id="slot-${epic}">
-                    <span class="slot-dir">${dir}</span>
-                    <span class="slot-pair">${t.pair || epic}</span>
-                    <span class="slot-price">${formatPrice(price)}</span>
-                    <span class="slot-pnl">${formatPnl(pnl)}</span>
-                </div>`;
+                // Update text content (no DOM rebuild)
+                el.querySelector('.slot-dir').textContent = dir;
+                el.querySelector('.slot-pair').textContent = t.pair || epic;
+                el.querySelector('.slot-price').textContent = formatPrice(price);
+                el.querySelector('.slot-pnl').textContent = formatPnl(pnl);
+                el.querySelector('.slot-empty-text').textContent = '';
+
+                // Flash logic: compare to previous price
+                if (prev !== undefined && prev !== price) {
+                    const flash = price > prev ? 'up' : 'down';
+                    el.className = 'slot ' + flash;
+
+                    // Clear previous timer for this slot
+                    const slotKey = cat + '-' + i;
+                    if (flashTimers[slotKey]) clearTimeout(flashTimers[slotKey]);
+
+                    // Keep flash for 800ms then fade to neutral-active
+                    flashTimers[slotKey] = setTimeout(() => {
+                        el.className = 'slot neutral-active';
+                    }, 800);
+                } else if (prev === undefined) {
+                    // First time seeing this trade — show as active neutral
+                    el.className = 'slot neutral-active';
+                }
+                // If price === prev, keep current class (holds last flash/neutral)
+
+                prevPrices[epic] = price;
             } else {
-                html += '<div class="slot empty"><span class="slot-empty-text">—</span></div>';
+                // Empty slot
+                el.className = 'slot empty';
+                el.querySelector('.slot-dir').textContent = '';
+                el.querySelector('.slot-pair').textContent = '';
+                el.querySelector('.slot-price').textContent = '';
+                el.querySelector('.slot-pnl').textContent = '';
+                el.querySelector('.slot-empty-text').textContent = '—';
             }
         }
-
-        html += '</div></div>';
     });
-
-    container.innerHTML = html;
 }
 
 async function fetchState() {
@@ -346,10 +384,11 @@ async function fetchState() {
         document.getElementById('openCount').textContent = (d.total_open || 0) + '/20';
         document.getElementById('lastTick').textContent = d.updated_at || '—';
 
-        renderGrid(d);
+        updateGrid(d);
     } catch(e) {}
 }
 
+buildGrid();
 fetchState();
 setInterval(fetchState, 1000);
 </script>
