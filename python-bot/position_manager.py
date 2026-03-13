@@ -13,11 +13,15 @@ from logger_setup import get_logger
 
 log = get_logger("pos_mgr")
 
-# Initial SL: 1.5% below entry
+# Initial SL: 1.5% below entry (default)
 INITIAL_SL_PCT = 0.015
-
-# Step size for SL ratcheting (5% of entry price)
+# Step size for SL ratcheting: 5% of entry price (default)
 PROFIT_STEP_PCT = 0.05
+
+# BTC-specific overrides
+BTC_INITIAL_SL_PCT = 0.005   # 0.5% from entry
+BTC_PROFIT_STEP_PCT = 0.01   # 1% steps
+BTC_EPICS = {"BTCUSD", "BITCOIN", "BTC"}
 
 
 def _initial_sl(entry_price: float, direction: str) -> float:
