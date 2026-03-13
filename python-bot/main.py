@@ -241,9 +241,12 @@ def run():
 
                 # Re-discover best stocks & crypto (rotates into hottest movers)
                 discovered = discovery.discover()
-                if discovered["stock_epics"] or discovered["crypto_epics"]:
+                if discovered["stock_epics"] or discovered["crypto_epics"] or discovered.get("forex_epics"):
                     old_watchlist = set(config.WATCHLIST)
-                    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+                    config.update_dynamic_watchlists(
+                        discovered["stock_epics"], discovered["crypto_epics"],
+                        forex_epics=discovered.get("forex_epics"),
+                    )
                     new_watchlist = set(config.WATCHLIST)
                     added = new_watchlist - old_watchlist
                     removed = old_watchlist - new_watchlist
