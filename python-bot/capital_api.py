@@ -1,12 +1,53 @@
-"""Capital.com REST API wrapper for demo/live trading."""
+"""Capital.com REST API wrapper for demo/live trading.
+
+Includes rate-limit detection, automatic retry with backoff,
+and request pacing to avoid 429 errors.
+"""
 
 import math
+import time
 import requests
 from typing import Optional
 from logger_setup import get_logger
 import config
 
 log = get_logger("capital_api")
+
+# Rate limit protection
+_MIN_REQUEST_INTERVAL = 0.15  # 150ms between requests
+_last_request_time = 0.0
+_consecutive_errors = 0
+_MAX_RETRIES = 2
+_BACKOFF_BASE = 1.0  # seconds
+
+
+def _pace_request():
+    """Enforce minimum interval between API requests to avoid rate limits."""
+    global _last_request_time
+    now = time.time()
+    elapsed = now - _last_request_time
+    if elapsed < _MIN_REQUEST_INTERVAL:
+        time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
+    _last_request_time = time.time()
+
+
+def _handle_error(resp_status: int):
+    """Track consecutive errors and back off if needed."""
+    global _consecutive_errors
+    _consecutive_errors += 1
+    if resp_status == 429:
+        wait = min(30, _BACKOFF_BASE * (2 ** min(_consecutive_errors, 5)))
+        log.warning(f"⏳ Rate limited (429) — backing off {wait:.1f}s")
+        time.sleep(wait)
+    elif _consecutive_errors >= 5:
+        wait = min(10, _consecutive_errors * 0.5)
+        log.warning(f"⏳ {_consecutive_errors} consecutive API errors — cooling {wait:.1f}s")
+        time.sleep(wait)
+
+
+def _handle_success():
+    global _consecutive_errors
+    _consecutive_errors = 0
 
 
 class CapitalAPI:
@@ -70,15 +111,19 @@ class CapitalAPI:
 
     def get_prices(self, epic: str, resolution: str, num_points: int = 60) -> Optional[dict]:
         """Fetch historical price candles."""
+        _pace_request()
         try:
             resp = self.session.get(
                 f"{self.base_url}/api/v1/prices/{epic}",
                 params={"resolution": resolution, "max": num_points},
                 headers=self._headers(),
+                timeout=10,
             )
             if resp.status_code == 200:
+                _handle_success()
                 return resp.json()
             else:
+                _handle_error(resp.status_code)
                 log.warning(f"Prices for {epic}: {resp.status_code}")
         except Exception as e:
             log.error(f"Prices exception for {epic}: {e}")
@@ -267,17 +312,28 @@ class CapitalAPI:
         return []
 
     def get_markets_details(self, epics: list[str]) -> list:
-        """Get details for multiple markets by epic codes (max 50)."""
+        """Get details for multiple markets by epic codes (max 50).
+        Includes retry logic for resilience.
+        """
         if not epics:
             return []
-        try:
-            resp = self.session.get(
-                f"{self.base_url}/api/v1/markets",
-                params={"epics": ",".join(epics[:50])},
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                return resp.json().get("markets", [])
-        except Exception as e:
-            log.error(f"Markets details exception: {e}")
+        for attempt in range(_MAX_RETRIES + 1):
+            _pace_request()
+            try:
+                resp = self.session.get(
+                    f"{self.base_url}/api/v1/markets",
+                    params={"epics": ",".join(epics[:50])},
+                    headers=self._headers(),
+                    timeout=15,
+                )
+                if resp.status_code == 200:
+                    _handle_success()
+                    return resp.json().get("markets", [])
+                else:
+                    _handle_error(resp.status_code)
+                    log.warning(f"Markets details attempt {attempt+1}: {resp.status_code}")
+            except Exception as e:
+                log.error(f"Markets details exception (attempt {attempt+1}): {e}")
+                if attempt < _MAX_RETRIES:
+                    time.sleep(1 * (attempt + 1))
         return []

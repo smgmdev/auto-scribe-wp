@@ -3,6 +3,7 @@ Capital.com Real-Time Trading Bot — Smart Adaptive Trading
 Streams prices via polling at 1s intervals, uses tick-level momentum detection.
 Features: Multi-timeframe pre-trade analysis, dynamic loss cutting, unlimited TP with
           1% step trailing SL, AI-driven parameter adaptation, and self-learning brain.
+          Background scanner thread prevents main loop stalls.
 """
 
 import json
@@ -10,6 +11,7 @@ import math
 import time
 import sys
 import os
+import threading
 from datetime import datetime
 from collections import defaultdict
 
@@ -464,8 +466,33 @@ def run():
     else:
         log.info("🔄 No existing positions found — starting fresh")
 
-    # Session keepalive
+    # ═══════════════════════════════════════════
+    # 🔄 BACKGROUND SCANNER THREAD
+    # Runs scan_all() in a separate thread so the main 1s loop
+    # is never blocked by 30-60 API calls from the scanner.
+    # ═══════════════════════════════════════════
+    _scanner_lock = threading.Lock()
+    _scanner_running = True
+
+    def _scanner_thread_fn():
+        """Background thread: runs scanner.scan_all() on its own schedule."""
+        while _scanner_running:
+            try:
+                scanner.scan_all()
+            except Exception as e:
+                log.error(f"Scanner thread error: {e}")
+            # Scanner has its own internal timers (SCALP_SCAN_INTERVAL, FULL_SCAN_INTERVAL)
+            # Sleep 2s between iterations to avoid tight-looping
+            time.sleep(2)
+
+    scanner_thread = threading.Thread(target=_scanner_thread_fn, daemon=True, name="scanner")
+    scanner_thread.start()
+    log.info("🔄 Background scanner thread started")
+
+    # Session keepalive & stall detection
     cycle_count = 0
+    _last_batch_success = time.time()
+    _stall_threshold = 60  # If no batch succeeds for 60s, force re-login
 
     while True:
         try:
@@ -486,10 +513,11 @@ def run():
                 log.info(f"📊 Full categories (skipping scan): {', '.join(full_categories)} | Counts: {cat_counts}")
 
             # ═══════════════════════════════════════════
-            # 📊 MULTI-TIMEFRAME MARKET SCAN — every 2 min
-            # Scanner now skips full categories automatically
+            # 📊 MULTI-TIMEFRAME MARKET SCAN — runs in background thread
+            # Main loop never blocks waiting for scanner API calls
             # ═══════════════════════════════════════════
-            scan_results = scanner.scan_all()
+            # Scanner runs in its own thread (started below main loop setup)
+            # Just read cached results — never call scan_all() synchronously
 
             # Session keepalive every 60 cycles
             if cycle_count % 60 == 0:
@@ -716,9 +744,11 @@ def run():
 
             # ═══════════════════════════════════════════
             # ⚡ BATCH PRICE FETCH — 1 API call instead of 30+ sequential calls
+            # With fallback: if batch fails, try smaller chunks
             # ═══════════════════════════════════════════
             batch_prices: dict[str, dict] = {}
             if balanced_epics:
+                batch_success = False
                 try:
                     for i in range(0, len(balanced_epics), 50):
                         chunk = balanced_epics[i:i+50]
@@ -735,8 +765,46 @@ def run():
                                     "bid": b, "ask": a,
                                     "mid": (b + a) / 2, "spread": a - b,
                                 }
+                        if details:
+                            batch_success = True
+                            _last_batch_success = time.time()
                 except Exception as e:
                     log.warning(f"Batch price fetch error: {e}")
+
+                # Fallback: if batch returned nothing, try smaller chunks of 10
+                if not batch_success and len(balanced_epics) > 10:
+                    log.info("🔄 Batch fetch failed — retrying with smaller chunks...")
+                    try:
+                        for i in range(0, min(len(balanced_epics), 30), 10):
+                            chunk = balanced_epics[i:i+10]
+                            details = api.get_markets_details(chunk)
+                            for m in details:
+                                ep = m.get("epic", "")
+                                snap = m.get("snapshot", {})
+                                bid_val = snap.get("bid", 0)
+                                ask_val = snap.get("offer", 0)
+                                if bid_val and ask_val:
+                                    b = float(bid_val)
+                                    a = float(ask_val)
+                                    batch_prices[ep] = {
+                                        "bid": b, "ask": a,
+                                        "mid": (b + a) / 2, "spread": a - b,
+                                    }
+                            time.sleep(0.3)
+                    except Exception as e2:
+                        log.warning(f"Fallback batch also failed: {e2}")
+
+                if not batch_prices:
+                    if cycle_count % 10 == 0:
+                        log.warning("⚠️ No price data this cycle — batch fetch returned empty")
+                    # Use last known tick prices as fallback
+                    for epic in balanced_epics:
+                        if epic in tick_history and tick_history[epic]:
+                            last = tick_history[epic][-1]
+                            batch_prices[epic] = {
+                                "bid": last["bid"], "ask": last["ask"],
+                                "mid": last["mid"], "spread": last["spread"],
+                            }
 
             for epic in balanced_epics:
                 try:
@@ -750,10 +818,10 @@ def run():
                         continue
 
                     # ═══════════════════════════════════════
-                    # Use batch-fetched prices instead of per-epic API calls
+                    # Use batch-fetched prices (with tick fallback above)
                     # ═══════════════════════════════════════
                     if epic not in batch_prices:
-                        continue  # No price data from batch fetch
+                        continue
 
                     bp = batch_prices[epic]
                     bid = bp["bid"]
@@ -773,8 +841,8 @@ def run():
                     if len(tick_history[epic]) > MAX_TICKS:
                         tick_history[epic] = tick_history[epic][-MAX_TICKS:]
 
-                    if len(tick_history[epic]) < 5:
-                        continue
+                    if len(tick_history[epic]) < 3:
+                        continue  # Reduced from 5 → 3 to prevent stalls
 
                     # Feed correlation tracker
                     correlation.update_prices(epic, mid)
@@ -857,17 +925,17 @@ def run():
 
                     entry_signal = Signal.HOLD
 
-                    # Only enter if tick momentum CONFIRMS scanner direction with strong alignment
+                    # Only enter if tick momentum CONFIRMS scanner direction
                     if scanner_direction == Signal.BUY:
                         if momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.BUY
-                        # Scalp: relaxed entry only with VERY strong scanner confidence
-                        elif is_scalp_asset and scanner_confidence >= 0.70 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.40:
+                        # Relaxed entry with strong scanner confidence (all asset types)
+                        elif scanner_confidence >= 0.65 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.35:
                             entry_signal = Signal.BUY
                     elif scanner_direction == Signal.SELL:
                         if momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.SELL
-                        elif is_scalp_asset and scanner_confidence >= 0.70 and momentum["direction"] != "UP" and momentum["strength"] >= 0.40:
+                        elif scanner_confidence >= 0.65 and momentum["direction"] != "UP" and momentum["strength"] >= 0.35:
                             entry_signal = Signal.SELL
 
                     if entry_signal == Signal.HOLD:
@@ -1049,6 +1117,18 @@ def run():
                 except Exception as e:
                     log.error(f"Tick scan error {epic}: {e}")
                     continue
+
+            # ═══════════════════════════════════════════
+            # STALL DETECTION — if no batch succeeds for 60s, force re-login
+            # ═══════════════════════════════════════════
+            if time.time() - _last_batch_success > _stall_threshold:
+                log.warning("⚠️ STALL DETECTED — no successful batch fetch for 60s. Re-authenticating...")
+                if api.login():
+                    _last_batch_success = time.time()
+                    log.info("✅ Re-authenticated after stall")
+                else:
+                    log.error("❌ Re-login failed — will retry next cycle")
+                    time.sleep(5)
 
             # Sleep to maintain 1-second cycle
             elapsed = time.time() - cycle_start
