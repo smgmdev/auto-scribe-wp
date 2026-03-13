@@ -445,33 +445,19 @@ def run():
     # ═══════════════════════════════════════════
     # 🔄 BACKGROUND SCANNER THREAD
     # Runs scan_all() in a separate thread so the main 1s loop
-    # is never blocked by 30-60 API calls from the scanner.
+    # is never blocked by API calls from the scanner.
+    # Scanner now uses sequential API calls (no ThreadPoolExecutor),
+    # so _pace_request() naturally serializes all API access.
     # ═══════════════════════════════════════════
-    _scanner_lock = threading.Lock()
     _scanner_running = True
-    _scanner_paused = threading.Event()  # When SET, scanner should pause
-    _scanner_paused.clear()
 
     def _scanner_thread_fn():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
-            # Wait if main loop is doing a batch fetch (avoid API contention)
-            if _scanner_paused.is_set():
-                time.sleep(0.5)
-                continue
-
-            got_lock = _scanner_lock.acquire(timeout=0.2)
-            if not got_lock:
-                time.sleep(0.5)
-                continue
-
             try:
                 scanner.scan_all()
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
-            finally:
-                _scanner_lock.release()
-
             # Sleep 5s between iterations to let main loop breathe
             time.sleep(5)
 
