@@ -858,7 +858,7 @@ export default function UpdateLog() {
 
         {/* Updates as Accordion */}
         <Accordion type="multiple" className="w-full">
-          {filteredUpdates.map((update, i) => (
+          {filteredUpdates.slice(0, visibleCount).map((update, i) => (
             <AccordionItem key={i} value={`item-${i}`} className="border-t border-white/10">
               <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-3 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
                 <span className="flex items-center justify-between w-full gap-3 text-left">
@@ -882,6 +882,17 @@ export default function UpdateLog() {
             </AccordionItem>
           ))}
         </Accordion>
+
+        {visibleCount < filteredUpdates.length && (
+          <div className="flex justify-center mt-8 mb-4">
+            <Button
+              onClick={() => setVisibleCount(prev => prev + 15)}
+              className="rounded-none bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-300 px-8"
+            >
+              Load More ({filteredUpdates.length - visibleCount} remaining)
+            </Button>
+          </div>
+        )}
       </main>
 
       <div className="border-t border-[#424245]" />
