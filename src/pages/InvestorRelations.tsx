@@ -12,6 +12,7 @@ import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import investorHeroBg from '@/assets/investor-hero-bg.mp4';
+import investorProductsBg from '@/assets/investor-products-bg.mp4';
 
 function useInView(options?: IntersectionObserverInit) {
   const ref = useRef<HTMLDivElement>(null);
@@ -196,6 +197,30 @@ export default function InvestorRelations() {
           </div>
         </section>
 
+
+        {/* Product Intro Video Section */}
+        <section className="relative overflow-hidden bg-black">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-50"
+            src={investorProductsBg}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-28 md:py-40 relative z-10 text-center">
+            <AnimatedSection>
+              <p className="text-sm font-medium tracking-wider uppercase text-white/40 mb-4">Our Products</p>
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-6">
+                Three Products.<br />One Platform.
+              </h2>
+              <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
+                From global media distribution to AI-powered publishing and geopolitical intelligence — Arcana Mace delivers an integrated suite built for the modern information economy.
+              </p>
+            </AnimatedSection>
+          </div>
+        </section>
 
 
 
