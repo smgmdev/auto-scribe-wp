@@ -144,9 +144,11 @@ class AssetDiscovery:
                 "stocks": self.discovered_stocks,
                 "crypto": self.discovered_crypto,
                 "forex": self.discovered_forex,
+                "commodities": self.discovered_commodities,
                 "stock_epics": self.stock_epics,
                 "crypto_epics": self.crypto_epics,
                 "forex_epics": self.forex_epics,
+                "commodity_epics": self.commodity_epics,
             }
 
         log.info("🔎 ═══ ASSET DISCOVERY — Finding best movers ═══")
