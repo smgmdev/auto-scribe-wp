@@ -94,20 +94,20 @@ export default function InvestorRelations() {
       />
 
     <div ref={scrollContainerRef} className="h-screen overflow-y-auto bg-white flex flex-col">
-      {/* Main Header - matches Mace AI page */}
+      {/* Header - dark background */}
       <header 
-        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-white/90 backdrop-blur-sm transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+        className={`fixed top-[28px] left-0 right-0 z-50 w-full bg-black transition-all duration-300 ease-out ${isHeaderHidden ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
       >
         <div className="max-w-[980px] mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          <button onClick={() => navigate('/')} className="flex items-center gap-3">
-            <HeaderLogo src={amblack} />
-            <span className="text-lg font-semibold text-foreground">Arcana Mace</span>
+          <button onClick={() => navigate('/')} className="flex items-center gap-3 flex-shrink-0">
+            <HeaderLogo src={amlogo} />
+            <span className="text-lg font-semibold text-white">Arcana Mace</span>
           </button>
           
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <button
               onClick={() => setSearchOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-muted/50 border border-border text-muted-foreground hover:bg-muted transition-colors text-left"
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-none bg-white/10 border border-white/20 text-white/50 hover:bg-white/15 transition-colors text-left"
             >
               <Search className="h-4 w-4" />
               <span>Search media outlets...</span>
@@ -118,16 +118,15 @@ export default function InvestorRelations() {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden hover:bg-black hover:text-white"
+              className="md:hidden text-white/70 hover:bg-white/10 hover:text-white"
               onClick={() => setSearchOpen(true)}
             >
               <Search className="h-5 w-5" />
             </Button>
-            
             {user ? (
               <Button 
                 onClick={() => navigate('/account')}
-                className="rounded-none bg-black text-white hover:bg-transparent hover:text-black transition-all duration-200 border border-transparent hover:border-black"
+                className="rounded-none bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white transition-all duration-200 border border-transparent hover:border-white"
               >
                 <User className="h-4 w-4" />
                 Account
@@ -135,7 +134,7 @@ export default function InvestorRelations() {
             ) : (
               <Button 
                 onClick={() => navigate('/auth')}
-                className="rounded-none bg-foreground text-background hover:bg-transparent hover:text-foreground border border-foreground transition-all duration-300"
+                className="rounded-none bg-white text-[#3d3d3d] hover:bg-transparent hover:text-white border border-white transition-all duration-300"
               >
                 Sign In
               </Button>
@@ -149,11 +148,11 @@ export default function InvestorRelations() {
 
       <div className="h-[92px]" />
 
-      {/* Sub-header */}
+      {/* Sub-header - dark */}
       <div className={`sticky z-40 transition-[top] duration-200 ease-out ${isHeaderHidden ? 'top-[28px]' : 'top-[92px]'}`}>
-        <div className="bg-white border-b border-border">
+        <div className="bg-black border-b border-white/10">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center">
-            <span className="text-xl font-semibold text-foreground">Investor Relations</span>
+            <span className="text-xl font-semibold text-white">Investor Relations</span>
           </div>
         </div>
       </div>
