@@ -60,39 +60,55 @@ Deno.serve(async (req) => {
     const credentials = btoa(`${site.username}:${site.app_password}`);
     const baseUrl = site.url.replace(/\/+$/, '');
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const MAX_RETRIES = 3;
+    const TIMEOUT_MS = 15000;
+    let wpResponse: Response | null = null;
+    let lastError = '';
 
-    let wpResponse;
-    try {
-      wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, {
-        headers: {
-          'Authorization': `Basic ${credentials}`,
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-      });
-    } catch (fetchError: unknown) {
-      clearTimeout(timeoutId);
-      const errorMessage = fetchError instanceof Error ? fetchError.message : 'Connection failed';
-      
-      // Handle SSL/TLS certificate errors gracefully
-      if (errorMessage.includes('certificate') || errorMessage.includes('SSL') || errorMessage.includes('TLS')) {
-        console.warn('[wordpress-get-categories] SSL certificate error for site, returning empty categories:', errorMessage);
-        return new Response(
-          JSON.stringify({ categories: [], warning: 'SSL certificate issue with WordPress site' }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      try {
+        console.log(`[wordpress-get-categories] Attempt ${attempt}/${MAX_RETRIES} for ${site.name}`);
+        wpResponse = await fetch(`${baseUrl}/wp-json/wp/v2/categories?per_page=100`, {
+          headers: {
+            'Authorization': `Basic ${credentials}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        break; // Success, exit retry loop
+      } catch (fetchError: unknown) {
+        clearTimeout(timeoutId);
+        lastError = fetchError instanceof Error ? fetchError.message : 'Connection failed';
+
+        // SSL errors won't resolve with retries
+        if (lastError.includes('certificate') || lastError.includes('SSL') || lastError.includes('TLS')) {
+          console.warn('[wordpress-get-categories] SSL certificate error, not retrying:', lastError);
+          return new Response(
+            JSON.stringify({ categories: [], warning: 'SSL certificate issue with WordPress site' }),
+            { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        console.warn(`[wordpress-get-categories] Attempt ${attempt} failed:`, lastError);
+
+        if (attempt < MAX_RETRIES) {
+          // Wait before retrying (1s, then 2s)
+          await new Promise(r => setTimeout(r, attempt * 1000));
+        }
       }
-      
-      console.warn('[wordpress-get-categories] Fetch error:', errorMessage);
+    }
+
+    if (!wpResponse) {
+      console.warn('[wordpress-get-categories] All retries exhausted:', lastError);
       return new Response(
-        JSON.stringify({ categories: [], warning: 'Connection error with WordPress site' }),
+        JSON.stringify({ categories: [], warning: 'Connection error with WordPress site after multiple attempts' }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    clearTimeout(timeoutId);
 
     if (!wpResponse.ok) {
       console.error('[wordpress-get-categories] WP API error:', wpResponse.status);
