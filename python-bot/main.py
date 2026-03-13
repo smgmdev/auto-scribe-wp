@@ -510,7 +510,7 @@ def run():
             # Session keepalive every 60 cycles
             if cycle_count % 60 == 0:
                 if not api.ping():
-                    log.warning("Session expired, re-authenticating...")
+                    log.info("Session expired, re-authenticating...")
                     api.login()
 
             # Refresh balance + re-discover assets every 5 minutes
