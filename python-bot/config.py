@@ -15,7 +15,7 @@ CAPITAL_API_URL = os.getenv("CAPITAL_API_URL", "https://demo-api-capital.backend
 # Risk management
 RISK_PER_TRADE = float(os.getenv("RISK_PER_TRADE", "0.01"))
 MAX_POSITIONS_PER_CATEGORY = int(os.getenv("MAX_POSITIONS_PER_CATEGORY", "5"))
-MAX_OPEN_POSITIONS = MAX_POSITIONS_PER_CATEGORY * 4  # 20 total (5 per category × 4 categories)
+MAX_OPEN_POSITIONS = MAX_POSITIONS_PER_CATEGORY  # 5 total (crypto only)
 
 # Strategy parameters
 EMA_FAST = int(os.getenv("EMA_FAST", "9"))
@@ -36,29 +36,14 @@ CATEGORY_CRYPTO = "crypto"
 CATEGORY_COMMODITIES = "commodities"
 CATEGORY_FOREX = "forex"
 
-# Commodities are fixed (limited, all liquid)
-WATCHLIST_COMMODITIES = [
-    "GOLD",           # Gold
-    "SILVER",         # Silver
-    "OIL_CRUDE",      # Crude Oil (WTI)
-    "NATURALGAS",     # Natural Gas
-    "COPPER",         # Copper
-    "PLATINUM",       # Platinum
-]
+# Commodities — DISABLED (crypto only mode)
+WATCHLIST_COMMODITIES = []
 
-# Forex: major & minor pairs (fallback before discovery)
-WATCHLIST_FOREX_FALLBACK = [
-    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD",
-    "USDCAD", "USDCHF", "NZDUSD", "EURGBP",
-    "EURJPY", "GBPJPY",
-]
+# Forex — DISABLED (crypto only mode)
+WATCHLIST_FOREX_FALLBACK = []
 
-# Stocks & Crypto: populated dynamically by AssetDiscovery
-# These are fallbacks used before first discovery completes
-WATCHLIST_STOCKS_FALLBACK = [
-    "AAPL", "TSLA", "NVDA", "MSFT", "AMZN",
-    "GOOGL", "META", "AMD", "NFLX", "JPM",
-]
+# Stocks — DISABLED (crypto only mode)
+WATCHLIST_STOCKS_FALLBACK = []
 WATCHLIST_CRYPTO_FALLBACK = [
     "BTCUSD", "ETHUSD", "SOLUSD", "XRPUSD",
     "BNBUSD", "DOGEUSD", "ADAUSD", "AVAXUSD",
@@ -70,7 +55,7 @@ CRYPTO_PINNED = ["BTCUSD"]
 # Runtime watchlists (updated by AssetDiscovery)
 WATCHLIST_STOCKS: list[str] = list(WATCHLIST_STOCKS_FALLBACK)
 WATCHLIST_CRYPTO: list[str] = list(WATCHLIST_CRYPTO_FALLBACK)
-WATCHLIST_FOREX: list[str] = list(WATCHLIST_FOREX_FALLBACK)
+WATCHLIST_FOREX: list[str] = []
 
 # Epic → category mapping (rebuilt when watchlists update)
 EPIC_CATEGORY: dict[str, str] = {}
