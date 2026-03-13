@@ -393,7 +393,7 @@ class CapitalAPI:
 
                     _handle_error(resp.status_code)
                     if resp.status_code >= 500:
-                        log.warning(
+                        log.info(
                             f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
                         )
                     else:
