@@ -1108,7 +1108,7 @@ def run():
             # (increased from 60s to avoid premature re-auth loops)
             # ═══════════════════════════════════════════
             if time.time() - _last_batch_success > 120:
-                log.warning("⚠️ STALL DETECTED — no successful batch fetch for 120s. Re-authenticating...")
+                log.info("STALL DETECTED — no successful batch fetch for 120s. Re-authenticating...")
                 time.sleep(3)  # Brief pause before re-auth
                 if api.login():
                     _last_batch_success = time.time()
