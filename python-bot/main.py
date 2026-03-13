@@ -129,6 +129,8 @@ def write_live_state(api, balance, positions, pos_manager, tick_history):
                 "size": size,
                 "unrealized_pnl": round(pnl, 5),
                 "locked_steps": tracked.get("locked_steps", 0),
+                "trailing_stop_price": tracked.get("trailing_stop_price"),
+                "stop_distance": tracked.get("stop_distance", 0),
                 "category": config.get_category(epic),
             })
 
