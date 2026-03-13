@@ -314,10 +314,10 @@ tr:hover { background: #15152a; }
     <h3>⚡ Active Positions <span id="posCount" style="color:#00ff88"></span></h3>
     <table>
         <thead>
-            <tr><th>Cat</th><th>Dir</th><th>Asset</th><th>Entry</th><th>Current Price</th><th>P&L</th><th>SL Steps</th></tr>
+            <tr><th>Cat</th><th>Dir</th><th>Asset</th><th>Size</th><th>Entry</th><th>Bid</th><th>Ask</th><th>Mid Price</th><th>P&L</th><th>SL Steps</th></tr>
         </thead>
         <tbody id="positionsBody">
-            <tr><td colspan="7" class="empty">No open positions</td></tr>
+            <tr><td colspan="10" class="empty">No open positions</td></tr>
         </tbody>
     </table>
 </div>
