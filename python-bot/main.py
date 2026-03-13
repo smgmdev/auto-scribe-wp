@@ -590,27 +590,29 @@ def run():
                     # Scalp assets: much lower threshold for fast entries
                     # ═══════════════════════════════════════
                     adaptive = journal.get_params(epic)
-                    default_threshold = 0.25 if is_scalp_asset else 0.5
+                    default_threshold = 0.45 if is_scalp_asset else 0.65
                     entry_threshold = adaptive.get("momentum_entry_threshold", default_threshold)
-                    # Cap threshold for scalp to prevent journal raising it too high
+                    # Cap threshold for scalp to prevent it going too low
                     if is_scalp_asset:
-                        entry_threshold = min(entry_threshold, 0.35)
+                        entry_threshold = max(entry_threshold, 0.40)
+                    else:
+                        entry_threshold = max(entry_threshold, 0.55)
 
                     momentum = tick_momentum(tick_history[epic])
 
                     entry_signal = Signal.HOLD
 
-                    # Only enter if tick momentum CONFIRMS scanner direction
+                    # Only enter if tick momentum CONFIRMS scanner direction with strong alignment
                     if scanner_direction == Signal.BUY:
                         if momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.BUY
-                        # Scalp: also enter on FLAT with strong scanner confidence
-                        elif is_scalp_asset and scanner_confidence >= 0.4 and momentum["direction"] != "DOWN":
+                        # Scalp: also enter on FLAT only with very strong scanner confidence
+                        elif is_scalp_asset and scanner_confidence >= 0.6 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.3:
                             entry_signal = Signal.BUY
                     elif scanner_direction == Signal.SELL:
                         if momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.SELL
-                        elif is_scalp_asset and scanner_confidence >= 0.4 and momentum["direction"] != "UP":
+                        elif is_scalp_asset and scanner_confidence >= 0.6 and momentum["direction"] != "UP" and momentum["strength"] >= 0.3:
                             entry_signal = Signal.SELL
 
                     if entry_signal == Signal.HOLD:

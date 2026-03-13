@@ -155,7 +155,7 @@ class MarketScanner:
 
             # Momentum direction
             total_signals += 1
-            mom_threshold = 0.08 if is_scalp else 0.15
+            mom_threshold = 0.15 if is_scalp else 0.20
             if momentum["score"] > mom_threshold:
                 buy_signals += 1
             elif momentum["score"] < -mom_threshold:
@@ -172,7 +172,7 @@ class MarketScanner:
             total_signals += 1
             lookback = min(10, len(closes) - 1)
             recent_slope = (closes[-1] - closes[-lookback]) / closes[-lookback] if lookback > 0 else 0
-            slope_threshold = 0.0003 if is_scalp else 0.001
+            slope_threshold = 0.001 if is_scalp else 0.002
             if recent_slope > slope_threshold:
                 buy_signals += 1
             elif recent_slope < -slope_threshold:
@@ -193,7 +193,7 @@ class MarketScanner:
                         sell_signals += 1
 
             # Determine direction and strength — lower thresholds for scalp
-            min_signals = 3 if is_scalp else 4
+            min_signals = 4 if is_scalp else 4
             if buy_signals > sell_signals and buy_signals >= min_signals:
                 direction = "BUY"
                 strength = buy_signals / total_signals
@@ -308,23 +308,30 @@ class MarketScanner:
             scan.atr = scan.analyses["15min"].atr
             scan.stop_distance = scan.atr * 2.0
 
-        # RSI filter — more lenient for scalp
+        # RSI filter — tighter to avoid entering at extremes
         rsi_ok = True
         check_tf = "1min" if is_scalp and "1min" in scan.analyses else "5min"
         if check_tf in scan.analyses:
             rsi_val = scan.analyses[check_tf].rsi
-            overbought = 80 if is_scalp else 75
-            oversold = 20 if is_scalp else 25
+            overbought = 72 if is_scalp else 68
+            oversold = 28 if is_scalp else 32
             if majority_dir == "BUY" and rsi_val > overbought:
                 rsi_ok = False
             if majority_dir == "SELL" and rsi_val < oversold:
                 rsi_ok = False
 
-        # Thresholds — much lower for scalp
-        min_majority = 1 if is_scalp else 2
-        min_confidence = 0.15 if is_scalp else 0.3
+        # Thresholds — raised significantly to filter weak signals
+        min_majority = 2 if is_scalp else 2
+        min_confidence = 0.35 if is_scalp else 0.45
 
-        if majority_count >= min_majority and abs(weighted_score) >= min_confidence and rsi_ok:
+        # For standard mode, require at least one TF with trend alignment
+        trend_ok = True
+        if not is_scalp:
+            has_trend_aligned = any(a.trend_aligned for a in scan.analyses.values() if a.direction == majority_dir)
+            if not has_trend_aligned:
+                trend_ok = False
+
+        if majority_count >= min_majority and abs(weighted_score) >= min_confidence and rsi_ok and trend_ok:
             scan.overall_signal = majority_dir
             scan.confidence = round(abs(weighted_score), 3)
 
@@ -339,6 +346,8 @@ class MarketScanner:
             tf_summary = " | ".join(f"{k}={v}" for k, v in directions.items())
             if not rsi_ok:
                 scan.reason = f"RSI extreme — no entry | [{tf_summary}]"
+            elif not trend_ok:
+                scan.reason = f"No EMA trend alignment | [{tf_summary}]"
             elif majority_count < min_majority:
                 scan.reason = f"No TF agreement | [{tf_summary}]"
             else:
