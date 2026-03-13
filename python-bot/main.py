@@ -16,7 +16,7 @@ from collections import defaultdict
 import config
 from capital_api import CapitalAPI
 from strategy import analyze, Signal, tick_momentum
-from risk import calculate_position_size, can_open_position
+from risk import calculate_position_size, can_open_position, count_positions_by_category
 from position_manager import PositionManager
 from trade_journal import TradeJournal
 from market_scanner import MarketScanner
