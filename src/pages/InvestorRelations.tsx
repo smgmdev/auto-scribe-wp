@@ -309,7 +309,7 @@ export default function InvestorRelations() {
               Mace AI
             </h2>
             <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
-              AI-powered article generation, voice publishing, and content optimization engine for enterprise publishers.
+              AI powered article publishing to media in under 30 seconds—without touching the keyboard or writing a single word. Just using a voice command.
             </p>
             <Button
               onClick={() => navigate('/mace-ai')}
