@@ -337,10 +337,20 @@ export default function InvestorRelations() {
                 className="w-full rounded-lg"
                 src={arcanaPrecisionGlobe}
                 onCanPlayThrough={() => setPrecisionVideoLoaded(true)}
+                onError={(e) => {
+                  const vid = e.currentTarget;
+                  setPrecisionVideoLoaded(true);
+                  setTimeout(() => { vid.load(); vid.play().catch(() => {}); }, 500);
+                }}
+                onStalled={(e) => {
+                  const vid = e.currentTarget;
+                  setTimeout(() => { vid.play().catch(() => {}); }, 300);
+                }}
                 autoPlay
                 muted
                 loop
                 playsInline
+                preload="auto"
               />
             </div>
             <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
