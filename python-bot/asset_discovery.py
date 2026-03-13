@@ -395,7 +395,22 @@ class AssetDiscovery:
             log.info(f"  📡 Running commodity search fallback ({len(all_commodities)}/{TOP_COMMODITIES} found so far)...")
             commodity_terms = ["GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER",
                                "PLATINUM", "PALLADIUM", "OIL_BRENT"]
-            all_commodities.extend(self._search_fallback(commodity_terms, "COMMODITIES"))
+            all_commodities.extend(
+                self._search_fallback(
+                    commodity_terms,
+                    ("COMMODITIES",),
+                    require_tradeable=True,
+                )
+            )
+            if len(all_commodities) < TOP_COMMODITIES:
+                all_commodities.extend(
+                    self._search_fallback(
+                        commodity_terms,
+                        ("COMMODITIES",),
+                        require_tradeable=False,
+                        limit_per_term=2,
+                    )
+                )
 
         ranked_commodities = self._rank_assets(all_commodities)[:TOP_COMMODITIES]
 
