@@ -362,10 +362,9 @@ export default function InvestorRelations() {
 
 
         {/* CTA */}
-        <section className="py-20 bg-[#f5f5f7]">
+        <section className="py-20 bg-white">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
             <AnimatedSection>
-              <Briefcase className="h-10 w-10 mx-auto mb-6 text-[#1d1d1f]/30" />
               <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Invest in Arcana Mace</h2>
               <p className="text-[#86868b] max-w-xl mx-auto mb-8 leading-relaxed">
                 We are selectively engaging with strategic investors who share our vision of building the definitive global media intelligence platform.
@@ -375,7 +374,6 @@ export default function InvestorRelations() {
                 className="rounded-none bg-[#1d1d1f] text-white hover:bg-[#1d1d1f]/90 h-12 px-8 text-base font-medium"
               >
                 Get in Touch
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </AnimatedSection>
           </div>
