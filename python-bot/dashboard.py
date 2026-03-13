@@ -500,7 +500,9 @@ function updateGrid(data) {
                 el.querySelector('.slot-dir').textContent = '';
                 el.querySelector('.slot-pair').textContent = '';
                 el.querySelector('.slot-price').textContent = '';
+                el.querySelector('.slot-entry').textContent = '';
                 el.querySelector('.slot-pnl').textContent = '';
+                el.querySelector('.slot-pnl').style.color = '';
                 el.querySelector('.slot-empty-text').textContent = '—';
             }
         }
