@@ -13,16 +13,34 @@ from logger_setup import get_logger
 
 log = get_logger("pos_mgr")
 
-# Initial SL: 1.5% below entry
+# Initial SL: 1.5% below entry (default)
 INITIAL_SL_PCT = 0.015
-
-# Step size for SL ratcheting (5% of entry price)
+# Step size for SL ratcheting: 5% of entry price (default)
 PROFIT_STEP_PCT = 0.05
 
+# BTC-specific overrides
+BTC_INITIAL_SL_PCT = 0.005   # 0.5% from entry
+BTC_PROFIT_STEP_PCT = 0.01   # 1% steps
+BTC_EPICS = {"BTCUSD", "BITCOIN", "BTC"}
 
-def _initial_sl(entry_price: float, direction: str) -> float:
-    """Calculate initial SL at -1.5% from entry."""
-    dist = entry_price * INITIAL_SL_PCT
+
+def _is_btc(epic: str) -> bool:
+    """Check if epic is a BTC instrument."""
+    upper = epic.upper()
+    return any(b in upper for b in BTC_EPICS)
+
+
+def _get_params(epic: str) -> tuple[float, float]:
+    """Return (initial_sl_pct, step_pct) for the given epic."""
+    if _is_btc(epic):
+        return BTC_INITIAL_SL_PCT, BTC_PROFIT_STEP_PCT
+    return INITIAL_SL_PCT, PROFIT_STEP_PCT
+
+
+def _initial_sl(entry_price: float, direction: str, epic: str = "") -> float:
+    """Calculate initial SL from entry."""
+    sl_pct, _ = _get_params(epic)
+    dist = entry_price * sl_pct
     if direction == "BUY":
         return entry_price - dist  # SL below entry
     else:
@@ -30,26 +48,23 @@ def _initial_sl(entry_price: float, direction: str) -> float:
 
 
 def _validate_sl(sl_price: float, entry_price: float, direction: str,
-                 locked_steps: int) -> float:
+                 locked_steps: int, epic: str = "") -> float:
     """
     Ensure SL makes sense for the direction and profit level.
-    - BUY with 0 steps: SL must be BELOW entry
-    - SELL with 0 steps: SL must be ABOVE entry
-    - BUY with steps >= 1: SL must be >= entry + (steps * 5%)
-    - SELL with steps >= 1: SL must be <= entry - (steps * 5%)
-    If invalid, reset to correct value.
     """
+    sl_pct, step_pct = _get_params(epic)
+    step_label = f"{step_pct*100:.0f}%"
     if locked_steps == 0:
         # No profit locked — SL must be on the loss side
         if direction == "BUY" and sl_price >= entry_price:
-            corrected = _initial_sl(entry_price, direction)
+            corrected = _initial_sl(entry_price, direction, epic)
             log.warning(
                 f"⚠️ SL sanity fix: BUY SL {sl_price:.6f} >= entry {entry_price:.6f} "
                 f"with 0 steps. Reset to {corrected:.6f}"
             )
             return corrected
         elif direction == "SELL" and sl_price <= entry_price:
-            corrected = _initial_sl(entry_price, direction)
+            corrected = _initial_sl(entry_price, direction, epic)
             log.warning(
                 f"⚠️ SL sanity fix: SELL SL {sl_price:.6f} <= entry {entry_price:.6f} "
                 f"with 0 steps. Reset to {corrected:.6f}"
@@ -57,7 +72,7 @@ def _validate_sl(sl_price: float, entry_price: float, direction: str,
             return corrected
     else:
         # Profit locked — SL should be at locked level
-        expected_pnl = locked_steps * entry_price * PROFIT_STEP_PCT
+        expected_pnl = locked_steps * entry_price * step_pct
         if direction == "BUY":
             expected_sl = entry_price + expected_pnl
             if sl_price < entry_price:
@@ -89,10 +104,11 @@ class PositionManager:
                        spread: float = 0.0, current_price: float = 0.0,
                        created_date: float = 0.0, category: str = ""):
         """Start tracking a new position."""
-        step_size = entry_price * PROFIT_STEP_PCT
+        sl_pct, step_pct = _get_params(epic)
+        step_size = entry_price * step_pct
 
-        # Always start with default SL at -1.5%
-        trailing_stop_price = _initial_sl(entry_price, direction)
+        # Always start with default SL
+        trailing_stop_price = _initial_sl(entry_price, direction, epic)
         locked_steps = 0
 
         # Restart recovery: reconstruct locked steps from current price
@@ -116,7 +132,7 @@ class PositionManager:
 
         # SANITY CHECK: validate SL makes sense
         trailing_stop_price = _validate_sl(
-            trailing_stop_price, entry_price, direction, locked_steps
+            trailing_stop_price, entry_price, direction, locked_steps, epic
         )
 
         entry_time = created_date if created_date > 0 else time.time()
@@ -129,7 +145,7 @@ class PositionManager:
             "epic": epic,
             "direction": direction,
             "entry_price": entry_price,
-            "stop_distance": entry_price * INITIAL_SL_PCT,
+            "stop_distance": entry_price * sl_pct,
             "profit_distance": profit_distance,
             "highest_profit": max(pnl, 0.0),
             "lowest_profit": min(pnl, 0.0),
@@ -147,10 +163,14 @@ class PositionManager:
                 f"trailing_sl={trailing_stop_price:.6f}"
             )
 
+        sl_label = f"-{sl_pct*100}%" if locked_steps == 0 else f"+{locked_steps * step_pct * 100:.0f}%"
+        step_label = f"{step_pct*100:.0f}%"
+        btc_tag = " [BTC strategy]" if _is_btc(epic) else ""
         log.info(
             f"📌 Tracking {direction} {epic} @ {entry_price:.6f} | "
-            f"SL={trailing_stop_price:.6f} ({'-1.5%' if locked_steps == 0 else f'+{locked_steps*5}%'}) "
-            f"TP=UNLIMITED | Step size={step_size:.6f} (5%){recovery_tag}"
+            f"SL={trailing_stop_price:.6f} ({sl_label}) "
+            f"TP=UNLIMITED | Step size={step_size:.6f} ({step_label}){btc_tag}{recovery_tag}"
+        )
         )
 
     def untrack(self, deal_id: str):
@@ -183,7 +203,9 @@ class PositionManager:
 
         direction = pos["direction"]
         entry = pos["entry_price"]
-        step_size = entry * PROFIT_STEP_PCT
+        epic = pos["epic"]
+        _, step_pct = _get_params(epic)
+        step_size = entry * step_pct
 
         # Calculate unrealized P&L
         if direction == "BUY":
@@ -230,16 +252,16 @@ class PositionManager:
                     old_sl = pos["trailing_stop_price"]
                     pos["trailing_stop_price"] = new_sl
                     pos["locked_steps"] = current_steps
-                    locked_pct = current_steps * 5
+                    locked_pct = current_steps * step_pct * 100
                     log.info(
-                        f"🔒 {pos['epic']} SL ratcheted! Step {current_steps} "
-                        f"(+{locked_pct}% profit) | "
+                        f"🔒 {epic} SL ratcheted! Step {current_steps} "
+                        f"(+{locked_pct:.0f}% profit) | "
                         f"SL: {old_sl:.6f} → {new_sl:.6f}"
                     )
 
         # Periodic sanity check on SL
         pos["trailing_stop_price"] = _validate_sl(
-            pos["trailing_stop_price"], entry, direction, pos["locked_steps"]
+            pos["trailing_stop_price"], entry, direction, pos["locked_steps"], epic
         )
 
         # ═══════════════════════════════════════════
