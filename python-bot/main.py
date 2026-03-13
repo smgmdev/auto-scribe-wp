@@ -596,6 +596,15 @@ def run():
             # ═══════════════════════════════════════════
             for epic in config.WATCHLIST:
                 try:
+                    # Check if this epic's category is disabled via dashboard toggle
+                    from dashboard import is_category_disabled
+                    _cat_map = {config.CATEGORY_STOCKS: "Stocks", config.CATEGORY_CRYPTO: "Crypto",
+                                config.CATEGORY_COMMODITIES: "Commodities", config.CATEGORY_FOREX: "FX"}
+                    epic_cat = config.get_category(epic)
+                    display_cat = _cat_map.get(epic_cat, "Stocks")
+                    if is_category_disabled(display_cat):
+                        continue
+
                     tick_data = api.get_prices(epic, "MINUTE", num_points=2)
                     if not tick_data or not tick_data.get("prices"):
                         continue

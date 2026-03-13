@@ -44,6 +44,23 @@ _live_cache = {
 _cache_lock = threading.Lock()
 _api_ref = None  # Set by start_dashboard_thread
 
+# Categories disabled by toggle — positions get closed, no new trades
+_disabled_categories: set = set()
+_disabled_lock = threading.Lock()
+
+
+def is_category_disabled(display_cat: str) -> bool:
+    with _disabled_lock:
+        return display_cat in _disabled_categories
+
+
+def set_category_disabled(display_cat: str, disabled: bool):
+    with _disabled_lock:
+        if disabled:
+            _disabled_categories.add(display_cat)
+        else:
+            _disabled_categories.discard(display_cat)
+
 
 def _price_fetcher_loop():
     """
@@ -188,7 +205,10 @@ def _price_fetcher_loop():
 def generate_api_response() -> dict:
     """Return the live cache (updated every 1s by dedicated thread)."""
     with _cache_lock:
-        return dict(_live_cache)
+        data = dict(_live_cache)
+    with _disabled_lock:
+        data["disabled_categories"] = list(_disabled_categories)
+    return data
 
 
 def generate_html() -> str:
@@ -380,6 +400,36 @@ body {
     letter-spacing: 1px;
 }
 
+/* Category toggle */
+.cat-toggle {
+    position: relative;
+    width: 32px; height: 16px;
+    background: #b91c1c;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+.cat-toggle.on { background: #16a34a; }
+.cat-toggle .knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 12px; height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.2s;
+}
+.cat-toggle.on .knob { left: 18px; }
+.category-label { flex-direction: column; }
+.cat-status {
+    font-size: 8px;
+    color: #666;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
 /* Footer */
 .footer {
     text-align: center;
@@ -453,8 +503,11 @@ function buildGrid() {
     const container = document.getElementById('gridContainer');
     let html = '';
     CATEGORIES.forEach(cat => {
-        html += '<div class="category-row">';
-        html += '<div class="category-label">' + cat + '</div>';
+        html += '<div class="category-row" id="row-' + cat + '">';
+        html += '<div class="category-label">' + cat +
+                '<div class="cat-toggle on" id="toggle-' + cat + '" onclick="toggleCategory(\'' + cat + '\')">' +
+                '<div class="knob"></div></div>' +
+                '<span class="cat-status" id="status-' + cat + '">ACTIVE</span></div>';
         html += '<div class="slots" id="slots-' + cat + '">';
         for (let i = 0; i < MAX_SLOTS; i++) {
             html += '<div class="slot empty" id="slot-' + cat + '-' + i + '">' +
@@ -536,6 +589,49 @@ function updateGrid(data) {
     });
 }
 
+async function toggleCategory(cat) {
+    const toggle = document.getElementById('toggle-' + cat);
+    const isOn = toggle.classList.contains('on');
+    const newState = !isOn;
+
+    // Optimistic UI
+    toggle.classList.toggle('on');
+    document.getElementById('status-' + cat).textContent = newState ? 'ACTIVE' : 'OFF';
+
+    try {
+        const resp = await fetch('/api/toggle-category', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ category: cat, enabled: newState })
+        });
+        const d = await resp.json();
+        if (!d.ok) {
+            // Revert
+            toggle.classList.toggle('on');
+            document.getElementById('status-' + cat).textContent = isOn ? 'ACTIVE' : 'OFF';
+        }
+    } catch(e) {
+        toggle.classList.toggle('on');
+        document.getElementById('status-' + cat).textContent = isOn ? 'ACTIVE' : 'OFF';
+    }
+}
+
+function syncToggles(disabledList) {
+    CATEGORIES.forEach(cat => {
+        const toggle = document.getElementById('toggle-' + cat);
+        const status = document.getElementById('status-' + cat);
+        if (!toggle) return;
+        const isDisabled = (disabledList || []).includes(cat);
+        if (isDisabled) {
+            toggle.classList.remove('on');
+            status.textContent = 'OFF';
+        } else {
+            toggle.classList.add('on');
+            status.textContent = 'ACTIVE';
+        }
+    });
+}
+
 async function fetchState() {
     try {
         const resp = await fetch('/api/state');
@@ -545,9 +641,10 @@ async function fetchState() {
         const dot = document.getElementById('statusDot');
         dot.className = 'status-dot ' + (d.status === 'running' ? 'running' : 'stopped');
         document.getElementById('balance').textContent = '$' + (d.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('openCount').textContent = (d.total_open || 0) + '/20';
+        document.getElementById('openCount').textContent = (d.total_open || 0) + '/5';
         document.getElementById('lastTick').textContent = d.updated_at || '—';
 
+        syncToggles(d.disabled_categories);
         updateGrid(d);
     } catch(e) {}
 }
@@ -585,6 +682,13 @@ setInterval(fetchState, 1000);
 
 
 class DashboardHandler(SimpleHTTPRequestHandler):
+    def _json_response(self, data, status=200):
+        self.send_response(status)
+        self.send_header("Content-type", "application/json")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+
     def do_GET(self):
         if self.path == "/" or self.path == "/index.html":
             html = generate_html()
@@ -605,7 +709,47 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
-        if self.path == "/api/pull-restart":
+        if self.path == "/api/toggle-category":
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(content_length)) if content_length > 0 else {}
+                cat = body.get("category", "")
+                enabled = body.get("enabled", True)
+
+                if cat not in ['Stocks', 'Commodities', 'Crypto', 'FX']:
+                    self._json_response({"ok": False, "error": "Invalid category"})
+                    return
+
+                set_category_disabled(cat, not enabled)
+                log.info(f"{'✅' if enabled else '🚫'} Category {cat} {'ENABLED' if enabled else 'DISABLED'}")
+
+                # If disabling, close all positions in that category
+                if not enabled and _api_ref:
+                    cat_map_reverse = {"Stocks": "stocks", "Commodities": "commodities", "Crypto": "crypto", "FX": "forex"}
+                    target_cat = cat_map_reverse.get(cat, "")
+
+                    def _close_cat_positions():
+                        try:
+                            positions = _api_ref.get_positions()
+                            import config as cfg
+                            for pos in positions:
+                                epic = pos.get("market", {}).get("epic", "")
+                                deal_id = pos.get("position", {}).get("dealId", "")
+                                if epic and deal_id and cfg.get_category(epic) == target_cat:
+                                    log.info(f"  🚫 Toggle-closing {epic} deal={deal_id}")
+                                    _api_ref.close_position(deal_id)
+                                    time.sleep(0.3)
+                        except Exception as e:
+                            log.error(f"Toggle close error: {e}")
+
+                    threading.Thread(target=_close_cat_positions, daemon=True).start()
+
+                self._json_response({"ok": True, "category": cat, "enabled": enabled})
+            except Exception as e:
+                log.error(f"Toggle error: {e}")
+                self._json_response({"ok": False, "error": str(e)})
+
+        elif self.path == "/api/pull-restart":
             try:
                 bot_dir = os.path.dirname(os.path.abspath(__file__))
                 # Git pull
