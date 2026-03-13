@@ -180,6 +180,29 @@ def run():
     journal = TradeJournal()
     discovery = AssetDiscovery(api)
 
+    # ═══════════════════════════════════════════
+    # 🧠 SELF-LEARNING BRAIN — persistent intelligence
+    # ═══════════════════════════════════════════
+    brain = TradingBrain()
+    regime_detector = RegimeDetector(brain=brain)
+    correlation = CorrelationTracker(brain=brain)
+    ai_reviewer = AITradeReviewer(brain=brain)
+
+    # Print brain summary on startup
+    brain_summary = brain.get_brain_summary()
+    if brain_summary["total_trades"] > 0:
+        log.info(
+            f"🧠 Brain loaded: {brain_summary['total_trades']} trades | "
+            f"Win rate: {brain_summary['win_rate']:.0%} | "
+            f"P&L: {brain_summary['total_pnl']:.2f}"
+        )
+        if brain_summary["best_assets"]:
+            best = brain_summary["best_assets"][0]
+            log.info(f"  ⭐ Best asset: {best['epic']} ({best['win_rate']:.0%} WR)")
+        if brain_summary["worst_assets"]:
+            worst = brain_summary["worst_assets"][0]
+            log.info(f"  ⚠️ Worst asset: {worst['epic']} ({worst['win_rate']:.0%} WR)")
+
     # Give dashboard access to position manager for SL data
     from dashboard import set_pos_manager_ref
     set_pos_manager_ref(pos_manager)
