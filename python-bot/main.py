@@ -459,10 +459,19 @@ def run():
             if _scanner_paused.is_set():
                 time.sleep(0.5)
                 continue
+
+            got_lock = _scanner_lock.acquire(timeout=0.2)
+            if not got_lock:
+                time.sleep(0.5)
+                continue
+
             try:
                 scanner.scan_all()
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
+            finally:
+                _scanner_lock.release()
+
             # Sleep 5s between iterations to let main loop breathe
             time.sleep(5)
 
