@@ -51,8 +51,8 @@ def set_pos_manager_ref(pm):
     global _pos_manager_ref
     _pos_manager_ref = pm
 
-# Categories disabled by toggle — positions get closed, no new trades
-_disabled_categories: set = set()
+# Categories disabled by toggle — Stocks, Commodities, FX off by default (crypto-only)
+_disabled_categories: set = {"Stocks", "Commodities", "FX"}
 _disabled_lock = threading.Lock()
 
 
