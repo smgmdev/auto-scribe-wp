@@ -488,10 +488,11 @@ def run():
                 log.info(f"📊 Full categories (skipping scan): {', '.join(full_categories)} | Counts: {cat_counts}")
 
             # ═══════════════════════════════════════════
-            # 📊 MULTI-TIMEFRAME MARKET SCAN — every 2 min
-            # Scanner now skips full categories automatically
+            # 📊 MULTI-TIMEFRAME MARKET SCAN — runs in background thread
+            # Main loop never blocks waiting for scanner API calls
             # ═══════════════════════════════════════════
-            scan_results = scanner.scan_all()
+            # Scanner runs in its own thread (started below main loop setup)
+            # Just read cached results — never call scan_all() synchronously
 
             # Session keepalive every 60 cycles
             if cycle_count % 60 == 0:
