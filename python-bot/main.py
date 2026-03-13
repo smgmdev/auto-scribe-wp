@@ -176,10 +176,14 @@ def run():
     # --- Initial asset discovery: AI picks best stocks & crypto ---
     log.info("🔎 Running initial asset discovery...")
     discovered = discovery.discover(force=True)
-    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+    config.update_dynamic_watchlists(
+        discovered["stock_epics"], discovered["crypto_epics"],
+        forex_epics=discovered.get("forex_epics"),
+    )
     log.info(
-        f"📈 Stocks selected: {', '.join(config.WATCHLIST_STOCKS)} | "
-        f"₿ Crypto selected: {', '.join(config.WATCHLIST_CRYPTO)} | "
+        f"📈 Stocks: {', '.join(config.WATCHLIST_STOCKS)} | "
+        f"₿ Crypto: {', '.join(config.WATCHLIST_CRYPTO)} | "
+        f"💱 Forex: {', '.join(config.WATCHLIST_FOREX)} | "
         f"🪙 Commodities: {', '.join(config.WATCHLIST_COMMODITIES)}"
     )
 
