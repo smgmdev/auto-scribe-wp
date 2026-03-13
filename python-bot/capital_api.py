@@ -41,11 +41,11 @@ def _handle_error(resp_status: int):
     _consecutive_errors += 1
     if resp_status == 429:
         wait = min(30, _BACKOFF_BASE * (2 ** min(_consecutive_errors, 5)))
-        log.warning(f"⏳ Rate limited (429) — backing off {wait:.1f}s")
+        log.info(f"⏳ Rate limited (429) — backing off {wait:.1f}s")
         time.sleep(wait)
     elif _consecutive_errors >= 5:
         wait = min(10, _consecutive_errors * 0.5)
-        log.warning(f"⏳ {_consecutive_errors} consecutive API errors — cooling {wait:.1f}s")
+        log.info(f"⏳ {_consecutive_errors} consecutive API errors — cooling {wait:.1f}s")
         time.sleep(wait)
 
 
