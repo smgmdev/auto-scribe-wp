@@ -291,7 +291,10 @@ export default function InvestorRelations() {
         </section>
       </main>
 
-      <Footer narrow showTopBorder />
+      <div className="bg-[#1d1d1f] border-t border-white/10">
+        <PWAInstallButtons />
+      </div>
+      <Footer narrow showTopBorder dark />
     </>
   );
 }
