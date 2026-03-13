@@ -1,6 +1,8 @@
 """
-Trend-following strategy with tick-level momentum detection.
-Combines candle-based EMA crossover with real-time tick momentum.
+Enhanced trend-following strategy with:
+- Short-term bearish/bullish momentum detection (RSI + velocity + acceleration)
+- Multi-timeframe momentum scoring
+- Micro-structure analysis for precise entries
 """
 
 import numpy as np
@@ -34,22 +36,94 @@ def compute_atr(highs: np.ndarray, lows: np.ndarray, closes: np.ndarray, period:
     return tr.rolling(window=period).mean().values
 
 
-def analyze(prices_data: dict) -> dict:
+def compute_rsi(prices: np.ndarray, period: int = 14) -> float:
+    """Compute RSI from price array. Returns 0-100 value."""
+    if len(prices) < period + 1:
+        return 50.0  # neutral
+    deltas = np.diff(prices)
+    gains = np.where(deltas > 0, deltas, 0)
+    losses = np.where(deltas < 0, -deltas, 0)
+
+    avg_gain = pd.Series(gains).ewm(span=period, adjust=False).mean().values[-1]
+    avg_loss = pd.Series(losses).ewm(span=period, adjust=False).mean().values[-1]
+
+    if avg_loss == 0:
+        return 100.0
+    rs = avg_gain / avg_loss
+    return 100.0 - (100.0 / (1.0 + rs))
+
+
+def compute_momentum_score(prices: np.ndarray) -> dict:
     """
-    Candle-based analysis — EMA crossover for trend direction.
-    Called every 60s, provides trend bias for tick-level decisions.
+    Multi-window momentum scoring for short-term trend detection.
+    Returns a score from -1.0 (strong bearish) to +1.0 (strong bullish).
+    """
+    if len(prices) < 20:
+        return {"score": 0.0, "bias": "NEUTRAL"}
+
+    scores = []
+
+    # 5-bar rate of change
+    roc_5 = (prices[-1] - prices[-5]) / prices[-5] if prices[-5] != 0 else 0
+    scores.append(np.clip(roc_5 * 1000, -1, 1))
+
+    # 10-bar rate of change
+    if len(prices) >= 10:
+        roc_10 = (prices[-1] - prices[-10]) / prices[-10] if prices[-10] != 0 else 0
+        scores.append(np.clip(roc_10 * 500, -1, 1))
+
+    # Price vs EMA(5) — micro trend
+    ema5 = compute_ema(prices, 5)
+    if ema5[-1] != 0:
+        dev = (prices[-1] - ema5[-1]) / ema5[-1]
+        scores.append(np.clip(dev * 2000, -1, 1))
+
+    # RSI momentum component
+    rsi = compute_rsi(prices, 14)
+    rsi_score = (rsi - 50) / 50  # -1 to +1
+    scores.append(rsi_score)
+
+    # Consecutive direction — last 5 bars
+    last5 = prices[-5:]
+    ups = sum(1 for i in range(1, len(last5)) if last5[i] > last5[i - 1])
+    downs = sum(1 for i in range(1, len(last5)) if last5[i] < last5[i - 1])
+    dir_score = (ups - downs) / 4.0  # -1 to +1
+    scores.append(dir_score)
+
+    avg_score = sum(scores) / len(scores)
+
+    if avg_score > 0.2:
+        bias = "BULLISH"
+    elif avg_score < -0.2:
+        bias = "BEARISH"
+    else:
+        bias = "NEUTRAL"
+
+    return {"score": round(avg_score, 4), "bias": bias}
+
+
+def analyze(prices_data: dict, adaptive_params: dict = None) -> dict:
+    """
+    Candle-based analysis — EMA crossover + momentum scoring.
+    adaptive_params can override defaults from the learning system.
     """
     candles = prices_data.get("prices", [])
-    if len(candles) < config.EMA_TREND + 5:
+
+    # Use adaptive parameters if provided
+    ema_fast = (adaptive_params or {}).get("ema_fast", config.EMA_FAST)
+    ema_slow = (adaptive_params or {}).get("ema_slow", config.EMA_SLOW)
+    ema_trend = (adaptive_params or {}).get("ema_trend", config.EMA_TREND)
+
+    if len(candles) < ema_trend + 5:
         return {"signal": Signal.HOLD, "reason": "Insufficient data"}
 
     closes = np.array([(c["closePrice"]["bid"] + c["closePrice"]["ask"]) / 2 for c in candles])
     highs = np.array([(c["highPrice"]["bid"] + c["highPrice"]["ask"]) / 2 for c in candles])
     lows = np.array([(c["lowPrice"]["bid"] + c["lowPrice"]["ask"]) / 2 for c in candles])
 
-    ema_fast = compute_ema(closes, config.EMA_FAST)
-    ema_slow = compute_ema(closes, config.EMA_SLOW)
-    ema_trend = compute_ema(closes, config.EMA_TREND)
+    ema_f = compute_ema(closes, ema_fast)
+    ema_s = compute_ema(closes, ema_slow)
+    ema_t = compute_ema(closes, ema_trend)
     atr = compute_atr(highs, lows, closes, config.ATR_PERIOD)
 
     current_price = closes[-1]
@@ -58,72 +132,88 @@ def analyze(prices_data: dict) -> dict:
     if np.isnan(current_atr) or current_atr == 0:
         return {"signal": Signal.HOLD, "reason": "ATR not available"}
 
-    fast_now, fast_prev = ema_fast[-1], ema_fast[-2]
-    slow_now, slow_prev = ema_slow[-1], ema_slow[-2]
-    trend_now = ema_trend[-1]
+    fast_now, fast_prev = ema_f[-1], ema_f[-2]
+    slow_now, slow_prev = ema_s[-1], ema_s[-2]
+    trend_now = ema_t[-1]
+
+    # Short-term momentum scoring
+    momentum = compute_momentum_score(closes)
+    rsi = compute_rsi(closes, 14)
+
+    # Adaptive SL/TP multipliers from learning
+    sl_mult = (adaptive_params or {}).get("sl_multiplier", config.ATR_SL_MULTIPLIER)
+    tp_mult = (adaptive_params or {}).get("tp_multiplier", config.ATR_TP_MULTIPLIER)
 
     result = {
         "price": round(current_price, 5),
         "atr": round(current_atr, 5),
-        "stop_distance": round(current_atr * config.ATR_SL_MULTIPLIER, 5),
-        "profit_distance": round(current_atr * config.ATR_TP_MULTIPLIER, 5),
+        "stop_distance": round(current_atr * sl_mult, 5),
+        "profit_distance": round(current_atr * tp_mult, 5),
         "ema_fast": round(fast_now, 5),
         "ema_slow": round(slow_now, 5),
         "ema_trend": round(trend_now, 5),
+        "rsi": round(rsi, 2),
+        "momentum_score": momentum["score"],
+        "momentum_bias": momentum["bias"],
     }
 
+    # --- Signal generation with momentum confirmation ---
+
+    # EMA crossover + momentum agreement
     if fast_prev <= slow_prev and fast_now > slow_now and current_price > trend_now:
-        result["signal"] = Signal.BUY
-        result["reason"] = f"EMA({config.EMA_FAST}) crossed above EMA({config.EMA_SLOW})"
-        return result
+        if momentum["bias"] != "BEARISH":  # Don't buy into bearish momentum
+            result["signal"] = Signal.BUY
+            result["reason"] = f"EMA crossover UP + momentum {momentum['bias']} (RSI={rsi:.0f})"
+            return result
 
     if fast_prev >= slow_prev and fast_now < slow_now and current_price < trend_now:
-        result["signal"] = Signal.SELL
-        result["reason"] = f"EMA({config.EMA_FAST}) crossed below EMA({config.EMA_SLOW})"
-        return result
+        if momentum["bias"] != "BULLISH":  # Don't sell into bullish momentum
+            result["signal"] = Signal.SELL
+            result["reason"] = f"EMA crossover DOWN + momentum {momentum['bias']} (RSI={rsi:.0f})"
+            return result
 
-    # Also signal if strong trend alignment (no crossover needed)
+    # Strong trend alignment with momentum confirmation
     if fast_now > slow_now > trend_now and current_price > fast_now:
-        result["signal"] = Signal.BUY
-        result["reason"] = "Strong uptrend alignment"
-        return result
+        if momentum["score"] > 0.3:  # Require bullish momentum
+            result["signal"] = Signal.BUY
+            result["reason"] = f"Strong uptrend + bullish momentum ({momentum['score']:.2f})"
+            return result
 
     if fast_now < slow_now < trend_now and current_price < fast_now:
+        if momentum["score"] < -0.3:  # Require bearish momentum
+            result["signal"] = Signal.SELL
+            result["reason"] = f"Strong downtrend + bearish momentum ({momentum['score']:.2f})"
+            return result
+
+    # Pure momentum signal (short-term breakout)
+    if momentum["score"] > 0.6 and rsi > 55 and rsi < 80:
+        result["signal"] = Signal.BUY
+        result["reason"] = f"Bullish momentum breakout (score={momentum['score']:.2f}, RSI={rsi:.0f})"
+        return result
+
+    if momentum["score"] < -0.6 and rsi < 45 and rsi > 20:
         result["signal"] = Signal.SELL
-        result["reason"] = "Strong downtrend alignment"
+        result["reason"] = f"Bearish momentum breakout (score={momentum['score']:.2f}, RSI={rsi:.0f})"
         return result
 
     result["signal"] = Signal.HOLD
-    result["reason"] = "No trend alignment"
+    result["reason"] = f"No alignment (mom={momentum['score']:.2f}, RSI={rsi:.0f})"
     return result
 
 
 def tick_momentum(ticks: list[dict]) -> dict:
     """
     Analyze real-time tick data for momentum signals.
-
-    Looks at:
-    1. Price velocity (rate of change over last N ticks)
-    2. Acceleration (is momentum increasing?)
-    3. Tick direction consistency (what % of ticks moved in same direction)
-    4. Volume of movement vs spread
-
-    Returns:
-        {
-            "direction": "UP" | "DOWN" | "FLAT",
-            "strength": 0.0 - 1.0,
-            "acceleration": float (positive = accelerating, negative = decelerating),
-            "velocity": float (price change per second),
-        }
+    Enhanced with multi-window analysis and micro-RSI.
     """
     if len(ticks) < 5:
-        return {"direction": "FLAT", "strength": 0.0, "acceleration": 0.0, "velocity": 0.0}
+        return {"direction": "FLAT", "strength": 0.0, "acceleration": 0.0, "velocity": 0.0, "micro_rsi": 50.0}
 
     prices = [t["mid"] for t in ticks]
     times = [t["time"] for t in ticks]
 
     # --- Velocity: price change per second over different windows ---
-    windows = [5, 10, 30]  # short, medium, long tick windows
+    windows = [5, 10, 30]
     velocities = []
     for w in windows:
         if len(prices) >= w:
@@ -143,10 +233,10 @@ def tick_momentum(ticks: list[dict]) -> dict:
     else:
         acceleration = 0.0
 
-    # --- Direction consistency: what % of recent ticks moved same way ---
+    # --- Direction consistency ---
     recent = prices[-min(20, len(prices)):]
-    up_ticks = sum(1 for i in range(1, len(recent)) if recent[i] > recent[i-1])
-    down_ticks = sum(1 for i in range(1, len(recent)) if recent[i] < recent[i-1])
+    up_ticks = sum(1 for i in range(1, len(recent)) if recent[i] > recent[i - 1])
+    down_ticks = sum(1 for i in range(1, len(recent)) if recent[i] < recent[i - 1])
     total_moves = up_ticks + down_ticks
 
     if total_moves == 0:
@@ -158,18 +248,25 @@ def tick_momentum(ticks: list[dict]) -> dict:
         consistency = max(up_ratio, down_ratio)
         dominant_dir = "UP" if up_ratio > down_ratio else "DOWN"
 
-    # --- Strength: combine velocity magnitude + consistency ---
-    # Normalize velocity by average spread
+    # --- Micro RSI on tick prices ---
+    micro_rsi = compute_rsi(np.array(prices[-30:]), min(14, len(prices) - 2)) if len(prices) > 5 else 50.0
+
+    # --- Strength ---
     avg_spread = sum(t["spread"] for t in ticks[-20:]) / min(20, len(ticks))
     if avg_spread > 0:
         normalized_velocity = abs(avg_velocity) / avg_spread
     else:
         normalized_velocity = 0.0
 
-    # Strength = weighted combo of consistency and normalized velocity
-    strength = min(1.0, (consistency * 0.6) + (min(normalized_velocity, 1.0) * 0.4))
+    # RSI extreme adds to strength
+    rsi_boost = 0.0
+    if micro_rsi > 70 and dominant_dir == "UP":
+        rsi_boost = 0.15
+    elif micro_rsi < 30 and dominant_dir == "DOWN":
+        rsi_boost = 0.15
 
-    # Override direction to FLAT if strength is negligible
+    strength = min(1.0, (consistency * 0.5) + (min(normalized_velocity, 1.0) * 0.35) + rsi_boost)
+
     if strength < 0.3:
         dominant_dir = "FLAT"
 
@@ -178,4 +275,5 @@ def tick_momentum(ticks: list[dict]) -> dict:
         "strength": round(strength, 3),
         "acceleration": round(acceleration, 8),
         "velocity": round(avg_velocity, 8),
+        "micro_rsi": round(micro_rsi, 2),
     }
