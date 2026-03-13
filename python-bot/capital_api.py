@@ -312,17 +312,28 @@ class CapitalAPI:
         return []
 
     def get_markets_details(self, epics: list[str]) -> list:
-        """Get details for multiple markets by epic codes (max 50)."""
+        """Get details for multiple markets by epic codes (max 50).
+        Includes retry logic for resilience.
+        """
         if not epics:
             return []
-        try:
-            resp = self.session.get(
-                f"{self.base_url}/api/v1/markets",
-                params={"epics": ",".join(epics[:50])},
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                return resp.json().get("markets", [])
-        except Exception as e:
-            log.error(f"Markets details exception: {e}")
+        for attempt in range(_MAX_RETRIES + 1):
+            _pace_request()
+            try:
+                resp = self.session.get(
+                    f"{self.base_url}/api/v1/markets",
+                    params={"epics": ",".join(epics[:50])},
+                    headers=self._headers(),
+                    timeout=15,
+                )
+                if resp.status_code == 200:
+                    _handle_success()
+                    return resp.json().get("markets", [])
+                else:
+                    _handle_error(resp.status_code)
+                    log.warning(f"Markets details attempt {attempt+1}: {resp.status_code}")
+            except Exception as e:
+                log.error(f"Markets details exception (attempt {attempt+1}): {e}")
+                if attempt < _MAX_RETRIES:
+                    time.sleep(1 * (attempt + 1))
         return []

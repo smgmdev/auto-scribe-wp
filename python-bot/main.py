@@ -815,8 +815,8 @@ def run():
                     if len(tick_history[epic]) > MAX_TICKS:
                         tick_history[epic] = tick_history[epic][-MAX_TICKS:]
 
-                    if len(tick_history[epic]) < 5:
-                        continue
+                    if len(tick_history[epic]) < 3:
+                        continue  # Reduced from 5 → 3 to prevent stalls
 
                     # Feed correlation tracker
                     correlation.update_prices(epic, mid)
