@@ -13,8 +13,8 @@ from logger_setup import get_logger
 
 log = get_logger("pos_mgr")
 
-# Initial SL: 1.5% below entry (default)
-INITIAL_SL_PCT = 0.015
+# Initial SL: 1% below entry (default)
+INITIAL_SL_PCT = 0.01
 # Step size for SL ratcheting: 5% of entry price (default)
 PROFIT_STEP_PCT = 0.05
 
