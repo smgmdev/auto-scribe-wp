@@ -261,7 +261,7 @@ class PositionManager:
 
         # Periodic sanity check on SL
         pos["trailing_stop_price"] = _validate_sl(
-            pos["trailing_stop_price"], entry, direction, pos["locked_steps"]
+            pos["trailing_stop_price"], entry, direction, pos["locked_steps"], epic
         )
 
         # ═══════════════════════════════════════════
