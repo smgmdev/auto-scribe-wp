@@ -479,9 +479,10 @@ function updateGrid(data) {
                 el.querySelector('.slot-price').textContent = formatPrice(price);
                 el.querySelector('.slot-entry').textContent = 'Entry: ' + formatPrice(entryP);
 
-                // P&L percentage only
+                // P&L number + percentage
                 var pnlPct = (entryP > 0) ? (((price - entryP) / entryP) * 100 * (dir === 'BUY' ? 1 : -1)) : 0;
-                var pnlText = (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
+                var pnlAbs = (dir === 'BUY') ? (price - entryP) : (entryP - price);
+                var pnlText = formatPnl(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%)';
                 el.querySelector('.slot-pnl').textContent = pnlText;
                 el.querySelector('.slot-pnl').style.color = pnlPct >= 0 ? '#4ade80' : '#f87171';
                 el.querySelector('.slot-empty-text').textContent = '';
