@@ -47,39 +47,14 @@ BANNER = """
 """
 
 
-def write_live_state(api, balance, positions, pos_manager, tick_history):
+def write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices: dict | None = None):
     """Write live state to disk for dashboard to read.
-    Uses Capital.com API's live bid/ask from positions, plus direct price
-    fetches for the most accurate real-time data.
+    Uses cached batch_prices / tick_history — does NOT make its own API calls
+    to avoid rate-limit contention with scanner & main loop.
     """
     try:
         live_positions = []
-
-        # Collect epics that need fresh prices (from open positions)
-        epics_to_fetch = []
-        for pos in positions:
-            epic = pos.get("market", {}).get("epic", "")
-            if epic:
-                epics_to_fetch.append(epic)
-
-        # Batch-fetch live prices for all open position epics (max 50)
-        live_prices = {}
-        if epics_to_fetch:
-            try:
-                details = api.get_markets_details(epics_to_fetch[:50])
-                for m in details:
-                    ep = m.get("epic", "")
-                    snap = m.get("snapshot", {})
-                    bid = snap.get("bid", 0)
-                    ask = snap.get("offer", 0)
-                    if bid and ask:
-                        live_prices[ep] = {
-                            "bid": float(bid),
-                            "ask": float(ask),
-                            "mid": (float(bid) + float(ask)) / 2,
-                        }
-            except Exception as e:
-                log.debug(f"Live price fetch fallback: {e}")
+        live_prices = batch_prices or {}
 
         for pos in positions:
             epic = pos.get("market", {}).get("epic", "")
