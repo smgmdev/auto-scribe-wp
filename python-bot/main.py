@@ -743,7 +743,7 @@ def run():
                 log.info(f"🔄 Entry scan order: {' → '.join(scanning_cats)} | {len(balanced_epics)} epics")
 
             # ═══════════════════════════════════════════
-            # ⚡ BATCH PRICE FETCH — every 3 cycles (3s) to avoid API saturation
+            # ⚡ BATCH PRICE FETCH — every 5 cycles with adaptive cooldown
             # Background scanner also makes API calls, so main loop must pace itself
             # ═══════════════════════════════════════════
             batch_prices: dict[str, dict] = {}
