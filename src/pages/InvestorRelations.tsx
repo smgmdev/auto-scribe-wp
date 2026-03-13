@@ -314,7 +314,7 @@ export default function InvestorRelations() {
             </p>
             <Button
               onClick={() => navigate('/mace-ai')}
-              className="rounded-none bg-[#1e90ff] text-white hover:bg-[#1a7de0] h-12 px-8 text-base font-medium mt-8"
+              className="rounded-none bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-base font-medium mt-8"
             >
               Learn More
               <ArrowRight className="ml-2 h-4 w-4" />
