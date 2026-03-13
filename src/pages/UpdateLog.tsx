@@ -720,6 +720,7 @@ export default function UpdateLog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
+  const [visibleCount, setVisibleCount] = useState(15);
 
   const availableYears = useMemo(() => {
     const years = new Set(updates.map(u => u.date.split(', ')[1]));
@@ -838,7 +839,7 @@ export default function UpdateLog() {
             />
             <select
               value={selectedYear}
-              onChange={(e) => { setSelectedYear(e.target.value); setSelectedMonth('all'); }}
+              onChange={(e) => { setSelectedYear(e.target.value); setSelectedMonth('all'); setVisibleCount(15); }}
               className="px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white focus:outline-none focus:border-white/50 transition-colors appearance-none cursor-pointer"
             >
               <option value="all">All Years</option>
@@ -846,7 +847,7 @@ export default function UpdateLog() {
             </select>
             <select
               value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
+              onChange={(e) => { setSelectedMonth(e.target.value); setVisibleCount(15); }}
               className="px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white focus:outline-none focus:border-white/50 transition-colors appearance-none cursor-pointer"
             >
               <option value="all">All Months</option>
@@ -857,7 +858,7 @@ export default function UpdateLog() {
 
         {/* Updates as Accordion */}
         <Accordion type="multiple" className="w-full">
-          {filteredUpdates.map((update, i) => (
+          {filteredUpdates.slice(0, visibleCount).map((update, i) => (
             <AccordionItem key={i} value={`item-${i}`} className="border-t border-white/10">
               <AccordionTrigger className="text-lg md:text-xl font-semibold text-white hover:no-underline py-3 group [&>svg]:hidden text-left w-full hover:text-[#06c] data-[state=open]:text-[#06c] transition-colors">
                 <span className="flex items-center justify-between w-full gap-3 text-left">
@@ -881,6 +882,17 @@ export default function UpdateLog() {
             </AccordionItem>
           ))}
         </Accordion>
+
+        {visibleCount < filteredUpdates.length && (
+          <div className="flex justify-center mt-8 mb-4">
+            <Button
+              onClick={() => setVisibleCount(prev => prev + 15)}
+              className="rounded-none bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-300 px-8"
+            >
+              Load More ({filteredUpdates.length - visibleCount} remaining)
+            </Button>
+          </div>
+        )}
       </main>
 
       <div className="border-t border-[#424245]" />
