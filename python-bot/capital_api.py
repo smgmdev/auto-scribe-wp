@@ -279,12 +279,18 @@ class CapitalAPI:
 
     def ping(self) -> bool:
         """Keep session alive."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/session", headers=self._headers()
+                f"{self.base_url}/api/v1/session", headers=self._headers(), timeout=10
             )
-            return resp.status_code == 200
-        except:
+            ok = resp.status_code == 200
+            if ok:
+                _handle_success()
+            else:
+                _handle_error(resp.status_code)
+            return ok
+        except Exception:
             return False
 
     def get_market_categories(self) -> list:
