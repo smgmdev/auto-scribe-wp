@@ -36,14 +36,24 @@ CATEGORY_CRYPTO = "crypto"
 CATEGORY_COMMODITIES = "commodities"
 CATEGORY_FOREX = "forex"
 
-# Commodities — DISABLED (crypto only mode)
-WATCHLIST_COMMODITIES = []
+# Commodities — AI discovers best, fallback list below
+WATCHLIST_COMMODITIES_FALLBACK = [
+    "GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS",
+    "COPPER", "PLATINUM", "OIL_BRENT",
+]
+WATCHLIST_COMMODITIES: list[str] = list(WATCHLIST_COMMODITIES_FALLBACK)
 
-# Forex — DISABLED (crypto only mode)
-WATCHLIST_FOREX_FALLBACK = []
+# Forex — AI discovers best, fallback list below
+WATCHLIST_FOREX_FALLBACK = [
+    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
+    "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
+]
 
-# Stocks — DISABLED (crypto only mode)
-WATCHLIST_STOCKS_FALLBACK = []
+# Stocks — AI discovers best, fallback list below
+WATCHLIST_STOCKS_FALLBACK = [
+    "AAPL", "TSLA", "NVDA", "MSFT", "AMZN",
+    "META", "GOOGL", "AMD", "NFLX", "COIN",
+]
 WATCHLIST_CRYPTO_FALLBACK = [
     "BTCUSD", "ETHUSD", "SOLUSD", "XRPUSD",
     "BNBUSD", "DOGEUSD", "ADAUSD", "AVAXUSD",
