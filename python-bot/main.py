@@ -14,6 +14,7 @@ import os
 import threading
 from datetime import datetime
 from collections import defaultdict
+from typing import Optional
 
 import config
 from capital_api import CapitalAPI
