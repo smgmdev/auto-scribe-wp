@@ -368,7 +368,7 @@ export default function InvestorRelations() {
               </p>
               <Button
                 onClick={() => setContactOpen(true)}
-                className="rounded-none bg-[#1d1d1f] text-white hover:bg-[#1d1d1f]/90 h-12 px-8 text-base font-medium"
+                className="rounded-none bg-[#1d1d1f] text-white border border-[#1d1d1f] h-12 px-8 text-base font-medium transition-all duration-300 ease-out hover:bg-white hover:text-black hover:border-black"
               >
                 Get in Touch
               </Button>
