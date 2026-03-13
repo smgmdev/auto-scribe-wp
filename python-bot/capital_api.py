@@ -123,9 +123,15 @@ class CapitalAPI:
             "size": size,
         }
         if stop_distance is not None:
-            payload["stopDistance"] = round(stop_distance, 2)
+            # Capital.com requires stopDistance to be positive
+            sd = round(abs(stop_distance), 2)
+            if sd <= 0:
+                sd = 1.0  # absolute minimum fallback
+            payload["stopDistance"] = sd
         if profit_distance is not None:
-            payload["profitDistance"] = round(profit_distance, 2)
+            pd = round(abs(profit_distance), 2)
+            if pd > 0:
+                payload["profitDistance"] = pd
 
         try:
             resp = self.session.post(
