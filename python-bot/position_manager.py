@@ -19,7 +19,7 @@ INITIAL_SL_PCT = 0.01
 PROFIT_STEP_PCT = 0.05
 
 # BTC-specific overrides
-BTC_INITIAL_SL_PCT = 0.005   # 0.5% from entry
+BTC_INITIAL_SL_PCT = 0.0075   # 0.75% from entry
 BTC_PROFIT_STEP_PCT = 0.01   # 1% steps
 BTC_EPICS = {"BTCUSD", "BITCOIN", "BTC"}
 
