@@ -350,7 +350,7 @@ class CapitalAPI:
                     return resp.json().get("markets", [])
                 else:
                     _handle_error(resp.status_code)
-                    log.warning(f"Search markets '{search_term}' attempt {attempt+1}: {resp.status_code}")
+                    log.info(f"Search markets '{search_term}' attempt {attempt+1}: {resp.status_code}")
             except Exception as e:
                 log.error(f"Search markets exception '{search_term}' (attempt {attempt+1}): {e}")
                 if attempt < _MAX_RETRIES:
