@@ -868,7 +868,8 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
 
 def run_dashboard():
-    server = HTTPServer(("0.0.0.0", DASHBOARD_PORT), DashboardHandler)
+    server_cls = ThreadingHTTPServer if "ThreadingHTTPServer" in globals() else HTTPServer
+    server = server_cls(("0.0.0.0", DASHBOARD_PORT), DashboardHandler)
     log.info(f"📊 Dashboard running at http://localhost:{DASHBOARD_PORT}")
     print(f"\n  📊 Dashboard: http://localhost:{DASHBOARD_PORT}\n")
     server.serve_forever()
