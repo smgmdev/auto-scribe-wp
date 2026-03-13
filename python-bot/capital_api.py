@@ -327,7 +327,7 @@ class CapitalAPI:
                     return resp.json()
                 else:
                     _handle_error(resp.status_code)
-                    log.warning(f"Category markets {node_id} attempt {attempt+1}: {resp.status_code}")
+                    log.info(f"Category markets {node_id} attempt {attempt+1}: {resp.status_code}")
             except Exception as e:
                 log.error(f"Category markets exception for {node_id} (attempt {attempt+1}): {e}")
                 if attempt < _MAX_RETRIES:
