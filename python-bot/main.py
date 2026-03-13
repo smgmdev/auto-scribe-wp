@@ -924,17 +924,17 @@ def run():
 
                     entry_signal = Signal.HOLD
 
-                    # Only enter if tick momentum CONFIRMS scanner direction with strong alignment
+                    # Only enter if tick momentum CONFIRMS scanner direction
                     if scanner_direction == Signal.BUY:
                         if momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.BUY
-                        # Scalp: relaxed entry only with VERY strong scanner confidence
-                        elif is_scalp_asset and scanner_confidence >= 0.70 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.40:
+                        # Relaxed entry with strong scanner confidence (all asset types)
+                        elif scanner_confidence >= 0.65 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.35:
                             entry_signal = Signal.BUY
                     elif scanner_direction == Signal.SELL:
                         if momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
                             entry_signal = Signal.SELL
-                        elif is_scalp_asset and scanner_confidence >= 0.70 and momentum["direction"] != "UP" and momentum["strength"] >= 0.40:
+                        elif scanner_confidence >= 0.65 and momentum["direction"] != "UP" and momentum["strength"] >= 0.35:
                             entry_signal = Signal.SELL
 
                     if entry_signal == Signal.HOLD:
