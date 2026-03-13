@@ -743,11 +743,12 @@ def run():
                 log.info(f"🔄 Entry scan order: {' → '.join(scanning_cats)} | {len(balanced_epics)} epics")
 
             # ═══════════════════════════════════════════
-            # ⚡ BATCH PRICE FETCH — 1 API call instead of 30+ sequential calls
-            # With fallback: if batch fails, try smaller chunks
+            # ⚡ BATCH PRICE FETCH — every 3 cycles (3s) to avoid API saturation
+            # Background scanner also makes API calls, so main loop must pace itself
             # ═══════════════════════════════════════════
             batch_prices: dict[str, dict] = {}
-            if balanced_epics:
+            should_fetch_prices = (cycle_count % 3 == 0) and balanced_epics
+            if should_fetch_prices:
                 batch_success = False
                 try:
                     for i in range(0, len(balanced_epics), 50):
@@ -768,10 +769,12 @@ def run():
                         if details:
                             batch_success = True
                             _last_batch_success = time.time()
+                        if i + 50 < len(balanced_epics):
+                            time.sleep(0.3)  # Pace between chunks
                 except Exception as e:
                     log.warning(f"Batch price fetch error: {e}")
 
-                # Fallback: if batch returned nothing, try smaller chunks of 10
+                # Fallback: if batch returned nothing, try smaller chunks with delays
                 if not batch_success and len(balanced_epics) > 10:
                     log.info("🔄 Batch fetch failed — retrying with smaller chunks...")
                     try:
@@ -790,21 +793,24 @@ def run():
                                         "bid": b, "ask": a,
                                         "mid": (b + a) / 2, "spread": a - b,
                                     }
-                            time.sleep(0.3)
+                            if details:
+                                batch_success = True
+                                _last_batch_success = time.time()
+                            time.sleep(0.5)  # Longer delay for retry chunks
                     except Exception as e2:
                         log.warning(f"Fallback batch also failed: {e2}")
 
-                if not batch_prices:
-                    if cycle_count % 10 == 0:
-                        log.warning("⚠️ No price data this cycle — batch fetch returned empty")
-                    # Use last known tick prices as fallback
-                    for epic in balanced_epics:
-                        if epic in tick_history and tick_history[epic]:
-                            last = tick_history[epic][-1]
-                            batch_prices[epic] = {
-                                "bid": last["bid"], "ask": last["ask"],
-                                "mid": last["mid"], "spread": last["spread"],
-                            }
+            # Always populate batch_prices from tick_history for non-fetch cycles or empty results
+            for epic in balanced_epics:
+                if epic not in batch_prices and epic in tick_history and tick_history[epic]:
+                    last = tick_history[epic][-1]
+                    batch_prices[epic] = {
+                        "bid": last["bid"], "ask": last["ask"],
+                        "mid": last["mid"], "spread": last["spread"],
+                    }
+
+            if should_fetch_prices and not batch_prices and cycle_count % 30 == 0:
+                log.warning("⚠️ No price data — batch fetch returned empty and no tick history available")
 
             for epic in balanced_epics:
                 try:
