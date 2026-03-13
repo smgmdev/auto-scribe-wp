@@ -804,6 +804,35 @@ def run():
                     if not can_open_position(positions, epic):
                         continue
 
+                    # ═══════════════════════════════════════
+                    # GATE 4: RISK/REWARD CHECK — estimated profit must exceed risk
+                    # Use S/R levels: for BUY, distance to resistance vs stop
+                    # For SELL, distance to support vs stop
+                    # Require minimum 1.5:1 R:R ratio
+                    # ═══════════════════════════════════════
+                    MIN_RR_RATIO = 1.5
+                    estimated_profit_room = 0.0
+
+                    if scan_signal.nearest_resistance > 0 and entry_signal == Signal.BUY:
+                        estimated_profit_room = scan_signal.nearest_resistance - mid
+                    elif scan_signal.nearest_support > 0 and entry_signal == Signal.SELL:
+                        estimated_profit_room = mid - scan_signal.nearest_support
+
+                    # If S/R data unavailable, use ATR-based estimate (3× ATR as target)
+                    if estimated_profit_room <= 0 and atr > 0:
+                        estimated_profit_room = atr * 3.0
+
+                    effective_stop = stop_distance if stop_distance > 0 else mid * 0.01
+                    rr_ratio = estimated_profit_room / effective_stop if effective_stop > 0 else 0
+
+                    if rr_ratio < MIN_RR_RATIO:
+                        if cycle_count % 20 == 0:
+                            log.info(
+                                f"  ⚠️ {epic}: R:R ratio {rr_ratio:.2f} < {MIN_RR_RATIO} — "
+                                f"profit room {estimated_profit_room:.5f} vs stop {effective_stop:.5f} — skipping"
+                            )
+                        continue
+
                     # Calculate stop distance from scanner's multi-TF ATR
                     try:
                         stop_is_finite = math.isfinite(float(stop_distance))
