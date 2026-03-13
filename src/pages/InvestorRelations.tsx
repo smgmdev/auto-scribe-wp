@@ -7,7 +7,8 @@ import { SearchModal } from '@/components/search/SearchModal';
 import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { Button } from '@/components/ui/button';
 import { InvestorContactForm } from '@/components/investor/InvestorContactForm';
-import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase, Target, Layers } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase, Target, Layers, Search, User } from 'lucide-react';
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 
