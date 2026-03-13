@@ -64,7 +64,7 @@ def _validate_sl(sl_price: float, entry_price: float, direction: str,
             )
             return corrected
         elif direction == "SELL" and sl_price <= entry_price:
-            corrected = _initial_sl(entry_price, direction)
+            corrected = _initial_sl(entry_price, direction, epic)
             log.warning(
                 f"⚠️ SL sanity fix: SELL SL {sl_price:.6f} <= entry {entry_price:.6f} "
                 f"with 0 steps. Reset to {corrected:.6f}"
