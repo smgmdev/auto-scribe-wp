@@ -118,6 +118,8 @@ def _price_fetcher_loop():
                                 "direction": p.get("direction", ""),
                                 "entry_price": float(p.get("entry_price", 0) or 0),
                                 "size": float(p.get("size", 0) or 0),
+                                "trailing_stop": p.get("trailing_stop_price"),
+                                "stop_distance": float(p.get("stop_distance", 0) or 0),
                             })
 
                         with _cache_lock:
