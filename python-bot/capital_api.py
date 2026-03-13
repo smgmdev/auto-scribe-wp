@@ -308,16 +308,25 @@ class CapitalAPI:
 
     def search_markets(self, search_term: str) -> list:
         """Search for markets by name."""
-        try:
-            resp = self.session.get(
-                f"{self.base_url}/api/v1/markets",
-                params={"searchTerm": search_term},
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                return resp.json().get("markets", [])
-        except Exception as e:
-            log.error(f"Search markets exception: {e}")
+        _pace_request()
+        for attempt in range(_MAX_RETRIES + 1):
+            try:
+                resp = self.session.get(
+                    f"{self.base_url}/api/v1/markets",
+                    params={"searchTerm": search_term},
+                    headers=self._headers(),
+                    timeout=10,
+                )
+                if resp.status_code == 200:
+                    _handle_success()
+                    return resp.json().get("markets", [])
+                else:
+                    _handle_error(resp.status_code)
+                    log.warning(f"Search markets '{search_term}' attempt {attempt+1}: {resp.status_code}")
+            except Exception as e:
+                log.error(f"Search markets exception '{search_term}' (attempt {attempt+1}): {e}")
+                if attempt < _MAX_RETRIES:
+                    time.sleep(1 * (attempt + 1))
         return []
 
     def get_markets_details(self, epics: list[str]) -> list:
