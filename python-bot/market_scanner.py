@@ -208,6 +208,15 @@ class MarketScanner:
 
             trend_aligned = (ema_f_now > ema_s_now > ema_t_now) or (ema_f_now < ema_s_now < ema_t_now)
 
+            # Support/Resistance analysis
+            sr_lookback = 30 if is_scalp else 50
+            sr_data = compute_support_resistance(
+                highs, lows, closes,
+                lookback=min(sr_lookback, len(closes) - 1),
+                num_levels=3,
+                cluster_pct=0.002 if is_scalp else 0.003,
+            )
+
             return TimeframeAnalysis(
                 timeframe=tf_name,
                 direction=direction,
@@ -216,6 +225,7 @@ class MarketScanner:
                 momentum_score=round(momentum["score"], 4),
                 atr=round(current_atr, 5),
                 trend_aligned=trend_aligned,
+                sr_data=sr_data,
             )
 
         except Exception as e:
