@@ -682,6 +682,13 @@ setInterval(fetchState, 1000);
 
 
 class DashboardHandler(SimpleHTTPRequestHandler):
+    def _json_response(self, data, status=200):
+        self.send_response(status)
+        self.send_header("Content-type", "application/json")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+
     def do_GET(self):
         if self.path == "/" or self.path == "/index.html":
             html = generate_html()
