@@ -225,7 +225,7 @@ class CapitalAPI:
             # Enforce minimum from API
             min_sd = self.get_min_stop_distance(epic)
             if min_sd > 0 and sd < min_sd:
-                log.warning(f"⚠️ {epic} SL {sd} < min {min_sd}, bumping to {min_sd}")
+                log.info(f"{epic} SL {sd} < min {min_sd}, bumping to {min_sd}")
                 sd = min_sd * 1.05  # 5% above minimum for safety margin
 
             if sd <= 0:
