@@ -489,10 +489,9 @@ def run():
     scanner_thread.start()
     log.info("🔄 Background scanner thread started")
 
-    # Session keepalive & stall detection
+    # Also remove stall threshold variable (now hardcoded to 120s)
     cycle_count = 0
     _last_batch_success = time.time()
-    _stall_threshold = 60  # If no batch succeeds for 60s, force re-login
 
     while True:
         try:
