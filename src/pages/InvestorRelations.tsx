@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase, Target, Layers, Search, User } from 'lucide-react';
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
+import investorHeroBg from '@/assets/investor-hero-bg.mp4';
 
 function useInView(options?: IntersectionObserverInit) {
   const ref = useRef<HTMLDivElement>(null);
@@ -160,6 +161,15 @@ export default function InvestorRelations() {
 
         {/* Hero */}
         <section className="relative overflow-hidden bg-[#1d1d1f] text-white">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            src={investorHeroBg}
+          />
+          <div className="absolute inset-0 bg-black/50" />
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-24 md:py-36 text-center relative z-10">
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/50 mb-4">Investor Relations</p>
@@ -178,8 +188,6 @@ export default function InvestorRelations() {
               </Button>
             </AnimatedSection>
           </div>
-          {/* Subtle grid overlay */}
-          <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         </section>
 
 
