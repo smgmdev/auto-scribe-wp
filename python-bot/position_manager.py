@@ -27,35 +27,85 @@ class PositionManager:
 
     def track_position(self, deal_id: str, epic: str, direction: str,
                        entry_price: float, stop_distance: float, profit_distance: float,
-                       spread: float = 0.0):
+                       spread: float = 0.0, current_price: float = 0.0,
+                       created_date: float = 0.0):
         """Start tracking a new position.
         
         Args:
             spread: bid-ask spread at entry time. Capital.com fee = spread.
             profit_distance: kept for compatibility but ignored — TP is unlimited.
+            current_price: if provided, reconstructs profit state (for restart recovery).
+            created_date: Unix timestamp of when the position was originally opened.
         """
         fee_cost = spread * 2 if spread > 0 else entry_price * 0.0002
+        step_size = entry_price * PROFIT_STEP_PCT
+
+        # Calculate current P&L if we have a live price (restart recovery)
+        if current_price > 0 and entry_price > 0:
+            if direction == "BUY":
+                pnl = current_price - entry_price
+            else:
+                pnl = entry_price - current_price
+        else:
+            pnl = 0.0
+
+        # Reconstruct profit-step state from current P&L
+        break_even_set = False
+        trailing_stop_price = None
+        locked_steps = 0
+
+        if pnl > fee_cost and step_size > 0:
+            net_pnl = pnl - fee_cost
+            if net_pnl > 0:
+                break_even_set = True
+                current_steps = int(pnl / step_size)
+                locked_steps = current_steps
+
+                if current_steps >= 1:
+                    # Lock at (steps - 1) * step_size, but never below fee breakeven
+                    lock_level_pnl = max((current_steps - 1) * step_size, fee_cost * 1.5)
+                    if direction == "BUY":
+                        trailing_stop_price = entry_price + lock_level_pnl
+                    else:
+                        trailing_stop_price = entry_price - lock_level_pnl
+                else:
+                    # First profit SL: just above fees
+                    fee_buffer = fee_cost * 1.5
+                    if direction == "BUY":
+                        trailing_stop_price = entry_price + fee_buffer
+                    else:
+                        trailing_stop_price = entry_price - fee_buffer
+
+        entry_time = created_date if created_date > 0 else time.time()
 
         self.tracked[deal_id] = {
             "epic": epic,
             "direction": direction,
             "entry_price": entry_price,
             "stop_distance": stop_distance,
-            "profit_distance": profit_distance,  # kept for logging only
-            "highest_profit": 0.0,
-            "lowest_profit": 0.0,
-            "entry_time": time.time(),
-            "break_even_set": False,
-            "trailing_stop_price": None,
+            "profit_distance": profit_distance,
+            "highest_profit": max(pnl, 0.0),
+            "lowest_profit": min(pnl, 0.0),
+            "entry_time": entry_time,
+            "break_even_set": break_even_set,
+            "trailing_stop_price": trailing_stop_price,
             "spread": spread,
             "fee_cost": fee_cost,
-            "locked_steps": 0,  # how many 5% steps locked so far
+            "locked_steps": locked_steps,
         }
+
+        recovery_tag = ""
+        if current_price > 0:
+            recovery_tag = (
+                f" | 🔄 RECOVERED: pnl={pnl:.5f} steps={locked_steps} "
+                f"trailing_sl={trailing_stop_price}"
+            )
+
         log.info(
             f"📌 Tracking {direction} {epic} @ {entry_price:.5f} | "
             f"SL={stop_distance:.5f} TP=UNLIMITED | "
             f"Spread={spread:.5f} Fee={fee_cost:.5f} | "
-            f"Step size={entry_price * PROFIT_STEP_PCT:.5f} (5%)"
+            f"Step size={step_size:.5f} (5%){recovery_tag}"
         )
 
     def untrack(self, deal_id: str):
