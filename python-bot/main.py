@@ -419,7 +419,21 @@ def run():
                     if stop_distance <= 0 or atr <= 0:
                         recent_prices = [t["mid"] for t in tick_history[epic][-30:]]
                         price_range = max(recent_prices) - min(recent_prices)
-                        stop_distance = max(price_range * 1.5, spread * 10)
+                        stop_distance = max(price_range * 1.5, spread * 10, mid * 0.001)
+
+                    # Ensure stop distance is always positive and reasonable
+                    stop_distance = max(abs(stop_distance), spread * 3, mid * 0.0005)
+
+                    # Query market info for minimum stop distance
+                    try:
+                        minfo = api.get_market_info(epic)
+                        if minfo:
+                            dealing = minfo.get("dealingRules", {})
+                            min_stop = dealing.get("minNormalStopOrLimitDistance", {}).get("value", 0)
+                            if min_stop and float(min_stop) > 0:
+                                stop_distance = max(stop_distance, float(min_stop))
+                    except Exception:
+                        pass
 
                     # profit_distance is set but won't be used (unlimited TP via position manager)
                     profit_distance = stop_distance * 3
