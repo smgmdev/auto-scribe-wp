@@ -430,20 +430,34 @@ class MarketScanner:
 
         return scan
 
+    def set_full_categories(self, full_cats: set[str]):
+        """Update which categories are at max capacity (skip scanning them)."""
+        self._full_categories = full_cats
+
     def scan_all(self) -> list[MarketScanResult]:
         """
         Full market scan with dual modes:
         - Standard scan (stocks/commodities) every 2 min
         - Scalp scan (crypto/forex) every 30 sec
+        Skips categories that are already at max positions.
         """
         now = time.time()
         results: list[MarketScanResult] = []
 
         # ═══════════════════════════════════════════
         # SCALP SCAN — crypto & forex (every 30s)
+        # Skip categories that are full
         # ═══════════════════════════════════════════
         if now - self.last_scalp_scan >= self.SCALP_SCAN_INTERVAL:
-            scalp_epics = config.WATCHLIST_CRYPTO + config.WATCHLIST_FOREX
+            scalp_epics = []
+            if config.CATEGORY_CRYPTO not in self._full_categories:
+                scalp_epics += config.WATCHLIST_CRYPTO
+            else:
+                log.info("⏭️  Crypto: 5/5 positions filled — skipping scan")
+            if config.CATEGORY_FOREX not in self._full_categories:
+                scalp_epics += config.WATCHLIST_FOREX
+            else:
+                log.info("⏭️  Forex: 5/5 positions filled — skipping scan")
             if scalp_epics:
                 log.info("⚡ ═══ SCALP SCAN (Crypto + FX) ═══")
 
