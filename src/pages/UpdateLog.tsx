@@ -718,16 +718,38 @@ export default function UpdateLog() {
   const { user } = useAuth();
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [selectedMonth, setSelectedMonth] = useState<string>('all');
+
+  const availableYears = useMemo(() => {
+    const years = new Set(updates.map(u => u.date.split(', ')[1]));
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, []);
+
+  const availableMonths = useMemo(() => {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = new Set(
+      updates
+        .filter(u => selectedYear === 'all' || u.date.split(', ')[1] === selectedYear)
+        .map(u => u.date.split(' ')[0])
+    );
+    return monthNames.filter(m => months.has(m));
+  }, [selectedYear]);
 
   const filteredUpdates = useMemo(() => {
-    if (!searchQuery.trim()) return updates;
-    const q = searchQuery.toLowerCase();
-    return updates.filter(update =>
-      update.title.toLowerCase().includes(q) ||
-      update.date.toLowerCase().includes(q) ||
-      update.changes.some(c => c.toLowerCase().includes(q))
-    );
-  }, [searchQuery]);
+    return updates.filter(update => {
+      const [month, , year] = update.date.split(/[\s,]+/);
+      if (selectedYear !== 'all' && year !== selectedYear) return false;
+      if (selectedMonth !== 'all' && month !== selectedMonth) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return update.title.toLowerCase().includes(q) ||
+          update.date.toLowerCase().includes(q) ||
+          update.changes.some(c => c.toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [searchQuery, selectedYear, selectedMonth]);
 
   return (
     <>
