@@ -47,7 +47,7 @@ BANNER = """
 """
 
 
-def write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices: dict | None = None):
+def write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices: Optional[dict] = None):
     """Write live state to disk for dashboard to read.
     Uses cached batch_prices / tick_history — does NOT make its own API calls
     to avoid rate-limit contention with scanner & main loop.
