@@ -86,7 +86,7 @@ class MarketScanner:
         self.scan_cache: dict[str, MarketScanResult] = {}
         self.last_full_scan: float = 0
         self.last_scalp_scan: float = 0
-        self.FULL_SCAN_INTERVAL = 120    # Standard scan every 2 min
+        self.FULL_SCAN_INTERVAL = 45     # Standard scan every 45 sec (was 120 — too slow)
         self.SCALP_SCAN_INTERVAL = 30    # Scalp scan every 30 seconds
         self.TOP_N_STANDARD = 8          # Deep-analyze top 8 stocks/commodities
         self.TOP_N_SCALP = 12            # Deep-analyze top 12 crypto/forex
