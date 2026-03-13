@@ -475,6 +475,20 @@ def run():
             write_live_state(api, balance, positions, pos_manager, tick_history)
 
             # ═══════════════════════════════════════════
+            # 🚫 ENFORCE CRYPTO-ONLY — close any non-crypto that snuck through
+            # ═══════════════════════════════════════════
+            if positions and cycle_count % 10 == 0:
+                for pos in positions:
+                    epic = pos.get("market", {}).get("epic", "")
+                    deal_id = pos.get("position", {}).get("dealId", "")
+                    if epic and deal_id and config.get_category(epic) != config.CATEGORY_CRYPTO:
+                        log.info(f"🚫 Force-closing non-crypto: {epic} deal={deal_id}")
+                        if api.close_position(deal_id):
+                            pos_manager.untrack(deal_id)
+                            active_signals.pop(epic, None)
+                        time.sleep(0.3)
+
+            # ═══════════════════════════════════════════
             # ⚡ SMART POSITION MANAGEMENT — every cycle
             # ═══════════════════════════════════════════
             if positions and cycle_count % 2 == 0:  # Check every 2 seconds
