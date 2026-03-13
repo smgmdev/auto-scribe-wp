@@ -136,22 +136,68 @@ class AssetDiscovery:
         ranked.sort(key=lambda x: x["score"], reverse=True)
         return ranked
 
-    def _search_fallback(self, terms: list[str], instrument_type: str) -> list[dict]:
-        """Search for assets by term list with pacing between calls."""
-        results = []
+    def _search_fallback(
+        self,
+        terms: list[str],
+        instrument_types: tuple[str, ...],
+        require_tradeable: bool = True,
+        limit_per_term: int = 5,
+    ) -> list[dict]:
+        """Search for assets by terms with pacing between calls."""
+        results: list[dict] = []
+        seen_epics: set[str] = set()
+        allowed_types = {t.upper() for t in instrument_types}
+
         for term in terms:
             try:
                 markets = self.api.search_markets(term)
-                matched = [r for r in markets
-                           if r.get("instrumentType") == instrument_type
-                           and r.get("marketStatus") == "TRADEABLE"]
+                matched = []
+                for r in markets:
+                    epic = r.get("epic", "")
+                    r_type = str(r.get("instrumentType", "")).upper()
+                    r_status = str(r.get("marketStatus", "")).upper()
+                    if not epic or epic in seen_epics:
+                        continue
+                    if r_type not in allowed_types:
+                        continue
+                    if require_tradeable and r_status != "TRADEABLE":
+                        continue
+                    matched.append(r)
+                    seen_epics.add(epic)
+                    if len(matched) >= limit_per_term:
+                        break
+
                 results.extend(matched)
                 if matched:
-                    log.info(f"  🔍 Search '{term}': found {len(matched)} {instrument_type}")
+                    mode = "TRADEABLE" if require_tradeable else "ANY"
+                    log.info(f"  🔍 Search '{term}' [{mode}]: found {len(matched)}")
             except Exception as e:
                 log.warning(f"  Search '{term}' failed: {e}")
             time.sleep(_SEARCH_DELAY)
         return results
+
+    def _placeholder_ranked(self, markets: list[dict], top_n: int, fallback_type: str) -> list[dict]:
+        """Build ranked-like fallback list from raw market records (even if not tradeable)."""
+        ranked: list[dict] = []
+        seen_epics: set[str] = set()
+        for m in markets:
+            epic = m.get("epic", "")
+            if not epic or epic in seen_epics:
+                continue
+            seen_epics.add(epic)
+            ranked.append({
+                "epic": epic,
+                "name": m.get("instrumentName", epic),
+                "type": m.get("instrumentType", fallback_type),
+                "pct_change": round(abs(m.get("percentageChange", 0) or 0), 2),
+                "spread_pct": 0,
+                "bid": m.get("bid", 0) or 0,
+                "offer": m.get("offer", 0) or 0,
+                "score": 0.0,
+            })
+            if len(ranked) >= top_n:
+                break
+        return ranked
 
     def discover(self, force: bool = False) -> dict:
         """
