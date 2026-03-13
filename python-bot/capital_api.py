@@ -181,6 +181,7 @@ class CapitalAPI:
                 payload["profitDistance"] = pd
 
         try:
+            log.debug(f"Order payload {epic}: {payload}")
             resp = self.session.post(
                 f"{self.base_url}/api/v1/positions",
                 json=payload,
