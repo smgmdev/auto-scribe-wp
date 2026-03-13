@@ -20,11 +20,11 @@ log = get_logger("discovery")
 
 # How many assets to select per category
 TOP_STOCKS = 10
-TOP_CRYPTO = 8
-TOP_FOREX = 10
+TOP_CRYPTO = 15   # More crypto for scalp coverage
+TOP_FOREX = 12    # More forex pairs for scalp coverage
 
-# Re-discover every N minutes
-DISCOVERY_INTERVAL = 600  # 10 minutes
+# Re-discover every N minutes (faster for volatile markets)
+DISCOVERY_INTERVAL = 300  # 5 minutes (was 10)
 
 # Instrument type mapping from Capital.com API
 INSTRUMENT_TYPE_MAP = {
@@ -110,10 +110,11 @@ class AssetDiscovery:
             spread_pct = (spread / mid) * 100 if mid > 0 else 100
 
             # Score: high movement + low spread = good tradeable asset
-            vol_score = min(pct_change, 10)
+            # Crypto/forex weight volatility more heavily
+            vol_score = min(pct_change, 15)
             liq_score = max(0, 5 - spread_pct * 10)
 
-            total_score = vol_score * 0.7 + liq_score * 0.3
+            total_score = vol_score * 0.8 + liq_score * 0.2
 
             ranked.append({
                 "epic": epic,
@@ -187,7 +188,9 @@ class AssetDiscovery:
 
         if len(all_crypto) < TOP_CRYPTO:
             for term in ["BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", 
-                         "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB"]:
+                         "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB",
+                         "PEPE", "SHIB", "WIF", "BONK", "SUI", "SEI", "TIA",
+                         "FET", "RENDER", "INJ", "JUP", "ONDO", "OP", "STX"]:
                 results = self.api.search_markets(term)
                 crypto_results = [r for r in results if r.get("instrumentType") == "CRYPTOCURRENCIES"
                                   and r.get("marketStatus") == "TRADEABLE"]
