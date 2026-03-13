@@ -13,6 +13,7 @@ import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import investorHeroBg from '@/assets/investor-hero-bg.mp4';
 import investorProductsBg from '@/assets/investor-products-bg.mp4';
+import arcanaPrecisionGlobe from '@/assets/arcana-precision-globe.mp4';
 
 
 function useInView(options?: IntersectionObserverInit) {
