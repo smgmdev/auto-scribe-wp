@@ -8,7 +8,7 @@ Instead of a hardcoded watchlist, the bot:
 4. Re-scans periodically to rotate into the hottest assets
 5. Ensures pinned assets (e.g. BTCUSD) are always included
 
-Commodities remain fixed (limited set, all are liquid).
+Commodities are also dynamically discovered from Capital.com categories.
 """
 
 import time
