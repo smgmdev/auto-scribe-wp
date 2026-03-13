@@ -246,7 +246,7 @@ export default function InvestorRelations() {
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
             <AnimatedSection>
               <Briefcase className="h-10 w-10 mx-auto mb-6 text-[#1d1d1f]/30" />
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Partner With Us</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Invest in Arcana Mace</h2>
               <p className="text-[#86868b] max-w-xl mx-auto mb-8 leading-relaxed">
                 We are selectively engaging with strategic investors who share our vision of building the definitive global media intelligence platform.
               </p>
