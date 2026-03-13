@@ -2,6 +2,11 @@
 Local Trading Dashboard — Category Grid Layout
 Real-time 1s price updates with red/green box backgrounds.
 
+The dashboard runs its own price-fetching thread that polls Capital.com
+directly every 1 second for live bid/ask on open positions.
+This is independent of the main bot loop, so prices update even when
+the bot is busy scanning assets.
+
 Run: python dashboard.py
 Opens at: http://localhost:8050
 """
@@ -9,9 +14,9 @@ Opens at: http://localhost:8050
 import json
 import os
 import time
+import threading
 from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-import threading
 
 from logger_setup import get_logger
 import config
@@ -22,28 +27,28 @@ JOURNAL_FILE = os.path.join(os.path.dirname(__file__), "trade_history.json")
 LIVE_STATE_FILE = os.path.join(os.path.dirname(__file__), "live_state.json")
 DASHBOARD_PORT = int(os.getenv("DASHBOARD_PORT", "8050"))
 
+# ═══════════════════════════════════════════════
+# LIVE PRICE CACHE — updated by dedicated thread
+# ═══════════════════════════════════════════════
+_live_cache = {
+    "status": "starting",
+    "balance": 0,
+    "positions": [],
+    "updated_at": "—",
+    "total_open": 0,
+    "categories": {"Stocks": [], "Commodities": [], "Crypto": [], "FX": []},
+    "tick_count": 0,
+}
+_cache_lock = threading.Lock()
+_api_ref = None  # Set by start_dashboard_thread
 
-def load_live_state() -> dict:
-    if os.path.exists(LIVE_STATE_FILE):
-        try:
-            with open(LIVE_STATE_FILE, "r") as f:
-                return json.load(f)
-        except:
-            return {}
-    return {}
 
-
-def generate_api_response() -> dict:
-    """JSON state grouped by category for the grid dashboard."""
-    live = load_live_state()
-    positions = live.get("positions", [])
-
-    categories = {
-        "Stocks": [],
-        "Commodities": [],
-        "Crypto": [],
-        "FX": [],
-    }
+def _price_fetcher_loop():
+    """
+    Dedicated thread: fetches positions + live prices from Capital.com
+    every ~1 second. Completely independent of the main bot loop.
+    """
+    global _live_cache
 
     cat_map = {
         config.CATEGORY_STOCKS: "Stocks",
@@ -52,48 +57,136 @@ def generate_api_response() -> dict:
         config.CATEGORY_FOREX: "FX",
     }
 
-    for pos in positions:
-        raw_cat = pos.get("category", config.get_category(pos.get("epic", "")))
-        display_cat = cat_map.get(raw_cat, "Stocks")
+    tick_count = 0
 
-        epic = pos.get("epic", "?")
-        # Format as PAIR (e.g. BTCUSD → BTC/USD)
-        pair = epic
-        if len(epic) >= 6 and epic.endswith("USD"):
-            pair = epic[:-3] + "/USD"
-        elif len(epic) >= 6 and epic.endswith("JPY"):
-            pair = epic[:-3] + "/JPY"
-        elif len(epic) >= 6 and epic.endswith("GBP"):
-            pair = epic[:-3] + "/GBP"
-        elif len(epic) >= 6 and epic.endswith("CHF"):
-            pair = epic[:-3] + "/CHF"
-        elif len(epic) >= 6 and epic.endswith("CAD"):
-            pair = epic[:-3] + "/CAD"
-        elif len(epic) >= 6 and epic.endswith("AUD"):
-            pair = epic[:-3] + "/AUD"
-        elif len(epic) >= 6 and epic.endswith("NZD"):
-            pair = epic[:-3] + "/NZD"
+    while True:
+        try:
+            if _api_ref is None:
+                time.sleep(1)
+                continue
 
-        categories[display_cat].append({
-            "epic": epic,
-            "pair": pair,
-            "price": pos.get("current_price", 0),
-            "bid": pos.get("bid", 0),
-            "ask": pos.get("ask", 0),
-            "pnl": pos.get("unrealized_pnl", 0),
-            "direction": pos.get("direction", ""),
-            "entry_price": pos.get("entry_price", 0),
-            "size": pos.get("size", 0),
-            "locked_steps": pos.get("locked_steps", 0),
-        })
+            tick_count += 1
 
-    return {
-        "status": live.get("status", "unknown"),
-        "balance": live.get("balance", 0),
-        "updated_at": live.get("updated_at", "—"),
-        "total_open": len(positions),
-        "categories": categories,
-    }
+            # 1) Fetch open positions (includes entry price, direction, P&L)
+            positions = _api_ref.get_positions()
+
+            # 2) Batch-fetch live bid/ask for all position epics
+            epics = []
+            for pos in positions:
+                epic = pos.get("market", {}).get("epic", "")
+                if epic and epic not in epics:
+                    epics.append(epic)
+
+            live_prices = {}
+            if epics:
+                try:
+                    details = _api_ref.get_markets_details(epics[:50])
+                    for m in details:
+                        ep = m.get("epic", "")
+                        snap = m.get("snapshot", {})
+                        bid = snap.get("bid", 0)
+                        ask = snap.get("offer", 0)
+                        if bid and ask:
+                            live_prices[ep] = {
+                                "bid": float(bid),
+                                "ask": float(ask),
+                                "mid": (float(bid) + float(ask)) / 2,
+                            }
+                except Exception:
+                    pass
+
+            # 3) Fetch balance every 10 ticks
+            balance = _live_cache.get("balance", 0)
+            if tick_count % 10 == 1:
+                try:
+                    acct = _api_ref.get_account()
+                    if acct:
+                        balance = acct.get("balance", {}).get("balance", 0)
+                except Exception:
+                    pass
+
+            # 4) Build categorized position list
+            categories = {"Stocks": [], "Commodities": [], "Crypto": [], "FX": []}
+
+            for pos in positions:
+                epic = pos.get("market", {}).get("epic", "")
+                direction = pos.get("position", {}).get("direction", "")
+                entry_price = float(pos.get("position", {}).get("level", 0))
+                size = float(pos.get("position", {}).get("size", 0))
+
+                # Use live-fetched price (priority) or position market data (fallback)
+                if epic in live_prices:
+                    current_price = live_prices[epic]["mid"]
+                    bid = live_prices[epic]["bid"]
+                    ask = live_prices[epic]["ask"]
+                else:
+                    market = pos.get("market", {})
+                    api_bid = market.get("bid")
+                    api_ask = market.get("offer") or market.get("ask")
+                    if api_bid and api_ask:
+                        bid = float(api_bid)
+                        ask = float(api_ask)
+                        current_price = (bid + ask) / 2
+                    else:
+                        current_price = entry_price
+                        bid = ask = entry_price
+
+                # P&L from API or calculate
+                api_pnl = pos.get("position", {}).get("profit")
+                if api_pnl is not None:
+                    pnl = float(api_pnl)
+                else:
+                    if direction == "BUY":
+                        pnl = current_price - entry_price
+                    else:
+                        pnl = entry_price - current_price
+
+                # Format pair name
+                pair = epic
+                for suffix in ("USD", "JPY", "GBP", "CHF", "CAD", "AUD", "NZD", "EUR"):
+                    if len(epic) >= 6 and epic.endswith(suffix):
+                        pair = epic[:-len(suffix)] + "/" + suffix
+                        break
+
+                raw_cat = config.get_category(epic)
+                display_cat = cat_map.get(raw_cat, "Stocks")
+
+                categories[display_cat].append({
+                    "epic": epic,
+                    "pair": pair,
+                    "price": round(current_price, 6),
+                    "bid": round(bid, 6),
+                    "ask": round(ask, 6),
+                    "pnl": round(pnl, 5),
+                    "direction": direction,
+                    "entry_price": entry_price,
+                    "size": size,
+                })
+
+            now = datetime.utcnow()
+            updated_at = now.strftime("%H:%M:%S.") + f"{now.microsecond // 1000:03d}"
+
+            with _cache_lock:
+                _live_cache = {
+                    "status": "running",
+                    "balance": balance,
+                    "positions": [],  # not used by frontend
+                    "updated_at": updated_at,
+                    "total_open": len(positions),
+                    "categories": categories,
+                    "tick_count": tick_count,
+                }
+
+        except Exception as e:
+            log.debug(f"Price fetcher error: {e}")
+
+        time.sleep(1)
+
+
+def generate_api_response() -> dict:
+    """Return the live cache (updated every 1s by dedicated thread)."""
+    with _cache_lock:
+        return dict(_live_cache)
 
 
 def generate_html() -> str:
@@ -138,6 +231,7 @@ body {
 .topbar-title { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
 .topbar-right { display: flex; gap: 24px; font-size: 13px; color: #888; }
 .topbar-right .val { color: #fff; font-weight: 600; }
+.tick-counter { font-variant-numeric: tabular-nums; }
 
 /* Grid layout */
 .grid-container {
@@ -180,7 +274,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 12px 8px;
-    transition: background-color 0.4s ease, border-color 0.4s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
     position: relative;
     border: 1px solid #222;
 }
@@ -191,12 +285,12 @@ body {
 }
 
 .slot.up {
-    background: #22c55e;
+    background: #16a34a;
     border-color: #22c55e;
 }
 
 .slot.down {
-    background: #dc2626;
+    background: #b91c1c;
     border-color: #dc2626;
 }
 
@@ -222,12 +316,14 @@ body {
     font-weight: 500;
     margin-top: 4px;
     opacity: 0.95;
+    font-variant-numeric: tabular-nums;
 }
 
 .slot-pnl {
     font-size: 10px;
     margin-top: 2px;
     opacity: 0.85;
+    font-variant-numeric: tabular-nums;
 }
 
 .slot-dir {
@@ -266,7 +362,7 @@ body {
     <div class="topbar-right">
         <span>Balance: <span class="val" id="balance">$0.00</span></span>
         <span>Open: <span class="val" id="openCount">0/20</span></span>
-        <span>Updated: <span class="val" id="lastTick">—</span></span>
+        <span>Updated: <span class="val tick-counter" id="lastTick">—</span></span>
     </div>
 </div>
 
@@ -275,7 +371,7 @@ body {
 </div>
 
 <div class="footer">
-    Real-time 1s updates · Trading Bot v3.0
+    Direct API price feed · 1s updates · Trading Bot v3.1
 </div>
 
 <script>
@@ -336,35 +432,31 @@ function updateGrid(data) {
                 const pnl = t.pnl || 0;
                 const dir = t.direction || '';
 
-                // Update text content (no DOM rebuild)
+                // Update text
                 el.querySelector('.slot-dir').textContent = dir;
                 el.querySelector('.slot-pair').textContent = t.pair || epic;
                 el.querySelector('.slot-price').textContent = formatPrice(price);
                 el.querySelector('.slot-pnl').textContent = formatPnl(pnl);
                 el.querySelector('.slot-empty-text').textContent = '';
 
-                // Flash logic: compare to previous price
+                // Flash on price change — quick 150ms transition
                 if (prev !== undefined && prev !== price) {
                     const flash = price > prev ? 'up' : 'down';
                     el.className = 'slot ' + flash;
 
-                    // Clear previous timer for this slot
                     const slotKey = cat + '-' + i;
                     if (flashTimers[slotKey]) clearTimeout(flashTimers[slotKey]);
 
                     // Keep flash for 800ms then fade to neutral-active
                     flashTimers[slotKey] = setTimeout(() => {
                         el.className = 'slot neutral-active';
-                    }, 800);
+                    }, 600);
                 } else if (prev === undefined) {
-                    // First time seeing this trade — show as active neutral
                     el.className = 'slot neutral-active';
                 }
-                // If price === prev, keep current class (holds last flash/neutral)
 
                 prevPrices[epic] = price;
             } else {
-                // Empty slot
                 el.className = 'slot empty';
                 el.querySelector('.slot-dir').textContent = '';
                 el.querySelector('.slot-pair').textContent = '';
@@ -382,7 +474,6 @@ async function fetchState() {
         if (!resp.ok) return;
         const d = await resp.json();
 
-        // Top bar
         const dot = document.getElementById('statusDot');
         dot.className = 'status-dot ' + (d.status === 'running' ? 'running' : 'stopped');
         document.getElementById('balance').textContent = '$' + (d.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -432,7 +523,16 @@ def run_dashboard():
     server.serve_forever()
 
 
-def start_dashboard_thread():
+def start_dashboard_thread(api=None):
+    """Start dashboard HTTP server + live price fetcher threads."""
+    global _api_ref
+    _api_ref = api
+
+    # Start the dedicated price fetcher thread
+    fetcher = threading.Thread(target=_price_fetcher_loop, daemon=True)
+    fetcher.start()
+
+    # Start the HTTP server thread
     t = threading.Thread(target=run_dashboard, daemon=True)
     t.start()
     return t
