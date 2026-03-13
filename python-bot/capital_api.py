@@ -152,19 +152,29 @@ class CapitalAPI:
             "size": size,
         }
         if stop_distance is not None:
-            # Capital.com requires stopDistance to be positive
-            sd = round(abs(stop_distance), 2)
+            # Capital.com requires stopDistance to be positive + finite
+            try:
+                sd = abs(float(stop_distance))
+            except Exception:
+                sd = 0.0
+
+            if not math.isfinite(sd):
+                sd = 0.0
 
             # Enforce minimum from API
             min_sd = self.get_min_stop_distance(epic)
             if min_sd > 0 and sd < min_sd:
                 log.warning(f"⚠️ {epic} SL {sd} < min {min_sd}, bumping to {min_sd}")
-                sd = round(min_sd * 1.05, 2)  # 5% above minimum for safety margin
+                sd = min_sd * 1.05  # 5% above minimum for safety margin
 
             if sd <= 0:
-                sd = 1.0  # absolute minimum fallback
+                # Non-zero hard fallback to avoid minvalue:0 rejections
+                sd = max(min_sd * 1.05, 0.01)
+
+            # Keep precision for forex/crypto instruments
+            sd = round(sd, 6)
             payload["stopDistance"] = sd
-            log.info(f"📏 {epic} final stopDistance={sd}")
+            log.info(f"📏 {epic} final stopDistance={sd} (raw={stop_distance})")
         if profit_distance is not None:
             pd = round(abs(profit_distance), 2)
             if pd > 0:
