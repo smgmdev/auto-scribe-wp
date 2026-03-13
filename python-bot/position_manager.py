@@ -171,7 +171,6 @@ class PositionManager:
             f"SL={trailing_stop_price:.6f} ({sl_label}) "
             f"TP=UNLIMITED | Step size={step_size:.6f} ({step_label}){btc_tag}{recovery_tag}"
         )
-        )
 
     def untrack(self, deal_id: str):
         """Stop tracking a position."""
