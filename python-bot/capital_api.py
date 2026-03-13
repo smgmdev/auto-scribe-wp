@@ -355,6 +355,7 @@ class CapitalAPI:
             if not chunk:
                 return []
 
+            should_split = False
             for attempt in range(_MAX_RETRIES + 1):
                 _pace_request()
                 try:
@@ -373,8 +374,9 @@ class CapitalAPI:
                         f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
                     )
 
-                    # Invalid/oversized chunk responses: split to isolate bad epics
+                    # Split only for invalid/oversized chunk responses
                     if resp.status_code in (400, 404, 413, 414) and len(chunk) > 1:
+                        should_split = True
                         break
 
                 except Exception as e:
@@ -382,16 +384,17 @@ class CapitalAPI:
                     if attempt < _MAX_RETRIES:
                         time.sleep(1 * (attempt + 1))
 
-            # If chunk failed and has multiple epics, split recursively
-            if len(chunk) > 1:
+            # Split recursively only when chunk shape/content likely invalid
+            if should_split and len(chunk) > 1:
                 mid = len(chunk) // 2
                 left = _fetch_chunk(chunk[:mid], depth + 1)
                 time.sleep(0.2)
                 right = _fetch_chunk(chunk[mid:], depth + 1)
                 return left + right
 
-            # Single epic failed — skip it
-            log.debug(f"Skipping invalid/unavailable epic in markets batch: {chunk[0]}")
+            # Single epic failed OR non-splittable error (rate limit/auth/network)
+            if len(chunk) == 1:
+                log.debug(f"Skipping invalid/unavailable epic in markets batch: {chunk[0]}")
             return []
 
         all_markets: list = []
