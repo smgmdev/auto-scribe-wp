@@ -68,7 +68,7 @@ export default function InvestorRelations() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[rgba(29,29,31,0.92)] backdrop-blur-xl border-b border-white/10">
         <div className="max-w-[980px] mx-auto px-4 md:px-6 h-12 flex items-center justify-between">
-          <HeaderLogo srcDark={amblack} srcLight={amlogo} alt="Arcana Mace" onClick={() => navigate('/')} />
+          <HeaderLogo src={amlogo} alt="Arcana Mace" />
           <div className="flex items-center gap-3">
             <PWAInstallButtons />
             <button onClick={() => setSearchOpen(true)} className="text-white/60 hover:text-white transition-colors">
