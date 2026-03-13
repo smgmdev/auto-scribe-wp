@@ -389,7 +389,6 @@ body {
 <div class="topbar">
     <div class="topbar-left">
         <span id="statusDot" class="status-dot stopped"></span>
-        <span class="topbar-title">Trading Bot</span>
     </div>
     <div class="topbar-right">
         <span>Balance: <span class="val" id="balance">$0.00</span></span>
