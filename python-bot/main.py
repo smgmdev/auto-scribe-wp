@@ -176,6 +176,10 @@ def run():
     journal = TradeJournal()
     discovery = AssetDiscovery(api)
 
+    # Give dashboard access to position manager for SL data
+    from dashboard import set_pos_manager_ref
+    set_pos_manager_ref(pos_manager)
+
     # --- Initial asset discovery: AI picks best stocks & crypto ---
     log.info("🔎 Running initial asset discovery...")
     discovered = discovery.discover(force=True)
