@@ -348,7 +348,22 @@ class AssetDiscovery:
             forex_terms = ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
                            "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
                            "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "GBPAUD"]
-            all_forex.extend(self._search_fallback(forex_terms, "CURRENCIES"))
+            all_forex.extend(
+                self._search_fallback(
+                    forex_terms,
+                    ("CURRENCIES",),
+                    require_tradeable=True,
+                )
+            )
+            if len(all_forex) < TOP_FOREX:
+                all_forex.extend(
+                    self._search_fallback(
+                        forex_terms,
+                        ("CURRENCIES",),
+                        require_tradeable=False,
+                        limit_per_term=2,
+                    )
+                )
 
         ranked_forex = self._rank_assets(all_forex)[:TOP_FOREX]
 
