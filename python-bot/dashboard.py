@@ -14,6 +14,8 @@ Opens at: http://localhost:8050
 import json
 import os
 import time
+import subprocess
+import sys
 import threading
 from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -233,6 +235,21 @@ body {
 .topbar-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
 .topbar-right { display: flex; gap: 16px; font-size: 12px; color: #888; flex-wrap: wrap; }
 .topbar-right .val { color: #fff; font-weight: 600; }
+#updateBtn {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+}
+#updateBtn:hover { background: #333; border-color: #666; }
+#updateBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+#updateBtn.success { background: #16a34a; border-color: #22c55e; }
+#updateBtn.error { background: #b91c1c; border-color: #dc2626; }
 .tick-counter { font-variant-numeric: tabular-nums; }
 
 /* Grid layout */
@@ -402,6 +419,7 @@ body {
         <span>Balance: <span class="val" id="balance">$0.00</span></span>
         <span>Open: <span class="val" id="openCount">0/20</span></span>
         <span>Updated: <span class="val tick-counter" id="lastTick">—</span></span>
+        <button id="updateBtn" onclick="pullAndRestart()" title="Git pull &amp; restart bot">⟳ Update</button>
     </div>
 </div>
 
@@ -534,6 +552,30 @@ async function fetchState() {
     } catch(e) {}
 }
 
+async function pullAndRestart() {
+    const btn = document.getElementById('updateBtn');
+    btn.disabled = true;
+    btn.textContent = '⟳ Pulling...';
+    btn.className = '';
+    try {
+        const resp = await fetch('/api/pull-restart', { method: 'POST' });
+        const d = await resp.json();
+        if (d.ok) {
+            btn.textContent = '✓ Restarting...';
+            btn.className = 'success';
+            setTimeout(() => { location.reload(); }, 3000);
+        } else {
+            btn.textContent = '✗ Failed';
+            btn.className = 'error';
+            setTimeout(() => { btn.textContent = '⟳ Update'; btn.className = ''; btn.disabled = false; }, 3000);
+        }
+    } catch(e) {
+        btn.textContent = '✗ Error';
+        btn.className = 'error';
+        setTimeout(() => { btn.textContent = '⟳ Update'; btn.className = ''; btn.disabled = false; }, 3000);
+    }
+}
+
 buildGrid();
 fetchState();
 setInterval(fetchState, 1000);
@@ -558,6 +600,47 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(json.dumps(data).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_POST(self):
+        if self.path == "/api/pull-restart":
+            try:
+                bot_dir = os.path.dirname(os.path.abspath(__file__))
+                # Git pull
+                result = subprocess.run(
+                    ["git", "pull"], cwd=bot_dir, capture_output=True, text=True, timeout=30
+                )
+                log.info(f"Git pull: {result.stdout.strip()}")
+                if result.returncode != 0:
+                    log.error(f"Git pull error: {result.stderr.strip()}")
+                    self.send_response(200)
+                    self.send_header("Content-type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"ok": False, "error": result.stderr.strip()}).encode())
+                    return
+
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": True, "git": result.stdout.strip()}).encode())
+
+                # Restart the bot process after response is sent
+                def _restart():
+                    time.sleep(1)
+                    log.info("🔄 Restarting bot process...")
+                    os.execv(sys.executable, [sys.executable, os.path.join(bot_dir, "main.py")])
+
+                restart_thread = threading.Thread(target=_restart, daemon=True)
+                restart_thread.start()
+
+            except Exception as e:
+                log.error(f"Pull/restart error: {e}")
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": False, "error": str(e)}).encode())
         else:
             self.send_response(404)
             self.end_headers()
