@@ -445,33 +445,19 @@ def run():
     # ═══════════════════════════════════════════
     # 🔄 BACKGROUND SCANNER THREAD
     # Runs scan_all() in a separate thread so the main 1s loop
-    # is never blocked by 30-60 API calls from the scanner.
+    # is never blocked by API calls from the scanner.
+    # Scanner now uses sequential API calls (no ThreadPoolExecutor),
+    # so _pace_request() naturally serializes all API access.
     # ═══════════════════════════════════════════
-    _scanner_lock = threading.Lock()
     _scanner_running = True
-    _scanner_paused = threading.Event()  # When SET, scanner should pause
-    _scanner_paused.clear()
 
     def _scanner_thread_fn():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
-            # Wait if main loop is doing a batch fetch (avoid API contention)
-            if _scanner_paused.is_set():
-                time.sleep(0.5)
-                continue
-
-            got_lock = _scanner_lock.acquire(timeout=0.2)
-            if not got_lock:
-                time.sleep(0.5)
-                continue
-
             try:
                 scanner.scan_all()
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
-            finally:
-                _scanner_lock.release()
-
             # Sleep 5s between iterations to let main loop breathe
             time.sleep(5)
 
@@ -747,89 +733,39 @@ def run():
             )
 
             if should_fetch_prices:
-                # Pause scanner thread and take lock so scanner + main never fetch concurrently
-                _scanner_paused.set()
-                got_batch_lock = _scanner_lock.acquire(timeout=8.0)
+                batch_success = False
+                try:
+                    for i in range(0, len(balanced_epics), 50):
+                        chunk = balanced_epics[i:i+50]
+                        details = api.get_markets_details(chunk)
+                        for m in details:
+                            ep = m.get("epic", "")
+                            snap = m.get("snapshot", {})
+                            bid_val = snap.get("bid", 0)
+                            ask_val = snap.get("offer", 0)
+                            if bid_val and ask_val:
+                                b = float(bid_val)
+                                a = float(ask_val)
+                                batch_prices[ep] = {
+                                    "bid": b, "ask": a,
+                                    "mid": (b + a) / 2, "spread": a - b,
+                                }
+                        if details:
+                            batch_success = True
+                            _last_batch_success = time.time()
+                        if i + 50 < len(balanced_epics):
+                            time.sleep(0.5)
+                except Exception as e:
+                    log.warning(f"Batch price fetch error: {e}")
 
-                if not got_batch_lock:
-                    # Scanner is mid-scan; skip this cycle instead of colliding and triggering 429s
-                    _batch_fail_streak += 1
-                    cooldown = min(20, 2 ** min(_batch_fail_streak, 4))
-                    _next_batch_fetch_ts = time.time() + cooldown
-                    log.warning(
-                        f"⏳ Scanner busy — skipping batch fetch, cooldown {cooldown}s (fail streak: {_batch_fail_streak})"
-                    )
-                    _scanner_paused.clear()
+                if batch_success:
+                    _batch_fail_streak = 0
+                    _next_batch_fetch_ts = time.time() + 2
                 else:
-                    batch_success = False
-                    try:
-                        try:
-                            for i in range(0, len(balanced_epics), 50):
-                                chunk = balanced_epics[i:i+50]
-                                details = api.get_markets_details(chunk)
-                                for m in details:
-                                    ep = m.get("epic", "")
-                                    snap = m.get("snapshot", {})
-                                    bid_val = snap.get("bid", 0)
-                                    ask_val = snap.get("offer", 0)
-                                    if bid_val and ask_val:
-                                        b = float(bid_val)
-                                        a = float(ask_val)
-                                        batch_prices[ep] = {
-                                            "bid": b, "ask": a,
-                                            "mid": (b + a) / 2, "spread": a - b,
-                                        }
-                                if details:
-                                    batch_success = True
-                                    _last_batch_success = time.time()
-                                if i + 50 < len(balanced_epics):
-                                    time.sleep(0.4)
-                        except Exception as e:
-                            log.warning(f"Batch price fetch error: {e}")
-
-                        # Fallback: if batch returned nothing, try smaller chunks with stronger delays
-                        if not batch_success and len(balanced_epics) > 10:
-                            log.info("🔄 Batch fetch failed — retrying with smaller chunks...")
-                            try:
-                                for i in range(0, min(len(balanced_epics), 30), 10):
-                                    chunk = balanced_epics[i:i+10]
-                                    details = api.get_markets_details(chunk)
-                                    for m in details:
-                                        ep = m.get("epic", "")
-                                        snap = m.get("snapshot", {})
-                                        bid_val = snap.get("bid", 0)
-                                        ask_val = snap.get("offer", 0)
-                                        if bid_val and ask_val:
-                                            b = float(bid_val)
-                                            a = float(ask_val)
-                                            batch_prices[ep] = {
-                                                "bid": b, "ask": a,
-                                                "mid": (b + a) / 2, "spread": a - b,
-                                            }
-                                    if details:
-                                        batch_success = True
-                                        _last_batch_success = time.time()
-                                    time.sleep(1.0)
-                            except Exception as e2:
-                                log.warning(f"Fallback batch also failed: {e2}")
-
-                        # Adaptive cooldown to stop hammering API when failing repeatedly
-                        if batch_success:
-                            _batch_fail_streak = 0
-                            _next_batch_fetch_ts = time.time() + 1
-                        else:
-                            _batch_fail_streak += 1
-                            cooldown = min(60, 2 ** min(_batch_fail_streak, 6))
-                            _next_batch_fetch_ts = time.time() + cooldown
-                            log.warning(
-                                f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})"
-                            )
-                    finally:
-                        _scanner_lock.release()
-                        _scanner_paused.clear()
-            elif balanced_epics and cycle_count % 30 == 0 and now_ts < _next_batch_fetch_ts:
-                wait_left = int(max(0, _next_batch_fetch_ts - now_ts))
-                log.info(f"⏳ Batch fetch paused for backoff: {wait_left}s remaining")
+                    _batch_fail_streak += 1
+                    cooldown = min(30, 3 * _batch_fail_streak)
+                    _next_batch_fetch_ts = time.time() + cooldown
+                    log.warning(f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})")
 
             # Always populate batch_prices from tick_history for non-fetch cycles or empty results
             for epic in balanced_epics:
