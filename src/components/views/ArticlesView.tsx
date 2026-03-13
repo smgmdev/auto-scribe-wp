@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2, Search, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
@@ -48,6 +48,10 @@ export function ArticlesView() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   const [activeTab, setActiveTab] = useState(articlesTargetTab || 'published');
+
+  // Keep a ref so timeouts always call the latest version
+  const refreshRef = useRef(refreshArticles);
+  refreshRef.current = refreshArticles;
   
   // Consume and clear target tab — runs on mount AND whenever the store value changes
   useEffect(() => {
@@ -58,16 +62,17 @@ export function ArticlesView() {
       setSearchQuery('');
       setSearchResults(null);
       // Force a fresh fetch so new data appears immediately
-      refreshArticles(false);
-      // Second fetch after a short delay to catch any DB propagation lag
-      const timer = setTimeout(() => refreshArticles(false), 1500);
-      return () => clearTimeout(timer);
+      refreshRef.current(false);
+      // Staggered retries to catch DB propagation lag
+      const t1 = setTimeout(() => refreshRef.current(false), 1000);
+      const t2 = setTimeout(() => refreshRef.current(false), 3000);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [articlesTargetTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Also refresh on initial mount
   useEffect(() => {
-    refreshArticles(false);
+    refreshRef.current(false);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
