@@ -589,6 +589,49 @@ function updateGrid(data) {
     });
 }
 
+async function toggleCategory(cat) {
+    const toggle = document.getElementById('toggle-' + cat);
+    const isOn = toggle.classList.contains('on');
+    const newState = !isOn;
+
+    // Optimistic UI
+    toggle.classList.toggle('on');
+    document.getElementById('status-' + cat).textContent = newState ? 'ACTIVE' : 'OFF';
+
+    try {
+        const resp = await fetch('/api/toggle-category', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ category: cat, enabled: newState })
+        });
+        const d = await resp.json();
+        if (!d.ok) {
+            // Revert
+            toggle.classList.toggle('on');
+            document.getElementById('status-' + cat).textContent = isOn ? 'ACTIVE' : 'OFF';
+        }
+    } catch(e) {
+        toggle.classList.toggle('on');
+        document.getElementById('status-' + cat).textContent = isOn ? 'ACTIVE' : 'OFF';
+    }
+}
+
+function syncToggles(disabledList) {
+    CATEGORIES.forEach(cat => {
+        const toggle = document.getElementById('toggle-' + cat);
+        const status = document.getElementById('status-' + cat);
+        if (!toggle) return;
+        const isDisabled = (disabledList || []).includes(cat);
+        if (isDisabled) {
+            toggle.classList.remove('on');
+            status.textContent = 'OFF';
+        } else {
+            toggle.classList.add('on');
+            status.textContent = 'ACTIVE';
+        }
+    });
+}
+
 async function fetchState() {
     try {
         const resp = await fetch('/api/state');
@@ -598,9 +641,10 @@ async function fetchState() {
         const dot = document.getElementById('statusDot');
         dot.className = 'status-dot ' + (d.status === 'running' ? 'running' : 'stopped');
         document.getElementById('balance').textContent = '$' + (d.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('openCount').textContent = (d.total_open || 0) + '/20';
+        document.getElementById('openCount').textContent = (d.total_open || 0) + '/5';
         document.getElementById('lastTick').textContent = d.updated_at || '—';
 
+        syncToggles(d.disabled_categories);
         updateGrid(d);
     } catch(e) {}
 }
