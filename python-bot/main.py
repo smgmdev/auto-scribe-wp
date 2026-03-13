@@ -304,7 +304,7 @@ def run():
                         pos_manager.untrack(deal_id)
                         active_signals.pop(epic, None)
                     else:
-                        log.warning(f"    ⚠️ Failed to close {epic} — will retry")
+                        log.info(f"    Failed to close {epic} — will retry")
                 except Exception as e:
                     log.error(f"    ❌ Error closing {epic}: {e}")
                 time.sleep(0.3)
