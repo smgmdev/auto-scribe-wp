@@ -19,8 +19,13 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 const updates = [
   {
     date: 'March 13, 2026',
-    title: 'Investor Relations & Navigation Updates',
+    title: 'Changelog Filters, Pagination & Investor Relations',
     changes: [
+      'Added year and month filter dropdowns to the Changelog page — quickly narrow entries by selecting a specific year and month',
+      'Filters dynamically populate available months based on the selected year',
+      'Added pagination with "Load More" button — changelog now displays 15 entries at a time with remaining count shown on the button',
+      'Pagination resets when filters or search query change',
+      'Removed gaps between search input and filter dropdowns for a seamless toolbar appearance on both desktop and mobile',
       'Launched dedicated Investor Relations page at /ir with full-screen product showcase sections for Media Buying Marketplace, Mace AI, and Arcana Precision',
       'Each product section features inline video playback with loading spinners and golden "Learn More" call-to-action buttons',
       'Added "Invest in Arcana Mace" contact section with smooth hover transitions on the Get in Touch button',
