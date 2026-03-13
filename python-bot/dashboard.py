@@ -603,6 +603,7 @@ function buildGrid() {
                     `<span class="slot-price"></span>` +
                     `<span class="slot-entry"></span>` +
                     `<span class="slot-pnl"></span>` +
+                    `<span class="slot-sl"></span>` +
                     `<span class="slot-empty-text">—</span>` +
                     `</div>`;
         }
