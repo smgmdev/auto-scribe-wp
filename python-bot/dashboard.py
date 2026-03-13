@@ -460,8 +460,9 @@ function updateGrid(data) {
                 const epic = t.epic || '?';
                 const price = t.price || 0;
                 const prev = prevPrices[epic];
-                const pnl = t.pnl || 0;
+                const pnl = (t.pnl !== undefined && t.pnl !== null) ? t.pnl : 0;
                 const dir = t.direction || '';
+                const entryP = t.entry_price || 0;
 
                 // Update text
                 el.querySelector('.slot-dir').textContent = dir;
@@ -469,9 +470,8 @@ function updateGrid(data) {
                 el.querySelector('.slot-price').textContent = formatPrice(price);
 
                 // P&L with percentage
-                var entryP = t.entry_price || 0;
-                var pnlPct = entryP > 0 ? ((pnl / entryP) * 100) : 0;
-                var pnlText = formatPnl(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%)';
+                var pnlPct = (entryP > 0) ? ((pnl / entryP) * 100) : 0;
+                var pnlText = formatPnl(pnl) + '  ' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
                 el.querySelector('.slot-pnl').textContent = pnlText;
                 el.querySelector('.slot-empty-text').textContent = '';
 
