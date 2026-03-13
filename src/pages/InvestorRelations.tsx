@@ -199,7 +199,7 @@ export default function InvestorRelations() {
 
 
         {/* Product Intro Video Section */}
-        <section id="media-buying-marketplace" className="relative overflow-hidden bg-black">
+        <section id="media-buying-marketplace" className="relative overflow-hidden bg-black min-h-screen">
           <video
             autoPlay
             muted
@@ -215,7 +215,7 @@ export default function InvestorRelations() {
               <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
             </div>
           )}
-          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-28 md:py-40 relative z-10 text-center">
+          <div className="max-w-[980px] mx-auto px-4 md:px-6 py-28 md:py-40 relative z-10 text-center flex flex-col items-center justify-center min-h-screen">
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/40 mb-4">Our Products</p>
               <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-6">
