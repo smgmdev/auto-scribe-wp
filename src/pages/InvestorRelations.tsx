@@ -359,46 +359,6 @@ export default function InvestorRelations() {
         </section>
 
 
-        {/* Product Portfolio */}
-        <section className="py-20 bg-[#1d1d1f] text-white">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <AnimatedSection>
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 tracking-tight">Product Portfolio</h2>
-              <p className="text-center text-white/50 max-w-2xl mx-auto mb-16">
-                A diversified suite of products addressing multiple verticals in media, intelligence, and AI.
-              </p>
-            </AnimatedSection>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                {
-                  name: 'Media Buying Marketplace',
-                  description: 'Global media buying platform connecting clients with 500+ media outlets across 85+ countries through verified agency partners.',
-                  icon: Globe,
-                },
-                {
-                  name: 'Mace AI',
-                  description: 'AI-powered article generation, voice publishing, and content optimization engine for enterprise publishers.',
-                  icon: Zap,
-                },
-                {
-                  name: 'Arcana Precision',
-                  description: 'Geopolitical intelligence platform with AI threat forecasting, conflict simulation, and real-time surveillance.',
-                  icon: Shield,
-                },
-              ].map((product, i) => (
-                <AnimatedSection key={product.name} delay={i * 100}>
-                  <div className="border border-white/10 p-8 hover:border-white/25 transition-colors h-full">
-                    <product.icon className="h-6 w-6 mb-4 text-white/40" />
-                    <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                    <p className="text-sm text-white/50 leading-relaxed">{product.description}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
-
 
 
         {/* CTA */}
