@@ -285,7 +285,22 @@ class AssetDiscovery:
                             "DOT", "MATIC", "LINK", "UNI", "NEAR", "APT", "ARB",
                             "PEPE", "SHIB", "WIF", "BONK", "SUI", "SEI", "TIA",
                             "FET", "RENDER", "INJ", "JUP", "ONDO", "OP", "STX"]
-            all_crypto.extend(self._search_fallback(crypto_terms, "CRYPTOCURRENCIES"))
+            all_crypto.extend(
+                self._search_fallback(
+                    crypto_terms,
+                    ("CRYPTOCURRENCIES",),
+                    require_tradeable=True,
+                )
+            )
+            if len(all_crypto) < TOP_CRYPTO:
+                all_crypto.extend(
+                    self._search_fallback(
+                        crypto_terms,
+                        ("CRYPTOCURRENCIES",),
+                        require_tradeable=False,
+                        limit_per_term=2,
+                    )
+                )
 
         ranked_crypto = self._rank_assets(all_crypto)[:TOP_CRYPTO]
 
