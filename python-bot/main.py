@@ -693,18 +693,29 @@ def run():
                         deal_ref = trade.get("dealReference", "")
                         active_signals[epic] = entry_signal
 
-                        # Immediately refresh positions
+                        # Immediately refresh positions to get the real dealId
                         positions = api.get_positions()
+
+                        # Resolve real dealId from positions (dealReference ≠ dealId)
+                        real_deal_id = deal_ref  # fallback
+                        for p in positions:
+                            p_epic = p.get("market", {}).get("epic", "")
+                            p_deal = p.get("position", {}).get("dealId", "")
+                            if p_epic == epic and p_deal:
+                                real_deal_id = p_deal
+                                if real_deal_id != deal_ref:
+                                    log.info(f"🔗 Resolved dealRef {deal_ref} → dealId {real_deal_id}")
+                                break
 
                         # Track for smart management (pass spread for fee calculation)
                         pos_manager.track_position(
-                            deal_ref, epic, entry_signal,
+                            real_deal_id, epic, entry_signal,
                             mid, stop_distance, profit_distance,
                             spread=spread
                         )
 
                         # Store entry info for journal
-                        entry_info[deal_ref] = {
+                        entry_info[real_deal_id] = {
                             "reason": scan_signal.reason,
                             "momentum": momentum["strength"],
                             "rsi": momentum.get("micro_rsi", 50),
