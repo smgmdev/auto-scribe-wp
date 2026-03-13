@@ -12,6 +12,7 @@ import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import investorHeroBg from '@/assets/investor-hero-bg.mp4';
+import investorProductsBg from '@/assets/investor-products-bg.mp4';
 
 function useInView(options?: IntersectionObserverInit) {
   const ref = useRef<HTMLDivElement>(null);
