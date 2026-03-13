@@ -109,6 +109,18 @@ def run():
     # Initialize smart systems
     pos_manager = PositionManager()
     journal = TradeJournal()
+    discovery = AssetDiscovery(api)
+
+    # --- Initial asset discovery: AI picks best stocks & crypto ---
+    log.info("🔎 Running initial asset discovery...")
+    discovered = discovery.discover(force=True)
+    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+    log.info(
+        f"📈 Stocks selected: {', '.join(config.WATCHLIST_STOCKS)} | "
+        f"₿ Crypto selected: {', '.join(config.WATCHLIST_CRYPTO)} | "
+        f"🪙 Commodities: {', '.join(config.WATCHLIST_COMMODITIES)}"
+    )
+
     scanner = MarketScanner(api, config.WATCHLIST)
 
     # Print learning stats on startup
