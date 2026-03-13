@@ -460,6 +460,15 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+.slot-sl {
+    font-size: clamp(8px, 0.9vw, 10px);
+    margin-top: 2px;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: #facc15;
+}
+
 .slot-dir {
     position: absolute;
     top: 3px;
