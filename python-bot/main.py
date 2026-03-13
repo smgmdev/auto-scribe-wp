@@ -47,39 +47,14 @@ BANNER = """
 """
 
 
-def write_live_state(api, balance, positions, pos_manager, tick_history):
+def write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices: dict | None = None):
     """Write live state to disk for dashboard to read.
-    Uses Capital.com API's live bid/ask from positions, plus direct price
-    fetches for the most accurate real-time data.
+    Uses cached batch_prices / tick_history — does NOT make its own API calls
+    to avoid rate-limit contention with scanner & main loop.
     """
     try:
         live_positions = []
-
-        # Collect epics that need fresh prices (from open positions)
-        epics_to_fetch = []
-        for pos in positions:
-            epic = pos.get("market", {}).get("epic", "")
-            if epic:
-                epics_to_fetch.append(epic)
-
-        # Batch-fetch live prices for all open position epics (max 50)
-        live_prices = {}
-        if epics_to_fetch:
-            try:
-                details = api.get_markets_details(epics_to_fetch[:50])
-                for m in details:
-                    ep = m.get("epic", "")
-                    snap = m.get("snapshot", {})
-                    bid = snap.get("bid", 0)
-                    ask = snap.get("offer", 0)
-                    if bid and ask:
-                        live_prices[ep] = {
-                            "bid": float(bid),
-                            "ask": float(ask),
-                            "mid": (float(bid) + float(ask)) / 2,
-                        }
-            except Exception as e:
-                log.debug(f"Live price fetch fallback: {e}")
+        live_prices = batch_prices or {}
 
         for pos in positions:
             epic = pos.get("market", {}).get("epic", "")
@@ -473,10 +448,16 @@ def run():
     # ═══════════════════════════════════════════
     _scanner_lock = threading.Lock()
     _scanner_running = True
+    _scanner_paused = threading.Event()  # When SET, scanner should pause
+    _scanner_paused.clear()
 
     def _scanner_thread_fn():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
+            # Wait if main loop is doing a batch fetch (avoid API contention)
+            if _scanner_paused.is_set():
+                time.sleep(0.5)
+                continue
             try:
                 scanner.scan_all()
             except Exception as e:
@@ -557,8 +538,8 @@ def run():
             # Refresh positions every 3 cycles from API
             if cycle_count % 3 == 0:
                 positions = api.get_positions()
-            # Write live state every cycle — fetches live prices directly from API
-            write_live_state(api, balance, positions, pos_manager, tick_history)
+            # Write live state every cycle — uses cached prices (NO extra API calls)
+            write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices)
 
             # ═══════════════════════════════════════════
             # 🚫 ENFORCE DISABLED CATEGORIES — close positions in toggled-off categories
@@ -755,6 +736,8 @@ def run():
             )
 
             if should_fetch_prices:
+                # Pause scanner thread during batch fetch to avoid API contention
+                _scanner_paused.set()
                 batch_success = False
                 try:
                     for i in range(0, len(balanced_epics), 50):
@@ -817,6 +800,8 @@ def run():
                     log.warning(
                         f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})"
                     )
+                # Resume scanner thread after batch fetch completes
+                _scanner_paused.clear()
             elif balanced_epics and cycle_count % 30 == 0 and now_ts < _next_batch_fetch_ts:
                 wait_left = int(max(0, _next_batch_fetch_ts - now_ts))
                 log.info(f"⏳ Batch fetch paused for backoff: {wait_left}s remaining")

@@ -933,13 +933,18 @@ def run_dashboard():
 
 
 def start_dashboard_thread(api=None, pos_manager=None):
-    """Start dashboard HTTP server + live price fetcher threads."""
+    """Start dashboard HTTP server + live price fetcher threads.
+    Dashboard now reads live_state.json written by main loop instead of
+    making its own API calls — eliminates a major source of 429 rate limits.
+    """
     global _api_ref, _pos_manager_ref
-    _api_ref = api
+    # Do NOT pass api ref — dashboard should read from live_state.json only
+    # _api_ref stays None so _price_fetcher_loop uses file-based fallback
+    _api_ref = None
     if pos_manager is not None:
         _pos_manager_ref = pos_manager
 
-    # Start the dedicated price fetcher thread
+    # Start the dedicated price fetcher thread (file-based only)
     fetcher = threading.Thread(target=_price_fetcher_loop, daemon=True)
     fetcher.start()
 
