@@ -425,12 +425,23 @@ class AssetDiscovery:
 
         ranked_commodities = self._rank_assets(all_commodities)[:TOP_COMMODITIES]
 
-        # If ranked commodities is STILL empty, use fallback
+        # If ranked commodities is still empty, build fallback list from searchable market epics
         if not ranked_commodities:
-            log.warning("  ⚠️ Discovery found 0 commodities — using hardcoded fallback epics")
-            ranked_commodities = [{"epic": ep, "name": ep, "type": "COMMODITIES",
-                                   "pct_change": 0, "spread_pct": 0, "bid": 0,
-                                   "offer": 0, "score": 0} for ep in config.WATCHLIST_COMMODITIES_FALLBACK]
+            log.warning("  ⚠️ Discovery found 0 commodities — attempting non-tradeable epic fallback")
+            commodity_fallback_terms = [
+                "GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER",
+                "PLATINUM", "PALLADIUM", "OIL_BRENT", "XAUUSD", "XAGUSD",
+                "USCRUDE", "BRENT", "NATGAS",
+            ]
+            fallback_commodities = self._search_fallback(
+                commodity_fallback_terms,
+                ("COMMODITIES",),
+                require_tradeable=False,
+                limit_per_term=2,
+            )
+            ranked_commodities = self._placeholder_ranked(fallback_commodities, TOP_COMMODITIES, "COMMODITIES")
+            if not ranked_commodities and self.discovered_commodities:
+                ranked_commodities = self.discovered_commodities[:TOP_COMMODITIES]
 
         # Store results
         self.discovered_stocks = ranked_stocks
