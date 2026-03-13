@@ -156,27 +156,60 @@ class PositionManager:
         # ═══════════════════════════════════════════
 
         if pnl > 0:
-            # --- Break-even protection ---
-            if pnl_ratio >= 0.3 and not pos["break_even_set"]:
+            fee_cost = pos.get("fee_cost", 0)
+            net_pnl = pnl - fee_cost  # profit after fees
+            
+            # --- Fee-aware breakeven: SL moves to entry + fees (guaranteed net profit) ---
+            if net_pnl > 0 and not pos["break_even_set"]:
                 pos["break_even_set"] = True
+                # Set SL just above fee-breakeven point
+                fee_buffer = fee_cost * 1.2  # 20% margin above fees
                 if direction == "BUY":
-                    pos["trailing_stop_price"] = entry + (stop_dist * 0.1)  # Slight buffer above entry
+                    pos["trailing_stop_price"] = entry + fee_buffer
                 else:
-                    pos["trailing_stop_price"] = entry - (stop_dist * 0.1)
-                log.info(f"🛡️ {pos['epic']} break-even stop set @ {pos['trailing_stop_price']:.5f}")
+                    pos["trailing_stop_price"] = entry - fee_buffer
+                log.info(
+                    f"🛡️ {pos['epic']} fee-aware breakeven SL @ {pos['trailing_stop_price']:.5f} "
+                    f"(fee={fee_cost:.5f}, net_pnl={net_pnl:.5f})"
+                )
 
-            # --- Trailing stop activation ---
-            if pnl_ratio >= trailing_activation:
-                max_profit = pos["highest_profit"]
-                trail_dist = max_profit * trailing_distance_ratio
+            # --- Aggressive profit-zone trailing: ratchet SL up within profit area ---
+            if net_pnl > 0:
+                # Lock in progressively more profit as price moves favorably
+                # Keep SL at: current_price - (portion of net profit as cushion)
+                # The cushion shrinks as profit grows (lock in more at higher profits)
+                
+                if net_pnl / profit_dist < 0.3:
+                    cushion_ratio = 0.5   # Keep 50% cushion when small profit
+                elif net_pnl / profit_dist < 0.6:
+                    cushion_ratio = 0.35  # Tighten to 35%
+                else:
+                    cushion_ratio = 0.2   # Very tight at high profit — lock most of it
 
+                cushion = net_pnl * cushion_ratio
+                
                 if direction == "BUY":
-                    new_trail = current_price - trail_dist
+                    # SL = current price minus cushion, but never below entry + fees
+                    new_trail = current_price - cushion
+                    min_trail = entry + fee_cost  # absolute floor: above fees
+                    new_trail = max(new_trail, min_trail)
                     if pos["trailing_stop_price"] is None or new_trail > pos["trailing_stop_price"]:
+                        if pos["trailing_stop_price"] is not None:
+                            log.info(
+                                f"📈 {pos['epic']} SL ratchet: {pos['trailing_stop_price']:.5f} → {new_trail:.5f} "
+                                f"(locking {((new_trail - entry) / entry) * 100:.3f}% profit)"
+                            )
                         pos["trailing_stop_price"] = new_trail
                 else:
-                    new_trail = current_price + trail_dist
+                    new_trail = current_price + cushion
+                    max_trail = entry - fee_cost
+                    new_trail = min(new_trail, max_trail)
                     if pos["trailing_stop_price"] is None or new_trail < pos["trailing_stop_price"]:
+                        if pos["trailing_stop_price"] is not None:
+                            log.info(
+                                f"📈 {pos['epic']} SL ratchet: {pos['trailing_stop_price']:.5f} → {new_trail:.5f} "
+                                f"(locking {((entry - new_trail) / entry) * 100:.3f}% profit)"
+                            )
                         pos["trailing_stop_price"] = new_trail
 
             # --- Check trailing stop hit ---
