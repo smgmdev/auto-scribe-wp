@@ -209,9 +209,173 @@ def run():
     # Track entry info for journal logging
     entry_info: dict[str, dict] = {}  # deal_id -> {entry_price, momentum, rsi, reason, time}
 
+    # ═══════════════════════════════════════════
+    # 🔄 STARTUP: Reconcile existing open positions BEFORE main loop
+    # ═══════════════════════════════════════════
+    log.info("🔄 Checking for existing open positions on account...")
+    positions = api.get_positions()
+    if positions:
+        log.info(f"🔄 Found {len(positions)} open position(s) — applying current rules...")
+
+        # Collect epics for live price fetch
+        startup_epics = []
+        for pos in positions:
+            epic = pos.get("market", {}).get("epic", "")
+            if epic:
+                startup_epics.append(epic)
+
+        # Batch-fetch live prices for all open positions
+        startup_prices = {}
+        if startup_epics:
+            try:
+                details = api.get_markets_details(list(set(startup_epics))[:50])
+                for m in details:
+                    ep = m.get("epic", "")
+                    snap = m.get("snapshot", {})
+                    bid = snap.get("bid", 0)
+                    ask = snap.get("offer", 0)
+                    if bid and ask:
+                        startup_prices[ep] = {
+                            "bid": float(bid),
+                            "ask": float(ask),
+                            "mid": (float(bid) + float(ask)) / 2,
+                            "spread": float(ask) - float(bid),
+                        }
+            except Exception as e:
+                log.warning(f"Failed to fetch startup prices: {e}")
+
+        for pos in positions:
+            try:
+                epic = pos.get("market", {}).get("epic", "")
+                deal_id = pos.get("position", {}).get("dealId", "")
+                direction = pos.get("position", {}).get("direction", "")
+                entry_price = float(pos.get("position", {}).get("level", 0))
+
+                if not deal_id or not epic:
+                    continue
+
+                # Get current price from batch fetch
+                live = startup_prices.get(epic, {})
+                current_price = live.get("mid", entry_price)
+                live_spread = live.get("spread", 0.0)
+
+                # Parse created date
+                created_str = pos.get("position", {}).get("createdDateUTC", "")
+                created_ts = 0.0
+                if created_str:
+                    try:
+                        from datetime import datetime as dt_parse
+                        created_ts = dt_parse.fromisoformat(
+                            created_str.replace("Z", "+00:00")
+                        ).timestamp()
+                    except Exception:
+                        pass
+
+                # Estimate stop distance from market info or price percentage
+                stop_dist = entry_price * 0.01  # Default 1%
+                try:
+                    minfo = api.get_market_info(epic)
+                    if minfo:
+                        dealing = minfo.get("dealingRules", {})
+                        min_stop = dealing.get("minNormalStopOrLimitDistance", {}).get("value", 0)
+                        if min_stop and float(min_stop) > 0:
+                            stop_dist = max(stop_dist, float(min_stop))
+                except Exception:
+                    pass
+
+                # Track position with full state reconstruction
+                pos_manager.track_position(
+                    deal_id, epic, direction,
+                    entry_price, stop_dist, stop_dist * 1.5,
+                    spread=live_spread,
+                    current_price=current_price,
+                    created_date=created_ts,
+                )
+
+                # Mark as active signal to prevent duplicate entry
+                active_signals[epic] = direction
+
+                # Calculate P&L for logging
+                if direction == "BUY":
+                    pnl = current_price - entry_price
+                else:
+                    pnl = entry_price - current_price
+                pnl_pct = (pnl / entry_price) * 100 if entry_price > 0 else 0
+
+                tracked = pos_manager.tracked.get(deal_id, {})
+                locked = tracked.get("locked_steps", 0)
+                age_mins = (time.time() - created_ts) / 60 if created_ts > 0 else 0
+
+                log.info(
+                    f"  🔄 RECOVERED {direction} {epic} | "
+                    f"Entry: {entry_price:.5f} → Now: {current_price:.5f} | "
+                    f"P&L: {pnl:.5f} ({pnl_pct:+.2f}%) | "
+                    f"Locked steps: {locked} | Age: {age_mins:.0f}m | "
+                    f"Spread: {live_spread:.5f}"
+                )
+
+                # Immediately evaluate against current rules
+                adaptive = journal.get_params(epic)
+                # Seed minimal tick history for evaluation
+                if live.get("mid"):
+                    tick_history[epic].append({
+                        "time": time.time(),
+                        "bid": live.get("bid", current_price),
+                        "ask": live.get("ask", current_price),
+                        "mid": current_price,
+                        "spread": live_spread,
+                    })
+
+                evaluation = pos_manager.evaluate_position(
+                    deal_id, current_price,
+                    tick_history.get(epic, []),
+                    adaptive,
+                )
+
+                if evaluation["action"] in ("CLOSE_PROFIT", "CLOSE_LOSS"):
+                    log.info(
+                        f"  ⚡ STARTUP CLOSE {evaluation['action']} {epic} — {evaluation['reason']} | "
+                        f"P&L: {evaluation['unrealized_pnl']:.5f}"
+                    )
+                    closed = api.close_position(deal_id)
+                    if closed:
+                        journal.log_trade({
+                            "epic": epic,
+                            "direction": direction,
+                            "entry_price": entry_price,
+                            "exit_price": current_price,
+                            "pnl": evaluation["unrealized_pnl"],
+                            "pnl_pct": pnl_pct,
+                            "size": 0,
+                            "entry_reason": "pre-restart",
+                            "exit_reason": f"startup-{evaluation['reason']}",
+                            "duration_seconds": time.time() - created_ts if created_ts > 0 else 0,
+                            "momentum_at_entry": 0,
+                            "momentum_at_exit": 0,
+                            "rsi_at_entry": 50,
+                            "stop_distance": stop_dist,
+                            "profit_distance": stop_dist * 1.5,
+                            "hit_tp": False,
+                            "hit_sl": "LOSS" in evaluation["action"],
+                            "early_exit": True,
+                        })
+                        pos_manager.untrack(deal_id)
+                        active_signals.pop(epic, None)
+                        log.info(f"  ✅ Startup-closed {epic}")
+                else:
+                    log.info(f"  ✅ {epic} passes rules — continuing to manage")
+
+            except Exception as e:
+                log.error(f"Startup position recovery error: {e}")
+
+        # Refresh positions after any startup closes
+        positions = api.get_positions()
+        log.info(f"🔄 Startup reconciliation complete — {len(positions)} position(s) active")
+    else:
+        log.info("🔄 No existing positions found — starting fresh")
+
     # Session keepalive
     cycle_count = 0
-    positions = []
 
     while True:
         try:
