@@ -44,6 +44,7 @@ def count_positions_by_category(open_positions: list) -> dict[str, int]:
         config.CATEGORY_STOCKS: 0,
         config.CATEGORY_CRYPTO: 0,
         config.CATEGORY_COMMODITIES: 0,
+        config.CATEGORY_FOREX: 0,
     }
     for pos in open_positions:
         epic = pos.get("market", {}).get("epic", "")

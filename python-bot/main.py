@@ -30,10 +30,11 @@ BANNER = """
 ║   CAPITAL.COM REAL-TIME TRADING BOT  (DEMO)             ║
 ║   ⚡ 1-second price scanning — tick-level precision      ║
 ║   🧠 Adaptive AI: learns from every trade                ║
-║   🔎 Auto-discovery: AI picks best stocks & crypto       ║
+║   🔎 Auto-discovery: AI picks best assets                ║
 ║   📊 Multi-TF scanner: 60m → 15m → 5m confirmation      ║
 ║   🔒 Unlimited TP with 5% step trailing SL               ║
 ║   📈 Stocks (5) | ₿ Crypto (5) | 🪙 Commodities (5)     ║
+║   💱 Forex (5)  | 📌 BTC always tracked                  ║
 ║   📊 Dashboard: http://localhost:8050                    ║
 ╚══════════════════════════════════════════════════════════╝
 """
@@ -175,10 +176,14 @@ def run():
     # --- Initial asset discovery: AI picks best stocks & crypto ---
     log.info("🔎 Running initial asset discovery...")
     discovered = discovery.discover(force=True)
-    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+    config.update_dynamic_watchlists(
+        discovered["stock_epics"], discovered["crypto_epics"],
+        forex_epics=discovered.get("forex_epics"),
+    )
     log.info(
-        f"📈 Stocks selected: {', '.join(config.WATCHLIST_STOCKS)} | "
-        f"₿ Crypto selected: {', '.join(config.WATCHLIST_CRYPTO)} | "
+        f"📈 Stocks: {', '.join(config.WATCHLIST_STOCKS)} | "
+        f"₿ Crypto: {', '.join(config.WATCHLIST_CRYPTO)} | "
+        f"💱 Forex: {', '.join(config.WATCHLIST_FOREX)} | "
         f"🪙 Commodities: {', '.join(config.WATCHLIST_COMMODITIES)}"
     )
 
@@ -236,9 +241,12 @@ def run():
 
                 # Re-discover best stocks & crypto (rotates into hottest movers)
                 discovered = discovery.discover()
-                if discovered["stock_epics"] or discovered["crypto_epics"]:
+                if discovered["stock_epics"] or discovered["crypto_epics"] or discovered.get("forex_epics"):
                     old_watchlist = set(config.WATCHLIST)
-                    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+                    config.update_dynamic_watchlists(
+                        discovered["stock_epics"], discovered["crypto_epics"],
+                        forex_epics=discovered.get("forex_epics"),
+                    )
                     new_watchlist = set(config.WATCHLIST)
                     added = new_watchlist - old_watchlist
                     removed = old_watchlist - new_watchlist
