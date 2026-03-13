@@ -193,7 +193,7 @@ class MarketScanner:
                         sell_signals += 1
 
             # Determine direction and strength — lower thresholds for scalp
-            min_signals = 3 if is_scalp else 4
+            min_signals = 4 if is_scalp else 4
             if buy_signals > sell_signals and buy_signals >= min_signals:
                 direction = "BUY"
                 strength = buy_signals / total_signals
