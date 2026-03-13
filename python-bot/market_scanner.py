@@ -87,10 +87,10 @@ class MarketScanner:
         self.scan_cache: dict[str, MarketScanResult] = {}
         self.last_full_scan: float = 0
         self.last_scalp_scan: float = 0
-        self.FULL_SCAN_INTERVAL = 45     # Standard scan every 45 sec (was 120 — too slow)
-        self.SCALP_SCAN_INTERVAL = 30    # Scalp scan every 30 seconds
-        self.TOP_N_STANDARD = 8          # Deep-analyze top 8 stocks/commodities
-        self.TOP_N_SCALP = 12            # Deep-analyze top 12 crypto/forex
+        self.FULL_SCAN_INTERVAL = 20     # Standard scan every 20 sec for more opportunities
+        self.SCALP_SCAN_INTERVAL = 10    # Scalp scan every 10 sec for responsiveness
+        self.TOP_N_STANDARD = 10         # Deep-analyze top 10 stocks/commodities
+        self.TOP_N_SCALP = 14            # Deep-analyze top 14 crypto/forex
         self._full_categories: set[str] = set()  # Categories at max positions
 
     def _analyze_timeframe(self, epic: str, tf_name: str, tf_config: dict,

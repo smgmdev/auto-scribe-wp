@@ -835,23 +835,23 @@ def run():
                     # ═══════════════════════════════════════
                     # GATE 2: Minimum scanner confidence (raised)
                     # ═══════════════════════════════════════
-                    min_conf = 0.45 if is_scalp_asset else 0.55
+                    min_conf = 0.40 if is_scalp_asset else 0.48
                     if scanner_confidence < min_conf:
                         if cycle_count % 30 == 0:
                             log.debug(f"  {epic}: Scanner conf {scanner_confidence:.2f} < {min_conf} — skipping")
                         continue
 
                     # ═══════════════════════════════════════
-                    # GATE 3: Tick momentum must STRONGLY align with scanner
-                    # Raised thresholds to prevent weak entries
+                    # GATE 3: Tick momentum must align with scanner
+                    # (relaxed to avoid over-filtering FX/stocks/commodities)
                     # ═══════════════════════════════════════
                     adaptive = journal.get_params(epic)
-                    default_threshold = 0.55 if is_scalp_asset else 0.70
+                    default_threshold = 0.48 if is_scalp_asset else 0.58
                     entry_threshold = adaptive.get("momentum_entry_threshold", default_threshold)
                     if is_scalp_asset:
-                        entry_threshold = max(entry_threshold, 0.50)
+                        entry_threshold = max(entry_threshold, 0.42)
                     else:
-                        entry_threshold = max(entry_threshold, 0.60)
+                        entry_threshold = max(entry_threshold, 0.50)
 
                     momentum = tick_momentum(tick_history[epic])
 

@@ -25,7 +25,7 @@ ATR_PERIOD = int(os.getenv("ATR_PERIOD", "14"))
 ATR_SL_MULTIPLIER = float(os.getenv("ATR_SL_MULTIPLIER", "2.0"))
 ATR_TP_MULTIPLIER = float(os.getenv("ATR_TP_MULTIPLIER", "3.0"))
 CANDLE_TIMEFRAME = os.getenv("CANDLE_TIMEFRAME", "MINUTE_15")
-SCAN_INTERVAL_SECONDS = int(os.getenv("SCAN_INTERVAL_SECONDS", "60"))
+SCAN_INTERVAL_SECONDS = int(os.getenv("SCAN_INTERVAL_SECONDS", "1"))
 
 # ═══════════════════════════════════════════════
 # ASSET CATEGORIES — each with 5-trade limit
@@ -65,7 +65,7 @@ CRYPTO_PINNED = ["BTCUSD"]
 # Runtime watchlists (updated by AssetDiscovery)
 WATCHLIST_STOCKS: list[str] = list(WATCHLIST_STOCKS_FALLBACK)
 WATCHLIST_CRYPTO: list[str] = list(WATCHLIST_CRYPTO_FALLBACK)
-WATCHLIST_FOREX: list[str] = []
+WATCHLIST_FOREX: list[str] = list(WATCHLIST_FOREX_FALLBACK)
 
 # Epic → category mapping (rebuilt when watchlists update)
 EPIC_CATEGORY: dict[str, str] = {}
@@ -129,7 +129,10 @@ def get_category(epic: str) -> str:
         return CATEGORY_COMMODITIES
 
     # 3) Infer from epic name patterns
-    _commodities = {"GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER", "PLATINUM", "PALLADIUM", "OIL_BRENT"}
+    _commodities = {
+        "GOLD", "SILVER", "OIL_CRUDE", "NATURALGAS", "COPPER", "PLATINUM", "PALLADIUM", "OIL_BRENT",
+        "XAUUSD", "XAGUSD", "USCRUDE", "UKOIL", "BRENT", "NATGAS",
+    }
     if epic in _commodities:
         return CATEGORY_COMMODITIES
 
