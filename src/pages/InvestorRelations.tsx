@@ -66,6 +66,7 @@ export default function InvestorRelations() {
   const [productsVideoLoaded, setProductsVideoLoaded] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [precisionVideoLoaded, setPrecisionVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
