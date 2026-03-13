@@ -180,7 +180,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 12px 8px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.4s ease, border-color 0.4s ease;
     position: relative;
     border: 1px solid #222;
 }
@@ -203,6 +203,11 @@ body {
 .slot.neutral {
     background: #333;
     border-color: #444;
+}
+
+.slot.neutral-active {
+    background: #1a1a2e;
+    border-color: #333;
 }
 
 .slot-pair {
