@@ -633,6 +633,7 @@ function updateGrid(data) {
                 const pnl = (t.pnl !== undefined && t.pnl !== null) ? t.pnl : 0;
                 const dir = t.direction || '';
                 const entryP = t.entry_price || 0;
+                const size = t.size || 0;
 
                 // Update text
                 el.querySelector('.slot-dir').textContent = dir;
@@ -640,12 +641,28 @@ function updateGrid(data) {
                 el.querySelector('.slot-price').textContent = formatPrice(price);
                 el.querySelector('.slot-entry').textContent = 'Entry: ' + formatPrice(entryP);
 
-                // P&L number + percentage
+                // P&L: use backend value, or calculate dollar P&L from price diff * size
                 var pnlPct = (entryP > 0) ? (((price - entryP) / entryP) * 100 * (dir === 'BUY' ? 1 : -1)) : 0;
-                var pnlAbs = (dir === 'BUY') ? (price - entryP) : (entryP - price);
-                var pnlText = formatPnl(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%)';
+                var displayPnl = pnl;
+                // If pnl looks like a per-unit value (very small), multiply by size
+                if (Math.abs(pnl) < 0.01 && size > 0 && entryP > 0) {
+                    var calcPnl = (dir === 'BUY') ? (price - entryP) * size : (entryP - price) * size;
+                    if (Math.abs(calcPnl) > Math.abs(pnl)) {
+                        displayPnl = calcPnl;
+                    }
+                }
+                var pnlText = '$' + formatPnl(displayPnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%)';
                 el.querySelector('.slot-pnl').textContent = pnlText;
                 el.querySelector('.slot-pnl').style.color = pnlPct >= 0 ? '#4ade80' : '#f87171';
+
+                // SL display
+                var slEl = el.querySelector('.slot-sl');
+                if (t.trailing_stop !== null && t.trailing_stop !== undefined) {
+                    slEl.textContent = 'SL: ' + formatPrice(t.trailing_stop);
+                } else {
+                    slEl.textContent = 'SL: —';
+                }
+
                 el.querySelector('.slot-empty-text').textContent = '';
 
                 // Flash on price change — quick 150ms transition
@@ -673,6 +690,7 @@ function updateGrid(data) {
                 el.querySelector('.slot-entry').textContent = '';
                 el.querySelector('.slot-pnl').textContent = '';
                 el.querySelector('.slot-pnl').style.color = '';
+                el.querySelector('.slot-sl').textContent = '';
                 el.querySelector('.slot-empty-text').textContent = '—';
             }
         }
