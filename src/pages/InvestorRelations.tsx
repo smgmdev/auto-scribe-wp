@@ -169,8 +169,14 @@ export default function InvestorRelations() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover opacity-40"
             src={investorHeroBg}
+            onCanPlayThrough={() => setVideoLoaded(true)}
           />
           <div className="absolute inset-0 bg-black/50" />
+          {!videoLoaded && (
+            <div className="absolute bottom-4 left-4 z-20">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+            </div>
+          )}
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-24 md:py-36 text-center relative z-10">
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/50 mb-4">Investor Relations</p>
