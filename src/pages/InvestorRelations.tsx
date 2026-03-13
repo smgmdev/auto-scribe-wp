@@ -218,6 +218,13 @@ export default function InvestorRelations() {
               <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
                 From global media distribution to AI-powered publishing and geopolitical intelligence — Arcana Mace delivers an integrated suite built for the modern information economy.
               </p>
+              <Button
+                onClick={() => navigate('/how-it-works')}
+                className="rounded-none bg-blue-600 text-white hover:bg-blue-700 h-12 px-8 text-base font-medium mt-8"
+              >
+                Learn More
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </AnimatedSection>
           </div>
         </section>
