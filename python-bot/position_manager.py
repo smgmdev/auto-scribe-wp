@@ -62,8 +62,8 @@ class PositionManager:
                 locked_steps = current_steps
 
                 if current_steps >= 1:
-                    # Lock at (steps - 1) * step_size, but never below fee breakeven
-                    lock_level_pnl = max((current_steps - 1) * step_size, fee_cost * 1.5)
+                    # Lock AT the current step level (5% → SL at 5%, 10% → SL at 10%)
+                    lock_level_pnl = max(current_steps * step_size, fee_cost * 1.5)
                     if direction == "BUY":
                         trailing_stop_price = entry_price + lock_level_pnl
                     else:
