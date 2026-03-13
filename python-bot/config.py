@@ -15,7 +15,7 @@ CAPITAL_API_URL = os.getenv("CAPITAL_API_URL", "https://demo-api-capital.backend
 # Risk management
 RISK_PER_TRADE = float(os.getenv("RISK_PER_TRADE", "0.01"))
 MAX_POSITIONS_PER_CATEGORY = int(os.getenv("MAX_POSITIONS_PER_CATEGORY", "5"))
-MAX_OPEN_POSITIONS = MAX_POSITIONS_PER_CATEGORY  # 5 total (crypto only)
+MAX_OPEN_POSITIONS = MAX_POSITIONS_PER_CATEGORY * 4  # 5 per category × 4 categories = 20 global max
 
 # Strategy parameters
 EMA_FAST = int(os.getenv("EMA_FAST", "9"))
