@@ -16,7 +16,7 @@ from collections import defaultdict
 import config
 from capital_api import CapitalAPI
 from strategy import analyze, Signal, tick_momentum
-from risk import calculate_position_size, can_open_position
+from risk import calculate_position_size, can_open_position, count_positions_by_category
 from position_manager import PositionManager
 from trade_journal import TradeJournal
 from market_scanner import MarketScanner
@@ -439,12 +439,22 @@ def run():
             cycle_count += 1
 
             # ═══════════════════════════════════════════
-            # 📊 MULTI-TIMEFRAME MARKET SCAN — every 2 min
+            # 📊 CATEGORY CAPACITY CHECK — tell scanner which categories are full
             # ═══════════════════════════════════════════
-            # The scanner handles its own timing internally (120s interval)
-            # It: 1) ranks all assets by volatility
-            #     2) deep-analyzes top 5 on 60m/15m/5m
-            #     3) only confirms entry when timeframes agree
+            cat_counts = count_positions_by_category(positions) if positions else {}
+            full_categories = set()
+            for cat_key, count in cat_counts.items():
+                if count >= config.MAX_POSITIONS_PER_CATEGORY:
+                    full_categories.add(cat_key)
+            scanner.set_full_categories(full_categories)
+
+            if full_categories and cycle_count % 30 == 0:
+                log.info(f"📊 Full categories (skipping scan): {', '.join(full_categories)} | Counts: {cat_counts}")
+
+            # ═══════════════════════════════════════════
+            # 📊 MULTI-TIMEFRAME MARKET SCAN — every 2 min
+            # Scanner now skips full categories automatically
+            # ═══════════════════════════════════════════
             scan_results = scanner.scan_all()
 
             # Session keepalive every 60 cycles
@@ -613,9 +623,29 @@ def run():
                         log.error(f"Position management error: {e}")
 
             # ═══════════════════════════════════════════
-            # ⚡ ENTRY SCANNING — tick collection + scanner-gated entry
+            # ⚡ ENTRY SCANNING — balanced across categories
+            # Prioritize categories with fewer open positions (fill empty slots first)
+            # Skip categories that are already at max capacity
             # ═══════════════════════════════════════════
-            for epic in config.WATCHLIST:
+
+            # Build category-ordered epic list: categories with fewest positions first
+            _cat_order = sorted(
+                [config.CATEGORY_CRYPTO, config.CATEGORY_STOCKS, config.CATEGORY_COMMODITIES, config.CATEGORY_FOREX],
+                key=lambda c: cat_counts.get(c, 0),
+            )
+            balanced_epics = []
+            for cat in _cat_order:
+                if cat in full_categories:
+                    continue  # Skip full categories entirely
+                cat_epics = {
+                    config.CATEGORY_CRYPTO: config.WATCHLIST_CRYPTO,
+                    config.CATEGORY_STOCKS: config.WATCHLIST_STOCKS,
+                    config.CATEGORY_COMMODITIES: config.WATCHLIST_COMMODITIES,
+                    config.CATEGORY_FOREX: config.WATCHLIST_FOREX,
+                }.get(cat, [])
+                balanced_epics.extend(cat_epics)
+
+            for epic in balanced_epics:
                 try:
                     # Check if this epic's category is disabled via dashboard toggle
                     from dashboard import is_category_disabled
