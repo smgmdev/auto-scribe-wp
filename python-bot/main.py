@@ -428,7 +428,16 @@ def run():
                         continue
 
                     # Calculate stop distance from scanner's multi-TF ATR
-                    stop_invalid = (not math.isfinite(stop_distance)) or (not math.isfinite(atr)) or stop_distance <= 0 or atr <= 0
+                    try:
+                        stop_is_finite = math.isfinite(float(stop_distance))
+                    except Exception:
+                        stop_is_finite = False
+                    try:
+                        atr_is_finite = math.isfinite(float(atr))
+                    except Exception:
+                        atr_is_finite = False
+
+                    stop_invalid = (not stop_is_finite) or (not atr_is_finite) or float(stop_distance) <= 0 or float(atr) <= 0
                     if stop_invalid:
                         recent_prices = [t["mid"] for t in tick_history[epic][-30:] if math.isfinite(t.get("mid", 0))]
                         if len(recent_prices) >= 2:
@@ -436,9 +445,10 @@ def run():
                         else:
                             price_range = 0
                         stop_distance = max(price_range * 1.5, spread * 10, mid * 0.001)
+                        stop_is_finite = math.isfinite(float(stop_distance))
 
                     # Ensure stop distance is always positive and reasonable
-                    safe_stop = abs(float(stop_distance)) if math.isfinite(stop_distance) else 0.0
+                    safe_stop = abs(float(stop_distance)) if stop_is_finite else 0.0
                     stop_distance = max(safe_stop, spread * 3, mid * 0.0005)
 
                     if not math.isfinite(stop_distance) or stop_distance <= 0:
