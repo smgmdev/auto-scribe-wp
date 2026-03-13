@@ -195,7 +195,7 @@ class CapitalAPI:
                         log.info(f"📏 {epic} min stop from snapshot {snap_key}: {float(min_stop)}")
                         return float(min_stop)
         except Exception as e:
-            log.warning(f"Could not fetch min stop for {epic}: {e}")
+            log.info(f"Could not fetch min stop for {epic}: {e}")
         return 0.0
 
     def open_position(
