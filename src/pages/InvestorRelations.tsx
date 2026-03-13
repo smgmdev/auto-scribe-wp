@@ -209,60 +209,6 @@ export default function InvestorRelations() {
           </div>
         </section>
 
-        {/* Investment Thesis */}
-        <section className="py-20">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <AnimatedSection>
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 tracking-tight">Investment Thesis</h2>
-              <p className="text-center text-[#86868b] max-w-2xl mx-auto mb-16">
-                Why Arcana Mace represents a compelling opportunity in the intersection of media technology, artificial intelligence, and global intelligence.
-              </p>
-            </AnimatedSection>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {[
-                {
-                  icon: Globe,
-                  title: 'Global Media Marketplace',
-                  description: 'The first platform to aggregate 500+ media outlets across 85+ countries into a single, transactional marketplace for PR distribution and media buying — eliminating fragmentation in a $100B+ industry.',
-                },
-                {
-                  icon: Zap,
-                  title: 'AI-Native Publishing Stack',
-                  description: 'Proprietary AI article generation, auto-publishing pipelines, and Mace AI create a vertically integrated content engine that reduces publishing costs by up to 90% while maintaining editorial quality.',
-                },
-                {
-                  icon: Shield,
-                  title: 'Arcana Precision — Intelligence Platform',
-                  description: 'A defense-grade geopolitical intelligence product serving governments, enterprises, and semi-government agencies with real-time threat forecasting, conflict simulation, and surveillance capabilities.',
-                },
-                {
-                  icon: TrendingUp,
-                  title: 'Recurring Revenue Model',
-                  description: 'Credit-based transactional model with strong unit economics. Agency commission structure and platform fees create multiple revenue streams with high gross margins and predictable cash flows.',
-                },
-                {
-                  icon: Users,
-                  title: 'Network Effects',
-                  description: 'More agencies joining the platform increases media inventory, attracting more buyers. Each transaction generates data that improves AI models, creating a compounding data moat.',
-                },
-                {
-                  icon: BarChart3,
-                  title: 'Capital-Efficient Growth',
-                  description: 'Asset-light marketplace model with low customer acquisition costs. Agency partners handle fulfillment, allowing the platform to scale without proportional headcount growth.',
-                },
-              ].map((item, i) => (
-                <AnimatedSection key={item.title} delay={i * 80}>
-                  <div className="border border-[#d2d2d7] p-8 hover:border-[#1d1d1f]/30 transition-colors">
-                    <item.icon className="h-6 w-6 mb-4 text-[#1d1d1f]" />
-                    <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                    <p className="text-sm text-[#86868b] leading-relaxed">{item.description}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Product Portfolio */}
         <section className="py-20 bg-[#1d1d1f] text-white">
