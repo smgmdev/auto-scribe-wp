@@ -481,9 +481,8 @@ def run():
                 scanner.scan_all()
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
-            # Scanner has its own internal timers (SCALP_SCAN_INTERVAL, FULL_SCAN_INTERVAL)
-            # Sleep 2s between iterations to avoid tight-looping
-            time.sleep(2)
+            # Sleep 5s between iterations to let main loop breathe
+            time.sleep(5)
 
     scanner_thread = threading.Thread(target=_scanner_thread_fn, daemon=True, name="scanner")
     scanner_thread.start()
