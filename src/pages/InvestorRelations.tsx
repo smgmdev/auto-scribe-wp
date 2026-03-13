@@ -182,32 +182,7 @@ export default function InvestorRelations() {
           <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
         </section>
 
-        {/* Key Metrics */}
-        <section className="py-20 bg-[#f5f5f7]">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <AnimatedSection>
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 tracking-tight">By the Numbers</h2>
-            </AnimatedSection>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                { value: 500, suffix: '+', label: 'Media Outlets', icon: Globe },
-                { value: 85, suffix: '+', label: 'Countries Covered', icon: Target },
-                { value: 12, suffix: '+', label: 'Product Verticals', icon: Layers },
-                { value: 24, suffix: '/7', label: 'AI Intelligence', icon: Zap },
-              ].map((stat, i) => (
-                <AnimatedSection key={stat.label} delay={i * 100}>
-                  <div className="text-center">
-                    <stat.icon className="h-6 w-6 mx-auto mb-3 text-[#1d1d1f]/40" />
-                    <p className="text-3xl md:text-4xl font-bold tracking-tight">
-                      <AnimatedStat value={stat.value} suffix={stat.suffix} />
-                    </p>
-                    <p className="text-sm text-[#86868b] mt-1">{stat.label}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
+
 
 
         {/* Product Portfolio */}
