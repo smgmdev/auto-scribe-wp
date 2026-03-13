@@ -19,7 +19,7 @@ from typing import Optional
 
 warnings.filterwarnings(
     "ignore",
-    message="urllib3 v2 only supports OpenSSL 1.1.1+*",
+    message=r"urllib3 v2 only supports OpenSSL.*",
 )
 
 import config
