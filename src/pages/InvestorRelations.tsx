@@ -362,8 +362,8 @@ export default function InvestorRelations() {
         <section className="py-20 bg-white">
           <div className="max-w-[980px] mx-auto px-4 md:px-6 text-center">
             <AnimatedSection>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">Invest in Arcana Mace</h2>
-              <p className="text-[#86868b] max-w-xl mx-auto mb-8 leading-relaxed">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-black">Invest in Arcana Mace</h2>
+              <p className="text-[#86868b] text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
                 We are selectively engaging with strategic investors who share our vision of building the definitive global media intelligence platform.
               </p>
               <Button
