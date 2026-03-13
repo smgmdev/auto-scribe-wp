@@ -229,7 +229,7 @@ export default function InvestorRelations() {
             </p>
             <Button
               onClick={() => navigate('/how-it-works')}
-              className="rounded-none bg-[#f2a547] text-black hover:bg-[#e0963c] h-12 px-8 text-base font-medium mt-8"
+              className="rounded-none bg-[#f2a547] text-black border border-[#f2a547] h-12 px-8 text-base font-medium mt-8 transition-all duration-300 ease-out hover:bg-black hover:text-[#f2a547] hover:border-[#f2a547]"
             >
               Learn More
             </Button>
