@@ -42,12 +42,8 @@ WATCHLIST_COMMODITIES = []
 # Forex — DISABLED (crypto only mode)
 WATCHLIST_FOREX_FALLBACK = []
 
-# Stocks & Crypto: populated dynamically by AssetDiscovery
-# These are fallbacks used before first discovery completes
-WATCHLIST_STOCKS_FALLBACK = [
-    "AAPL", "TSLA", "NVDA", "MSFT", "AMZN",
-    "GOOGL", "META", "AMD", "NFLX", "JPM",
-]
+# Stocks — DISABLED (crypto only mode)
+WATCHLIST_STOCKS_FALLBACK = []
 WATCHLIST_CRYPTO_FALLBACK = [
     "BTCUSD", "ETHUSD", "SOLUSD", "XRPUSD",
     "BNBUSD", "DOGEUSD", "ADAUSD", "AVAXUSD",
