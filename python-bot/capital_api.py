@@ -60,6 +60,7 @@ class CapitalAPI:
         self.session = requests.Session()
         self.cst: Optional[str] = None
         self.security_token: Optional[str] = None
+        self._invalid_epics: set[str] = set()
 
     def login(self) -> bool:
         """Authenticate and obtain session tokens."""
