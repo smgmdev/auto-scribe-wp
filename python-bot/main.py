@@ -548,6 +548,7 @@ def run():
                                 spread=live_spread,
                                 current_price=current_price,
                                 created_date=created_ts,
+                                category=config.get_category(pos_epic),
                             )
 
                         # Get adaptive params
