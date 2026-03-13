@@ -166,12 +166,25 @@ def run():
                     log.warning("Session expired, re-authenticating...")
                     api.login()
 
-            # Refresh balance every 5 minutes
+            # Refresh balance + re-discover assets every 5 minutes
             if cycle_count % 300 == 0:
                 acct = api.get_account()
                 if acct:
                     balance = acct.get("balance", {}).get("balance", balance)
                     log.info(f"💰 Balance refresh: {balance:.2f}")
+
+                # Re-discover best stocks & crypto (rotates into hottest movers)
+                discovered = discovery.discover()
+                if discovered["stock_epics"] or discovered["crypto_epics"]:
+                    old_watchlist = set(config.WATCHLIST)
+                    config.update_dynamic_watchlists(discovered["stock_epics"], discovered["crypto_epics"])
+                    new_watchlist = set(config.WATCHLIST)
+                    added = new_watchlist - old_watchlist
+                    removed = old_watchlist - new_watchlist
+                    if added or removed:
+                        scanner.watchlist = config.WATCHLIST  # Update scanner's watchlist
+                        log.info(f"🔄 Watchlist rotated: +{len(added)} -{len(removed)} assets")
+
                 # Print learning summary
                 for epic in config.WATCHLIST:
                     s = journal.get_stats(epic)
