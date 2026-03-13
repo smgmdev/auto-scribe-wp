@@ -1,12 +1,53 @@
-"""Capital.com REST API wrapper for demo/live trading."""
+"""Capital.com REST API wrapper for demo/live trading.
+
+Includes rate-limit detection, automatic retry with backoff,
+and request pacing to avoid 429 errors.
+"""
 
 import math
+import time
 import requests
 from typing import Optional
 from logger_setup import get_logger
 import config
 
 log = get_logger("capital_api")
+
+# Rate limit protection
+_MIN_REQUEST_INTERVAL = 0.15  # 150ms between requests
+_last_request_time = 0.0
+_consecutive_errors = 0
+_MAX_RETRIES = 2
+_BACKOFF_BASE = 1.0  # seconds
+
+
+def _pace_request():
+    """Enforce minimum interval between API requests to avoid rate limits."""
+    global _last_request_time
+    now = time.time()
+    elapsed = now - _last_request_time
+    if elapsed < _MIN_REQUEST_INTERVAL:
+        time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
+    _last_request_time = time.time()
+
+
+def _handle_error(resp_status: int):
+    """Track consecutive errors and back off if needed."""
+    global _consecutive_errors
+    _consecutive_errors += 1
+    if resp_status == 429:
+        wait = min(30, _BACKOFF_BASE * (2 ** min(_consecutive_errors, 5)))
+        log.warning(f"⏳ Rate limited (429) — backing off {wait:.1f}s")
+        time.sleep(wait)
+    elif _consecutive_errors >= 5:
+        wait = min(10, _consecutive_errors * 0.5)
+        log.warning(f"⏳ {_consecutive_errors} consecutive API errors — cooling {wait:.1f}s")
+        time.sleep(wait)
+
+
+def _handle_success():
+    global _consecutive_errors
+    _consecutive_errors = 0
 
 
 class CapitalAPI:
