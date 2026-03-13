@@ -12,9 +12,15 @@ import time
 import sys
 import os
 import threading
+import warnings
 from datetime import datetime
 from collections import defaultdict
 from typing import Optional
+
+warnings.filterwarnings(
+    "ignore",
+    message=r"urllib3 v2 only supports OpenSSL.*",
+)
 
 import config
 from capital_api import CapitalAPI
@@ -261,7 +267,7 @@ def run():
                             "spread": float(ask) - float(bid),
                         }
             except Exception as e:
-                log.warning(f"Failed to fetch startup prices: {e}")
+                log.info(f"Failed to fetch startup prices: {e}")
 
         # ═══════════════════════════════════════════
         # CLOSE POSITIONS IN DISABLED CATEGORIES (respects dashboard toggles)
@@ -298,7 +304,7 @@ def run():
                         pos_manager.untrack(deal_id)
                         active_signals.pop(epic, None)
                     else:
-                        log.warning(f"    ⚠️ Failed to close {epic} — will retry")
+                        log.info(f"    Failed to close {epic} — will retry")
                 except Exception as e:
                     log.error(f"    ❌ Error closing {epic}: {e}")
                 time.sleep(0.3)
@@ -450,14 +456,18 @@ def run():
     # so _pace_request() naturally serializes all API access.
     # ═══════════════════════════════════════════
     _scanner_running = True
+    _scanner_scan_active = threading.Event()
 
     def _scanner_thread_fn():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
+            _scanner_scan_active.set()
             try:
                 scanner.scan_all()
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
+            finally:
+                _scanner_scan_active.clear()
             # Sleep 5s between iterations to let main loop breathe
             time.sleep(5)
 
@@ -500,7 +510,7 @@ def run():
             # Session keepalive every 60 cycles
             if cycle_count % 60 == 0:
                 if not api.ping():
-                    log.warning("Session expired, re-authenticating...")
+                    log.info("Session expired, re-authenticating...")
                     api.login()
 
             # Refresh balance + re-discover assets every 5 minutes
@@ -730,6 +740,7 @@ def run():
                 bool(balanced_epics)
                 and (cycle_count % 10 == 0)
                 and (now_ts >= _next_batch_fetch_ts)
+                and (not _scanner_scan_active.is_set())
             )
 
             if should_fetch_prices:
@@ -756,7 +767,7 @@ def run():
                         if i + 50 < len(balanced_epics):
                             time.sleep(0.5)
                 except Exception as e:
-                    log.warning(f"Batch price fetch error: {e}")
+                    log.info(f"Batch price fetch transient error: {e}")
 
                 if batch_success:
                     _batch_fail_streak = 0
@@ -765,7 +776,8 @@ def run():
                     _batch_fail_streak += 1
                     cooldown = min(45, 4 * _batch_fail_streak)
                     _next_batch_fetch_ts = time.time() + cooldown
-                    log.warning(f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})")
+                    if cycle_count % 30 == 0:
+                        log.info(f"Batch fetch backoff {cooldown}s (streak: {_batch_fail_streak})")
 
             # Always populate batch_prices from tick_history for non-fetch cycles or empty results
             for epic in balanced_epics:
@@ -776,8 +788,8 @@ def run():
                         "mid": last["mid"], "spread": last["spread"],
                     }
 
-            if should_fetch_prices and not batch_prices and cycle_count % 30 == 0:
-                log.warning("⚠️ No price data — batch fetch returned empty and no tick history available")
+            if should_fetch_prices and not batch_prices and cycle_count % 60 == 0:
+                log.info("No fresh batch prices this cycle; using cached tick history")
 
             for epic in balanced_epics:
                 try:
@@ -1006,7 +1018,7 @@ def run():
                     stop_distance = max(safe_stop, spread * 3, mid * 0.0005)
 
                     if not math.isfinite(stop_distance) or stop_distance <= 0:
-                        log.warning(f"Skipping {epic}: invalid stop_distance computed ({stop_distance})")
+                        log.info(f"Skipping {epic}: invalid stop_distance computed ({stop_distance})")
                         continue
 
                     # Query market info for minimum stop distance
@@ -1096,7 +1108,7 @@ def run():
             # (increased from 60s to avoid premature re-auth loops)
             # ═══════════════════════════════════════════
             if time.time() - _last_batch_success > 120:
-                log.warning("⚠️ STALL DETECTED — no successful batch fetch for 120s. Re-authenticating...")
+                log.info("STALL DETECTED — no successful batch fetch for 120s. Re-authenticating...")
                 time.sleep(3)  # Brief pause before re-auth
                 if api.login():
                     _last_batch_success = time.time()

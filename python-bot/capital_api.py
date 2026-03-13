@@ -41,11 +41,11 @@ def _handle_error(resp_status: int):
     _consecutive_errors += 1
     if resp_status == 429:
         wait = min(30, _BACKOFF_BASE * (2 ** min(_consecutive_errors, 5)))
-        log.warning(f"⏳ Rate limited (429) — backing off {wait:.1f}s")
+        log.info(f"⏳ Rate limited (429) — backing off {wait:.1f}s")
         time.sleep(wait)
     elif _consecutive_errors >= 5:
         wait = min(10, _consecutive_errors * 0.5)
-        log.warning(f"⏳ {_consecutive_errors} consecutive API errors — cooling {wait:.1f}s")
+        log.info(f"⏳ {_consecutive_errors} consecutive API errors — cooling {wait:.1f}s")
         time.sleep(wait)
 
 
@@ -132,7 +132,7 @@ class CapitalAPI:
                 return resp.json()
             else:
                 _handle_error(resp.status_code)
-                log.warning(f"Prices for {epic}: {resp.status_code}")
+                log.debug(f"Prices for {epic}: {resp.status_code}")
         except Exception as e:
             log.error(f"Prices exception for {epic}: {e}")
         return None
@@ -195,7 +195,7 @@ class CapitalAPI:
                         log.info(f"📏 {epic} min stop from snapshot {snap_key}: {float(min_stop)}")
                         return float(min_stop)
         except Exception as e:
-            log.warning(f"Could not fetch min stop for {epic}: {e}")
+            log.info(f"Could not fetch min stop for {epic}: {e}")
         return 0.0
 
     def open_position(
@@ -225,7 +225,7 @@ class CapitalAPI:
             # Enforce minimum from API
             min_sd = self.get_min_stop_distance(epic)
             if min_sd > 0 and sd < min_sd:
-                log.warning(f"⚠️ {epic} SL {sd} < min {min_sd}, bumping to {min_sd}")
+                log.info(f"{epic} SL {sd} < min {min_sd}, bumping to {min_sd}")
                 sd = min_sd * 1.05  # 5% above minimum for safety margin
 
             if sd <= 0:
@@ -306,7 +306,7 @@ class CapitalAPI:
                 return resp.json().get("nodes", [])
             else:
                 _handle_error(resp.status_code)
-                log.warning(f"Market categories: {resp.status_code}")
+                log.info(f"Market categories: {resp.status_code}")
         except Exception as e:
             log.error(f"Market categories exception: {e}")
         return []
@@ -327,7 +327,7 @@ class CapitalAPI:
                     return resp.json()
                 else:
                     _handle_error(resp.status_code)
-                    log.warning(f"Category markets {node_id} attempt {attempt+1}: {resp.status_code}")
+                    log.info(f"Category markets {node_id} attempt {attempt+1}: {resp.status_code}")
             except Exception as e:
                 log.error(f"Category markets exception for {node_id} (attempt {attempt+1}): {e}")
                 if attempt < _MAX_RETRIES:
@@ -350,7 +350,7 @@ class CapitalAPI:
                     return resp.json().get("markets", [])
                 else:
                     _handle_error(resp.status_code)
-                    log.warning(f"Search markets '{search_term}' attempt {attempt+1}: {resp.status_code}")
+                    log.info(f"Search markets '{search_term}' attempt {attempt+1}: {resp.status_code}")
             except Exception as e:
                 log.error(f"Search markets exception '{search_term}' (attempt {attempt+1}): {e}")
                 if attempt < _MAX_RETRIES:
@@ -392,9 +392,14 @@ class CapitalAPI:
                         return resp.json().get("markets", [])
 
                     _handle_error(resp.status_code)
-                    log.warning(
-                        f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
-                    )
+                    if resp.status_code >= 500:
+                        log.info(
+                            f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
+                        )
+                    else:
+                        log.debug(
+                            f"Markets details attempt {attempt+1} (chunk={len(chunk)}): {resp.status_code}"
+                        )
 
                     # Split only for invalid/oversized chunk responses
                     if resp.status_code in (400, 404, 413, 414) and len(chunk) > 1:
@@ -419,7 +424,7 @@ class CapitalAPI:
                 bad_epic = chunk[0]
                 if bad_epic not in self._invalid_epics:
                     self._invalid_epics.add(bad_epic)
-                    log.warning(f"🚫 Blacklisting invalid epic from batch fetch: {bad_epic}")
+                    log.info(f"🚫 Blacklisting invalid epic from batch fetch: {bad_epic}")
             return []
 
         all_markets: list = []
