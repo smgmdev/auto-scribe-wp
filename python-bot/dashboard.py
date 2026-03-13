@@ -233,6 +233,21 @@ body {
 .topbar-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
 .topbar-right { display: flex; gap: 16px; font-size: 12px; color: #888; flex-wrap: wrap; }
 .topbar-right .val { color: #fff; font-weight: 600; }
+#updateBtn {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+}
+#updateBtn:hover { background: #333; border-color: #666; }
+#updateBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+#updateBtn.success { background: #16a34a; border-color: #22c55e; }
+#updateBtn.error { background: #b91c1c; border-color: #dc2626; }
 .tick-counter { font-variant-numeric: tabular-nums; }
 
 /* Grid layout */
