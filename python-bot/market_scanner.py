@@ -548,11 +548,16 @@ class MarketScanner:
             else:
                 log.info("⏭️  Commodities: 5/5 positions filled — skipping scan")
             if std_epics:
-                log.info("🔍 ═══ STANDARD SCAN (Stocks + Commodities) ═══")
+                std_page = self._next_scan_page(
+                    std_epics,
+                    self.STANDARD_SCAN_PAGE_SIZE,
+                    "std",
+                )
+                log.info(f"🔍 ═══ STANDARD SCAN (Stocks + Commodities) [{len(std_page)}/{len(std_epics)}] ═══")
 
-                # Sequential volatility scan — avoids API rate limiting from parallel calls
+                # Sequential volatility scan — avoids API rate limiting spikes
                 vol_scans = []
-                for ep in std_epics:
+                for ep in std_page:
                     vol_scans.append(self._quick_volatility_scan(ep))
 
                 vol_scans.sort(key=lambda x: x["volatility"], reverse=True)

@@ -760,10 +760,10 @@ def run():
 
                 if batch_success:
                     _batch_fail_streak = 0
-                    _next_batch_fetch_ts = time.time() + 2
+                    _next_batch_fetch_ts = time.time() + 4
                 else:
                     _batch_fail_streak += 1
-                    cooldown = min(30, 3 * _batch_fail_streak)
+                    cooldown = min(45, 4 * _batch_fail_streak)
                     _next_batch_fetch_ts = time.time() + cooldown
                     log.warning(f"⏸️ Batch fetch cooldown {cooldown}s (fail streak: {_batch_fail_streak})")
 
