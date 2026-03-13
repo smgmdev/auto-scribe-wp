@@ -432,7 +432,6 @@ function renderPositions(positions) {
             }, { once: true });
         }
     });
-    });
 }
 
 function renderHistory(trades) {
