@@ -113,9 +113,9 @@ def write_live_state(api, balance, positions, pos_manager, tick_history):
                 pnl = float(api_pnl)
             else:
                 if direction == "BUY":
-                    pnl = current_price - entry_price
+                    pnl = (current_price - entry_price) * size
                 else:
-                    pnl = entry_price - current_price
+                    pnl = (entry_price - current_price) * size
 
             tracked = pos_manager.tracked.get(deal_id, {})
 
@@ -129,6 +129,8 @@ def write_live_state(api, balance, positions, pos_manager, tick_history):
                 "size": size,
                 "unrealized_pnl": round(pnl, 5),
                 "locked_steps": tracked.get("locked_steps", 0),
+                "trailing_stop_price": tracked.get("trailing_stop_price"),
+                "stop_distance": tracked.get("stop_distance", 0),
                 "category": config.get_category(epic),
             })
 
@@ -159,7 +161,7 @@ def run():
         sys.exit(1)
 
     # Start dashboard AFTER login so it can use the API session
-    start_dashboard_thread(api=api)
+    start_dashboard_thread(api=api, pos_manager=None)  # pos_manager set later
 
     account = api.get_account()
     if not account:
@@ -173,6 +175,10 @@ def run():
     pos_manager = PositionManager()
     journal = TradeJournal()
     discovery = AssetDiscovery(api)
+
+    # Give dashboard access to position manager for SL data
+    from dashboard import set_pos_manager_ref
+    set_pos_manager_ref(pos_manager)
 
     # --- Initial asset discovery: AI picks best stocks & crypto ---
     log.info("🔎 Running initial asset discovery...")

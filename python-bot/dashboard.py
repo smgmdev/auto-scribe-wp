@@ -44,6 +44,12 @@ _live_cache = {
 }
 _cache_lock = threading.Lock()
 _api_ref = None  # Set by start_dashboard_thread
+_pos_manager_ref = None  # Set by main after PositionManager init
+
+
+def set_pos_manager_ref(pm):
+    global _pos_manager_ref
+    _pos_manager_ref = pm
 
 # Categories disabled by toggle — positions get closed, no new trades
 _disabled_categories: set = set()
@@ -112,6 +118,8 @@ def _price_fetcher_loop():
                                 "direction": p.get("direction", ""),
                                 "entry_price": float(p.get("entry_price", 0) or 0),
                                 "size": float(p.get("size", 0) or 0),
+                                "trailing_stop": p.get("trailing_stop_price"),
+                                "stop_distance": float(p.get("stop_distance", 0) or 0),
                             })
 
                         with _cache_lock:
@@ -198,15 +206,15 @@ def _price_fetcher_loop():
                         current_price = entry_price
                         bid = ask = entry_price
 
-                # P&L from API or calculate
+                # P&L from API or calculate (multiply by size for dollar value)
                 api_pnl = pos.get("position", {}).get("profit")
                 if api_pnl is not None:
                     pnl = float(api_pnl)
                 else:
                     if direction == "BUY":
-                        pnl = current_price - entry_price
+                        pnl = (current_price - entry_price) * size
                     else:
-                        pnl = entry_price - current_price
+                        pnl = (entry_price - current_price) * size
 
                 # Format pair name
                 pair = epic
@@ -218,6 +226,24 @@ def _price_fetcher_loop():
                 raw_cat = config.get_category(epic)
                 display_cat = cat_map.get(raw_cat, "Stocks")
 
+                # Get SL data from position manager
+                deal_id = pos.get("position", {}).get("dealId", "")
+                tracked = {}
+                if _pos_manager_ref and deal_id:
+                    tracked = _pos_manager_ref.tracked.get(deal_id, {})
+
+                trailing_stop = tracked.get("trailing_stop_price")
+                stop_dist = tracked.get("stop_distance", 0)
+
+                # If no trailing stop, calculate initial SL from stop_distance
+                if trailing_stop is None and stop_dist > 0:
+                    if direction == "BUY":
+                        sl_price = entry_price - stop_dist
+                    else:
+                        sl_price = entry_price + stop_dist
+                else:
+                    sl_price = trailing_stop
+
                 categories[display_cat].append({
                     "epic": epic,
                     "pair": pair,
@@ -228,6 +254,8 @@ def _price_fetcher_loop():
                     "direction": direction,
                     "entry_price": entry_price,
                     "size": size,
+                    "trailing_stop": round(sl_price, 6) if sl_price is not None else None,
+                    "stop_distance": stop_dist,
                 })
 
             now = datetime.utcnow()
@@ -432,6 +460,15 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+.slot-sl {
+    font-size: clamp(8px, 0.9vw, 10px);
+    margin-top: 2px;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: #facc15;
+}
+
 .slot-dir {
     position: absolute;
     top: 3px;
@@ -566,6 +603,7 @@ function buildGrid() {
                     `<span class="slot-price"></span>` +
                     `<span class="slot-entry"></span>` +
                     `<span class="slot-pnl"></span>` +
+                    `<span class="slot-sl"></span>` +
                     `<span class="slot-empty-text">—</span>` +
                     `</div>`;
         }
@@ -595,6 +633,7 @@ function updateGrid(data) {
                 const pnl = (t.pnl !== undefined && t.pnl !== null) ? t.pnl : 0;
                 const dir = t.direction || '';
                 const entryP = t.entry_price || 0;
+                const size = t.size || 0;
 
                 // Update text
                 el.querySelector('.slot-dir').textContent = dir;
@@ -602,12 +641,28 @@ function updateGrid(data) {
                 el.querySelector('.slot-price').textContent = formatPrice(price);
                 el.querySelector('.slot-entry').textContent = 'Entry: ' + formatPrice(entryP);
 
-                // P&L number + percentage
+                // P&L: use backend value, or calculate dollar P&L from price diff * size
                 var pnlPct = (entryP > 0) ? (((price - entryP) / entryP) * 100 * (dir === 'BUY' ? 1 : -1)) : 0;
-                var pnlAbs = (dir === 'BUY') ? (price - entryP) : (entryP - price);
-                var pnlText = formatPnl(pnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%)';
+                var displayPnl = pnl;
+                // If pnl looks like a per-unit value (very small), multiply by size
+                if (Math.abs(pnl) < 0.01 && size > 0 && entryP > 0) {
+                    var calcPnl = (dir === 'BUY') ? (price - entryP) * size : (entryP - price) * size;
+                    if (Math.abs(calcPnl) > Math.abs(pnl)) {
+                        displayPnl = calcPnl;
+                    }
+                }
+                var pnlText = '$' + formatPnl(displayPnl) + ' (' + (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%)';
                 el.querySelector('.slot-pnl').textContent = pnlText;
                 el.querySelector('.slot-pnl').style.color = pnlPct >= 0 ? '#4ade80' : '#f87171';
+
+                // SL display
+                var slEl = el.querySelector('.slot-sl');
+                if (t.trailing_stop !== null && t.trailing_stop !== undefined) {
+                    slEl.textContent = 'SL: ' + formatPrice(t.trailing_stop);
+                } else {
+                    slEl.textContent = 'SL: —';
+                }
+
                 el.querySelector('.slot-empty-text').textContent = '';
 
                 // Flash on price change — quick 150ms transition
@@ -635,6 +690,7 @@ function updateGrid(data) {
                 el.querySelector('.slot-entry').textContent = '';
                 el.querySelector('.slot-pnl').textContent = '';
                 el.querySelector('.slot-pnl').style.color = '';
+                el.querySelector('.slot-sl').textContent = '';
                 el.querySelector('.slot-empty-text').textContent = '—';
             }
         }
@@ -875,10 +931,12 @@ def run_dashboard():
     server.serve_forever()
 
 
-def start_dashboard_thread(api=None):
+def start_dashboard_thread(api=None, pos_manager=None):
     """Start dashboard HTTP server + live price fetcher threads."""
-    global _api_ref
+    global _api_ref, _pos_manager_ref
     _api_ref = api
+    if pos_manager is not None:
+        _pos_manager_ref = pos_manager
 
     # Start the dedicated price fetcher thread
     fetcher = threading.Thread(target=_price_fetcher_loop, daemon=True)
