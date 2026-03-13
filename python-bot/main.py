@@ -428,13 +428,22 @@ def run():
                         continue
 
                     # Calculate stop distance from scanner's multi-TF ATR
-                    if stop_distance <= 0 or atr <= 0:
-                        recent_prices = [t["mid"] for t in tick_history[epic][-30:]]
-                        price_range = max(recent_prices) - min(recent_prices)
+                    stop_invalid = (not math.isfinite(stop_distance)) or (not math.isfinite(atr)) or stop_distance <= 0 or atr <= 0
+                    if stop_invalid:
+                        recent_prices = [t["mid"] for t in tick_history[epic][-30:] if math.isfinite(t.get("mid", 0))]
+                        if len(recent_prices) >= 2:
+                            price_range = max(recent_prices) - min(recent_prices)
+                        else:
+                            price_range = 0
                         stop_distance = max(price_range * 1.5, spread * 10, mid * 0.001)
 
                     # Ensure stop distance is always positive and reasonable
-                    stop_distance = max(abs(stop_distance), spread * 3, mid * 0.0005)
+                    safe_stop = abs(float(stop_distance)) if math.isfinite(stop_distance) else 0.0
+                    stop_distance = max(safe_stop, spread * 3, mid * 0.0005)
+
+                    if not math.isfinite(stop_distance) or stop_distance <= 0:
+                        log.warning(f"Skipping {epic}: invalid stop_distance computed ({stop_distance})")
+                        continue
 
                     # Query market info for minimum stop distance
                     try:
