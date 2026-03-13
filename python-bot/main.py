@@ -1,6 +1,7 @@
 """
-Capital.com Real-Time Trading Bot — Sub-Second Precision
+Capital.com Real-Time Trading Bot — Smart Adaptive Trading
 Streams prices via polling at 1s intervals, uses tick-level momentum detection.
+Features: Dynamic loss cutting, early profit taking, and AI-driven parameter adaptation.
 """
 
 import time
@@ -12,6 +13,8 @@ import config
 from capital_api import CapitalAPI
 from strategy import analyze, Signal, tick_momentum
 from risk import calculate_position_size, can_open_position
+from position_manager import PositionManager
+from trade_journal import TradeJournal
 from logger_setup import get_logger
 
 log = get_logger("main")
@@ -20,7 +23,8 @@ BANNER = """
 ╔══════════════════════════════════════════════════════════╗
 ║   CAPITAL.COM REAL-TIME TRADING BOT  (DEMO)             ║
 ║   ⚡ 1-second price scanning — tick-level precision      ║
-║   Strategy: EMA Crossover + Tick Momentum + ATR Stops    ║
+║   🧠 Adaptive AI: learns from every trade                ║
+║   Strategy: EMA + Momentum + Smart Exits + Trailing SL   ║
 ║   Assets: Gold, Silver, Oil, Gas, US Stocks              ║
 ╚══════════════════════════════════════════════════════════╝
 """
@@ -46,21 +50,37 @@ def run():
     balance = account.get("balance", {}).get("balance", 0)
     log.info(f"Starting balance: {balance:.2f}")
 
+    # Initialize smart systems
+    pos_manager = PositionManager()
+    journal = TradeJournal()
+
+    # Print learning stats on startup
+    stats = journal.get_stats()
+    if stats["total"] > 0:
+        log.info(
+            f"🧠 Historical: {stats['total']} trades | "
+            f"Win rate: {stats['win_rate']:.0%} | "
+            f"Total P&L: {stats['total_pnl']:.5f}"
+        )
+
     # Tick history for real-time momentum detection
     tick_history: dict[str, list[dict]] = defaultdict(list)
-    MAX_TICKS = 120  # Keep last 120 ticks (2 min at 1s interval)
+    MAX_TICKS = 120
 
-    # Track which epics have active signals to avoid duplicate entries
-    active_signals: dict[str, str] = {}  # epic -> last signal direction
+    # Track which epics have active signals
+    active_signals: dict[str, str] = {}
 
-    # Candle analysis cache (refresh every 60s, not every tick)
+    # Track entry info for journal logging
+    entry_info: dict[str, dict] = {}  # deal_id -> {entry_price, momentum, rsi, reason, time}
+
+    # Candle analysis cache
     candle_cache: dict[str, dict] = {}
     last_candle_fetch = 0
     CANDLE_REFRESH_INTERVAL = 60
 
     # Session keepalive
-    ping_counter = 0
     cycle_count = 0
+    positions = []
 
     while True:
         try:
@@ -73,9 +93,17 @@ def run():
                 log.info("━━━ Refreshing candle analysis ━━━")
                 for epic in config.WATCHLIST:
                     try:
+                        # Get adaptive params for this epic
+                        adaptive = journal.get_params(epic)
                         prices = api.get_prices(epic, config.CANDLE_TIMEFRAME, num_points=config.EMA_TREND + 10)
                         if prices:
-                            candle_cache[epic] = analyze(prices)
+                            candle_cache[epic] = analyze(prices, adaptive)
+                            sig = candle_cache[epic]
+                            if sig["signal"] != Signal.HOLD:
+                                log.info(
+                                    f"  {epic}: {sig['signal']} — {sig['reason']} "
+                                    f"| RSI={sig.get('rsi', '?')} mom={sig.get('momentum_score', '?')}"
+                                )
                     except Exception as e:
                         log.error(f"Candle fetch error {epic}: {e}")
                 last_candle_fetch = now
@@ -92,14 +120,98 @@ def run():
                 if acct:
                     balance = acct.get("balance", {}).get("balance", balance)
                     log.info(f"💰 Balance refresh: {balance:.2f}")
+                # Print learning summary
+                for epic in config.WATCHLIST:
+                    s = journal.get_stats(epic)
+                    if s["total"] > 0:
+                        log.info(f"  🧠 {epic}: {s['total']} trades, {s['win_rate']:.0%} win rate")
 
-            # Get positions once per cycle
-            positions = api.get_positions() if cycle_count % 5 == 0 else positions if 'positions' in dir() else []
+            # Get positions every 5 cycles
+            if cycle_count % 5 == 0:
+                positions = api.get_positions()
 
-            # ⚡ Real-time tick scan — every second
+            # ═══════════════════════════════════════════
+            # ⚡ SMART POSITION MANAGEMENT — every cycle
+            # ═══════════════════════════════════════════
+            if positions and cycle_count % 2 == 0:  # Check every 2 seconds
+                for pos in positions:
+                    try:
+                        pos_epic = pos.get("market", {}).get("epic", "")
+                        pos_direction = pos.get("position", {}).get("direction", "")
+                        deal_id = pos.get("position", {}).get("dealId", "")
+
+                        if not deal_id or pos_epic not in tick_history:
+                            continue
+
+                        # Get current price from latest tick
+                        if not tick_history[pos_epic]:
+                            continue
+                        current_price = tick_history[pos_epic][-1]["mid"]
+
+                        # Auto-track if not already tracked
+                        if deal_id not in pos_manager.tracked:
+                            entry_price = float(pos.get("position", {}).get("level", current_price))
+                            stop_dist = candle_cache.get(pos_epic, {}).get("stop_distance", 0)
+                            profit_dist = candle_cache.get(pos_epic, {}).get("profit_distance", 0)
+                            if stop_dist > 0 and profit_dist > 0:
+                                pos_manager.track_position(
+                                    deal_id, pos_epic, pos_direction,
+                                    entry_price, stop_dist, profit_dist
+                                )
+
+                        # Get adaptive params
+                        adaptive = journal.get_params(pos_epic)
+
+                        # Evaluate position
+                        evaluation = pos_manager.evaluate_position(
+                            deal_id, current_price,
+                            tick_history.get(pos_epic, []),
+                            adaptive
+                        )
+
+                        if evaluation["action"] in ("CLOSE_PROFIT", "CLOSE_LOSS"):
+                            log.info(
+                                f"{'💰' if 'PROFIT' in evaluation['action'] else '🔴'} "
+                                f"{evaluation['action']} {pos_epic} — {evaluation['reason']} "
+                                f"| P&L: {evaluation['unrealized_pnl']:.5f}"
+                            )
+                            closed = api.close_position(deal_id)
+                            if closed:
+                                # Log to journal for learning
+                                tracked = pos_manager.tracked.get(deal_id, {})
+                                entry_data = entry_info.get(deal_id, {})
+                                journal.log_trade({
+                                    "epic": pos_epic,
+                                    "direction": pos_direction,
+                                    "entry_price": tracked.get("entry_price", 0),
+                                    "exit_price": current_price,
+                                    "pnl": evaluation["unrealized_pnl"],
+                                    "pnl_pct": (evaluation["unrealized_pnl"] / tracked.get("entry_price", 1)) * 100,
+                                    "size": 0,
+                                    "entry_reason": entry_data.get("reason", "unknown"),
+                                    "exit_reason": evaluation["reason"],
+                                    "duration_seconds": time.time() - tracked.get("entry_time", time.time()),
+                                    "momentum_at_entry": entry_data.get("momentum", 0),
+                                    "momentum_at_exit": tick_momentum(tick_history.get(pos_epic, [])).get("strength", 0),
+                                    "rsi_at_entry": entry_data.get("rsi", 50),
+                                    "stop_distance": tracked.get("stop_distance", 0),
+                                    "profit_distance": tracked.get("profit_distance", 0),
+                                    "hit_tp": False,
+                                    "hit_sl": "LOSS" in evaluation["action"],
+                                    "early_exit": True,
+                                })
+                                pos_manager.untrack(deal_id)
+                                active_signals.pop(pos_epic, None)
+                                entry_info.pop(deal_id, None)
+
+                    except Exception as e:
+                        log.error(f"Position management error: {e}")
+
+            # ═══════════════════════════════════════════
+            # ⚡ ENTRY SCANNING — every second
+            # ═══════════════════════════════════════════
             for epic in config.WATCHLIST:
                 try:
-                    # Fetch latest 1-minute candle for real-time bid/ask
                     tick_data = api.get_prices(epic, "MINUTE", num_points=2)
                     if not tick_data or not tick_data.get("prices"):
                         continue
@@ -111,20 +223,14 @@ def run():
                     spread = ask - bid
                     ts = time.time()
 
-                    # Store tick
                     tick_history[epic].append({
-                        "time": ts,
-                        "bid": bid,
-                        "ask": ask,
-                        "mid": mid,
-                        "spread": spread,
+                        "time": ts, "bid": bid, "ask": ask,
+                        "mid": mid, "spread": spread,
                     })
 
-                    # Trim to MAX_TICKS
                     if len(tick_history[epic]) > MAX_TICKS:
                         tick_history[epic] = tick_history[epic][-MAX_TICKS:]
 
-                    # Need at least 10 ticks for momentum analysis
                     if len(tick_history[epic]) < 10:
                         continue
 
@@ -135,50 +241,55 @@ def run():
                     stop_distance = candle_signal.get("stop_distance", 0)
                     profit_distance = candle_signal.get("profit_distance", 0)
 
-                    # ⚡ Tick-level momentum check
+                    # Get adaptive params for this epic
+                    adaptive = journal.get_params(epic)
+                    entry_threshold = adaptive.get("momentum_entry_threshold", 0.6)
+
+                    # ⚡ Tick-level momentum
                     momentum = tick_momentum(tick_history[epic])
 
-                    # Entry logic: candle trend + tick momentum must agree
+                    # Entry logic with adaptive thresholds
                     entry_signal = Signal.HOLD
 
-                    if trend_bias == Signal.BUY and momentum["direction"] == "UP" and momentum["strength"] >= 0.6:
+                    if trend_bias == Signal.BUY and momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
                         entry_signal = Signal.BUY
-                    elif trend_bias == Signal.SELL and momentum["direction"] == "DOWN" and momentum["strength"] >= 0.6:
+                    elif trend_bias == Signal.SELL and momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
                         entry_signal = Signal.SELL
 
-                    # Also: pure tick breakout (no candle signal needed)
+                    # Pure tick breakout (higher threshold)
                     if entry_signal == Signal.HOLD and momentum["strength"] >= 0.85:
                         if momentum["direction"] == "UP" and momentum["acceleration"] > 0:
                             entry_signal = Signal.BUY
-                            log.info(f"⚡ {epic} TICK BREAKOUT BUY | strength={momentum['strength']:.2f}")
+                            log.info(f"⚡ {epic} TICK BREAKOUT BUY | str={momentum['strength']:.2f} RSI={momentum.get('micro_rsi', '?')}")
                         elif momentum["direction"] == "DOWN" and momentum["acceleration"] < 0:
                             entry_signal = Signal.SELL
-                            log.info(f"⚡ {epic} TICK BREAKOUT SELL | strength={momentum['strength']:.2f}")
+                            log.info(f"⚡ {epic} TICK BREAKOUT SELL | str={momentum['strength']:.2f} RSI={momentum.get('micro_rsi', '?')}")
 
                     if entry_signal == Signal.HOLD:
-                        # Log price every 10 cycles for monitoring
                         if cycle_count % 10 == 0:
                             log.debug(
                                 f"{epic}: {mid:.5f} | spread={spread:.5f} | "
-                                f"mom={momentum['direction']} {momentum['strength']:.2f}"
+                                f"mom={momentum['direction']} {momentum['strength']:.2f} | "
+                                f"RSI={momentum.get('micro_rsi', '?')}"
                             )
                         continue
 
-                    # Skip if same signal already active
                     if active_signals.get(epic) == entry_signal:
                         continue
 
-                    # Can we open?
                     if not can_open_position(positions, epic):
                         continue
 
-                    # Use ATR-based stops if available, otherwise use tick-based stops
+                    # Use adaptive SL/TP from learning
                     if stop_distance <= 0 or atr <= 0:
-                        # Fallback: use recent price range as stop
                         recent_prices = [t["mid"] for t in tick_history[epic][-30:]]
                         price_range = max(recent_prices) - min(recent_prices)
                         stop_distance = max(price_range * 1.5, spread * 10)
                         profit_distance = stop_distance * 1.5
+                    else:
+                        # Apply learned multipliers
+                        stop_distance = atr * adaptive.get("sl_multiplier", config.ATR_SL_MULTIPLIER)
+                        profit_distance = atr * adaptive.get("tp_multiplier", config.ATR_TP_MULTIPLIER)
 
                     size = calculate_position_size(balance, stop_distance, mid)
                     if size <= 0:
@@ -194,45 +305,33 @@ def run():
                     )
 
                     if trade:
+                        deal_ref = trade.get("dealReference", "")
                         active_signals[epic] = entry_signal
+
+                        # Track for smart management
+                        pos_manager.track_position(
+                            deal_ref, epic, entry_signal,
+                            mid, stop_distance, profit_distance
+                        )
+
+                        # Store entry info for journal
+                        entry_info[deal_ref] = {
+                            "reason": candle_signal.get("reason", "tick breakout"),
+                            "momentum": momentum["strength"],
+                            "rsi": momentum.get("micro_rsi", 50),
+                            "time": time.time(),
+                        }
+
                         log.info(
                             f"✅ {entry_signal} {epic} @ {mid:.5f} | "
                             f"Size: {size} | SL: {stop_distance:.5f} | TP: {profit_distance:.5f} | "
-                            f"Momentum: {momentum['strength']:.2f}"
+                            f"Mom: {momentum['strength']:.2f} | RSI: {momentum.get('micro_rsi', '?')} | "
+                            f"Adaptive: SL={adaptive.get('sl_multiplier', '?')}x TP={adaptive.get('tp_multiplier', '?')}x"
                         )
 
                 except Exception as e:
                     log.error(f"Tick scan error {epic}: {e}")
                     continue
-
-            # ⚡ Exit management — check every 5 seconds
-            if cycle_count % 5 == 0 and positions:
-                for pos in positions:
-                    try:
-                        pos_epic = pos.get("market", {}).get("epic", "")
-                        pos_direction = pos.get("position", {}).get("direction", "")
-                        deal_id = pos.get("position", {}).get("dealId", "")
-
-                        if pos_epic not in tick_history or len(tick_history[pos_epic]) < 10:
-                            continue
-
-                        momentum = tick_momentum(tick_history[pos_epic])
-
-                        # Exit if momentum reverses against position
-                        should_exit = False
-                        if pos_direction == "BUY" and momentum["direction"] == "DOWN" and momentum["strength"] >= 0.7:
-                            should_exit = True
-                            log.info(f"⚡ EXIT signal {pos_epic} — momentum reversed DOWN ({momentum['strength']:.2f})")
-                        elif pos_direction == "SELL" and momentum["direction"] == "UP" and momentum["strength"] >= 0.7:
-                            should_exit = True
-                            log.info(f"⚡ EXIT signal {pos_epic} — momentum reversed UP ({momentum['strength']:.2f})")
-
-                        if should_exit:
-                            api.close_position(deal_id)
-                            active_signals.pop(pos_epic, None)
-
-                    except Exception as e:
-                        log.error(f"Exit check error: {e}")
 
             # Sleep to maintain 1-second cycle
             elapsed = time.time() - cycle_start
@@ -242,6 +341,8 @@ def run():
 
         except KeyboardInterrupt:
             log.info("🛑 Bot stopped by user")
+            stats = journal.get_stats()
+            log.info(f"📊 Session stats: {stats['total']} trades | Win rate: {stats['win_rate']:.0%}")
             break
         except Exception as e:
             log.error(f"Loop error: {e}")
