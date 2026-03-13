@@ -72,7 +72,7 @@ def _validate_sl(sl_price: float, entry_price: float, direction: str,
             return corrected
     else:
         # Profit locked — SL should be at locked level
-        expected_pnl = locked_steps * entry_price * PROFIT_STEP_PCT
+        expected_pnl = locked_steps * entry_price * step_pct
         if direction == "BUY":
             expected_sl = entry_price + expected_pnl
             if sl_price < entry_price:
