@@ -626,6 +626,26 @@ def run():
                                 active_signals.pop(pos_epic, None)
                                 entry_info.pop(deal_id, None)
 
+                                # ═══════════════════════════════════════
+                                # LOSS COOLDOWN: record loss for this epic
+                                # ═══════════════════════════════════════
+                                if "LOSS" in evaluation["action"]:
+                                    prev = loss_cooldowns.get(pos_epic, {})
+                                    consec = prev.get("consecutive_losses", 0) + 1
+                                    loss_cooldowns[pos_epic] = {
+                                        "time": time.time(),
+                                        "consecutive_losses": consec,
+                                    }
+                                    # Also invalidate scanner cache so stale signal doesn't re-trigger
+                                    scanner.invalidate(pos_epic)
+                                    log.info(
+                                        f"🧊 {pos_epic}: Loss cooldown activated "
+                                        f"(consecutive: {consec})"
+                                    )
+                                else:
+                                    # Profitable close: reset cooldown for this epic
+                                    loss_cooldowns.pop(pos_epic, None)
+
                     except Exception as e:
                         log.error(f"Position management error: {e}")
 
