@@ -199,7 +199,7 @@ export default function InvestorRelations() {
 
 
         {/* Product Intro Video Section */}
-        <section id="media-buying-marketplace" className="relative overflow-hidden bg-black">
+        <section id="media-buying-marketplace" className="relative overflow-hidden bg-black min-h-screen">
           <video
             autoPlay
             muted
