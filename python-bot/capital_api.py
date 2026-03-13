@@ -273,12 +273,18 @@ class CapitalAPI:
 
     def get_market_categories(self) -> list:
         """Get all top-level market navigation categories."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/marketnavigation", headers=self._headers()
+                f"{self.base_url}/api/v1/marketnavigation", headers=self._headers(),
+                timeout=10,
             )
             if resp.status_code == 200:
+                _handle_success()
                 return resp.json().get("nodes", [])
+            else:
+                _handle_error(resp.status_code)
+                log.warning(f"Market categories: {resp.status_code}")
         except Exception as e:
             log.error(f"Market categories exception: {e}")
         return []
