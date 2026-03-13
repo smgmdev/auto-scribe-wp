@@ -553,7 +553,7 @@ body {
     </div>
     <div class="topbar-right">
         <span>Balance: <span class="val" id="balance">$0.00</span></span>
-        <span>Open: <span class="val" id="openCount">0/5</span></span>
+        <span>Open: <span class="val" id="openCount">0/20</span></span>
         <span>Updated: <span class="val tick-counter" id="lastTick">—</span></span>
         <button id="updateBtn" onclick="pullAndRestart()" title="Git pull &amp; restart bot">⟳ Update</button>
     </div>
