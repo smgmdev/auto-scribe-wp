@@ -3,9 +3,10 @@ Smart Position Manager — Dynamic loss cutting and unlimited profit riding.
 
 Key behaviors:
 1. Unlimited TP: no fixed take-profit — let winners run indefinitely
-2. Default SL at -1.5% from entry price
-3. At +5% profit, SL locks at +5%; at +10% → SL at +10%, etc.
+2. Default SL at -1% from entry price
+3. At +1% profit, SL locks at +1%; at +2% → SL at +2%, etc.
 4. SL only moves UP (never backwards)
+5. BTC: SL at -0.75%, steps at 1%
 """
 
 import time
@@ -15,8 +16,8 @@ log = get_logger("pos_mgr")
 
 # Initial SL: 1% below entry (default)
 INITIAL_SL_PCT = 0.01
-# Step size for SL ratcheting: 5% of entry price (default)
-PROFIT_STEP_PCT = 0.05
+# Step size for SL ratcheting: 1% of entry price (default)
+PROFIT_STEP_PCT = 0.01
 
 # BTC-specific overrides
 BTC_INITIAL_SL_PCT = 0.0075   # 0.75% from entry
