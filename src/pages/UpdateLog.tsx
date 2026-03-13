@@ -839,7 +839,7 @@ export default function UpdateLog() {
             />
             <select
               value={selectedYear}
-              onChange={(e) => { setSelectedYear(e.target.value); setSelectedMonth('all'); }}
+              onChange={(e) => { setSelectedYear(e.target.value); setSelectedMonth('all'); setVisibleCount(15); }}
               className="px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white focus:outline-none focus:border-white/50 transition-colors appearance-none cursor-pointer"
             >
               <option value="all">All Years</option>
