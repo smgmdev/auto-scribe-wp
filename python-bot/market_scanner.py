@@ -336,9 +336,9 @@ class MarketScanner:
             if majority_dir == "SELL" and rsi_val < oversold:
                 rsi_ok = False
 
-        # Thresholds — raised significantly to filter weak signals
+        # Thresholds — raised to filter weak/ambiguous signals
         min_majority = 2 if is_scalp else 2
-        min_confidence = 0.35 if is_scalp else 0.45
+        min_confidence = 0.42 if is_scalp else 0.50
 
         # For standard mode, require at least one TF with trend alignment
         trend_ok = True
