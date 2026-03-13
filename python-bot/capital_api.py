@@ -6,6 +6,7 @@ and request pacing to avoid 429 errors.
 
 import math
 import time
+import threading
 import requests
 from typing import Optional
 from logger_setup import get_logger
@@ -13,22 +14,25 @@ import config
 
 log = get_logger("capital_api")
 
-# Rate limit protection
-_MIN_REQUEST_INTERVAL = 0.15  # 150ms between requests
+# Rate limit protection — thread-safe with Lock
+_MIN_REQUEST_INTERVAL = 0.25  # 250ms between requests (was 150ms — too fast for 2 threads)
+_request_lock = threading.Lock()
 _last_request_time = 0.0
 _consecutive_errors = 0
 _MAX_RETRIES = 2
-_BACKOFF_BASE = 1.0  # seconds
+_BACKOFF_BASE = 1.5  # seconds (was 1.0)
 
 
 def _pace_request():
-    """Enforce minimum interval between API requests to avoid rate limits."""
+    """Enforce minimum interval between API requests across ALL threads."""
     global _last_request_time
-    now = time.time()
-    elapsed = now - _last_request_time
-    if elapsed < _MIN_REQUEST_INTERVAL:
-        time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
-    _last_request_time = time.time()
+    with _request_lock:
+        now = time.time()
+        elapsed = now - _last_request_time
+        if elapsed < _MIN_REQUEST_INTERVAL:
+            wait = _MIN_REQUEST_INTERVAL - elapsed
+            time.sleep(wait)
+        _last_request_time = time.time()
 
 
 def _handle_error(resp_status: int):
