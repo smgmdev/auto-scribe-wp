@@ -61,6 +61,7 @@ export default function InvestorRelations() {
   const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
+  const [productsVideoLoaded, setProductsVideoLoaded] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -207,8 +208,14 @@ export default function InvestorRelations() {
             playsInline
             className="absolute inset-0 w-full h-full object-cover opacity-50"
             src={investorProductsBg}
+            onCanPlayThrough={() => setProductsVideoLoaded(true)}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+          {!productsVideoLoaded && (
+            <div className="absolute top-4 left-4 z-20">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+            </div>
+          )}
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-28 md:py-40 relative z-10 text-center">
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/40 mb-4">Our Products</p>
