@@ -750,7 +750,7 @@ async function fetchState() {
         const dot = document.getElementById('statusDot');
         dot.className = 'status-dot ' + ((d.status === 'running' || d.status === 'running-file') ? 'running' : 'stopped');
         document.getElementById('balance').textContent = '$' + (d.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('openCount').textContent = (d.total_open || 0) + '/5';
+        document.getElementById('openCount').textContent = (d.total_open || 0) + '/20';
         document.getElementById('lastTick').textContent = d.updated_at || '—';
 
         syncToggles(d.disabled_categories);
