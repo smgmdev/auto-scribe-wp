@@ -369,7 +369,7 @@ body {
     .grid-container { padding: 16px 12px; gap: 12px; }
     .category-label { width: 70px; min-width: 70px; font-size: 14px; }
     .slots { gap: 6px; }
-    .slot { min-height: 60px; padding: 8px 4px; border-radius: 6px; }
+    .slot { min-height: 60px; padding: 8px 4px; border-radius: 0; }
 }
 
 @media (max-width: 600px) {
