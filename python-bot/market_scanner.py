@@ -64,6 +64,9 @@ class MarketScanResult:
         self.stop_distance: float = 0.0
         self.atr: float = 0.0
         self.is_scalp: bool = False
+        self.nearest_support: float = 0.0
+        self.nearest_resistance: float = 0.0
+        self.sr_quality: float = 0.0
 
     def __repr__(self):
         mode = "SCALP" if self.is_scalp else "STD"
