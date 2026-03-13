@@ -14,7 +14,7 @@ CAPITAL_API_URL = os.getenv("CAPITAL_API_URL", "https://demo-api-capital.backend
 # Risk management
 RISK_PER_TRADE = float(os.getenv("RISK_PER_TRADE", "0.01"))
 MAX_POSITIONS_PER_CATEGORY = int(os.getenv("MAX_POSITIONS_PER_CATEGORY", "5"))
-MAX_OPEN_POSITIONS = MAX_POSITIONS_PER_CATEGORY * 3  # 15 total (5 per category)
+MAX_OPEN_POSITIONS = MAX_POSITIONS_PER_CATEGORY * 4  # 20 total (5 per category × 4 categories)
 
 # Strategy parameters
 EMA_FAST = int(os.getenv("EMA_FAST", "9"))
@@ -26,13 +26,14 @@ ATR_TP_MULTIPLIER = float(os.getenv("ATR_TP_MULTIPLIER", "3.0"))
 CANDLE_TIMEFRAME = os.getenv("CANDLE_TIMEFRAME", "MINUTE_15")
 SCAN_INTERVAL_SECONDS = int(os.getenv("SCAN_INTERVAL_SECONDS", "60"))
 
-# ═══════════════════════════════════════════
+# ═══════════════════════════════════════════════
 # ASSET CATEGORIES — each with 5-trade limit
-# ═══════════════════════════════════════════
+# ═══════════════════════════════════════════════
 
 CATEGORY_STOCKS = "stocks"
 CATEGORY_CRYPTO = "crypto"
 CATEGORY_COMMODITIES = "commodities"
+CATEGORY_FOREX = "forex"
 
 # Commodities are fixed (limited, all liquid)
 WATCHLIST_COMMODITIES = [
@@ -42,6 +43,13 @@ WATCHLIST_COMMODITIES = [
     "NATURALGAS",     # Natural Gas
     "COPPER",         # Copper
     "PLATINUM",       # Platinum
+]
+
+# Forex: major & minor pairs (fallback before discovery)
+WATCHLIST_FOREX_FALLBACK = [
+    "EURUSD", "GBPUSD", "USDJPY", "AUDUSD",
+    "USDCAD", "USDCHF", "NZDUSD", "EURGBP",
+    "EURJPY", "GBPJPY",
 ]
 
 # Stocks & Crypto: populated dynamically by AssetDiscovery
@@ -55,9 +63,13 @@ WATCHLIST_CRYPTO_FALLBACK = [
     "BNBUSD", "DOGEUSD", "ADAUSD", "AVAXUSD",
 ]
 
+# Crypto epics that MUST always be included (never rotated out)
+CRYPTO_PINNED = ["BTCUSD"]
+
 # Runtime watchlists (updated by AssetDiscovery)
 WATCHLIST_STOCKS: list[str] = list(WATCHLIST_STOCKS_FALLBACK)
 WATCHLIST_CRYPTO: list[str] = list(WATCHLIST_CRYPTO_FALLBACK)
+WATCHLIST_FOREX: list[str] = list(WATCHLIST_FOREX_FALLBACK)
 
 # Epic → category mapping (rebuilt when watchlists update)
 EPIC_CATEGORY: dict[str, str] = {}
@@ -73,16 +85,28 @@ def rebuild_watchlist():
         EPIC_CATEGORY[epic] = CATEGORY_CRYPTO
     for epic in WATCHLIST_COMMODITIES:
         EPIC_CATEGORY[epic] = CATEGORY_COMMODITIES
-    WATCHLIST = WATCHLIST_STOCKS + WATCHLIST_CRYPTO + WATCHLIST_COMMODITIES
+    for epic in WATCHLIST_FOREX:
+        EPIC_CATEGORY[epic] = CATEGORY_FOREX
+    WATCHLIST = WATCHLIST_STOCKS + WATCHLIST_CRYPTO + WATCHLIST_COMMODITIES + WATCHLIST_FOREX
 
 
-def update_dynamic_watchlists(stock_epics: list[str], crypto_epics: list[str]):
+def update_dynamic_watchlists(
+    stock_epics: list[str],
+    crypto_epics: list[str],
+    forex_epics: list[str] | None = None,
+):
     """Called by AssetDiscovery to update the live watchlists."""
-    global WATCHLIST_STOCKS, WATCHLIST_CRYPTO
+    global WATCHLIST_STOCKS, WATCHLIST_CRYPTO, WATCHLIST_FOREX
     if stock_epics:
         WATCHLIST_STOCKS = stock_epics
     if crypto_epics:
+        # Ensure pinned crypto are always present
+        for pinned in CRYPTO_PINNED:
+            if pinned not in crypto_epics:
+                crypto_epics.insert(0, pinned)
         WATCHLIST_CRYPTO = crypto_epics
+    if forex_epics:
+        WATCHLIST_FOREX = forex_epics
     rebuild_watchlist()
 
 
@@ -94,4 +118,4 @@ def get_category(epic: str) -> str:
 # Initial build
 rebuild_watchlist()
 # Combined watchlist (rebuilt by rebuild_watchlist)
-WATCHLIST: list[str] = WATCHLIST_STOCKS + WATCHLIST_CRYPTO + WATCHLIST_COMMODITIES
+WATCHLIST: list[str] = WATCHLIST_STOCKS + WATCHLIST_CRYPTO + WATCHLIST_COMMODITIES + WATCHLIST_FOREX
