@@ -376,6 +376,7 @@ class CapitalAPI:
                 return []
 
             should_split = False
+            last_status = None
             for attempt in range(_MAX_RETRIES + 1):
                 _pace_request()
                 try:
@@ -385,6 +386,7 @@ class CapitalAPI:
                         headers=self._headers(),
                         timeout=15,
                     )
+                    last_status = resp.status_code
                     if resp.status_code == 200:
                         _handle_success()
                         return resp.json().get("markets", [])
@@ -412,9 +414,12 @@ class CapitalAPI:
                 right = _fetch_chunk(chunk[mid:], depth + 1)
                 return left + right
 
-            # Single epic failed OR non-splittable error (rate limit/auth/network)
-            if len(chunk) == 1:
-                log.debug(f"Skipping invalid/unavailable epic in markets batch: {chunk[0]}")
+            # Single epic failed as invalid/unavailable -> blacklist it
+            if len(chunk) == 1 and last_status in (400, 404):
+                bad_epic = chunk[0]
+                if bad_epic not in self._invalid_epics:
+                    self._invalid_epics.add(bad_epic)
+                    log.warning(f"🚫 Blacklisting invalid epic from batch fetch: {bad_epic}")
             return []
 
         all_markets: list = []
