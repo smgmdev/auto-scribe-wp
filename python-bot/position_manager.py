@@ -26,8 +26,17 @@ class PositionManager:
         self.tracked: dict[str, dict] = {}
 
     def track_position(self, deal_id: str, epic: str, direction: str,
-                       entry_price: float, stop_distance: float, profit_distance: float):
-        """Start tracking a new position."""
+                       entry_price: float, stop_distance: float, profit_distance: float,
+                       spread: float = 0.0):
+        """Start tracking a new position.
+        
+        Args:
+            spread: bid-ask spread at entry time. Used to calculate fee-aware breakeven.
+                    Capital.com charges no commission — the spread IS the fee.
+        """
+        # Capital.com fee = spread (paid on entry + exit = 2x spread cost)
+        fee_cost = spread * 2 if spread > 0 else entry_price * 0.0002  # fallback ~2 pips
+        
         self.tracked[deal_id] = {
             "epic": epic,
             "direction": direction,
@@ -39,8 +48,14 @@ class PositionManager:
             "entry_time": time.time(),
             "break_even_set": False,
             "trailing_stop_price": None,
+            "spread": spread,
+            "fee_cost": fee_cost,  # total round-trip fee in price units
         }
-        log.info(f"📌 Tracking {direction} {epic} @ {entry_price:.5f} | SL={stop_distance:.5f} TP={profit_distance:.5f}")
+        log.info(
+            f"📌 Tracking {direction} {epic} @ {entry_price:.5f} | "
+            f"SL={stop_distance:.5f} TP={profit_distance:.5f} | "
+            f"Spread={spread:.5f} Fee={fee_cost:.5f}"
+        )
 
     def untrack(self, deal_id: str):
         """Stop tracking a position."""
