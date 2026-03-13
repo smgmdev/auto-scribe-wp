@@ -172,7 +172,7 @@ class MarketScanner:
             total_signals += 1
             lookback = min(10, len(closes) - 1)
             recent_slope = (closes[-1] - closes[-lookback]) / closes[-lookback] if lookback > 0 else 0
-            slope_threshold = 0.0003 if is_scalp else 0.001
+            slope_threshold = 0.001 if is_scalp else 0.002
             if recent_slope > slope_threshold:
                 buy_signals += 1
             elif recent_slope < -slope_threshold:
