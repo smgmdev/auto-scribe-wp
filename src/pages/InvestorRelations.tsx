@@ -237,7 +237,7 @@ export default function InvestorRelations() {
         </section>
 
         {/* Mace AI Section */}
-        <section className="bg-black min-h-[auto] md:min-h-screen flex flex-col items-center justify-center px-4 md:px-6 py-20 md:py-0">
+        <section className="bg-black min-h-[auto] md:min-h-screen flex flex-col items-center justify-center px-4 md:px-6 py-10 md:py-0">
           <AnimatedSection className="text-center flex flex-col items-center">
             <p className="text-sm font-medium tracking-wider uppercase text-white/40 mb-4">Our Products</p>
             <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-4">
