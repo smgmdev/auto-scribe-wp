@@ -240,7 +240,7 @@ export default function InvestorRelations() {
         {/* Mace AI Section */}
         <section className="bg-black min-h-screen flex flex-col items-center justify-center px-4 md:px-6 py-28 md:py-40">
           <AnimatedSection className="text-center flex flex-col items-center">
-            <div className="relative w-full max-w-md mb-10">
+            <div className="relative w-48 md:w-64 mb-10">
               {!maceVideoLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center z-10">
                   <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
