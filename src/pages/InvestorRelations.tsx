@@ -223,7 +223,7 @@ export default function InvestorRelations() {
                 Media Buying Marketplace
               </h2>
               <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
-                Diverse network of media outlets worldwide. Empowering clients to publish content where it matters most.
+                Connecting global brands with international PR and marketing agencies. Offering a diverse network of media outlets worldwide. Empowering clients to publish content where it matters most.
               </p>
               <Button
                 onClick={() => navigate('/how-it-works')}
