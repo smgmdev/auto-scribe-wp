@@ -132,7 +132,7 @@ class CapitalAPI:
                 return resp.json()
             else:
                 _handle_error(resp.status_code)
-                log.warning(f"Prices for {epic}: {resp.status_code}")
+                log.debug(f"Prices for {epic}: {resp.status_code}")
         except Exception as e:
             log.error(f"Prices exception for {epic}: {e}")
         return None
