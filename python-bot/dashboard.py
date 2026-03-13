@@ -604,6 +604,47 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+    def do_POST(self):
+        if self.path == "/api/pull-restart":
+            try:
+                bot_dir = os.path.dirname(os.path.abspath(__file__))
+                # Git pull
+                result = subprocess.run(
+                    ["git", "pull"], cwd=bot_dir, capture_output=True, text=True, timeout=30
+                )
+                log.info(f"Git pull: {result.stdout.strip()}")
+                if result.returncode != 0:
+                    log.error(f"Git pull error: {result.stderr.strip()}")
+                    self.send_response(200)
+                    self.send_header("Content-type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"ok": False, "error": result.stderr.strip()}).encode())
+                    return
+
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": True, "git": result.stdout.strip()}).encode())
+
+                # Restart the bot process after response is sent
+                def _restart():
+                    time.sleep(1)
+                    log.info("🔄 Restarting bot process...")
+                    os.execv(sys.executable, [sys.executable, os.path.join(bot_dir, "main.py")])
+
+                restart_thread = threading.Thread(target=_restart, daemon=True)
+                restart_thread.start()
+
+            except Exception as e:
+                log.error(f"Pull/restart error: {e}")
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"ok": False, "error": str(e)}).encode())
+        else:
+            self.send_response(404)
+            self.end_headers()
+
     def log_message(self, format, *args):
         pass
 
