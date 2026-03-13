@@ -1,11 +1,11 @@
 """
-Smart Position Manager — Dynamic loss cutting and profit protection.
+Smart Position Manager — Dynamic loss cutting and unlimited profit riding.
 
 Key behaviors:
-1. Trailing stop: moves stop-loss in profit direction as price moves favorably
-2. Early profit taking: if momentum fades while in profit, close before TP
-3. Smart loss cutting: if trade goes negative and momentum confirms reversal, exit early
-4. Break-even protection: move SL to entry once sufficient profit is reached
+1. Unlimited TP: no fixed take-profit — let winners run indefinitely
+2. 5% step trailing SL: every 5% price growth, lock in profit with new SL
+3. Fee-aware first SL: first profit SL covers trading fees (spread × 2)
+4. Smart loss cutting: exit early if momentum confirms reversal while losing
 """
 
 import time
@@ -15,14 +15,14 @@ import numpy as np
 
 log = get_logger("pos_mgr")
 
+# Step size for SL ratcheting (5% of entry price)
+PROFIT_STEP_PCT = 0.05
+
 
 class PositionManager:
     """Manages open positions with dynamic exits."""
 
     def __init__(self):
-        # Track each position's state
-        # deal_id -> {entry_price, direction, epic, stop_distance, profit_distance,
-        #             highest_profit, lowest_profit, entry_time, break_even_set}
         self.tracked: dict[str, dict] = {}
 
     def track_position(self, deal_id: str, epic: str, direction: str,
@@ -31,30 +31,31 @@ class PositionManager:
         """Start tracking a new position.
         
         Args:
-            spread: bid-ask spread at entry time. Used to calculate fee-aware breakeven.
-                    Capital.com charges no commission — the spread IS the fee.
+            spread: bid-ask spread at entry time. Capital.com fee = spread.
+            profit_distance: kept for compatibility but ignored — TP is unlimited.
         """
-        # Capital.com fee = spread (paid on entry + exit = 2x spread cost)
-        fee_cost = spread * 2 if spread > 0 else entry_price * 0.0002  # fallback ~2 pips
-        
+        fee_cost = spread * 2 if spread > 0 else entry_price * 0.0002
+
         self.tracked[deal_id] = {
             "epic": epic,
             "direction": direction,
             "entry_price": entry_price,
             "stop_distance": stop_distance,
-            "profit_distance": profit_distance,
+            "profit_distance": profit_distance,  # kept for logging only
             "highest_profit": 0.0,
             "lowest_profit": 0.0,
             "entry_time": time.time(),
             "break_even_set": False,
             "trailing_stop_price": None,
             "spread": spread,
-            "fee_cost": fee_cost,  # total round-trip fee in price units
+            "fee_cost": fee_cost,
+            "locked_steps": 0,  # how many 5% steps locked so far
         }
         log.info(
             f"📌 Tracking {direction} {epic} @ {entry_price:.5f} | "
-            f"SL={stop_distance:.5f} TP={profit_distance:.5f} | "
-            f"Spread={spread:.5f} Fee={fee_cost:.5f}"
+            f"SL={stop_distance:.5f} TP=UNLIMITED | "
+            f"Spread={spread:.5f} Fee={fee_cost:.5f} | "
+            f"Step size={entry_price * PROFIT_STEP_PCT:.5f} (5%)"
         )
 
     def untrack(self, deal_id: str):
@@ -66,12 +67,19 @@ class PositionManager:
         """
         Evaluate whether a position should be closed early.
 
+        Unlimited TP strategy:
+        - No fixed TP — the trade runs as long as price keeps moving favorably
+        - Every 5% of price growth from entry, SL ratchets up to lock that level
+        - First SL is set at entry + fees (guarantees net profit)
+        - SL only moves UP (BUY) or DOWN (SELL), never backwards
+        - Trade closes only when price drops back to hit the trailing SL
+
         Returns:
             {
-                "action": "HOLD" | "CLOSE_PROFIT" | "CLOSE_LOSS" | "TRAIL_STOP",
+                "action": "HOLD" | "CLOSE_PROFIT" | "CLOSE_LOSS",
                 "reason": str,
-                "unrealized_pnl": float,  # in price units
-                "pnl_ratio": float,  # ratio of profit distance achieved
+                "unrealized_pnl": float,
+                "pnl_ratio": float,
             }
         """
         pos = self.tracked.get(deal_id)
@@ -81,7 +89,8 @@ class PositionManager:
         direction = pos["direction"]
         entry = pos["entry_price"]
         stop_dist = pos["stop_distance"]
-        profit_dist = pos["profit_distance"]
+        fee_cost = pos.get("fee_cost", 0)
+        step_size = entry * PROFIT_STEP_PCT  # 5% of entry price
 
         # Calculate unrealized P&L
         if direction == "BUY":
@@ -89,20 +98,18 @@ class PositionManager:
         else:
             pnl = entry - current_price
 
-        pnl_ratio = pnl / profit_dist if profit_dist > 0 else 0.0
+        # pnl_ratio uses step_size as reference (since TP is unlimited)
+        pnl_ratio = pnl / step_size if step_size > 0 else 0.0
 
-        # Update high/low watermarks
+        # Update watermarks
         pos["highest_profit"] = max(pos["highest_profit"], pnl)
         pos["lowest_profit"] = min(pos["lowest_profit"], pnl)
 
-        # Adaptive thresholds from learning
+        # Adaptive thresholds
         params = adaptive_params or {}
-        profit_take_threshold = params.get("early_profit_ratio", 0.5)  # Take profit at 50% of TP
-        loss_cut_threshold = params.get("loss_cut_ratio", 0.5)  # Cut at 50% of SL
-        trailing_activation = params.get("trailing_activation", 0.4)  # Activate trailing at 40% of TP
-        trailing_distance_ratio = params.get("trailing_distance", 0.3)  # Trail at 30% of max profit
+        loss_cut_threshold = params.get("loss_cut_ratio", 0.5)
 
-        # --- Get momentum context ---
+        # Momentum context
         momentum = {"direction": "FLAT", "strength": 0.0, "micro_rsi": 50.0}
         if tick_history and len(tick_history) >= 10:
             momentum = tick_momentum(tick_history)
@@ -123,7 +130,6 @@ class PositionManager:
         if pnl < 0:
             loss_ratio = abs(pnl) / stop_dist if stop_dist > 0 else 0
 
-            # If loss > 50% of SL AND momentum confirms reversal → cut early
             if loss_ratio >= loss_cut_threshold:
                 momentum_against = False
                 if direction == "BUY" and momentum["direction"] == "DOWN" and momentum["strength"] >= 0.5:
@@ -139,80 +145,79 @@ class PositionManager:
                     )
                     return result
 
-            # If loss > 70% of SL regardless of momentum → cut to preserve capital
             if loss_ratio >= 0.7:
                 result["action"] = "CLOSE_LOSS"
                 result["reason"] = f"Capital protection: {loss_ratio:.0%} of SL consumed"
                 return result
 
-            # Time-based loss cut: if losing after 5+ minutes with no recovery
             if time_held > 300 and loss_ratio > 0.3 and pos["highest_profit"] <= 0:
                 result["action"] = "CLOSE_LOSS"
                 result["reason"] = f"Stale losing trade ({time_held/60:.0f}min, never profitable)"
                 return result
 
         # ═══════════════════════════════════════════
-        # 2. PROFIT PROTECTION & EARLY TAKE-PROFIT
+        # 2. UNLIMITED TP — 5% STEP TRAILING SL
         # ═══════════════════════════════════════════
 
         if pnl > 0:
-            fee_cost = pos.get("fee_cost", 0)
-            net_pnl = pnl - fee_cost  # profit after fees
-            
-            # --- Fee-aware breakeven: SL moves to entry + fees (guaranteed net profit) ---
+            net_pnl = pnl - fee_cost
+
+            # --- Step 1: Fee-aware first SL (set once when net profitable) ---
             if net_pnl > 0 and not pos["break_even_set"]:
                 pos["break_even_set"] = True
-                # Set SL just above fee-breakeven point
-                fee_buffer = fee_cost * 1.2  # 20% margin above fees
+                pos["locked_steps"] = 0
+                # First SL = entry + fees + small buffer (covers round-trip spread)
+                fee_buffer = fee_cost * 1.5  # 50% margin above fees
                 if direction == "BUY":
                     pos["trailing_stop_price"] = entry + fee_buffer
                 else:
                     pos["trailing_stop_price"] = entry - fee_buffer
                 log.info(
-                    f"🛡️ {pos['epic']} fee-aware breakeven SL @ {pos['trailing_stop_price']:.5f} "
-                    f"(fee={fee_cost:.5f}, net_pnl={net_pnl:.5f})"
+                    f"🛡️ {pos['epic']} FIRST profit SL @ {pos['trailing_stop_price']:.5f} "
+                    f"(entry={entry:.5f} + fee_buffer={fee_buffer:.5f})"
                 )
 
-            # --- Aggressive profit-zone trailing: ratchet SL up within profit area ---
+            # --- Step 2: 5% step ratcheting — lock every 5% of growth ---
             if net_pnl > 0:
-                # Lock in progressively more profit as price moves favorably
-                # Keep SL at: current_price - (portion of net profit as cushion)
-                # The cushion shrinks as profit grows (lock in more at higher profits)
-                
-                if net_pnl / profit_dist < 0.3:
-                    cushion_ratio = 0.5   # Keep 50% cushion when small profit
-                elif net_pnl / profit_dist < 0.6:
-                    cushion_ratio = 0.35  # Tighten to 35%
-                else:
-                    cushion_ratio = 0.2   # Very tight at high profit — lock most of it
+                # How many full 5% steps has the price moved from entry?
+                current_steps = int(pnl / step_size)
 
-                cushion = net_pnl * cushion_ratio
-                
-                if direction == "BUY":
-                    # SL = current price minus cushion, but never below entry + fees
-                    new_trail = current_price - cushion
-                    min_trail = entry + fee_cost  # absolute floor: above fees
-                    new_trail = max(new_trail, min_trail)
-                    if pos["trailing_stop_price"] is None or new_trail > pos["trailing_stop_price"]:
-                        if pos["trailing_stop_price"] is not None:
-                            log.info(
-                                f"📈 {pos['epic']} SL ratchet: {pos['trailing_stop_price']:.5f} → {new_trail:.5f} "
-                                f"(locking {((new_trail - entry) / entry) * 100:.3f}% profit)"
-                            )
-                        pos["trailing_stop_price"] = new_trail
-                else:
-                    new_trail = current_price + cushion
-                    max_trail = entry - fee_cost
-                    new_trail = min(new_trail, max_trail)
-                    if pos["trailing_stop_price"] is None or new_trail < pos["trailing_stop_price"]:
-                        if pos["trailing_stop_price"] is not None:
-                            log.info(
-                                f"📈 {pos['epic']} SL ratchet: {pos['trailing_stop_price']:.5f} → {new_trail:.5f} "
-                                f"(locking {((entry - new_trail) / entry) * 100:.3f}% profit)"
-                            )
-                        pos["trailing_stop_price"] = new_trail
+                if current_steps > pos["locked_steps"]:
+                    # Lock profit at (current_steps - 1) * step_size above entry
+                    # This means: if price is at +15%, SL locks at +10%
+                    # Giving 1 step (5%) of breathing room
+                    lock_level_pnl = (current_steps - 1) * step_size
 
-            # --- Check trailing stop hit ---
+                    # But never below fee-breakeven
+                    lock_level_pnl = max(lock_level_pnl, fee_cost * 1.5)
+
+                    if direction == "BUY":
+                        new_sl = entry + lock_level_pnl
+                    else:
+                        new_sl = entry - lock_level_pnl
+
+                    # SL only moves in profit direction, never backwards
+                    should_update = False
+                    if pos["trailing_stop_price"] is None:
+                        should_update = True
+                    elif direction == "BUY" and new_sl > pos["trailing_stop_price"]:
+                        should_update = True
+                    elif direction == "SELL" and new_sl < pos["trailing_stop_price"]:
+                        should_update = True
+
+                    if should_update:
+                        old_sl = pos["trailing_stop_price"]
+                        pos["trailing_stop_price"] = new_sl
+                        pos["locked_steps"] = current_steps
+                        locked_pct = (lock_level_pnl / entry) * 100
+                        log.info(
+                            f"🔒 {pos['epic']} SL stepped up! Step {current_steps} "
+                            f"({current_steps * 5}% growth) | "
+                            f"SL: {old_sl:.5f} → {new_sl:.5f} "
+                            f"(locking {locked_pct:.2f}% profit)"
+                        )
+
+            # --- Step 3: Check if trailing SL is hit → close with profit ---
             if pos["trailing_stop_price"] is not None:
                 trail_hit = False
                 if direction == "BUY" and current_price <= pos["trailing_stop_price"]:
@@ -221,49 +226,15 @@ class PositionManager:
                     trail_hit = True
 
                 if trail_hit:
+                    locked_profit = abs(pos["trailing_stop_price"] - entry)
+                    net_locked = locked_profit - fee_cost
                     result["action"] = "CLOSE_PROFIT"
                     result["reason"] = (
-                        f"Trailing stop hit @ {pos['trailing_stop_price']:.5f} "
-                        f"(peak profit: {pos['highest_profit']:.5f}, captured: {pnl:.5f})"
+                        f"Trailing SL hit @ {pos['trailing_stop_price']:.5f} | "
+                        f"Steps locked: {pos['locked_steps']} ({pos['locked_steps'] * 5}% growth) | "
+                        f"Peak: {pos['highest_profit']:.5f} | "
+                        f"Net profit: {net_locked:.5f}"
                     )
-                    return result
-
-            # --- Early profit taking: momentum fading while in profit ---
-            if pnl_ratio >= profit_take_threshold:
-                momentum_fading = False
-
-                if direction == "BUY":
-                    # RSI overbought or momentum turning down
-                    if momentum.get("micro_rsi", 50) > 75:
-                        momentum_fading = True
-                    if momentum["direction"] == "DOWN" and momentum["strength"] >= 0.4:
-                        momentum_fading = True
-                elif direction == "SELL":
-                    if momentum.get("micro_rsi", 50) < 25:
-                        momentum_fading = True
-                    if momentum["direction"] == "UP" and momentum["strength"] >= 0.4:
-                        momentum_fading = True
-
-                # Also check if profit is retracing from peak
-                if pos["highest_profit"] > 0:
-                    retrace_ratio = (pos["highest_profit"] - pnl) / pos["highest_profit"]
-                    if retrace_ratio > 0.4:  # Gave back 40% of max profit
-                        momentum_fading = True
-
-                if momentum_fading:
-                    result["action"] = "CLOSE_PROFIT"
-                    result["reason"] = (
-                        f"Early profit take: {pnl_ratio:.0%} of TP, "
-                        f"momentum fading ({momentum['direction']} RSI={momentum.get('micro_rsi', 50):.0f})"
-                    )
-                    return result
-
-            # --- High profit lock: if we've reached 80%+ of TP, tighten everything ---
-            if pnl_ratio >= 0.8:
-                # At this point, any momentum hesitation = take profit
-                if momentum["strength"] < 0.4:
-                    result["action"] = "CLOSE_PROFIT"
-                    result["reason"] = f"Near-TP profit lock: {pnl_ratio:.0%} with weak momentum"
                     return result
 
         return result
