@@ -275,7 +275,7 @@ body {
     flex: 1;
     min-width: 0;
     min-height: 70px;
-    border-radius: 8px;
+    border-radius: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
