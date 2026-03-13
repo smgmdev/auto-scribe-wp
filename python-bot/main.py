@@ -469,7 +469,7 @@ def run():
     cycle_count = 0
     _last_batch_success = time.time()
     _batch_fail_streak = 0
-    _next_batch_fetch_ts = time.time()
+    _next_batch_fetch_ts = time.time() + 15  # let startup scans finish before first batch fetch
     batch_prices: dict[str, dict] = {}
 
     while True:

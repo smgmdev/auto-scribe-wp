@@ -490,11 +490,16 @@ class MarketScanner:
             else:
                 log.info("⏭️  Forex: 5/5 positions filled — skipping scan")
             if scalp_epics:
-                log.info("⚡ ═══ SCALP SCAN (Crypto + FX) ═══")
+                scalp_page = self._next_scan_page(
+                    scalp_epics,
+                    self.SCALP_SCAN_PAGE_SIZE,
+                    "scalp",
+                )
+                log.info(f"⚡ ═══ SCALP SCAN (Crypto + FX) [{len(scalp_page)}/{len(scalp_epics)}] ═══")
 
-                # Sequential volatility scan — avoids API rate limiting from parallel calls
+                # Sequential volatility scan — avoids API rate limiting spikes
                 vol_scans = []
-                for ep in scalp_epics:
+                for ep in scalp_page:
                     vol_scans.append(self._quick_volatility_scan(ep))
 
                 # Sort by volatility × volume expansion (catches surges)
