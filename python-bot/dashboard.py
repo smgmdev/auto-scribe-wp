@@ -550,6 +550,30 @@ async function fetchState() {
     } catch(e) {}
 }
 
+async function pullAndRestart() {
+    const btn = document.getElementById('updateBtn');
+    btn.disabled = true;
+    btn.textContent = '⟳ Pulling...';
+    btn.className = '';
+    try {
+        const resp = await fetch('/api/pull-restart', { method: 'POST' });
+        const d = await resp.json();
+        if (d.ok) {
+            btn.textContent = '✓ Restarting...';
+            btn.className = 'success';
+            setTimeout(() => { location.reload(); }, 3000);
+        } else {
+            btn.textContent = '✗ Failed';
+            btn.className = 'error';
+            setTimeout(() => { btn.textContent = '⟳ Update'; btn.className = ''; btn.disabled = false; }, 3000);
+        }
+    } catch(e) {
+        btn.textContent = '✗ Error';
+        btn.className = 'error';
+        setTimeout(() => { btn.textContent = '⟳ Update'; btn.className = ''; btn.disabled = false; }, 3000);
+    }
+}
+
 buildGrid();
 fetchState();
 setInterval(fetchState, 1000);
