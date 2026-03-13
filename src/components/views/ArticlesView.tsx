@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { FileText, Edit, Trash2, ExternalLink, Loader2, Plus, CheckCircle2, Search, RefreshCw } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
