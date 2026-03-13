@@ -18,6 +18,15 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 
 const updates = [
   {
+    date: 'March 13, 2026',
+    title: 'Article Sync & WordPress Reliability',
+    changes: [
+      'Fixed an issue where newly published articles would not appear in the My Articles view without a manual refresh — real-time subscription now correctly uses the latest fetch logic, eliminating stale closure bugs',
+      'Added a 10-second polling fallback to ensure the articles list stays in sync even if a real-time event is missed',
+      'WordPress category fetching now retries up to 3 times with progressive backoff delays when the target site is slow to respond, reducing failed loads for high-latency media sites',
+    ],
+  },
+  {
     date: 'March 12, 2026',
     title: 'Trade Intelligence & Globe Enhancements',
     changes: [
