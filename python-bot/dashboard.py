@@ -931,10 +931,12 @@ def run_dashboard():
     server.serve_forever()
 
 
-def start_dashboard_thread(api=None):
+def start_dashboard_thread(api=None, pos_manager=None):
     """Start dashboard HTTP server + live price fetcher threads."""
-    global _api_ref
+    global _api_ref, _pos_manager_ref
     _api_ref = api
+    if pos_manager is not None:
+        _pos_manager_ref = pos_manager
 
     # Start the dedicated price fetcher thread
     fetcher = threading.Thread(target=_price_fetcher_loop, daemon=True)
