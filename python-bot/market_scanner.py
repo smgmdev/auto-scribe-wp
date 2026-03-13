@@ -13,7 +13,7 @@ import time
 import numpy as np
 from typing import Optional
 from logger_setup import get_logger
-from strategy import compute_ema, compute_rsi, compute_atr, compute_momentum_score
+from strategy import compute_ema, compute_rsi, compute_atr, compute_momentum_score, compute_support_resistance
 import config
 
 log = get_logger("scanner")
