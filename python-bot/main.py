@@ -5,8 +5,10 @@ Features: Multi-timeframe pre-trade analysis, dynamic loss cutting, unlimited TP
           5% step trailing SL, and AI-driven parameter adaptation.
 """
 
+import json
 import time
 import sys
+import os
 from datetime import datetime
 from collections import defaultdict
 
@@ -17,6 +19,7 @@ from risk import calculate_position_size, can_open_position
 from position_manager import PositionManager
 from trade_journal import TradeJournal
 from market_scanner import MarketScanner
+from dashboard import start_dashboard_thread
 from logger_setup import get_logger
 
 log = get_logger("main")
@@ -28,9 +31,53 @@ BANNER = """
 ║   🧠 Adaptive AI: learns from every trade                ║
 ║   📊 Multi-TF scanner: 60m → 15m → 5m confirmation      ║
 ║   🔒 Unlimited TP with 5% step trailing SL               ║
-║   Assets: Gold, Silver, Oil, Gas, US Stocks              ║
+║   📈 Stocks (5) | ₿ Crypto (5) | 🪙 Commodities (5)     ║
+║   📊 Dashboard: http://localhost:8050                    ║
 ╚══════════════════════════════════════════════════════════╝
 """
+
+
+def write_live_state(balance, positions, pos_manager, tick_history):
+    """Write live state to disk for dashboard to read."""
+    try:
+        live_positions = []
+        for pos in positions:
+            epic = pos.get("market", {}).get("epic", "")
+            deal_id = pos.get("position", {}).get("dealId", "")
+            direction = pos.get("position", {}).get("direction", "")
+            entry_price = float(pos.get("position", {}).get("level", 0))
+            
+            current_price = entry_price
+            if epic in tick_history and tick_history[epic]:
+                current_price = tick_history[epic][-1]["mid"]
+            
+            tracked = pos_manager.tracked.get(deal_id, {})
+            if direction == "BUY":
+                pnl = current_price - entry_price
+            else:
+                pnl = entry_price - current_price
+
+            live_positions.append({
+                "epic": epic,
+                "direction": direction,
+                "entry_price": entry_price,
+                "current_price": current_price,
+                "unrealized_pnl": round(pnl, 5),
+                "locked_steps": tracked.get("locked_steps", 0),
+                "category": config.get_category(epic),
+            })
+
+        state = {
+            "status": "running",
+            "balance": balance,
+            "positions": live_positions,
+            "updated_at": datetime.utcnow().strftime("%H:%M:%S"),
+        }
+        state_file = os.path.join(os.path.dirname(__file__), "live_state.json")
+        with open(state_file, "w") as f:
+            json.dump(state, f)
+    except Exception as e:
+        log.error(f"Failed to write live state: {e}")
 
 
 def run():
@@ -38,6 +85,10 @@ def run():
     log.info(f"Watchlist: {', '.join(config.WATCHLIST)}")
     log.info(f"⚡ Scan interval: {config.SCAN_INTERVAL_SECONDS}s (real-time)")
     log.info(f"Risk per trade: {config.RISK_PER_TRADE * 100}% | Max positions: {config.MAX_OPEN_POSITIONS}")
+    log.info(f"📈 Stocks: {len(config.WATCHLIST_STOCKS)} | ₿ Crypto: {len(config.WATCHLIST_CRYPTO)} | 🪙 Commodities: {len(config.WATCHLIST_COMMODITIES)}")
+
+    # Start dashboard in background
+    start_dashboard_thread()
 
     api = CapitalAPI()
 
@@ -116,6 +167,8 @@ def run():
             # Get positions every 5 cycles
             if cycle_count % 5 == 0:
                 positions = api.get_positions()
+                # Update dashboard live state
+                write_live_state(balance, positions, pos_manager, tick_history)
 
             # ═══════════════════════════════════════════
             # ⚡ SMART POSITION MANAGEMENT — every cycle
