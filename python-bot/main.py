@@ -677,6 +677,30 @@ def run():
             if cycle_count % 30 == 0 and scanning_cats:
                 log.info(f"🔄 Entry scan order: {' → '.join(scanning_cats)} | {len(balanced_epics)} epics")
 
+            # ═══════════════════════════════════════════
+            # ⚡ BATCH PRICE FETCH — 1 API call instead of 30+ sequential calls
+            # ═══════════════════════════════════════════
+            batch_prices: dict[str, dict] = {}
+            if balanced_epics:
+                try:
+                    for i in range(0, len(balanced_epics), 50):
+                        chunk = balanced_epics[i:i+50]
+                        details = api.get_markets_details(chunk)
+                        for m in details:
+                            ep = m.get("epic", "")
+                            snap = m.get("snapshot", {})
+                            bid_val = snap.get("bid", 0)
+                            ask_val = snap.get("offer", 0)
+                            if bid_val and ask_val:
+                                b = float(bid_val)
+                                a = float(ask_val)
+                                batch_prices[ep] = {
+                                    "bid": b, "ask": a,
+                                    "mid": (b + a) / 2, "spread": a - b,
+                                }
+                except Exception as e:
+                    log.warning(f"Batch price fetch error: {e}")
+
             for epic in balanced_epics:
                 try:
                     # Check if this epic's category is disabled via dashboard toggle
