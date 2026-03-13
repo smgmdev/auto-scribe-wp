@@ -308,21 +308,21 @@ class MarketScanner:
             scan.atr = scan.analyses["15min"].atr
             scan.stop_distance = scan.atr * 2.0
 
-        # RSI filter — more lenient for scalp
+        # RSI filter — tighter to avoid entering at extremes
         rsi_ok = True
         check_tf = "1min" if is_scalp and "1min" in scan.analyses else "5min"
         if check_tf in scan.analyses:
             rsi_val = scan.analyses[check_tf].rsi
-            overbought = 80 if is_scalp else 75
-            oversold = 20 if is_scalp else 25
+            overbought = 72 if is_scalp else 68
+            oversold = 28 if is_scalp else 32
             if majority_dir == "BUY" and rsi_val > overbought:
                 rsi_ok = False
             if majority_dir == "SELL" and rsi_val < oversold:
                 rsi_ok = False
 
-        # Thresholds — much lower for scalp
-        min_majority = 1 if is_scalp else 2
-        min_confidence = 0.15 if is_scalp else 0.3
+        # Thresholds — raised significantly to filter weak signals
+        min_majority = 2 if is_scalp else 2
+        min_confidence = 0.35 if is_scalp else 0.45
 
         if majority_count >= min_majority and abs(weighted_score) >= min_confidence and rsi_ok:
             scan.overall_signal = majority_dir
