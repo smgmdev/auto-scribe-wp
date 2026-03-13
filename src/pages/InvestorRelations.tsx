@@ -8,7 +8,7 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 import { Button } from '@/components/ui/button';
 import { InvestorContactForm } from '@/components/investor/InvestorContactForm';
 import { useAuth } from '@/hooks/useAuth';
-import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase, Target, Layers, Search, User } from 'lucide-react';
+import { TrendingUp, Globe, Shield, Zap, BarChart3, Users, ArrowRight, Briefcase, Target, Layers, Search, User, Loader2 } from 'lucide-react';
 import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import investorHeroBg from '@/assets/investor-hero-bg.mp4';
