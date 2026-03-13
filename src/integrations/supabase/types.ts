@@ -1021,6 +1021,45 @@ export type Database = {
         }
         Relationships: []
       }
+      investor_contact_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          investor_type: string
+          message: string | null
+          mobile_number: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          investor_type: string
+          message?: string | null
+          mobile_number: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          investor_type?: string
+          message?: string | null
+          mobile_number?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lost_chat_global_state: {
         Row: {
           active_model_id: string
