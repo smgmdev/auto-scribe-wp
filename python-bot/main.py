@@ -475,6 +475,7 @@ def run():
     _last_batch_success = time.time()
     _batch_fail_streak = 0
     _next_batch_fetch_ts = time.time()
+    batch_prices: dict[str, dict] = {}
 
     while True:
         try:
