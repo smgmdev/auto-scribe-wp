@@ -163,10 +163,14 @@ class PositionManager:
                 f"trailing_sl={trailing_stop_price:.6f}"
             )
 
+        sl_label = f"-{sl_pct*100}%" if locked_steps == 0 else f"+{locked_steps * step_pct * 100:.0f}%"
+        step_label = f"{step_pct*100:.0f}%"
+        btc_tag = " [BTC strategy]" if _is_btc(epic) else ""
         log.info(
             f"📌 Tracking {direction} {epic} @ {entry_price:.6f} | "
-            f"SL={trailing_stop_price:.6f} ({'-1.5%' if locked_steps == 0 else f'+{locked_steps*5}%'}) "
-            f"TP=UNLIMITED | Step size={step_size:.6f} (5%){recovery_tag}"
+            f"SL={trailing_stop_price:.6f} ({sl_label}) "
+            f"TP=UNLIMITED | Step size={step_size:.6f} ({step_label}){btc_tag}{recovery_tag}"
+        )
         )
 
     def untrack(self, deal_id: str):
