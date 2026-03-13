@@ -744,7 +744,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(html.encode())
-        elif self.path == "/api/state":
+        elif self.path.startswith("/api/state"):
             data = generate_api_response()
             self.send_response(200)
             self.send_header("Content-type", "application/json")
