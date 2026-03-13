@@ -35,7 +35,8 @@ TIMEFRAMES_SCALP = {
 class TimeframeAnalysis:
     """Result of analyzing a single timeframe."""
     def __init__(self, timeframe: str, direction: str, strength: float,
-                 rsi: float, momentum_score: float, atr: float, trend_aligned: bool):
+                 rsi: float, momentum_score: float, atr: float, trend_aligned: bool,
+                 sr_data: dict = None):
         self.timeframe = timeframe
         self.direction = direction      # "BUY" | "SELL" | "NEUTRAL"
         self.strength = strength        # 0.0 - 1.0
@@ -43,6 +44,7 @@ class TimeframeAnalysis:
         self.momentum_score = momentum_score
         self.atr = atr
         self.trend_aligned = trend_aligned
+        self.sr_data = sr_data or {}
 
     def __repr__(self):
         return f"{self.timeframe}: {self.direction} str={self.strength:.2f} RSI={self.rsi:.0f} mom={self.momentum_score:.2f}"
