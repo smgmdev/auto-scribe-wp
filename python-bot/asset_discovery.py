@@ -377,7 +377,7 @@ class AssetDiscovery:
             ]
             fallback_forex = self._search_fallback(
                 forex_fallback_terms,
-                ("CURRENCIES",),
+                ("CURRENCIES", "FOREX"),
                 require_tradeable=False,
                 limit_per_term=2,
             )
