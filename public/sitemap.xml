@@ -4,49 +4,49 @@
   <!-- Main Pages -->
   <url>
     <loc>https://arcanamace.com/</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/about</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/how-it-works</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/media-buying</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/self-publishing</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/ai-article-generation</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/mace-ai</loc>
-    <lastmod>2026-03-02</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/arcana-precision</loc>
-    <lastmod>2026-03-02</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -54,46 +54,46 @@
   <!-- Industries -->
   <url>
     <loc>https://arcanamace.com/industries</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url><loc>https://arcanamace.com/industries?industry=aerospace-and-defence</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=asset-and-wealth-management</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=automotive</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=banking-and-capital-markets</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=construction-and-real-estate</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=consumer-goods</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=consumer-and-retail</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=education</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=energy</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=entertainment</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=financial-services</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=food-and-beverage</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=government-and-public-sector</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=healthcare</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=hospitality-and-leisure</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=industrial-goods-and-manufacturing</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=insurance</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=intelligence</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=mining-and-metals</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=oil-and-gas</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=pharmaceutical-and-life-sciences</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=private-equity-and-principal-investors</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=public-markets</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=public-safety-and-security</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=power-and-utilities</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=semiconductors</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=sovereign-wealth-funds</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=supply-chain</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=technology-media-and-telecommunications</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=transport-and-logistics</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://arcanamace.com/industries?industry=travel-and-tourism</loc><lastmod>2026-02-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=aerospace-and-defence</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=asset-and-wealth-management</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=automotive</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=banking-and-capital-markets</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=construction-and-real-estate</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=consumer-goods</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=consumer-and-retail</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=education</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=energy</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=entertainment</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=financial-services</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=food-and-beverage</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=government-and-public-sector</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=healthcare</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=hospitality-and-leisure</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=industrial-goods-and-manufacturing</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=insurance</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=intelligence</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=mining-and-metals</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=oil-and-gas</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=pharmaceutical-and-life-sciences</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=private-equity-and-principal-investors</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=public-markets</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=public-safety-and-security</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=power-and-utilities</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=semiconductors</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=sovereign-wealth-funds</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=supply-chain</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=technology-media-and-telecommunications</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=transport-and-logistics</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://arcanamace.com/industries?industry=travel-and-tourism</loc><lastmod>2026-03-13</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
 
   <!-- Press -->
   <url>
     <loc>https://arcanamace.com/press</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -101,97 +101,97 @@
   <!-- Help Center -->
   <url>
     <loc>https://arcanamace.com/help</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/getting-started</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/your-account</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/credits-pricing</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/publishing-articles</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/media-buying</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/orders-delivery</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/for-agencies</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-generation</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/troubleshooting</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-auto-publishing</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-security-supervision</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/agency-account-downgraded</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/mace-ai</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/ai-marketing-strategy</loc>
-    <lastmod>2026-03-02</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/help/arcana-precision</loc>
-    <lastmod>2026-03-02</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -199,25 +199,25 @@
   <!-- Legal & Info -->
   <url>
     <loc>https://arcanamace.com/terms</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/privacy</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/do-not-sell</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/guidelines</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -225,25 +225,25 @@
   <!-- Utility & Info -->
   <url>
     <loc>https://arcanamace.com/system-status</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/update-log</loc>
-    <lastmod>2026-03-03</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/report-bug</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://arcanamace.com/sitemap</loc>
-    <lastmod>2026-03-01</lastmod>
+    <lastmod>2026-03-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
