@@ -19,8 +19,14 @@ import { HeaderLogo } from '@/components/ui/HeaderLogo';
 const updates = [
   {
     date: 'March 13, 2026',
-    title: 'Article Sync & WordPress Reliability',
+    title: 'Investor Relations & Navigation Updates',
     changes: [
+      'Launched dedicated Investor Relations page at /ir with full-screen product showcase sections for Media Buying Marketplace, Mace AI, and Arcana Precision',
+      'Each product section features inline video playback with loading spinners and golden "Learn More" call-to-action buttons',
+      'Added "Invest in Arcana Mace" contact section with smooth hover transitions on the Get in Touch button',
+      'Updated Quick Nav mega menu with Investor Relations link and reorganized Arcana Mace and Support column link ordering',
+      'Moved Changelog link from Arcana Mace column to Support column in Quick Nav for better categorization',
+      'Added Investor Relations to footer navigation, site map page, and sitemap.xml',
       'Fixed an issue where newly published articles would not appear in the My Articles view without a manual refresh — real-time subscription now correctly uses the latest fetch logic, eliminating stale closure bugs',
       'Added a 10-second polling fallback to ensure the articles list stays in sync even if a real-time event is missed',
       'WordPress category fetching now retries up to 3 times with progressive backoff delays when the target site is slow to respond, reducing failed loads for high-latency media sites',
