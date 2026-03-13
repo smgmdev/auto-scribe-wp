@@ -244,6 +244,43 @@ def run():
             except Exception as e:
                 log.warning(f"Failed to fetch startup prices: {e}")
 
+        # ═══════════════════════════════════════════
+        # CLOSE ALL NON-CRYPTO POSITIONS (crypto-only mode)
+        # ═══════════════════════════════════════════
+        non_crypto_closed = 0
+        remaining_positions = []
+        for pos in positions:
+            try:
+                epic = pos.get("market", {}).get("epic", "")
+                deal_id = pos.get("position", {}).get("dealId", "")
+                if not deal_id or not epic:
+                    continue
+                category = config.get_category(epic)
+                if category != config.CATEGORY_CRYPTO:
+                    log.info(f"🚫 Closing non-crypto position: {epic} ({category}) deal={deal_id}")
+                    closed = api.close_position(deal_id)
+                    if closed:
+                        non_crypto_closed += 1
+                        pos_manager.untrack(deal_id)
+                        active_signals.pop(epic, None)
+                        log.info(f"  ✅ Closed {epic}")
+                    else:
+                        log.warning(f"  ⚠️ Failed to close {epic}")
+                else:
+                    remaining_positions.append(pos)
+            except Exception as e:
+                log.error(f"Error closing non-crypto {epic}: {e}")
+                remaining_positions.append(pos)
+
+        if non_crypto_closed > 0:
+            log.info(f"🚫 Closed {non_crypto_closed} non-crypto position(s) — crypto-only mode active")
+            positions = api.get_positions()  # Refresh
+        else:
+            positions = remaining_positions if remaining_positions else positions
+
+        # ═══════════════════════════════════════════
+        # RECOVER remaining (crypto) positions
+        # ═══════════════════════════════════════════
         for pos in positions:
             try:
                 epic = pos.get("market", {}).get("epic", "")
