@@ -549,25 +549,29 @@ function formatPnl(val) {
 function buildGrid() {
     const container = document.getElementById('gridContainer');
     let html = '';
+
     CATEGORIES.forEach(cat => {
-        html += '<div class="category-row" id="row-' + cat + '">';
-        html += '<div class="category-label">' + cat +
-                '<div class="cat-toggle on" id="toggle-' + cat + '" onclick="toggleCategory(\'' + cat + '\')">' +
-                '<div class="knob"></div></div>' +
-                '<span class="cat-status" id="status-' + cat + '">ACTIVE</span></div>';
-        html += '<div class="slots" id="slots-' + cat + '">';
+        html += `<div class="category-row" id="row-${cat}">`;
+        html += `<div class="category-label">${cat}` +
+                `<div class="cat-toggle on" id="toggle-${cat}" onclick="toggleCategory('${cat}')">` +
+                `<div class="knob"></div></div>` +
+                `<span class="cat-status" id="status-${cat}">ACTIVE</span></div>`;
+        html += `<div class="slots" id="slots-${cat}">`;
+
         for (let i = 0; i < MAX_SLOTS; i++) {
-            html += '<div class="slot empty" id="slot-' + cat + '-' + i + '">' +
-                    '<span class="slot-dir"></span>' +
-                    '<span class="slot-pair"></span>' +
-                    '<span class="slot-price"></span>' +
-                    '<span class="slot-entry"></span>' +
-                    '<span class="slot-pnl"></span>' +
-                    '<span class="slot-empty-text">—</span>' +
-                    '</div>';
+            html += `<div class="slot empty" id="slot-${cat}-${i}">` +
+                    `<span class="slot-dir"></span>` +
+                    `<span class="slot-pair"></span>` +
+                    `<span class="slot-price"></span>` +
+                    `<span class="slot-entry"></span>` +
+                    `<span class="slot-pnl"></span>` +
+                    `<span class="slot-empty-text">—</span>` +
+                    `</div>`;
         }
-        html += '</div></div>';
+
+        html += `</div></div>`;
     });
+
     container.innerHTML = html;
     gridBuilt = true;
 }
