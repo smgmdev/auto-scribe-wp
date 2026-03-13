@@ -223,7 +223,7 @@ export default function InvestorRelations() {
                 Media Buying Marketplace
               </h2>
               <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
-                From global media distribution to AI-powered publishing and geopolitical intelligence — Arcana Mace delivers an integrated suite built for the modern information economy.
+                Diverse network of media outlets worldwide. Empowering clients to publish content where it matters most.
               </p>
               <Button
                 onClick={() => navigate('/how-it-works')}
