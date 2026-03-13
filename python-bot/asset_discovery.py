@@ -367,12 +367,23 @@ class AssetDiscovery:
 
         ranked_forex = self._rank_assets(all_forex)[:TOP_FOREX]
 
-        # If ranked forex is STILL empty, use the fallback watchlist directly
+        # If ranked forex is still empty, build fallback list from searchable market epics
         if not ranked_forex:
-            log.warning("  ⚠️ Discovery found 0 forex — using hardcoded fallback epics")
-            ranked_forex = [{"epic": ep, "name": ep, "type": "CURRENCIES",
-                             "pct_change": 0, "spread_pct": 0, "bid": 0,
-                             "offer": 0, "score": 0} for ep in config.WATCHLIST_FOREX_FALLBACK]
+            log.warning("  ⚠️ Discovery found 0 forex — attempting non-tradeable epic fallback")
+            forex_fallback_terms = [
+                "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD",
+                "USDCHF", "NZDUSD", "EURGBP", "EURJPY", "GBPJPY",
+                "AUDJPY", "EURAUD", "EURCHF", "CADJPY", "GBPAUD",
+            ]
+            fallback_forex = self._search_fallback(
+                forex_fallback_terms,
+                ("CURRENCIES",),
+                require_tradeable=False,
+                limit_per_term=2,
+            )
+            ranked_forex = self._placeholder_ranked(fallback_forex, TOP_FOREX, "CURRENCIES")
+            if not ranked_forex and self.discovered_forex:
+                ranked_forex = self.discovered_forex[:TOP_FOREX]
 
         # --- Discover commodities ---
         log.info("🪙 Scanning commodities...")
