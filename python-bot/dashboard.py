@@ -702,7 +702,47 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
-        if self.path == "/api/pull-restart":
+        if self.path == "/api/toggle-category":
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(content_length)) if content_length > 0 else {}
+                cat = body.get("category", "")
+                enabled = body.get("enabled", True)
+
+                if cat not in ['Stocks', 'Commodities', 'Crypto', 'FX']:
+                    self._json_response({"ok": False, "error": "Invalid category"})
+                    return
+
+                set_category_disabled(cat, not enabled)
+                log.info(f"{'✅' if enabled else '🚫'} Category {cat} {'ENABLED' if enabled else 'DISABLED'}")
+
+                # If disabling, close all positions in that category
+                if not enabled and _api_ref:
+                    cat_map_reverse = {"Stocks": "stocks", "Commodities": "commodities", "Crypto": "crypto", "FX": "forex"}
+                    target_cat = cat_map_reverse.get(cat, "")
+
+                    def _close_cat_positions():
+                        try:
+                            positions = _api_ref.get_positions()
+                            import config as cfg
+                            for pos in positions:
+                                epic = pos.get("market", {}).get("epic", "")
+                                deal_id = pos.get("position", {}).get("dealId", "")
+                                if epic and deal_id and cfg.get_category(epic) == target_cat:
+                                    log.info(f"  🚫 Toggle-closing {epic} deal={deal_id}")
+                                    _api_ref.close_position(deal_id)
+                                    time.sleep(0.3)
+                        except Exception as e:
+                            log.error(f"Toggle close error: {e}")
+
+                    threading.Thread(target=_close_cat_positions, daemon=True).start()
+
+                self._json_response({"ok": True, "category": cat, "enabled": enabled})
+            except Exception as e:
+                log.error(f"Toggle error: {e}")
+                self._json_response({"ok": False, "error": str(e)})
+
+        elif self.path == "/api/pull-restart":
             try:
                 bot_dir = os.path.dirname(os.path.abspath(__file__))
                 # Git pull
