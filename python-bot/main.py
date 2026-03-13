@@ -488,9 +488,11 @@ def run():
     scanner_thread.start()
     log.info("🔄 Background scanner thread started")
 
-    # Also remove stall threshold variable (now hardcoded to 120s)
+    # Adaptive fetch backoff for persistent API pressure
     cycle_count = 0
     _last_batch_success = time.time()
+    _batch_fail_streak = 0
+    _next_batch_fetch_ts = time.time()
 
     while True:
         try:
