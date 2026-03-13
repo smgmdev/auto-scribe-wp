@@ -192,7 +192,6 @@ export default function InvestorRelations() {
                 className="rounded-none bg-white text-black hover:bg-white/90 h-12 px-8 text-base font-medium"
               >
                 Explore Our Products
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </AnimatedSection>
           </div>
