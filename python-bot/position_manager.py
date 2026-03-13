@@ -203,7 +203,9 @@ class PositionManager:
 
         direction = pos["direction"]
         entry = pos["entry_price"]
-        step_size = entry * PROFIT_STEP_PCT
+        epic = pos["epic"]
+        _, step_pct = _get_params(epic)
+        step_size = entry * step_pct
 
         # Calculate unrealized P&L
         if direction == "BUY":
