@@ -367,7 +367,7 @@ export default function InvestorRelations() {
         </section>
       </main>
 
-      <div className="bg-[#1d1d1f] border-t border-white/10">
+      <div className="w-full bg-black border-t border-[#424245]">
         <PWAInstallButtons />
       </div>
       <Footer narrow showTopBorder dark />
