@@ -13,6 +13,7 @@ import amblack from '@/assets/amblack.png';
 import amlogo from '@/assets/amlogo.png';
 import investorHeroBg from '@/assets/investor-hero-bg.mp4';
 import investorProductsBg from '@/assets/investor-products-bg.mp4';
+import maceAiBg from '@/assets/mace-ai-bg.mp4';
 
 function useInView(options?: IntersectionObserverInit) {
   const ref = useRef<HTMLDivElement>(null);
@@ -62,6 +63,7 @@ export default function InvestorRelations() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [productsVideoLoaded, setProductsVideoLoaded] = useState(false);
+  const [maceVideoLoaded, setMaceVideoLoaded] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -237,6 +239,21 @@ export default function InvestorRelations() {
 
         {/* Mace AI Section */}
         <section className="relative overflow-hidden bg-black min-h-screen">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-50"
+            src={maceAiBg}
+            onCanPlayThrough={() => setMaceVideoLoaded(true)}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+          {!maceVideoLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center z-20">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            </div>
+          )}
           <div className="max-w-[980px] mx-auto px-4 md:px-6 py-28 md:py-40 relative z-10 text-center flex flex-col items-center justify-center min-h-screen">
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/40 mb-4">AI-Powered Publishing</p>
