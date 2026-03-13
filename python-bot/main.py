@@ -439,12 +439,22 @@ def run():
             cycle_count += 1
 
             # ═══════════════════════════════════════════
-            # 📊 MULTI-TIMEFRAME MARKET SCAN — every 2 min
+            # 📊 CATEGORY CAPACITY CHECK — tell scanner which categories are full
             # ═══════════════════════════════════════════
-            # The scanner handles its own timing internally (120s interval)
-            # It: 1) ranks all assets by volatility
-            #     2) deep-analyzes top 5 on 60m/15m/5m
-            #     3) only confirms entry when timeframes agree
+            cat_counts = count_positions_by_category(positions) if positions else {}
+            full_categories = set()
+            for cat_key, count in cat_counts.items():
+                if count >= config.MAX_POSITIONS_PER_CATEGORY:
+                    full_categories.add(cat_key)
+            scanner.set_full_categories(full_categories)
+
+            if full_categories and cycle_count % 30 == 0:
+                log.info(f"📊 Full categories (skipping scan): {', '.join(full_categories)} | Counts: {cat_counts}")
+
+            # ═══════════════════════════════════════════
+            # 📊 MULTI-TIMEFRAME MARKET SCAN — every 2 min
+            # Scanner now skips full categories automatically
+            # ═══════════════════════════════════════════
             scan_results = scanner.scan_all()
 
             # Session keepalive every 60 cycles
