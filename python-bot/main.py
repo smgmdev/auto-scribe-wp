@@ -30,10 +30,11 @@ BANNER = """
 ║   CAPITAL.COM REAL-TIME TRADING BOT  (DEMO)             ║
 ║   ⚡ 1-second price scanning — tick-level precision      ║
 ║   🧠 Adaptive AI: learns from every trade                ║
-║   🔎 Auto-discovery: AI picks best stocks & crypto       ║
+║   🔎 Auto-discovery: AI picks best assets                ║
 ║   📊 Multi-TF scanner: 60m → 15m → 5m confirmation      ║
 ║   🔒 Unlimited TP with 5% step trailing SL               ║
 ║   📈 Stocks (5) | ₿ Crypto (5) | 🪙 Commodities (5)     ║
+║   💱 Forex (5)  | 📌 BTC always tracked                  ║
 ║   📊 Dashboard: http://localhost:8050                    ║
 ╚══════════════════════════════════════════════════════════╝
 """
