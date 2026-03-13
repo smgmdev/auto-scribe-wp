@@ -2,7 +2,7 @@
 Capital.com Real-Time Trading Bot — Smart Adaptive Trading
 Streams prices via polling at 1s intervals, uses tick-level momentum detection.
 Features: Multi-timeframe pre-trade analysis, dynamic loss cutting, unlimited TP with
-          5% step trailing SL, and AI-driven parameter adaptation.
+          1% step trailing SL, AI-driven parameter adaptation, and self-learning brain.
 """
 
 import json
@@ -22,6 +22,10 @@ from trade_journal import TradeJournal
 from market_scanner import MarketScanner
 from asset_discovery import AssetDiscovery
 from dashboard import start_dashboard_thread
+from learning_db import TradingBrain
+from regime_detector import RegimeDetector
+from correlation_tracker import CorrelationTracker
+from ai_reviewer import AITradeReviewer
 from logger_setup import get_logger
 
 log = get_logger("main")
@@ -175,6 +179,29 @@ def run():
     pos_manager = PositionManager()
     journal = TradeJournal()
     discovery = AssetDiscovery(api)
+
+    # ═══════════════════════════════════════════
+    # 🧠 SELF-LEARNING BRAIN — persistent intelligence
+    # ═══════════════════════════════════════════
+    brain = TradingBrain()
+    regime_detector = RegimeDetector(brain=brain)
+    correlation = CorrelationTracker(brain=brain)
+    ai_reviewer = AITradeReviewer(brain=brain)
+
+    # Print brain summary on startup
+    brain_summary = brain.get_brain_summary()
+    if brain_summary["total_trades"] > 0:
+        log.info(
+            f"🧠 Brain loaded: {brain_summary['total_trades']} trades | "
+            f"Win rate: {brain_summary['win_rate']:.0%} | "
+            f"P&L: {brain_summary['total_pnl']:.2f}"
+        )
+        if brain_summary["best_assets"]:
+            best = brain_summary["best_assets"][0]
+            log.info(f"  ⭐ Best asset: {best['epic']} ({best['win_rate']:.0%} WR)")
+        if brain_summary["worst_assets"]:
+            worst = brain_summary["worst_assets"][0]
+            log.info(f"  ⚠️ Worst asset: {worst['epic']} ({worst['win_rate']:.0%} WR)")
 
     # Give dashboard access to position manager for SL data
     from dashboard import set_pos_manager_ref
@@ -599,12 +626,12 @@ def run():
                             )
                             closed = api.close_position(deal_id)
                             if closed:
-                                # Log to journal for learning
                                 tracked = pos_manager.tracked.get(deal_id, {})
                                 entry_data = entry_info.get(deal_id, {})
-                                journal.log_trade({
+                                trade_data = {
                                     "epic": pos_epic,
                                     "direction": pos_direction,
+                                    "category": config.get_category(pos_epic),
                                     "entry_price": tracked.get("entry_price", 0),
                                     "exit_price": current_price,
                                     "pnl": evaluation["unrealized_pnl"],
@@ -616,12 +643,22 @@ def run():
                                     "momentum_at_entry": entry_data.get("momentum", 0),
                                     "momentum_at_exit": tick_momentum(tick_history.get(pos_epic, [])).get("strength", 0),
                                     "rsi_at_entry": entry_data.get("rsi", 50),
+                                    "scanner_confidence": entry_data.get("scanner_confidence", 0),
+                                    "regime": regime_detector.get_cached_regime(pos_epic),
                                     "stop_distance": tracked.get("stop_distance", 0),
                                     "profit_distance": tracked.get("profit_distance", 0),
                                     "hit_tp": False,
                                     "hit_sl": "LOSS" in evaluation["action"],
                                     "early_exit": True,
-                                })
+                                }
+                                journal.log_trade(trade_data)
+
+                                # 🧠 Log to Brain (persistent learning)
+                                trade_id = brain.log_trade(trade_data)
+
+                                # 🤖 AI Review (every N trades)
+                                ai_reviewer.review_trade(trade_data, trade_id, brain.get_brain_summary())
+
                                 pos_manager.untrack(deal_id)
                                 active_signals.pop(pos_epic, None)
                                 entry_info.pop(deal_id, None)
@@ -739,9 +776,21 @@ def run():
                     if len(tick_history[epic]) < 5:
                         continue
 
+                    # Feed correlation tracker
+                    correlation.update_prices(epic, mid)
+
                     # Determine if this is a scalp asset (crypto/forex)
                     epic_category = config.get_category(epic)
                     is_scalp_asset = epic_category in (config.CATEGORY_CRYPTO, config.CATEGORY_FOREX)
+
+                    # ═══════════════════════════════════════
+                    # GATE -1: BRAIN CHECK — blacklist, bad hours, low win rate
+                    # ═══════════════════════════════════════
+                    brain_ok, brain_reason = brain.should_trade_now(epic)
+                    if not brain_ok:
+                        if cycle_count % 60 == 0:
+                            log.info(f"🧠 {epic}: Brain blocked — {brain_reason}")
+                        continue
 
                     # ═══════════════════════════════════════
                     # GATE 0: LOSS COOLDOWN — don't re-enter an epic that just lost
@@ -833,6 +882,33 @@ def run():
                         continue
 
                     if not can_open_position(positions, epic):
+                        continue
+
+                    # ═══════════════════════════════════════
+                    # GATE 5: CORRELATION CHECK — avoid doubling risk
+                    # ═══════════════════════════════════════
+                    open_epics = [p.get("market", {}).get("epic", "") for p in (positions or [])]
+                    corr_ok, corr_reason = correlation.check_correlation_conflict(
+                        epic, open_epics, same_direction=(entry_signal == Signal.BUY)
+                    )
+                    if not corr_ok:
+                        if cycle_count % 30 == 0:
+                            log.info(f"  🔗 {epic}: Correlation blocked — {corr_reason}")
+                        continue
+
+                    # ═══════════════════════════════════════
+                    # GATE 6: PATTERN SCORE — brain checks historical success
+                    # ═══════════════════════════════════════
+                    pattern_score = brain.get_pattern_score({
+                        "category": epic_category,
+                        "direction": entry_signal,
+                        "regime": regime_detector.get_cached_regime(epic),
+                        "rsi": momentum.get("micro_rsi", 50),
+                        "momentum": momentum["strength"],
+                    })
+                    if pattern_score < 0.30:
+                        if cycle_count % 30 == 0:
+                            log.info(f"  🧠 {epic}: Pattern score too low ({pattern_score:.2f}) — skipping")
                         continue
 
                     # ═══════════════════════════════════════
