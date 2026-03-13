@@ -239,33 +239,7 @@ export default function InvestorRelations() {
           </div>
         </section>
 
-        {/* Market Opportunity */}
-        <section className="py-20">
-          <div className="max-w-[980px] mx-auto px-4 md:px-6">
-            <AnimatedSection>
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 tracking-tight">Market Opportunity</h2>
-              <p className="text-center text-[#86868b] max-w-2xl mx-auto mb-16">
-                Arcana Mace operates at the intersection of three rapidly growing markets.
-              </p>
-            </AnimatedSection>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                { market: 'Global PR & Media Distribution', size: '$100B+', growth: 'Growing 8% annually' },
-                { market: 'AI Content & Publishing Tools', size: '$15B+', growth: 'Growing 35% annually' },
-                { market: 'Geopolitical Intelligence & Risk', size: '$12B+', growth: 'Growing 12% annually' },
-              ].map((m, i) => (
-                <AnimatedSection key={m.market} delay={i * 100}>
-                  <div className="text-center p-8 bg-[#f5f5f7]">
-                    <p className="text-3xl md:text-4xl font-bold tracking-tight mb-2">{m.size}</p>
-                    <h3 className="text-sm font-semibold mb-1">{m.market}</h3>
-                    <p className="text-xs text-[#86868b]">{m.growth}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* CTA */}
         <section className="py-20 bg-[#f5f5f7]">
