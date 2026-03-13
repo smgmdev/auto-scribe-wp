@@ -435,7 +435,7 @@ class AssetDiscovery:
             ]
             fallback_commodities = self._search_fallback(
                 commodity_fallback_terms,
-                ("COMMODITIES",),
+                ("COMMODITIES", "COMMODITY", "CURRENCIES"),
                 require_tradeable=False,
                 limit_per_term=2,
             )
