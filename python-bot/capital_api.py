@@ -157,12 +157,15 @@ class CapitalAPI:
 
     def get_positions(self) -> list:
         """Get all open positions."""
+        _pace_request()
         try:
             resp = self.session.get(
-                f"{self.base_url}/api/v1/positions", headers=self._headers()
+                f"{self.base_url}/api/v1/positions", headers=self._headers(), timeout=10
             )
             if resp.status_code == 200:
+                _handle_success()
                 return resp.json().get("positions", [])
+            _handle_error(resp.status_code)
         except Exception as e:
             log.error(f"Positions exception: {e}")
         return []
