@@ -719,9 +719,11 @@ def run():
 
             # ═══════════════════════════════════════════
             # ⚡ BATCH PRICE FETCH — 1 API call instead of 30+ sequential calls
+            # With fallback: if batch fails, try smaller chunks
             # ═══════════════════════════════════════════
             batch_prices: dict[str, dict] = {}
             if balanced_epics:
+                batch_success = False
                 try:
                     for i in range(0, len(balanced_epics), 50):
                         chunk = balanced_epics[i:i+50]
@@ -738,8 +740,45 @@ def run():
                                     "bid": b, "ask": a,
                                     "mid": (b + a) / 2, "spread": a - b,
                                 }
+                        if details:
+                            batch_success = True
                 except Exception as e:
                     log.warning(f"Batch price fetch error: {e}")
+
+                # Fallback: if batch returned nothing, try smaller chunks of 10
+                if not batch_success and len(balanced_epics) > 10:
+                    log.info("🔄 Batch fetch failed — retrying with smaller chunks...")
+                    try:
+                        for i in range(0, min(len(balanced_epics), 30), 10):
+                            chunk = balanced_epics[i:i+10]
+                            details = api.get_markets_details(chunk)
+                            for m in details:
+                                ep = m.get("epic", "")
+                                snap = m.get("snapshot", {})
+                                bid_val = snap.get("bid", 0)
+                                ask_val = snap.get("offer", 0)
+                                if bid_val and ask_val:
+                                    b = float(bid_val)
+                                    a = float(ask_val)
+                                    batch_prices[ep] = {
+                                        "bid": b, "ask": a,
+                                        "mid": (b + a) / 2, "spread": a - b,
+                                    }
+                            time.sleep(0.3)
+                    except Exception as e2:
+                        log.warning(f"Fallback batch also failed: {e2}")
+
+                if not batch_prices:
+                    if cycle_count % 10 == 0:
+                        log.warning("⚠️ No price data this cycle — batch fetch returned empty")
+                    # Use last known tick prices as fallback
+                    for epic in balanced_epics:
+                        if epic in tick_history and tick_history[epic]:
+                            last = tick_history[epic][-1]
+                            batch_prices[epic] = {
+                                "bid": last["bid"], "ask": last["ask"],
+                                "mid": last["mid"], "spread": last["spread"],
+                            }
 
             for epic in balanced_epics:
                 try:
@@ -753,10 +792,10 @@ def run():
                         continue
 
                     # ═══════════════════════════════════════
-                    # Use batch-fetched prices instead of per-epic API calls
+                    # Use batch-fetched prices (with tick fallback above)
                     # ═══════════════════════════════════════
                     if epic not in batch_prices:
-                        continue  # No price data from batch fetch
+                        continue
 
                     bp = batch_prices[epic]
                     bid = bp["bid"]
