@@ -246,37 +246,43 @@ def run():
 
         # ═══════════════════════════════════════════
         # CLOSE ALL NON-CRYPTO POSITIONS (crypto-only mode)
+        # Retry up to 3 times with delays for rate limiting
         # ═══════════════════════════════════════════
-        non_crypto_closed = 0
-        remaining_positions = []
-        for pos in positions:
-            try:
+        for attempt in range(3):
+            positions = api.get_positions()  # Re-fetch each attempt
+            non_crypto = []
+            for pos in positions:
                 epic = pos.get("market", {}).get("epic", "")
                 deal_id = pos.get("position", {}).get("dealId", "")
                 if not deal_id or not epic:
                     continue
                 category = config.get_category(epic)
                 if category != config.CATEGORY_CRYPTO:
-                    log.info(f"🚫 Closing non-crypto position: {epic} ({category}) deal={deal_id}")
+                    non_crypto.append((epic, deal_id, category))
+
+            if not non_crypto:
+                log.info(f"✅ All non-crypto positions closed (attempt {attempt + 1})")
+                break
+
+            log.info(f"🚫 Attempt {attempt + 1}: Closing {len(non_crypto)} non-crypto position(s)...")
+            for epic, deal_id, category in non_crypto:
+                log.info(f"  🚫 Closing {epic} ({category}) deal={deal_id}")
+                try:
                     closed = api.close_position(deal_id)
                     if closed:
-                        non_crypto_closed += 1
+                        log.info(f"    ✅ Closed {epic}")
                         pos_manager.untrack(deal_id)
                         active_signals.pop(epic, None)
-                        log.info(f"  ✅ Closed {epic}")
                     else:
-                        log.warning(f"  ⚠️ Failed to close {epic}")
-                else:
-                    remaining_positions.append(pos)
-            except Exception as e:
-                log.error(f"Error closing non-crypto {epic}: {e}")
-                remaining_positions.append(pos)
+                        log.warning(f"    ⚠️ Failed to close {epic} — will retry")
+                except Exception as e:
+                    log.error(f"    ❌ Error closing {epic}: {e}")
+                time.sleep(0.3)  # Rate limit protection
 
-        if non_crypto_closed > 0:
-            log.info(f"🚫 Closed {non_crypto_closed} non-crypto position(s) — crypto-only mode active")
-            positions = api.get_positions()  # Refresh
-        else:
-            positions = remaining_positions if remaining_positions else positions
+            time.sleep(1)  # Wait before retry
+
+        # Final refresh
+        positions = api.get_positions()
 
         # ═══════════════════════════════════════════
         # RECOVER remaining (crypto) positions
@@ -467,6 +473,20 @@ def run():
                 positions = api.get_positions()
             # Write live state every cycle — fetches live prices directly from API
             write_live_state(api, balance, positions, pos_manager, tick_history)
+
+            # ═══════════════════════════════════════════
+            # 🚫 ENFORCE CRYPTO-ONLY — close any non-crypto that snuck through
+            # ═══════════════════════════════════════════
+            if positions and cycle_count % 10 == 0:
+                for pos in positions:
+                    epic = pos.get("market", {}).get("epic", "")
+                    deal_id = pos.get("position", {}).get("dealId", "")
+                    if epic and deal_id and config.get_category(epic) != config.CATEGORY_CRYPTO:
+                        log.info(f"🚫 Force-closing non-crypto: {epic} deal={deal_id}")
+                        if api.close_position(deal_id):
+                            pos_manager.untrack(deal_id)
+                            active_signals.pop(epic, None)
+                        time.sleep(0.3)
 
             # ═══════════════════════════════════════════
             # ⚡ SMART POSITION MANAGEMENT — every cycle
