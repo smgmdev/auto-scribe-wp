@@ -330,7 +330,7 @@ body {
 .status-dot.stopped { background: #ff4444; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .topbar-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-.topbar-right { display: flex; gap: 16px; font-size: 12px; color: #888; flex-wrap: wrap; }
+.topbar-right { display: flex; align-items: center; gap: 16px; font-size: 12px; color: #888; flex-wrap: wrap; }
 .topbar-right .val { color: #fff; font-weight: 600; }
 #updateBtn {
     background: #222;
