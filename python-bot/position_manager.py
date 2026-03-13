@@ -28,7 +28,7 @@ class PositionManager:
     def track_position(self, deal_id: str, epic: str, direction: str,
                        entry_price: float, stop_distance: float, profit_distance: float,
                        spread: float = 0.0, current_price: float = 0.0,
-                       created_date: float = 0.0):
+                       created_date: float = 0.0, category: str = ""):
         """Start tracking a new position.
         
         Args:
@@ -78,6 +78,10 @@ class PositionManager:
 
         entry_time = created_date if created_date > 0 else time.time()
 
+        # Resolve category: use explicit param, or infer from epic
+        import config as _cfg
+        resolved_cat = category if category else _cfg.get_category(epic)
+
         self.tracked[deal_id] = {
             "epic": epic,
             "direction": direction,
@@ -92,6 +96,7 @@ class PositionManager:
             "spread": spread,
             "fee_cost": fee_cost,
             "locked_steps": locked_steps,
+            "category": resolved_cat,
         }
 
         recovery_tag = ""

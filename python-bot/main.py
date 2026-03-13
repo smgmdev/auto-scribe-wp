@@ -131,7 +131,7 @@ def write_live_state(api, balance, positions, pos_manager, tick_history):
                 "locked_steps": tracked.get("locked_steps", 0),
                 "trailing_stop_price": tracked.get("trailing_stop_price"),
                 "stop_distance": tracked.get("stop_distance", 0),
-                "category": config.get_category(epic),
+                "category": tracked.get("category") or config.get_category(epic),
             })
 
         state = {
@@ -339,6 +339,7 @@ def run():
                     spread=live_spread,
                     current_price=current_price,
                     created_date=created_ts,
+                    category=config.get_category(epic),
                 )
 
                 # Mark as active signal to prevent duplicate entry
@@ -547,6 +548,7 @@ def run():
                                 spread=live_spread,
                                 current_price=current_price,
                                 created_date=created_ts,
+                                category=config.get_category(pos_epic),
                             )
 
                         # Get adaptive params
@@ -785,7 +787,8 @@ def run():
                         pos_manager.track_position(
                             real_deal_id, epic, entry_signal,
                             mid, stop_distance, profit_distance,
-                            spread=spread
+                            spread=spread,
+                            category=config.get_category(epic),
                         )
 
                         # Store entry info for journal

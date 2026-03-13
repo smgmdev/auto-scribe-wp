@@ -223,14 +223,15 @@ def _price_fetcher_loop():
                         pair = epic[:-len(suffix)] + "/" + suffix
                         break
 
-                raw_cat = config.get_category(epic)
-                display_cat = cat_map.get(raw_cat, "Stocks")
-
-                # Get SL data from position manager
+                # Use stored category from position manager (set at trade open time)
                 deal_id = pos.get("position", {}).get("dealId", "")
                 tracked = {}
                 if _pos_manager_ref and deal_id:
                     tracked = _pos_manager_ref.tracked.get(deal_id, {})
+                raw_cat = tracked.get("category") or config.get_category(epic)
+                display_cat = cat_map.get(raw_cat, "Stocks")
+
+                # SL data already in `tracked` from above
 
                 trailing_stop = tracked.get("trailing_stop_price")
                 stop_dist = tracked.get("stop_distance", 0)
