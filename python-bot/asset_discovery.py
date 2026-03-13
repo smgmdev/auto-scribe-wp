@@ -20,7 +20,9 @@ log = get_logger("discovery")
 
 # How many assets to select per category
 TOP_STOCKS = 10
-TOP_CRYPTO = 15   # More crypto for scalp coverage
+TOP_CRYPTO = 15
+TOP_FOREX = 12
+TOP_COMMODITIES = 8
 TOP_FOREX = 12    # More forex pairs for scalp coverage
 
 # Re-discover every N minutes (faster for volatile markets)
