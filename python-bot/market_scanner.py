@@ -91,7 +91,37 @@ class MarketScanner:
         self.SCALP_SCAN_INTERVAL = 20    # Scalp scan every 20 sec
         self.TOP_N_STANDARD = 8          # Deep-analyze top 8 stocks/commodities (was 10)
         self.TOP_N_SCALP = 10            # Deep-analyze top 10 crypto/forex (was 14)
+        self.SCALP_SCAN_PAGE_SIZE = 12   # Only scan a rotating subset each cycle
+        self.STANDARD_SCAN_PAGE_SIZE = 10
+        self._scalp_page_cursor = 0
+        self._std_page_cursor = 0
         self._full_categories: set[str] = set()  # Categories at max positions
+
+    def _next_scan_page(self, epics: list[str], page_size: int, mode: str) -> list[str]:
+        """Return a rotating page of epics to keep API usage bounded."""
+        if not epics:
+            return []
+
+        unique_epics = list(dict.fromkeys(epics))
+        if len(unique_epics) <= page_size:
+            return unique_epics
+
+        if mode == "scalp":
+            cursor = self._scalp_page_cursor
+        else:
+            cursor = self._std_page_cursor
+
+        page = unique_epics[cursor:cursor + page_size]
+        if len(page) < page_size:
+            page.extend(unique_epics[:page_size - len(page)])
+
+        next_cursor = (cursor + page_size) % len(unique_epics)
+        if mode == "scalp":
+            self._scalp_page_cursor = next_cursor
+        else:
+            self._std_page_cursor = next_cursor
+
+        return page
 
     def _analyze_timeframe(self, epic: str, tf_name: str, tf_config: dict,
                            is_scalp: bool = False) -> Optional[TimeframeAnalysis]:

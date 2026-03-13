@@ -15,7 +15,7 @@ import config
 log = get_logger("capital_api")
 
 # Rate limit protection — thread-safe with Lock
-_MIN_REQUEST_INTERVAL = 0.25  # 250ms between requests (was 150ms — too fast for 2 threads)
+_MIN_REQUEST_INTERVAL = 0.5  # 500ms between requests to stay below broker rate limits
 _request_lock = threading.Lock()
 _last_request_time = 0.0
 _consecutive_errors = 0
