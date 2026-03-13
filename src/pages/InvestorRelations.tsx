@@ -348,10 +348,9 @@ export default function InvestorRelations() {
             </p>
             <Button
               onClick={() => navigate('/arcana-precision')}
-              className="rounded-none bg-[#f2a547] text-white hover:bg-[#e0963c] h-12 px-8 text-base font-medium mt-8"
+              className="rounded-none bg-[#f2a547] text-black hover:bg-[#e0963c] h-12 px-8 text-base font-medium mt-8"
             >
               Learn More
-              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </AnimatedSection>
         </section>
