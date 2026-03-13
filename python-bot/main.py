@@ -12,9 +12,15 @@ import time
 import sys
 import os
 import threading
+import warnings
 from datetime import datetime
 from collections import defaultdict
 from typing import Optional
+
+warnings.filterwarnings(
+    "ignore",
+    message="urllib3 v2 only supports OpenSSL 1.1.1+*",
+)
 
 import config
 from capital_api import CapitalAPI
