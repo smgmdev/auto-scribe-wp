@@ -252,7 +252,7 @@ class PositionManager:
                     old_sl = pos["trailing_stop_price"]
                     pos["trailing_stop_price"] = new_sl
                     pos["locked_steps"] = current_steps
-                    locked_pct = current_steps * 5
+                    locked_pct = current_steps * step_pct * 100
                     log.info(
                         f"🔒 {pos['epic']} SL ratcheted! Step {current_steps} "
                         f"(+{locked_pct}% profit) | "
