@@ -223,7 +223,12 @@ def _price_fetcher_loop():
                         pair = epic[:-len(suffix)] + "/" + suffix
                         break
 
-                raw_cat = config.get_category(epic)
+                # Use stored category from position manager (set at trade open time)
+                deal_id = pos.get("position", {}).get("dealId", "")
+                tracked = {}
+                if _pos_manager_ref and deal_id:
+                    tracked = _pos_manager_ref.tracked.get(deal_id, {})
+                raw_cat = tracked.get("category") or config.get_category(epic)
                 display_cat = cat_map.get(raw_cat, "Stocks")
 
                 # Get SL data from position manager
