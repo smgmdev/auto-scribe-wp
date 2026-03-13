@@ -90,6 +90,7 @@ class MarketScanner:
         self.SCALP_SCAN_INTERVAL = 30    # Scalp scan every 30 seconds
         self.TOP_N_STANDARD = 8          # Deep-analyze top 8 stocks/commodities
         self.TOP_N_SCALP = 12            # Deep-analyze top 12 crypto/forex
+        self._full_categories: set[str] = set()  # Categories at max positions
 
     def _analyze_timeframe(self, epic: str, tf_name: str, tf_config: dict,
                            is_scalp: bool = False) -> Optional[TimeframeAnalysis]:
