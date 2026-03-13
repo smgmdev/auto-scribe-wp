@@ -828,14 +828,30 @@ export default function UpdateLog() {
           <p className="text-white/50 leading-relaxed">
             We regularly release updates to improve performance, introduce new capabilities, and refine the user experience across publishing, media buying, and agency management. Each entry below details the changes included in that release.
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               placeholder="Search updates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-colors"
+              className="flex-1 px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 transition-colors"
             />
+            <select
+              value={selectedYear}
+              onChange={(e) => { setSelectedYear(e.target.value); setSelectedMonth('all'); }}
+              className="px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white focus:outline-none focus:border-white/50 transition-colors appearance-none cursor-pointer"
+            >
+              <option value="all">All Years</option>
+              {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="px-4 py-2 text-sm rounded-none bg-black border border-white/20 text-white focus:outline-none focus:border-white/50 transition-colors appearance-none cursor-pointer"
+            >
+              <option value="all">All Months</option>
+              {availableMonths.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
           </div>
         </div>
 
