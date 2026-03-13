@@ -63,7 +63,6 @@ export default function InvestorRelations() {
       <SEOHead
         title="Investor Relations — Arcana Mace"
         description="Invest in the future of global media intelligence. Arcana Mace is redefining how organizations access media distribution, AI-powered publishing, and geopolitical intelligence."
-        canonicalUrl="https://amdev.lovable.app/investor-relations"
       />
 
       {/* Header */}
