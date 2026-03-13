@@ -213,7 +213,7 @@ export default function InvestorRelations() {
             <AnimatedSection>
               <p className="text-sm font-medium tracking-wider uppercase text-white/40 mb-4">Our Products</p>
               <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-6">
-                Three Products.<br />One Platform.
+                Media Buying Marketplace
               </h2>
               <p className="text-base md:text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
                 From global media distribution to AI-powered publishing and geopolitical intelligence — Arcana Mace delivers an integrated suite built for the modern information economy.
