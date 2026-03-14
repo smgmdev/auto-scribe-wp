@@ -206,6 +206,11 @@ def run():
         f"🪙 Commodities: {', '.join(config.WATCHLIST_COMMODITIES)}"
     )
 
+    # ═══════════════════════════════════════════
+    # 🕐 MARKET HOURS CHECK — detect open/closed markets
+    # ═══════════════════════════════════════════
+    open_categories = log_market_status()
+
     scanner = MarketScanner(api, config.WATCHLIST)
 
     # Print learning stats on startup
