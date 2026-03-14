@@ -479,8 +479,33 @@ def run():
     cycle_count = 0
     _last_batch_success = time.time()
     _batch_fail_streak = 0
-    _next_batch_fetch_ts = time.time() + 15  # let startup scans finish before first batch fetch
+    _next_batch_fetch_ts = time.time() + 10  # short warmup before first quote page
     batch_prices: dict[str, dict] = {}
+
+    # Rotating quote pages prevent API spikes while keeping tick history fresh
+    BATCH_FETCH_INTERVAL_CYCLES = 2
+    BATCH_PAGE_SIZE = 14
+    BATCH_CACHE_TTL_SECONDS = 180
+    _batch_page_cursor = 0
+    _quote_cache: dict[str, dict] = {}
+
+    def _next_batch_page(epics: list[str], page_size: int) -> list[str]:
+        """Return rotating subset of epics for market-details fetches."""
+        nonlocal _batch_page_cursor
+        if not epics:
+            return []
+
+        unique_epics = list(dict.fromkeys(epics))
+        if len(unique_epics) <= page_size:
+            return unique_epics
+
+        start = _batch_page_cursor
+        page = unique_epics[start:start + page_size]
+        if len(page) < page_size:
+            page.extend(unique_epics[:page_size - len(page)])
+
+        _batch_page_cursor = (start + page_size) % len(unique_epics)
+        return page
 
     while True:
         try:
