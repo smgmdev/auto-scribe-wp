@@ -327,6 +327,7 @@ def run():
                     if closed:
                         log.info(f"    ✅ Closed {epic}")
                         pos_manager.untrack(deal_id)
+                        unregister_deal(deal_id)
                         active_signals.pop(epic, None)
                     else:
                         log.info(f"    Failed to close {epic} — will retry")
