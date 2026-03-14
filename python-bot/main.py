@@ -456,18 +456,14 @@ def run():
     # so _pace_request() naturally serializes all API access.
     # ═══════════════════════════════════════════
     _scanner_running = True
-    _scanner_scan_active = threading.Event()
 
     def _scanner_thread_fn():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
-            _scanner_scan_active.set()
             try:
                 scanner.scan_all()
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
-            finally:
-                _scanner_scan_active.clear()
             # Sleep 5s between iterations to let main loop breathe
             time.sleep(5)
 
