@@ -36,6 +36,7 @@ from regime_detector import RegimeDetector
 from correlation_tracker import CorrelationTracker
 from market_hours import log_market_status, get_closed_categories
 from ai_reviewer import AITradeReviewer
+from trade_ownership import register_deal, unregister_deal, is_own_deal, get_own_deals, cleanup_closed
 from logger_setup import get_logger
 
 log = get_logger("main")
