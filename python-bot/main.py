@@ -309,7 +309,7 @@ def run():
                     log.error(f"    ❌ Error closing {epic}: {e}")
                 time.sleep(0.3)
 
-            time.sleep(1)
+        time.sleep(3)  # 3s between dashboard fetches (was 1s) — reduces API pressure
 
         # Final refresh
         positions = api.get_positions()
