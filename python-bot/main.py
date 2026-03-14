@@ -246,8 +246,26 @@ def run():
     # ═══════════════════════════════════════════
     log.info("🔄 Checking for existing open positions on account...")
     positions = api.get_positions()
+
+    # ═══════════════════════════════════════════
+    # 🔒 TRADE OWNERSHIP — only manage positions opened by THIS bot
+    # Other bot (Claude) may have positions on the same account
+    # ═══════════════════════════════════════════
+    own_deals = get_own_deals()
     if positions:
-        log.info(f"🔄 Found {len(positions)} open position(s) — applying current rules...")
+        all_open_ids = {p.get("position", {}).get("dealId", "") for p in positions}
+        cleanup_closed(all_open_ids)  # Remove stale entries
+
+        # Filter to only our positions
+        total_on_account = len(positions)
+        positions_own = [p for p in positions if p.get("position", {}).get("dealId", "") in own_deals]
+        positions_other = total_on_account - len(positions_own)
+
+        if positions_other > 0:
+            log.info(f"👻 Ignoring {positions_other} position(s) opened by other bot(s)")
+
+        log.info(f"🔄 Found {len(positions_own)} OWN position(s) (of {total_on_account} total) — applying current rules...")
+        positions = positions_own  # Only work with our own
 
         # Collect epics for live price fetch
         startup_epics = []
