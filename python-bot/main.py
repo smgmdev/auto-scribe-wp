@@ -36,6 +36,7 @@ from regime_detector import RegimeDetector
 from correlation_tracker import CorrelationTracker
 from market_hours import log_market_status, get_closed_categories
 from ai_reviewer import AITradeReviewer
+from trade_ownership import register_deal, unregister_deal, is_own_deal, get_own_deals, cleanup_closed
 from logger_setup import get_logger
 
 log = get_logger("main")
@@ -245,8 +246,26 @@ def run():
     # ═══════════════════════════════════════════
     log.info("🔄 Checking for existing open positions on account...")
     positions = api.get_positions()
+
+    # ═══════════════════════════════════════════
+    # 🔒 TRADE OWNERSHIP — only manage positions opened by THIS bot
+    # Other bot (Claude) may have positions on the same account
+    # ═══════════════════════════════════════════
+    own_deals = get_own_deals()
     if positions:
-        log.info(f"🔄 Found {len(positions)} open position(s) — applying current rules...")
+        all_open_ids = {p.get("position", {}).get("dealId", "") for p in positions}
+        cleanup_closed(all_open_ids)  # Remove stale entries
+
+        # Filter to only our positions
+        total_on_account = len(positions)
+        positions_own = [p for p in positions if p.get("position", {}).get("dealId", "") in own_deals]
+        positions_other = total_on_account - len(positions_own)
+
+        if positions_other > 0:
+            log.info(f"👻 Ignoring {positions_other} position(s) opened by other bot(s)")
+
+        log.info(f"🔄 Found {len(positions_own)} OWN position(s) (of {total_on_account} total) — applying current rules...")
+        positions = positions_own  # Only work with our own
 
         # Collect epics for live price fetch
         startup_epics = []
@@ -284,7 +303,7 @@ def run():
             config.CATEGORY_COMMODITIES: "Commodities", config.CATEGORY_FOREX: "FX",
         }
         for attempt in range(3):
-            positions = api.get_positions()
+            positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
             disabled_pos = []
             for pos in positions:
                 epic = pos.get("market", {}).get("epic", "")
@@ -308,6 +327,7 @@ def run():
                     if closed:
                         log.info(f"    ✅ Closed {epic}")
                         pos_manager.untrack(deal_id)
+                        unregister_deal(deal_id)
                         active_signals.pop(epic, None)
                     else:
                         log.info(f"    Failed to close {epic} — will retry")
@@ -318,7 +338,7 @@ def run():
         time.sleep(3)  # 3s between dashboard fetches (was 1s) — reduces API pressure
 
         # Final refresh
-        positions = api.get_positions()
+        positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
 
         # ═══════════════════════════════════════════
         # RECOVER remaining (crypto) positions
@@ -440,6 +460,7 @@ def run():
                             "early_exit": True,
                         })
                         pos_manager.untrack(deal_id)
+                        unregister_deal(deal_id)
                         active_signals.pop(epic, None)
                         log.info(f"  ✅ Startup-closed {epic}")
                 else:
@@ -449,8 +470,8 @@ def run():
                 log.error(f"Startup position recovery error: {e}")
 
         # Refresh positions after any startup closes
-        positions = api.get_positions()
-        log.info(f"🔄 Startup reconciliation complete — {len(positions)} position(s) active")
+        positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
+        log.info(f"🔄 Startup reconciliation complete — {len(positions)} OWN position(s) active")
     else:
         log.info("🔄 No existing positions found — starting fresh")
 
@@ -598,9 +619,9 @@ def run():
                     if s["total"] > 0:
                         log.info(f"  🧠 {epic}: {s['total']} trades, {s['win_rate']:.0%} win rate")
 
-            # Refresh positions every 3 cycles from API
+            # Refresh positions every 3 cycles from API (only OWN trades)
             if cycle_count % 3 == 0:
-                positions = api.get_positions()
+                positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
             # Write live state every cycle — uses cached prices (NO extra API calls)
             write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices)
 
@@ -621,6 +642,7 @@ def run():
                             log.info(f"🚫 Force-closing disabled-category: {epic} ({cat}) deal={deal_id}")
                             if api.close_position(deal_id):
                                 pos_manager.untrack(deal_id)
+                                unregister_deal(deal_id)
                                 active_signals.pop(epic, None)
                             time.sleep(0.3)
 
@@ -732,6 +754,7 @@ def run():
                                 ai_reviewer.review_trade(trade_data, trade_id, brain.get_brain_summary())
 
                                 pos_manager.untrack(deal_id)
+                                unregister_deal(deal_id)
                                 active_signals.pop(pos_epic, None)
                                 entry_info.pop(deal_id, None)
 
@@ -1154,6 +1177,9 @@ def run():
                                 if real_deal_id != deal_ref:
                                     log.info(f"🔗 Resolved dealRef {deal_ref} → dealId {real_deal_id}")
                                 break
+
+                        # 🔒 Register as OWN trade
+                        register_deal(real_deal_id)
 
                         # Track for smart management (pass spread for fee calculation)
                         pos_manager.track_position(
