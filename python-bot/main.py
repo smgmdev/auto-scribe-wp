@@ -461,7 +461,23 @@ def run():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
             try:
-                scanner.scan_all()
+                results = scanner.scan_all()
+                # Run regime detection on scanned assets so pattern scoring
+                # uses real regime data instead of always "unknown"
+                for scan_result in results:
+                    if scan_result.price > 0 and scan_result.atr > 0:
+                        try:
+                            ep = scan_result.epic
+                            prices_data = api.get_prices(ep, "MINUTE_15", num_points=40)
+                            if prices_data and prices_data.get("prices") and len(prices_data["prices"]) >= 30:
+                                candles = prices_data["prices"]
+                                import numpy as np
+                                c = np.array([(x["closePrice"]["bid"] + x["closePrice"]["ask"]) / 2 for x in candles])
+                                h = np.array([(x["highPrice"]["bid"] + x["highPrice"]["ask"]) / 2 for x in candles])
+                                l = np.array([(x["lowPrice"]["bid"] + x["lowPrice"]["ask"]) / 2 for x in candles])
+                                regime_detector.detect(ep, c, h, l)
+                        except Exception:
+                            pass
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
             # Sleep 5s between iterations to let main loop breathe

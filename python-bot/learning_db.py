@@ -543,10 +543,10 @@ class TradingBrain:
             "SELECT total_trades, win_rate, current_consecutive_losses FROM asset_performance WHERE epic = ?",
             (epic,)
         ).fetchone()
-        if row and row["total_trades"] >= 10 and row["win_rate"] < 0.25:
+        if row and row["total_trades"] >= 15 and row["win_rate"] < 0.20:
             return False, f"Win rate too low ({row['win_rate']:.0%} over {row['total_trades']} trades)"
 
-        if row and row["current_consecutive_losses"] >= 3:
+        if row and row["current_consecutive_losses"] >= 4:
             return False, f"{row['current_consecutive_losses']} consecutive losses — cooling down"
 
         return True, "OK"
