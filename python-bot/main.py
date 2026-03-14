@@ -303,7 +303,7 @@ def run():
             config.CATEGORY_COMMODITIES: "Commodities", config.CATEGORY_FOREX: "FX",
         }
         for attempt in range(3):
-            positions = api.get_positions()
+            positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
             disabled_pos = []
             for pos in positions:
                 epic = pos.get("market", {}).get("epic", "")
