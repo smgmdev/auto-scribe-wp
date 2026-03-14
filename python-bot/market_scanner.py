@@ -547,13 +547,17 @@ class MarketScanner:
         # ═══════════════════════════════════════════
         if now - self.last_full_scan >= self.FULL_SCAN_INTERVAL:
             std_epics = []
-            if config.CATEGORY_STOCKS not in self._full_categories:
+            if config.CATEGORY_STOCKS not in _skip_cats:
                 std_epics += config.WATCHLIST_STOCKS
-            else:
+            elif config.CATEGORY_STOCKS in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_STOCKS in self._full_categories:
                 log.info("⏭️  Stocks: 5/5 positions filled — skipping scan")
-            if config.CATEGORY_COMMODITIES not in self._full_categories:
+            if config.CATEGORY_COMMODITIES not in _skip_cats:
                 std_epics += config.WATCHLIST_COMMODITIES
-            else:
+            elif config.CATEGORY_COMMODITIES in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_COMMODITIES in self._full_categories:
                 log.info("⏭️  Commodities: 5/5 positions filled — skipping scan")
             if std_epics:
                 std_page = self._next_scan_page(
