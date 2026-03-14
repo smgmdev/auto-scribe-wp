@@ -642,6 +642,7 @@ def run():
                             log.info(f"🚫 Force-closing disabled-category: {epic} ({cat}) deal={deal_id}")
                             if api.close_position(deal_id):
                                 pos_manager.untrack(deal_id)
+                                unregister_deal(deal_id)
                                 active_signals.pop(epic, None)
                             time.sleep(0.3)
 
