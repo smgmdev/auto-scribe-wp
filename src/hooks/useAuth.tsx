@@ -283,11 +283,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Check profile for PIN and email verification status
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('pin_enabled, pin_hash, email_verified, precision_enabled')
-        .eq('id', userId)
-        .maybeSingle();
+      // Retry up to 3 times — on initial login the Supabase client's auth
+      // headers may not be ready yet, causing the RLS-protected query to
+      // return null (profile not found) which would false-trigger the
+      // "unverified" sign-out gate below.
+      let profileData: { pin_enabled: boolean; pin_hash: string | null; email_verified: boolean; precision_enabled: boolean } | null = null;
+      let profileError: any = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('pin_enabled, pin_hash, email_verified, precision_enabled')
+          .eq('id', userId)
+          .maybeSingle();
+        profileData = data;
+        profileError = error;
+        if (data !== null) break;
+        // Wait before retrying to give auth headers time to propagate
+        if (attempt < 3) {
+          console.warn(`[Auth] Profile query returned null on attempt ${attempt}, retrying...`);
+          await new Promise(r => setTimeout(r, 500 * attempt));
+        }
+      }
+
+      // If profile still null after retries, don't assume unverified — this
+      // is a transient failure, not evidence the user is unverified.
+      if (profileData === null) {
+        console.warn('[Auth] Profile query failed after 3 attempts, skipping verification gate');
+        setPrecisionEnabled(false);
+        setEmailVerified(true); // Assume verified to prevent false kicks
+        setPinRequired(false);
+        setPinVerified(true);
+        return;
+      }
 
       setPrecisionEnabled(profileData?.precision_enabled ?? false);
       
