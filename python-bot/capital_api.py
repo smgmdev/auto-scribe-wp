@@ -241,24 +241,36 @@ class CapitalAPI:
             if pd > 0:
                 payload["profitDistance"] = pd
 
-        try:
-            log.debug(f"Order payload {epic}: {payload}")
-            resp = self.session.post(
-                f"{self.base_url}/api/v1/positions",
-                json=payload,
-                headers=self._headers(),
-            )
-            if resp.status_code == 200:
-                deal_ref = resp.json().get("dealReference", "?")
-                log.info(
-                    f"📈 OPENED {direction} {size} {epic} | "
-                    f"SL: {stop_distance} | TP: {profit_distance} | Ref: {deal_ref}"
+        for attempt in range(_MAX_RETRIES + 1):
+            _pace_request()
+            try:
+                log.debug(f"Order payload {epic}: {payload}")
+                resp = self.session.post(
+                    f"{self.base_url}/api/v1/positions",
+                    json=payload,
+                    headers=self._headers(),
+                    timeout=15,
                 )
-                return resp.json()
-            else:
-                log.error(f"Open position failed: {resp.status_code} — {resp.text}")
-        except Exception as e:
-            log.error(f"Open position exception: {e}")
+                if resp.status_code == 200:
+                    _handle_success()
+                    deal_ref = resp.json().get("dealReference", "?")
+                    log.info(
+                        f"📈 OPENED {direction} {size} {epic} | "
+                        f"SL: {stop_distance} | TP: {profit_distance} | Ref: {deal_ref}"
+                    )
+                    return resp.json()
+
+                _handle_error(resp.status_code)
+                log.error(f"Open position failed (attempt {attempt + 1}): {resp.status_code} — {resp.text}")
+                if resp.status_code in (429, 500, 502, 503, 504) and attempt < _MAX_RETRIES:
+                    time.sleep(_BACKOFF_BASE * (attempt + 1))
+                    continue
+                break
+            except Exception as e:
+                log.error(f"Open position exception (attempt {attempt + 1}): {e}")
+                if attempt < _MAX_RETRIES:
+                    time.sleep(_BACKOFF_BASE * (attempt + 1))
+
         return None
 
     def close_position(self, deal_id: str) -> bool:
