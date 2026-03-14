@@ -34,7 +34,7 @@ from dashboard import start_dashboard_thread
 from learning_db import TradingBrain
 from regime_detector import RegimeDetector
 from correlation_tracker import CorrelationTracker
-from ai_reviewer import AITradeReviewer
+from market_hours import log_market_status, get_closed_categories
 from logger_setup import get_logger
 
 log = get_logger("main")
