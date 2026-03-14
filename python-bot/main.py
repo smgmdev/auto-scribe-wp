@@ -456,18 +456,14 @@ def run():
     # so _pace_request() naturally serializes all API access.
     # ═══════════════════════════════════════════
     _scanner_running = True
-    _scanner_scan_active = threading.Event()
 
     def _scanner_thread_fn():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
-            _scanner_scan_active.set()
             try:
                 scanner.scan_all()
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
-            finally:
-                _scanner_scan_active.clear()
             # Sleep 5s between iterations to let main loop breathe
             time.sleep(5)
 
@@ -479,8 +475,33 @@ def run():
     cycle_count = 0
     _last_batch_success = time.time()
     _batch_fail_streak = 0
-    _next_batch_fetch_ts = time.time() + 15  # let startup scans finish before first batch fetch
+    _next_batch_fetch_ts = time.time() + 10  # short warmup before first quote page
     batch_prices: dict[str, dict] = {}
+
+    # Rotating quote pages prevent API spikes while keeping tick history fresh
+    BATCH_FETCH_INTERVAL_CYCLES = 2
+    BATCH_PAGE_SIZE = 14
+    BATCH_CACHE_TTL_SECONDS = 180
+    _batch_page_cursor = 0
+    _quote_cache: dict[str, dict] = {}
+
+    def _next_batch_page(epics: list[str], page_size: int) -> list[str]:
+        """Return rotating subset of epics for market-details fetches."""
+        nonlocal _batch_page_cursor
+        if not epics:
+            return []
+
+        unique_epics = list(dict.fromkeys(epics))
+        if len(unique_epics) <= page_size:
+            return unique_epics
+
+        start = _batch_page_cursor
+        page = unique_epics[start:start + page_size]
+        if len(page) < page_size:
+            page.extend(unique_epics[:page_size - len(page)])
+
+        _batch_page_cursor = (start + page_size) % len(unique_epics)
+        return page
 
     while True:
         try:
@@ -731,55 +752,69 @@ def run():
                 log.info(f"🔄 Entry scan order: {' → '.join(scanning_cats)} | {len(balanced_epics)} epics")
 
             # ═══════════════════════════════════════════
-            # ⚡ BATCH PRICE FETCH — every 10 cycles with adaptive cooldown
-            # Background scanner also makes API calls, so main loop must pace itself
+            # ⚡ BATCH PRICE FETCH — rotating pages to avoid starvation
+            # Never blocks on scanner state; global API pacer serializes requests safely.
             # ═══════════════════════════════════════════
             batch_prices: dict[str, dict] = {}
             now_ts = time.time()
+
+            # Seed this cycle with recent quotes so entry logic always has price input
+            cache_cutoff = now_ts - BATCH_CACHE_TTL_SECONDS
+            for epic in balanced_epics:
+                cached = _quote_cache.get(epic)
+                if cached and cached.get("ts", 0) >= cache_cutoff:
+                    batch_prices[epic] = {
+                        "bid": cached["bid"],
+                        "ask": cached["ask"],
+                        "mid": cached["mid"],
+                        "spread": cached["spread"],
+                    }
+
             should_fetch_prices = (
                 bool(balanced_epics)
-                and (cycle_count % 10 == 0)
+                and (cycle_count % BATCH_FETCH_INTERVAL_CYCLES == 0)
                 and (now_ts >= _next_batch_fetch_ts)
-                and (not _scanner_scan_active.is_set())
             )
 
             if should_fetch_prices:
                 batch_success = False
+                fetch_page = _next_batch_page(balanced_epics, BATCH_PAGE_SIZE)
                 try:
-                    for i in range(0, len(balanced_epics), 50):
-                        chunk = balanced_epics[i:i+50]
-                        details = api.get_markets_details(chunk)
-                        for m in details:
-                            ep = m.get("epic", "")
-                            snap = m.get("snapshot", {})
-                            bid_val = snap.get("bid", 0)
-                            ask_val = snap.get("offer", 0)
-                            if bid_val and ask_val:
-                                b = float(bid_val)
-                                a = float(ask_val)
-                                batch_prices[ep] = {
-                                    "bid": b, "ask": a,
-                                    "mid": (b + a) / 2, "spread": a - b,
-                                }
-                        if details:
+                    details = api.get_markets_details(fetch_page)
+                    for m in details:
+                        ep = m.get("epic", "")
+                        snap = m.get("snapshot", {})
+                        bid_val = snap.get("bid", 0)
+                        ask_val = snap.get("offer", 0)
+                        if bid_val and ask_val:
+                            b = float(bid_val)
+                            a = float(ask_val)
+                            quote = {
+                                "bid": b,
+                                "ask": a,
+                                "mid": (b + a) / 2,
+                                "spread": a - b,
+                            }
+                            batch_prices[ep] = quote
+                            _quote_cache[ep] = {**quote, "ts": now_ts}
                             batch_success = True
-                            _last_batch_success = time.time()
-                        if i + 50 < len(balanced_epics):
-                            time.sleep(0.5)
+
+                    if batch_success:
+                        _last_batch_success = time.time()
                 except Exception as e:
                     log.info(f"Batch price fetch transient error: {e}")
 
                 if batch_success:
                     _batch_fail_streak = 0
-                    _next_batch_fetch_ts = time.time() + 4
+                    _next_batch_fetch_ts = time.time() + 2
                 else:
                     _batch_fail_streak += 1
-                    cooldown = min(45, 4 * _batch_fail_streak)
+                    cooldown = min(20, 2 * _batch_fail_streak)
                     _next_batch_fetch_ts = time.time() + cooldown
                     if cycle_count % 30 == 0:
                         log.info(f"Batch fetch backoff {cooldown}s (streak: {_batch_fail_streak})")
 
-            # Always populate batch_prices from tick_history for non-fetch cycles or empty results
+            # Fallback to local ticks when quote cache has gaps
             for epic in balanced_epics:
                 if epic not in batch_prices and epic in tick_history and tick_history[epic]:
                     last = tick_history[epic][-1]
@@ -787,6 +822,13 @@ def run():
                         "bid": last["bid"], "ask": last["ask"],
                         "mid": last["mid"], "spread": last["spread"],
                     }
+
+            # Periodic cache prune (keeps memory bounded)
+            if cycle_count % 120 == 0 and _quote_cache:
+                _quote_cache = {
+                    ep: q for ep, q in _quote_cache.items()
+                    if q.get("ts", 0) >= cache_cutoff
+                }
 
             if should_fetch_prices and not batch_prices and cycle_count % 60 == 0:
                 log.info("No fresh batch prices this cycle; using cached tick history")
