@@ -277,11 +277,13 @@ Deno.serve(async (req) => {
 
     console.log('[wordpress-publish-article] Article published successfully:', wpPostId);
 
-    // Telegram alert for WP article published
-    const siteName = site.name || site.url || 'Unknown';
-    sendTelegramAlert(
-      TelegramAlerts.wpArticlePublished(siteName, title, data.link || '')
-    ).catch(() => {});
+    // Telegram alert for WP article published (skip drafts)
+    if (status === 'publish') {
+      const siteName = site.name || site.url || 'Unknown';
+      sendTelegramAlert(
+        TelegramAlerts.wpArticlePublished(siteName, title, data.link || '')
+      ).catch(() => {});
+    }
 
     // ── Notify site owner via email ──────────────────────────────────────
     if (site.user_id && status === 'publish') {
