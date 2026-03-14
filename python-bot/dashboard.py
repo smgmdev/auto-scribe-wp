@@ -276,7 +276,7 @@ def _price_fetcher_loop():
         except Exception as e:
             log.debug(f"Price fetcher error: {e}")
 
-        time.sleep(1)
+        time.sleep(3)  # 3s between fetches — reduces API pressure on main loop
 
 
 def generate_api_response() -> dict:

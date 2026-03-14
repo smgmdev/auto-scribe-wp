@@ -309,7 +309,7 @@ def run():
                     log.error(f"    ❌ Error closing {epic}: {e}")
                 time.sleep(0.3)
 
-            time.sleep(1)
+        time.sleep(3)  # 3s between dashboard fetches (was 1s) — reduces API pressure
 
         # Final refresh
         positions = api.get_positions()
@@ -461,7 +461,23 @@ def run():
         """Background thread: runs scanner.scan_all() on its own schedule."""
         while _scanner_running:
             try:
-                scanner.scan_all()
+                results = scanner.scan_all()
+                # Run regime detection on scanned assets so pattern scoring
+                # uses real regime data instead of always "unknown"
+                for scan_result in results:
+                    if scan_result.price > 0 and scan_result.atr > 0:
+                        try:
+                            ep = scan_result.epic
+                            prices_data = api.get_prices(ep, "MINUTE_15", num_points=40)
+                            if prices_data and prices_data.get("prices") and len(prices_data["prices"]) >= 30:
+                                candles = prices_data["prices"]
+                                import numpy as np
+                                c = np.array([(x["closePrice"]["bid"] + x["closePrice"]["ask"]) / 2 for x in candles])
+                                h = np.array([(x["highPrice"]["bid"] + x["highPrice"]["ask"]) / 2 for x in candles])
+                                l = np.array([(x["lowPrice"]["bid"] + x["lowPrice"]["ask"]) / 2 for x in candles])
+                                regime_detector.detect(ep, c, h, l)
+                        except Exception:
+                            pass
             except Exception as e:
                 log.error(f"Scanner thread error: {e}")
             # Sleep 5s between iterations to let main loop breathe
@@ -857,8 +873,12 @@ def run():
                     spread = bp["spread"]
                     ts = time.time()
 
-                    if (not all(math.isfinite(v) for v in (bid, ask, mid, spread))) or mid <= 0 or spread <= 0:
+                    if (not all(math.isfinite(v) for v in (bid, ask, mid, spread))) or mid <= 0:
                         continue
+                    # Allow zero spread through — some cached quotes have 0 spread
+                    # but the price is still valid for entry evaluation
+                    if spread <= 0:
+                        spread = mid * 0.0001  # Minimal synthetic spread
 
                     tick_history[epic].append({
                         "time": ts, "bid": bid, "ask": ask,
@@ -868,8 +888,8 @@ def run():
                     if len(tick_history[epic]) > MAX_TICKS:
                         tick_history[epic] = tick_history[epic][-MAX_TICKS:]
 
-                    if len(tick_history[epic]) < 3:
-                        continue  # Reduced from 5 → 3 to prevent stalls
+                    if len(tick_history[epic]) < 2:
+                        continue  # Need at least 2 ticks for momentum calc
 
                     # Feed correlation tracker
                     correlation.update_prices(epic, mid)
@@ -937,39 +957,41 @@ def run():
                         continue
 
                     # ═══════════════════════════════════════
-                    # GATE 3: Tick momentum must align with scanner
-                    # (relaxed to avoid over-filtering FX/stocks/commodities)
+                    # GATE 3: Tick momentum alignment (relaxed)
+                    # Scanner already did multi-TF analysis; tick momentum is a
+                    # soft confirmation, NOT a hard gate.  With rotating batch
+                    # pages most epics carry stale/identical cached ticks, so
+                    # requiring high tick-momentum strength starves the bot.
                     # ═══════════════════════════════════════
                     adaptive = journal.get_params(epic)
-                    default_threshold = 0.48 if is_scalp_asset else 0.58
-                    entry_threshold = adaptive.get("momentum_entry_threshold", default_threshold)
-                    if is_scalp_asset:
-                        entry_threshold = max(entry_threshold, 0.42)
-                    else:
-                        entry_threshold = max(entry_threshold, 0.50)
-
                     momentum = tick_momentum(tick_history[epic])
 
                     entry_signal = Signal.HOLD
 
-                    # Only enter if tick momentum CONFIRMS scanner direction
-                    if scanner_direction == Signal.BUY:
-                        if momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
+                    # Strong scanner confidence (≥0.55) → trust the scanner,
+                    # only block if tick momentum is clearly AGAINST.
+                    if scanner_confidence >= 0.55:
+                        if scanner_direction == Signal.BUY and momentum["direction"] != "DOWN":
                             entry_signal = Signal.BUY
-                        # Relaxed entry with strong scanner confidence (all asset types)
-                        elif scanner_confidence >= 0.65 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.35:
-                            entry_signal = Signal.BUY
-                    elif scanner_direction == Signal.SELL:
-                        if momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
-                            entry_signal = Signal.SELL
-                        elif scanner_confidence >= 0.65 and momentum["direction"] != "UP" and momentum["strength"] >= 0.35:
+                        elif scanner_direction == Signal.SELL and momentum["direction"] != "UP":
                             entry_signal = Signal.SELL
 
+                    # Moderate confidence → require at least non-opposing momentum
+                    # with minimal strength
                     if entry_signal == Signal.HOLD:
-                        if cycle_count % 10 == 0:
+                        min_str = 0.25 if is_scalp_asset else 0.30
+                        if scanner_direction == Signal.BUY:
+                            if momentum["direction"] == "UP" and momentum["strength"] >= min_str:
+                                entry_signal = Signal.BUY
+                        elif scanner_direction == Signal.SELL:
+                            if momentum["direction"] == "DOWN" and momentum["strength"] >= min_str:
+                                entry_signal = Signal.SELL
+
+                    if entry_signal == Signal.HOLD:
+                        if cycle_count % 30 == 0:
                             log.debug(
-                                f"  {epic}: Scanner={scanner_direction} but tick mom={momentum['direction']} "
-                                f"str={momentum['strength']:.2f} thr={entry_threshold:.2f} — waiting"
+                                f"  {epic}: Scanner={scanner_direction} conf={scanner_confidence:.2f} "
+                                f"tick={momentum['direction']} str={momentum['strength']:.2f} — waiting"
                             )
                         continue
 
@@ -1001,7 +1023,9 @@ def run():
                         "rsi": momentum.get("micro_rsi", 50),
                         "momentum": momentum["strength"],
                     })
-                    if pattern_score < 0.30:
+                    # Only block on very poor historical patterns (0.15);
+                    # 0.30 was too aggressive and blocked assets with sparse data
+                    if pattern_score < 0.15:
                         if cycle_count % 30 == 0:
                             log.info(f"  🧠 {epic}: Pattern score too low ({pattern_score:.2f}) — skipping")
                         continue

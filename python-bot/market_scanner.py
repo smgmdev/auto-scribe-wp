@@ -606,8 +606,9 @@ class MarketScanner:
         if not result or result.overall_signal == "HOLD":
             return None
 
-        # Staleness check — scalp signals expire faster
-        max_age = self.SCALP_SCAN_INTERVAL * 3 if result.is_scalp else self.FULL_SCAN_INTERVAL * 2
+        # Staleness check — give signals more time to be consumed
+        # Scalp: 3 minutes, Standard: 5 minutes
+        max_age = 180 if result.is_scalp else 300
         scan_time = self.last_scalp_scan if result.is_scalp else self.last_full_scan
         if time.time() - scan_time > max_age:
             return None
