@@ -62,9 +62,14 @@ async function hashPinWithSalt(pin: string, salt: string): Promise<string> {
 }
 
 // Detect shadow mode from URL params (read-only admin access)
+// Also treat Lovable preview domains as shadow mode to prevent
+// session guard ping-pong between preview and production.
 const isShadowMode = () => {
   try {
-    return new URLSearchParams(window.location.search).get('shadow') === '1';
+    if (new URLSearchParams(window.location.search).get('shadow') === '1') return true;
+    const host = window.location.hostname;
+    if (host.endsWith('.lovable.app') || host.endsWith('.lovableproject.com')) return true;
+    return false;
   } catch { return false; }
 };
 
