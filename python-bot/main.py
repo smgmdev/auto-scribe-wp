@@ -857,8 +857,12 @@ def run():
                     spread = bp["spread"]
                     ts = time.time()
 
-                    if (not all(math.isfinite(v) for v in (bid, ask, mid, spread))) or mid <= 0 or spread <= 0:
+                    if (not all(math.isfinite(v) for v in (bid, ask, mid, spread))) or mid <= 0:
                         continue
+                    # Allow zero spread through — some cached quotes have 0 spread
+                    # but the price is still valid for entry evaluation
+                    if spread <= 0:
+                        spread = mid * 0.0001  # Minimal synthetic spread
 
                     tick_history[epic].append({
                         "time": ts, "bid": bid, "ask": ask,
