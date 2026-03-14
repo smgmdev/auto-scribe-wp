@@ -1003,7 +1003,9 @@ def run():
                         "rsi": momentum.get("micro_rsi", 50),
                         "momentum": momentum["strength"],
                     })
-                    if pattern_score < 0.30:
+                    # Only block on very poor historical patterns (0.15);
+                    # 0.30 was too aggressive and blocked assets with sparse data
+                    if pattern_score < 0.15:
                         if cycle_count % 30 == 0:
                             log.info(f"  🧠 {epic}: Pattern score too low ({pattern_score:.2f}) — skipping")
                         continue
