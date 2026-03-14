@@ -478,17 +478,24 @@ class MarketScanner:
 
         # ═══════════════════════════════════════════
         # SCALP SCAN — crypto & forex (every 30s)
-        # Skip categories that are full
+        # Skip categories that are full OR market is closed
         # ═══════════════════════════════════════════
+        closed_markets = get_closed_categories()
+        _skip_cats = self._full_categories | closed_markets
+
         if now - self.last_scalp_scan >= self.SCALP_SCAN_INTERVAL:
             scalp_epics = []
-            if config.CATEGORY_CRYPTO not in self._full_categories:
+            if config.CATEGORY_CRYPTO not in _skip_cats:
                 scalp_epics += config.WATCHLIST_CRYPTO
-            else:
+            elif config.CATEGORY_CRYPTO in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_CRYPTO in self._full_categories:
                 log.info("⏭️  Crypto: 5/5 positions filled — skipping scan")
-            if config.CATEGORY_FOREX not in self._full_categories:
+            if config.CATEGORY_FOREX not in _skip_cats:
                 scalp_epics += config.WATCHLIST_FOREX
-            else:
+            elif config.CATEGORY_FOREX in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_FOREX in self._full_categories:
                 log.info("⏭️  Forex: 5/5 positions filled — skipping scan")
             if scalp_epics:
                 scalp_page = self._next_scan_page(
