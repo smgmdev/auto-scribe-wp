@@ -34,7 +34,7 @@ from dashboard import start_dashboard_thread
 from learning_db import TradingBrain
 from regime_detector import RegimeDetector
 from correlation_tracker import CorrelationTracker
-from ai_reviewer import AITradeReviewer
+from market_hours import log_market_status, get_closed_categories
 from logger_setup import get_logger
 
 log = get_logger("main")
@@ -205,6 +205,11 @@ def run():
         f"💱 Forex: {', '.join(config.WATCHLIST_FOREX)} | "
         f"🪙 Commodities: {', '.join(config.WATCHLIST_COMMODITIES)}"
     )
+
+    # ═══════════════════════════════════════════
+    # 🕐 MARKET HOURS CHECK — detect open/closed markets
+    # ═══════════════════════════════════════════
+    open_categories = log_market_status()
 
     scanner = MarketScanner(api, config.WATCHLIST)
 
@@ -525,17 +530,30 @@ def run():
             cycle_count += 1
 
             # ═══════════════════════════════════════════
-            # 📊 CATEGORY CAPACITY CHECK — tell scanner which categories are full
+            # 📊 CATEGORY CAPACITY + MARKET HOURS CHECK
+            # Skip categories that are full OR have closed markets
             # ═══════════════════════════════════════════
             cat_counts = count_positions_by_category(positions) if positions else {}
             full_categories = set()
             for cat_key, count in cat_counts.items():
                 if count >= config.MAX_POSITIONS_PER_CATEGORY:
                     full_categories.add(cat_key)
+
+            # Add closed markets to skip set
+            closed_markets = get_closed_categories()
+            full_categories |= closed_markets
             scanner.set_full_categories(full_categories)
 
+            if cycle_count % 300 == 0:
+                # Re-check market hours every 5 min and log status
+                log_market_status()
+
             if full_categories and cycle_count % 30 == 0:
-                log.info(f"📊 Full categories (skipping scan): {', '.join(full_categories)} | Counts: {cat_counts}")
+                capacity_full = full_categories - closed_markets
+                if capacity_full:
+                    log.info(f"📊 Full categories: {', '.join(capacity_full)} | Counts: {cat_counts}")
+                if closed_markets:
+                    log.info(f"🔴 Closed markets: {', '.join(closed_markets)}")
 
             # ═══════════════════════════════════════════
             # 📊 MULTI-TIMEFRAME MARKET SCAN — runs in background thread

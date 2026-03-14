@@ -16,6 +16,7 @@ from typing import Optional
 from logger_setup import get_logger
 from strategy import compute_ema, compute_rsi, compute_atr, compute_momentum_score, compute_support_resistance
 import config
+from market_hours import get_closed_categories
 
 log = get_logger("scanner")
 
@@ -477,17 +478,24 @@ class MarketScanner:
 
         # ═══════════════════════════════════════════
         # SCALP SCAN — crypto & forex (every 30s)
-        # Skip categories that are full
+        # Skip categories that are full OR market is closed
         # ═══════════════════════════════════════════
+        closed_markets = get_closed_categories()
+        _skip_cats = self._full_categories | closed_markets
+
         if now - self.last_scalp_scan >= self.SCALP_SCAN_INTERVAL:
             scalp_epics = []
-            if config.CATEGORY_CRYPTO not in self._full_categories:
+            if config.CATEGORY_CRYPTO not in _skip_cats:
                 scalp_epics += config.WATCHLIST_CRYPTO
-            else:
+            elif config.CATEGORY_CRYPTO in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_CRYPTO in self._full_categories:
                 log.info("⏭️  Crypto: 5/5 positions filled — skipping scan")
-            if config.CATEGORY_FOREX not in self._full_categories:
+            if config.CATEGORY_FOREX not in _skip_cats:
                 scalp_epics += config.WATCHLIST_FOREX
-            else:
+            elif config.CATEGORY_FOREX in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_FOREX in self._full_categories:
                 log.info("⏭️  Forex: 5/5 positions filled — skipping scan")
             if scalp_epics:
                 scalp_page = self._next_scan_page(
@@ -539,13 +547,17 @@ class MarketScanner:
         # ═══════════════════════════════════════════
         if now - self.last_full_scan >= self.FULL_SCAN_INTERVAL:
             std_epics = []
-            if config.CATEGORY_STOCKS not in self._full_categories:
+            if config.CATEGORY_STOCKS not in _skip_cats:
                 std_epics += config.WATCHLIST_STOCKS
-            else:
+            elif config.CATEGORY_STOCKS in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_STOCKS in self._full_categories:
                 log.info("⏭️  Stocks: 5/5 positions filled — skipping scan")
-            if config.CATEGORY_COMMODITIES not in self._full_categories:
+            if config.CATEGORY_COMMODITIES not in _skip_cats:
                 std_epics += config.WATCHLIST_COMMODITIES
-            else:
+            elif config.CATEGORY_COMMODITIES in closed_markets:
+                pass  # Silent — logged at startup
+            elif config.CATEGORY_COMMODITIES in self._full_categories:
                 log.info("⏭️  Commodities: 5/5 positions filled — skipping scan")
             if std_epics:
                 std_page = self._next_scan_page(
