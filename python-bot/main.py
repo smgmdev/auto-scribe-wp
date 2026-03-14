@@ -751,6 +751,7 @@ def run():
                                 ai_reviewer.review_trade(trade_data, trade_id, brain.get_brain_summary())
 
                                 pos_manager.untrack(deal_id)
+                                unregister_deal(deal_id)
                                 active_signals.pop(pos_epic, None)
                                 entry_info.pop(deal_id, None)
 
