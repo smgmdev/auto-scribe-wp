@@ -459,6 +459,7 @@ def run():
                             "early_exit": True,
                         })
                         pos_manager.untrack(deal_id)
+                        unregister_deal(deal_id)
                         active_signals.pop(epic, None)
                         log.info(f"  ✅ Startup-closed {epic}")
                 else:
