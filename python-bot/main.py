@@ -468,8 +468,8 @@ def run():
                 log.error(f"Startup position recovery error: {e}")
 
         # Refresh positions after any startup closes
-        positions = api.get_positions()
-        log.info(f"🔄 Startup reconciliation complete — {len(positions)} position(s) active")
+        positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
+        log.info(f"🔄 Startup reconciliation complete — {len(positions)} OWN position(s) active")
     else:
         log.info("🔄 No existing positions found — starting fresh")
 
