@@ -872,8 +872,8 @@ def run():
                     if len(tick_history[epic]) > MAX_TICKS:
                         tick_history[epic] = tick_history[epic][-MAX_TICKS:]
 
-                    if len(tick_history[epic]) < 3:
-                        continue  # Reduced from 5 → 3 to prevent stalls
+                    if len(tick_history[epic]) < 2:
+                        continue  # Need at least 2 ticks for momentum calc
 
                     # Feed correlation tracker
                     correlation.update_prices(epic, mid)
