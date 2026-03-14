@@ -337,7 +337,7 @@ def run():
         time.sleep(3)  # 3s between dashboard fetches (was 1s) — reduces API pressure
 
         # Final refresh
-        positions = api.get_positions()
+        positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
 
         # ═══════════════════════════════════════════
         # RECOVER remaining (crypto) positions
