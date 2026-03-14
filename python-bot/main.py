@@ -617,9 +617,9 @@ def run():
                     if s["total"] > 0:
                         log.info(f"  🧠 {epic}: {s['total']} trades, {s['win_rate']:.0%} win rate")
 
-            # Refresh positions every 3 cycles from API
+            # Refresh positions every 3 cycles from API (only OWN trades)
             if cycle_count % 3 == 0:
-                positions = api.get_positions()
+                positions = [p for p in api.get_positions() if is_own_deal(p.get("position", {}).get("dealId", ""))]
             # Write live state every cycle — uses cached prices (NO extra API calls)
             write_live_state(api, balance, positions, pos_manager, tick_history, batch_prices)
 
