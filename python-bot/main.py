@@ -1174,6 +1174,9 @@ def run():
                                     log.info(f"🔗 Resolved dealRef {deal_ref} → dealId {real_deal_id}")
                                 break
 
+                        # 🔒 Register as OWN trade
+                        register_deal(real_deal_id)
+
                         # Track for smart management (pass spread for fee calculation)
                         pos_manager.track_position(
                             real_deal_id, epic, entry_signal,
