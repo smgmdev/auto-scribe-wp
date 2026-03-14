@@ -968,30 +968,35 @@ def run():
 
                     entry_signal = Signal.HOLD
 
-                    # Strong scanner confidence (≥0.55) → trust the scanner,
-                    # only block if tick momentum is clearly AGAINST.
-                    if scanner_confidence >= 0.55:
-                        if scanner_direction == Signal.BUY and momentum["direction"] != "DOWN":
-                            entry_signal = Signal.BUY
-                        elif scanner_direction == Signal.SELL and momentum["direction"] != "UP":
-                            entry_signal = Signal.SELL
+                    # Tick momentum acts as a veto only when clearly opposing.
+                    tick_dir = momentum.get("direction", "FLAT")
+                    tick_strength = float(momentum.get("strength", 0.0) or 0.0)
+                    opposes_scanner = (
+                        (scanner_direction == Signal.BUY and tick_dir == "DOWN")
+                        or (scanner_direction == Signal.SELL and tick_dir == "UP")
+                    )
 
-                    # Moderate confidence → require at least non-opposing momentum
-                    # with minimal strength
+                    # Strong scanner confidence (≥0.55): trust scanner unless opposition is strong.
+                    if scanner_confidence >= 0.55:
+                        if not (opposes_scanner and tick_strength >= 0.45):
+                            entry_signal = scanner_direction
+
+                    # Moderate confidence: allow scanner when momentum is not opposing
+                    # and either moving or confidence is decent.
                     if entry_signal == Signal.HOLD:
-                        min_str = 0.25 if is_scalp_asset else 0.30
-                        if scanner_direction == Signal.BUY:
-                            if momentum["direction"] == "UP" and momentum["strength"] >= min_str:
-                                entry_signal = Signal.BUY
-                        elif scanner_direction == Signal.SELL:
-                            if momentum["direction"] == "DOWN" and momentum["strength"] >= min_str:
-                                entry_signal = Signal.SELL
+                        min_str = 0.18 if is_scalp_asset else 0.22
+                        if not opposes_scanner and (
+                            tick_dir in ("UP", "DOWN")
+                            or tick_strength >= min_str
+                            or scanner_confidence >= 0.50
+                        ):
+                            entry_signal = scanner_direction
 
                     if entry_signal == Signal.HOLD:
                         if cycle_count % 30 == 0:
                             log.debug(
                                 f"  {epic}: Scanner={scanner_direction} conf={scanner_confidence:.2f} "
-                                f"tick={momentum['direction']} str={momentum['strength']:.2f} — waiting"
+                                f"tick={tick_dir} str={tick_strength:.2f} — waiting"
                             )
                         continue
 
@@ -1034,9 +1039,9 @@ def run():
                     # GATE 4: RISK/REWARD CHECK — estimated profit must exceed risk
                     # Use S/R levels: for BUY, distance to resistance vs stop
                     # For SELL, distance to support vs stop
-                    # Require minimum 1.5:1 R:R ratio
+                    # Require minimum R:R by mode
                     # ═══════════════════════════════════════
-                    MIN_RR_RATIO = 1.5
+                    MIN_RR_RATIO = 1.2 if is_scalp_asset else 1.4
                     estimated_profit_room = 0.0
 
                     if scan_signal.nearest_resistance > 0 and entry_signal == Signal.BUY:
@@ -1087,16 +1092,8 @@ def run():
                         log.info(f"Skipping {epic}: invalid stop_distance computed ({stop_distance})")
                         continue
 
-                    # Query market info for minimum stop distance
-                    try:
-                        minfo = api.get_market_info(epic)
-                        if minfo:
-                            dealing = minfo.get("dealingRules", {})
-                            min_stop = dealing.get("minNormalStopOrLimitDistance", {}).get("value", 0)
-                            if min_stop and float(min_stop) > 0:
-                                stop_distance = max(stop_distance, float(min_stop))
-                    except Exception:
-                        pass
+                    # Avoid duplicate market-info call here; open_position() already
+                    # enforces broker min stop distance with pacing/retries.
 
                     # profit_distance is set but won't be used (unlimited TP via position manager)
                     profit_distance = stop_distance * 3
