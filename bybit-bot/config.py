@@ -5,10 +5,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Bybit API
-BYBIT_API_KEY = os.getenv("BYBIT_API_KEY", "")
-BYBIT_API_SECRET = os.getenv("BYBIT_API_SECRET", "")
-BYBIT_BASE_URL = os.getenv("BYBIT_BASE_URL", "https://api-testnet.bybit.com")
+# Bitget API
+BITGET_API_KEY = os.getenv("BITGET_API_KEY", "")
+BITGET_API_SECRET = os.getenv("BITGET_API_SECRET", "")
+BITGET_API_PASSPHRASE = os.getenv("BITGET_API_PASSPHRASE", "")
+BITGET_BASE_URL = "https://api.bitget.com"
+
+# Demo trading (paper trading)
+BITGET_DEMO = os.getenv("BITGET_DEMO", "1") == "1"
 
 # Watchlist
 WATCHLIST = [s.strip() for s in os.getenv("WATCHLIST", "BTCUSDT,ETHUSDT,SOLUSDT").split(",") if s.strip()]
@@ -28,9 +32,9 @@ CANDLE_INTERVAL = os.getenv("CANDLE_INTERVAL", "15")  # minutes
 INITIAL_SL_PCT = float(os.getenv("INITIAL_SL_PCT", "0.015"))   # 1.5%
 TRAILING_STEP_PCT = float(os.getenv("TRAILING_STEP_PCT", "0.01"))  # 1%
 
-# Bybit taker fee per side (0.055%)
-TAKER_FEE_PCT = float(os.getenv("TAKER_FEE_PCT", "0.00055"))
-# Round-trip fee = 2 * taker fee = 0.11%
+# Bitget taker fee per side (0.06%)
+TAKER_FEE_PCT = float(os.getenv("TAKER_FEE_PCT", "0.0006"))
+# Round-trip fee = 2 * taker fee = 0.12%
 ROUND_TRIP_FEE_PCT = TAKER_FEE_PCT * 2
 
 # Scan interval
