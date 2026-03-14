@@ -937,39 +937,41 @@ def run():
                         continue
 
                     # ═══════════════════════════════════════
-                    # GATE 3: Tick momentum must align with scanner
-                    # (relaxed to avoid over-filtering FX/stocks/commodities)
+                    # GATE 3: Tick momentum alignment (relaxed)
+                    # Scanner already did multi-TF analysis; tick momentum is a
+                    # soft confirmation, NOT a hard gate.  With rotating batch
+                    # pages most epics carry stale/identical cached ticks, so
+                    # requiring high tick-momentum strength starves the bot.
                     # ═══════════════════════════════════════
                     adaptive = journal.get_params(epic)
-                    default_threshold = 0.48 if is_scalp_asset else 0.58
-                    entry_threshold = adaptive.get("momentum_entry_threshold", default_threshold)
-                    if is_scalp_asset:
-                        entry_threshold = max(entry_threshold, 0.42)
-                    else:
-                        entry_threshold = max(entry_threshold, 0.50)
-
                     momentum = tick_momentum(tick_history[epic])
 
                     entry_signal = Signal.HOLD
 
-                    # Only enter if tick momentum CONFIRMS scanner direction
-                    if scanner_direction == Signal.BUY:
-                        if momentum["direction"] == "UP" and momentum["strength"] >= entry_threshold:
+                    # Strong scanner confidence (≥0.55) → trust the scanner,
+                    # only block if tick momentum is clearly AGAINST.
+                    if scanner_confidence >= 0.55:
+                        if scanner_direction == Signal.BUY and momentum["direction"] != "DOWN":
                             entry_signal = Signal.BUY
-                        # Relaxed entry with strong scanner confidence (all asset types)
-                        elif scanner_confidence >= 0.65 and momentum["direction"] != "DOWN" and momentum["strength"] >= 0.35:
-                            entry_signal = Signal.BUY
-                    elif scanner_direction == Signal.SELL:
-                        if momentum["direction"] == "DOWN" and momentum["strength"] >= entry_threshold:
-                            entry_signal = Signal.SELL
-                        elif scanner_confidence >= 0.65 and momentum["direction"] != "UP" and momentum["strength"] >= 0.35:
+                        elif scanner_direction == Signal.SELL and momentum["direction"] != "UP":
                             entry_signal = Signal.SELL
 
+                    # Moderate confidence → require at least non-opposing momentum
+                    # with minimal strength
                     if entry_signal == Signal.HOLD:
-                        if cycle_count % 10 == 0:
+                        min_str = 0.25 if is_scalp_asset else 0.30
+                        if scanner_direction == Signal.BUY:
+                            if momentum["direction"] == "UP" and momentum["strength"] >= min_str:
+                                entry_signal = Signal.BUY
+                        elif scanner_direction == Signal.SELL:
+                            if momentum["direction"] == "DOWN" and momentum["strength"] >= min_str:
+                                entry_signal = Signal.SELL
+
+                    if entry_signal == Signal.HOLD:
+                        if cycle_count % 30 == 0:
                             log.debug(
-                                f"  {epic}: Scanner={scanner_direction} but tick mom={momentum['direction']} "
-                                f"str={momentum['strength']:.2f} thr={entry_threshold:.2f} — waiting"
+                                f"  {epic}: Scanner={scanner_direction} conf={scanner_confidence:.2f} "
+                                f"tick={momentum['direction']} str={momentum['strength']:.2f} — waiting"
                             )
                         continue
 
